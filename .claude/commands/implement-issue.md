@@ -75,12 +75,20 @@ Use the code-reviewer subagent to validate final implementation:
 
 **CRITICAL**: This step is MANDATORY for every issue implementation. No implementation is complete without proper GitHub workflow.
 
-**Quality Validation & Commit:**
+**Quality Validation & Platform Verification:**
 ```bash
-# Quality validation (or use scripts/quality-check.sh)
-flutter test && flutter analyze && dart format .
+# MANDATORY: Run comprehensive quality checks with platform builds
+./scripts/quality-check.sh
 
-# Commit with standards from docs/github_instaruction.md
+# This script automatically:
+# - Formats code and runs analysis
+# - Executes all tests with coverage
+# - Verifies platform configuration (Android/iOS Firebase setup)
+# - Builds and tests all platforms (Web, Android, iOS on macOS)
+# - Provides specific error messages and fixes for common issues
+# - Times out builds to prevent infinite hangs
+
+# If quality-check.sh passes, commit with standards from docs/github_instaruction.md
 git add .
 git commit -m "type(scope): description - closes #$ARGUMENTS
 
@@ -148,10 +156,18 @@ EOF
 **Branch Strategy**: Always target `development` branch for PRs (see parallel development workflow in CLAUDE.md)
 
 **IMPLEMENTATION NOT COMPLETE UNTIL**:
-1. ✅ Code committed with proper message format
-2. ✅ Pull request created targeting `development` branch  
-3. ✅ Issue commented with implementation summary and PR link
-4. ✅ All documentation updates completed
+1. ✅ Platform verification passed (all platforms build successfully)
+2. ✅ Quality checks passed (tests, analysis, coverage)
+3. ✅ Code committed with proper message format
+4. ✅ Pull request created targeting `development` branch  
+5. ✅ Issue commented with implementation summary and PR link
+6. ✅ All documentation updates completed
+
+**Platform Verification Requirements:**
+- ✅ Web build successful
+- ✅ Android build successful (with proper Firebase configuration)
+- ✅ iOS build successful on macOS (with iOS 13.0+ deployment target)
+- ✅ All platform-specific configurations validated
 
 **AGENT COORDINATION EXAMPLE:**
 Issue #11 (Firebase Setup):
