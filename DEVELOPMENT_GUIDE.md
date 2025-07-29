@@ -30,6 +30,7 @@ This guide provides everything you need to develop the Kahoot-style quiz app eff
 ```bash
 # When implementing a specific GitHub issue
 # Implementation: .claude/commands/implement-issue.md
+# Automatically creates PR and comments on issue when complete
 # Follows agent assignment logic from CLAUDE.md
 /project:implement-issue 11
 
@@ -39,6 +40,12 @@ This guide provides everything you need to develop the Kahoot-style quiz app eff
 # When generating code structure
 /project:generate-code
 ```
+
+**Important**: Every `/project:implement-issue` command now **automatically**:
+- ✅ Creates proper commit with closing reference
+- ✅ Creates pull request targeting `development` branch
+- ✅ Comments on GitHub issue with implementation summary
+- ✅ Includes quality metrics and next steps
 
 ### **🧪 Testing & Quality**
 ```bash

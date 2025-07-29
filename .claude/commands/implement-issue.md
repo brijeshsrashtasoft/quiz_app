@@ -71,24 +71,87 @@ Use the code-reviewer subagent to validate final implementation:
 - Security guidelines
 - **Documentation updates completed by all agents**
 
-**STEP 5: COMMIT & PR**
+**STEP 5: COMMIT, PR CREATION & ISSUE COMMUNICATION**
 
-**Automation**: Use `scripts/quality-check.sh` for comprehensive validation, or run manually:
+**CRITICAL**: This step is MANDATORY for every issue implementation. No implementation is complete without proper GitHub workflow.
 
+**Quality Validation & Commit:**
 ```bash
 # Quality validation (or use scripts/quality-check.sh)
 flutter test && flutter analyze && dart format .
 
 # Commit with standards from docs/github_instaruction.md
 git add .
-git commit -m "type(scope): description - closes #$ARGUMENTS"
+git commit -m "type(scope): description - closes #$ARGUMENTS
 
-# Push and create PR to development branch (never main directly)
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+```
+
+**MANDATORY Pull Request Creation:**
+```bash
+# Push feature branch
 git push -u origin feature/issue-$ARGUMENTS-{short-description}
-gh pr create --base development --title "type(scope): description"
+
+# Create PR targeting development branch (NEVER main directly)
+gh pr create --base development --title "type(scope): description" --body "$(cat <<'EOF'
+## Summary
+- [Brief description of what was implemented]
+- [Key architectural decisions or patterns used]
+- [Integration points with existing codebase]
+
+## Test Plan
+- [x] [Test category 1: unit/widget/integration tests written]
+- [x] [Test category 2: specific validation performed]
+- [x] [Quality checks: lint, format, analyze passed]
+- [x] [Architecture compliance: Clean Architecture patterns followed]
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+EOF
+)"
+```
+
+**MANDATORY Issue Comment:**
+```bash
+# Comment on original issue with completion summary
+gh issue comment $ARGUMENTS --body "$(cat <<'EOF'
+## ✅ Issue Implementation Complete
+
+**[Brief title of what was implemented]**
+
+### 🎯 Implementation Summary:
+- ✅ **[Feature/Component 1]**: [What was implemented and how]
+- ✅ **[Feature/Component 2]**: [Key architectural decisions]
+- ✅ **[Testing]**: [Test coverage and validation performed]
+- ✅ **[Quality]**: [Standards compliance and quality metrics]
+
+### 📊 Quality Metrics:
+- **Test Coverage**: [Coverage percentage or test categories]
+- **Architecture Compliance**: [Clean Architecture validation]
+- **Security/Performance**: [Relevant standards met]
+- **Documentation**: [Documentation updates completed]
+
+### 🔗 Pull Request: #[PR_NUMBER]
+Review and merge the implementation at: [GITHUB_PR_URL]
+
+### 🚀 Next Steps:
+[Brief description of what comes next in development sequence]
+
+**Status**: ✅ **COMPLETED** - [Implementation is ready for review/merge]
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+EOF
+)"
 ```
 
 **Branch Strategy**: Always target `development` branch for PRs (see parallel development workflow in CLAUDE.md)
+
+**IMPLEMENTATION NOT COMPLETE UNTIL**:
+1. ✅ Code committed with proper message format
+2. ✅ Pull request created targeting `development` branch  
+3. ✅ Issue commented with implementation summary and PR link
+4. ✅ All documentation updates completed
 
 **AGENT COORDINATION EXAMPLE:**
 Issue #11 (Firebase Setup):
