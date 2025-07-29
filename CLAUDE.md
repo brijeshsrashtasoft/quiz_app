@@ -7,8 +7,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **Primary Documentation Files:**
 - **CLAUDE.md** (this file) - Master project documentation and architecture guidelines
 - **DEVELOPMENT_GUIDE.md** - Complete development workflow, commands, and troubleshooting
-- **docs/github_instruction.md** - GitHub workflow standards, commit formats, and PR guidelines
+- **docs/github_instruction.md** - GitHub workflow standards, commit formats, and PR guidelines (CONCISE FORMAT)
 - **docs/ui_guideline.md** - Comprehensive UI/UX design system, color palette, and component specifications
+- **docs/parallel-execution-guide.md** - Mandatory parallel sub-agent execution patterns and workflows
+- **docs/firebase_setup.md** - Firebase configuration and environment setup (CONCISE FORMAT)
 
 **Sub-Agent Documentation:**
 - **.claude/agents/flutter-architect.md** - Clean Architecture and code structure specialist
@@ -476,6 +478,12 @@ leaderboards/
 - **Avoid jargon**: Write for any team member to understand
 - **Edit ruthlessly**: Cut everything non-essential
 - **Immediate clarity**: Reader should understand purpose within 5 seconds
+
+### Documentation Style (MANDATORY)
+- **All .md files**: Use concise bullet points, NO lengthy paragraphs
+- **Comments**: One line max, explain WHY not WHAT
+- **Descriptions**: Max 100 words, essential info only
+- **Reference**: See `docs/github_instruction.md` for examples
 
 ## UI/UX Design Guidelines
 
