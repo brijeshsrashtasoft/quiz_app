@@ -14,26 +14,18 @@ class Result<T> with _$Result<T> {
 /// Extension methods for Result pattern
 extension ResultX<T> on Result<T> {
   /// Check if result is successful
-  bool get isSuccess => when(
-    success: (_) => true,
-    failure: (_) => false,
-  );
-  
+  bool get isSuccess => when(success: (_) => true, failure: (_) => false);
+
   /// Check if result is failure
   bool get isFailure => !isSuccess;
-  
+
   /// Get data if successful, null otherwise
-  T? get dataOrNull => when(
-    success: (data) => data,
-    failure: (_) => null,
-  );
-  
+  T? get dataOrNull => when(success: (data) => data, failure: (_) => null);
+
   /// Get failure if error, null otherwise
-  Failure? get failureOrNull => when(
-    success: (_) => null,
-    failure: (failure) => failure,
-  );
-  
+  Failure? get failureOrNull =>
+      when(success: (_) => null, failure: (failure) => failure);
+
   /// Transform success data
   Result<R> transform<R>(R Function(T) transform) {
     return when(
@@ -41,7 +33,7 @@ extension ResultX<T> on Result<T> {
       failure: (failure) => Result.failure(failure),
     );
   }
-  
+
   /// Chain operations
   Result<R> flatMap<R>(Result<R> Function(T) transform) {
     return when(
@@ -49,7 +41,7 @@ extension ResultX<T> on Result<T> {
       failure: (failure) => Result.failure(failure),
     );
   }
-  
+
   /// Get data or throw exception
   T get dataOrThrow => when(
     success: (data) => data,

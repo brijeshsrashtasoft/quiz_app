@@ -8,10 +8,10 @@ void main() {
       test('should create success result with data', () {
         // Arrange
         const data = 'test data';
-        
+
         // Act
         const result = Result.success(data);
-        
+
         // Assert
         expect(result, isA<Success<String>>());
         result.when(
@@ -25,10 +25,10 @@ void main() {
       test('should create failure result with failure', () {
         // Arrange
         const failure = Failure.networkFailure(message: 'Network error');
-        
+
         // Act
         const result = Result<String>.failure(failure);
-        
+
         // Assert
         expect(result, isA<Error<String>>());
         result.when(
@@ -89,10 +89,10 @@ void main() {
       test('should transform success data', () {
         // Arrange
         const result = Result.success(10);
-        
+
         // Act
         final mapped = result.transform((data) => data * 2);
-        
+
         // Assert
         expect(mapped.dataOrNull, equals(20));
       });
@@ -100,10 +100,10 @@ void main() {
       test('should preserve failure', () {
         // Arrange
         const result = Result<int>.failure(failure);
-        
+
         // Act
         final mapped = result.transform((data) => data * 2);
-        
+
         // Assert
         expect(mapped.failureOrNull, equals(failure));
       });
@@ -113,10 +113,10 @@ void main() {
       test('should chain successful operations', () {
         // Arrange
         const result = Result.success(10);
-        
+
         // Act
         final flatMapped = result.flatMap((data) => Result.success(data * 2));
-        
+
         // Assert
         expect(flatMapped.dataOrNull, equals(20));
       });
@@ -124,10 +124,10 @@ void main() {
       test('should stop at first failure', () {
         // Arrange
         const result = Result<int>.failure(failure);
-        
+
         // Act
         final flatMapped = result.flatMap((data) => Result.success(data * 2));
-        
+
         // Assert
         expect(flatMapped.failureOrNull, equals(failure));
       });
@@ -135,11 +135,15 @@ void main() {
       test('should propagate chained failure', () {
         // Arrange
         const result = Result.success(10);
-        const chainedFailure = Failure.validationFailure(message: 'Invalid data');
-        
+        const chainedFailure = Failure.validationFailure(
+          message: 'Invalid data',
+        );
+
         // Act
-        final flatMapped = result.flatMap((_) => Result<int>.failure(chainedFailure));
-        
+        final flatMapped = result.flatMap(
+          (_) => Result<int>.failure(chainedFailure),
+        );
+
         // Assert
         expect(flatMapped.failureOrNull, equals(chainedFailure));
       });
@@ -153,11 +157,13 @@ void main() {
       test('should throw exception for failure result', () {
         expect(
           () => failureResult.dataOrThrow,
-          throwsA(isA<Exception>().having(
-            (e) => e.toString(),
-            'message',
-            contains('Network error'),
-          )),
+          throwsA(
+            isA<Exception>().having(
+              (e) => e.toString(),
+              'message',
+              contains('Network error'),
+            ),
+          ),
         );
       });
     });
@@ -167,13 +173,13 @@ void main() {
     test('should chain multiple operations successfully', () {
       // Arrange
       const initialResult = Result.success('hello');
-      
+
       // Act
       final result = initialResult
           .transform((data) => data.toUpperCase())
           .flatMap((data) => Result.success('$data WORLD'))
           .transform((data) => data.length);
-      
+
       // Assert
       expect(result.dataOrNull, equals(11)); // "HELLO WORLD".length
     });
@@ -182,13 +188,13 @@ void main() {
       // Arrange
       const initialResult = Result.success('hello');
       const validationFailure = Failure.validationFailure(message: 'Invalid');
-      
+
       // Act
       final result = initialResult
           .transform((data) => data.toUpperCase())
           .flatMap((_) => Result<String>.failure(validationFailure))
           .transform((data) => data.length);
-      
+
       // Assert
       expect(result.failureOrNull, equals(validationFailure));
     });
@@ -198,11 +204,11 @@ void main() {
     test('should maintain type safety through transformations', () {
       // Arrange
       const stringResult = Result.success('test');
-      
+
       // Act
       final intResult = stringResult.transform((s) => s.length);
       final boolResult = intResult.transform((i) => i > 3);
-      
+
       // Assert
       expect(stringResult, isA<Result<String>>());
       expect(intResult, isA<Result<int>>());
@@ -215,11 +221,11 @@ void main() {
       const serverFailure = Failure.serverFailure(message: 'Server error');
       const authFailure = Failure.authFailure(message: 'Auth error');
       const networkFailure = Failure.networkFailure(message: 'Network error');
-      
+
       const serverResult = Result<String>.failure(serverFailure);
       const authResult = Result<int>.failure(authFailure);
       const networkResult = Result<bool>.failure(networkFailure);
-      
+
       expect(serverResult.failureOrNull, equals(serverFailure));
       expect(authResult.failureOrNull, equals(authFailure));
       expect(networkResult.failureOrNull, equals(networkFailure));

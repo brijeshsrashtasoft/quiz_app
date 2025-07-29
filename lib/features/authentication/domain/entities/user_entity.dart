@@ -48,19 +48,19 @@ extension UserEntityX on UserEntity {
   bool get isProfileComplete {
     return name.isNotEmpty && email.isNotEmpty;
   }
-  
+
   /// Get user's win rate as percentage
   double get winRate {
     if (stats == null || stats!.gamesPlayed == 0) return 0.0;
     return (stats!.gamesWon / stats!.gamesPlayed) * 100;
   }
-  
+
   /// Get accuracy rate as percentage
   double get accuracyRate {
     if (stats == null || stats!.totalQuestions == 0) return 0.0;
     return (stats!.correctAnswers / stats!.totalQuestions) * 100;
   }
-  
+
   /// Check if user is new (created within last 7 days)
   bool get isNewUser {
     final now = DateTime.now();

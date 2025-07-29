@@ -8,10 +8,10 @@ void main() {
         // Arrange
         const message = 'Server error occurred';
         const code = '500';
-        
+
         // Act
         const failure = Failure.serverFailure(message: message, code: code);
-        
+
         // Assert
         expect(failure, isA<ServerFailure>());
         failure.when(
@@ -31,10 +31,10 @@ void main() {
       test('should create ServerFailure with message only', () {
         // Arrange
         const message = 'Server error occurred';
-        
+
         // Act
         const failure = Failure.serverFailure(message: message);
-        
+
         // Assert
         failure.when(
           serverFailure: (msg, code) {
@@ -55,10 +55,10 @@ void main() {
       test('should create NetworkFailure with message', () {
         // Arrange
         const message = 'Network connection failed';
-        
+
         // Act
         const failure = Failure.networkFailure(message: message);
-        
+
         // Assert
         expect(failure, isA<NetworkFailure>());
         failure.when(
@@ -80,10 +80,10 @@ void main() {
         // Arrange
         const message = 'Authentication failed';
         const code = 'user-not-found';
-        
+
         // Act
         const failure = Failure.authFailure(message: message, code: code);
-        
+
         // Assert
         expect(failure, isA<AuthFailure>());
         failure.when(
@@ -106,10 +106,10 @@ void main() {
         // Arrange
         const message = 'Firestore operation failed';
         const code = 'permission-denied';
-        
+
         // Act
         const failure = Failure.firestoreFailure(message: message, code: code);
-        
+
         // Assert
         expect(failure, isA<FirestoreFailure>());
         failure.when(
@@ -131,14 +131,17 @@ void main() {
       test('should create ValidationFailure with message and field errors', () {
         // Arrange
         const message = 'Validation failed';
-        const fieldErrors = {'email': 'Invalid email format', 'password': 'Too short'};
-        
+        const fieldErrors = {
+          'email': 'Invalid email format',
+          'password': 'Too short',
+        };
+
         // Act
         const failure = Failure.validationFailure(
           message: message,
           fieldErrors: fieldErrors,
         );
-        
+
         // Assert
         expect(failure, isA<ValidationFailure>());
         failure.when(
@@ -160,10 +163,10 @@ void main() {
       test('should create CacheFailure with message', () {
         // Arrange
         const message = 'Cache operation failed';
-        
+
         // Act
         const failure = Failure.cacheFailure(message: message);
-        
+
         // Assert
         expect(failure, isA<CacheFailure>());
         failure.when(
@@ -184,10 +187,10 @@ void main() {
       test('should create UnknownFailure with message', () {
         // Arrange
         const message = 'Unknown error occurred';
-        
+
         // Act
         const failure = Failure.unknownFailure(message: message);
-        
+
         // Assert
         expect(failure, isA<UnknownFailure>());
         failure.when(
@@ -210,10 +213,10 @@ void main() {
       test('should return correct user message for ServerFailure', () {
         // Arrange
         const failure = Failure.serverFailure(message: 'Internal server error');
-        
+
         // Act
         final userMessage = failure.userMessage;
-        
+
         // Assert
         expect(userMessage, equals('Server error: Internal server error'));
       });
@@ -221,10 +224,10 @@ void main() {
       test('should return correct user message for NetworkFailure', () {
         // Arrange
         const failure = Failure.networkFailure(message: 'Connection timeout');
-        
+
         // Act
         final userMessage = failure.userMessage;
-        
+
         // Assert
         expect(userMessage, equals('Network error: Connection timeout'));
       });
@@ -232,21 +235,24 @@ void main() {
       test('should return correct user message for AuthFailure', () {
         // Arrange
         const failure = Failure.authFailure(message: 'Invalid credentials');
-        
+
         // Act
         final userMessage = failure.userMessage;
-        
+
         // Assert
-        expect(userMessage, equals('Authentication error: Invalid credentials'));
+        expect(
+          userMessage,
+          equals('Authentication error: Invalid credentials'),
+        );
       });
 
       test('should return correct user message for FirestoreFailure', () {
         // Arrange
         const failure = Failure.firestoreFailure(message: 'Permission denied');
-        
+
         // Act
         final userMessage = failure.userMessage;
-        
+
         // Assert
         expect(userMessage, equals('Database error: Permission denied'));
       });
@@ -254,10 +260,10 @@ void main() {
       test('should return correct user message for ValidationFailure', () {
         // Arrange
         const failure = Failure.validationFailure(message: 'Invalid input');
-        
+
         // Act
         final userMessage = failure.userMessage;
-        
+
         // Assert
         expect(userMessage, equals('Validation error: Invalid input'));
       });
@@ -265,10 +271,10 @@ void main() {
       test('should return correct user message for CacheFailure', () {
         // Arrange
         const failure = Failure.cacheFailure(message: 'Cache is full');
-        
+
         // Act
         final userMessage = failure.userMessage;
-        
+
         // Assert
         expect(userMessage, equals('Cache error: Cache is full'));
       });
@@ -276,10 +282,10 @@ void main() {
       test('should return correct user message for UnknownFailure', () {
         // Arrange
         const failure = Failure.unknownFailure(message: 'Something went wrong');
-        
+
         // Act
         final userMessage = failure.userMessage;
-        
+
         // Assert
         expect(userMessage, equals('Unknown error: Something went wrong'));
       });

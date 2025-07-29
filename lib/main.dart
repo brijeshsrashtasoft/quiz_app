@@ -6,27 +6,21 @@ import 'core/utils/logger.dart';
 void main() async {
   // Ensure Flutter binding is initialized
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   try {
     // Initialize Firebase
     await FirebaseCoreConfig.initialize();
-    AppLogger.info('Application started successfully with Firebase initialized');
-    
-    // Run app with Riverpod
-    runApp(
-      const ProviderScope(
-        child: QuizApp(),
-      ),
+    AppLogger.info(
+      'Application started successfully with Firebase initialized',
     );
+
+    // Run app with Riverpod
+    runApp(const ProviderScope(child: QuizApp()));
   } catch (e, stackTrace) {
     AppLogger.fatal('Failed to initialize application', e, stackTrace);
-    
+
     // Run app without Firebase in case of initialization failure
-    runApp(
-      const ProviderScope(
-        child: QuizApp(),
-      ),
-    );
+    runApp(const ProviderScope(child: QuizApp()));
   }
 }
 
@@ -76,4 +70,3 @@ class HomePage extends ConsumerWidget {
     );
   }
 }
-

@@ -4,28 +4,28 @@ import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 /// Helper class for setting up Firebase mocks in tests
 class FirebaseTestHelper {
   static bool _isInitialized = false;
-  
+
   /// Initialize Firebase for testing
   static Future<void> setupFirebaseForTest() async {
     if (_isInitialized) return;
-    
+
     TestWidgetsFlutterBinding.ensureInitialized();
-    
+
     // Mock Firebase.initializeApp to prevent actual Firebase initialization
     // This prevents the "No Firebase App has been created" errors
     _isInitialized = true;
   }
-  
+
   /// Clean up Firebase after tests
   static Future<void> tearDownFirebase() async {
     _isInitialized = false;
   }
-  
+
   /// Create a fake Firestore instance for testing
   static FakeFirebaseFirestore createFakeFirestore() {
     return FakeFirebaseFirestore();
   }
-  
+
   /// Setup test data in fake Firestore
   static Future<void> setupTestData(FakeFirebaseFirestore firestore) async {
     // Add test users
@@ -43,7 +43,7 @@ class FirebaseTestHelper {
         'lastGameDate': DateTime.now(),
       },
     });
-    
+
     // Add test quizzes
     await firestore.collection('quizzes').doc('test_quiz_1').set({
       'title': 'Test Quiz 1',
@@ -64,7 +64,7 @@ class FirebaseTestHelper {
       'isPublic': true,
       'createdAt': DateTime.now(),
     });
-    
+
     // Add test game sessions
     await firestore.collection('game_sessions').doc('test_session_1').set({
       'quizId': 'test_quiz_1',
@@ -75,7 +75,7 @@ class FirebaseTestHelper {
       'currentQuestionIndex': 0,
       'createdAt': DateTime.now(),
     });
-    
+
     // Add test leaderboards
     await firestore.collection('leaderboards').doc('test_session_1').set({
       'scores': [
@@ -90,7 +90,7 @@ class FirebaseTestHelper {
       'updatedAt': DateTime.now(),
     });
   }
-  
+
   /// Create mock user credentials for testing
   static Map<String, dynamic> createMockUserData({
     String uid = 'test_uid',
@@ -117,13 +117,15 @@ class FirebaseTestHelper {
       ],
     };
   }
-  
+
   /// Simulate authentication state changes
   static Stream<Map<String, dynamic>?> createAuthStateStream({
     bool isAuthenticated = false,
     Map<String, dynamic>? userData,
   }) {
-    return Stream.value(isAuthenticated ? (userData ?? createMockUserData()) : null);
+    return Stream.value(
+      isAuthenticated ? (userData ?? createMockUserData()) : null,
+    );
   }
 }
 
@@ -137,11 +139,11 @@ void firebaseTestGroup(
     setUpAll(() async {
       await FirebaseTestHelper.setupFirebaseForTest();
     });
-    
+
     tearDownAll(() async {
       await FirebaseTestHelper.tearDownFirebase();
     });
-    
+
     body();
   }, skip: skip);
 }
@@ -153,8 +155,13 @@ void firebaseTest(
   bool skip = false,
   dynamic tags,
 }) {
-  test(description, () async {
-    await FirebaseTestHelper.setupFirebaseForTest();
-    await body();
-  }, skip: skip, tags: tags);
+  test(
+    description,
+    () async {
+      await FirebaseTestHelper.setupFirebaseForTest();
+      await body();
+    },
+    skip: skip,
+    tags: tags,
+  );
 }
