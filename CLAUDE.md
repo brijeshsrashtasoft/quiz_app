@@ -157,6 +157,8 @@ claude mcp add firebase
 
 ### Ticket-Based Development (Following GitHub Standards)
 
+**Reference**: All GitHub workflow standards are defined in `docs/github_instruction.md`
+
 #### Issue Creation Standards
 - **Title format**: `[Action] [Component]: [Specific outcome]`
   - Examples: "Fix authentication: Resolve login timeout errors"
@@ -347,13 +349,138 @@ leaderboards/
 - **Edit ruthlessly**: Cut everything non-essential
 - **Immediate clarity**: Reader should understand purpose within 5 seconds
 
+## UI/UX Design Guidelines
+
+### Color System (Use Only These Colors)
+```dart
+// Primary Colors
+static const Color primaryBlue = Color(0xFF2563EB);      // Kahoot blue
+static const Color primaryRed = Color(0xFFEF4444);       // Answer A - Red
+static const Color primaryGreen = Color(0xFF10B981);     // Answer B - Green  
+static const Color primaryYellow = Color(0xFFF59E0B);    // Answer C - Yellow
+static const Color primaryPurple = Color(0xFF8B5CF6);    // Answer D - Purple
+
+// Neutral Colors
+static const Color backgroundLight = Color(0xFFF8FAFC);  // Light background
+static const Color backgroundDark = Color(0xFF1E293B);   // Dark background
+static const Color textPrimary = Color(0xFF0F172A);      // Primary text
+static const Color textSecondary = Color(0xFF64748B);    // Secondary text
+static const Color surfaceWhite = Color(0xFFFFFFFF);     // Cards/surfaces
+static const Color borderGray = Color(0xFFE2E8F0);       // Borders
+
+// Status Colors
+static const Color successGreen = Color(0xFF059669);     // Success states
+static const Color errorRed = Color(0xFFDC2626);         // Error states
+static const Color warningOrange = Color(0xFFF97316);    // Warning states
+```
+
+### Component Library (Always Use These)
+
+#### Button Components
+- **PrimaryButton**: Main actions (Start Quiz, Join Game)
+- **SecondaryButton**: Secondary actions (Cancel, Back)
+- **AnswerButton**: Quiz answer options with color coding
+- **FloatingActionButton**: Add/Create actions
+
+#### Input Components
+- **QuizTextField**: Standard text input with validation
+- **PinCodeInput**: Game PIN entry with large numbers
+- **SearchInput**: Search functionality with icon
+
+#### Display Components
+- **QuizCard**: Display quiz information
+- **PlayerCard**: Show participant information
+- **ScoreCard**: Leaderboard entries
+- **CountdownTimer**: Question time limits
+
+#### Layout Components
+- **AppScaffold**: Standard page layout with consistent styling
+- **LoadingOverlay**: Loading states with animations
+- **ErrorWidget**: Consistent error display
+- **EmptyStateWidget**: When no data is available
+
+### Typography System
+```dart
+// Headings
+static const TextStyle headingLarge = TextStyle(
+  fontSize: 32, fontWeight: FontWeight.bold, color: textPrimary);
+static const TextStyle headingMedium = TextStyle(
+  fontSize: 24, fontWeight: FontWeight.w600, color: textPrimary);
+static const TextStyle headingSmall = TextStyle(
+  fontSize: 20, fontWeight: FontWeight.w600, color: textPrimary);
+
+// Body Text
+static const TextStyle bodyLarge = TextStyle(
+  fontSize: 16, fontWeight: FontWeight.normal, color: textPrimary);
+static const TextStyle bodyMedium = TextStyle(
+  fontSize: 14, fontWeight: FontWeight.normal, color: textSecondary);
+static const TextStyle bodySmall = TextStyle(
+  fontSize: 12, fontWeight: FontWeight.normal, color: textSecondary);
+
+// Button Text
+static const TextStyle buttonText = TextStyle(
+  fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white);
+```
+
+### Animation Standards
+```dart
+// Animation Durations
+static const Duration shortAnimation = Duration(milliseconds: 200);
+static const Duration mediumAnimation = Duration(milliseconds: 400);
+static const Duration longAnimation = Duration(milliseconds: 600);
+
+// Common Animations
+- Button press: Scale(0.95) with shortAnimation
+- Page transitions: Slide with mediumAnimation
+- Loading states: Pulse with longAnimation
+- Answer feedback: Color change + scale with shortAnimation
+```
+
+### Spacing System
+```dart
+// Consistent Spacing (Use Only These)
+static const double spacingXS = 4.0;   // Tiny gaps
+static const double spacingS = 8.0;    // Small gaps  
+static const double spacingM = 16.0;   // Standard padding
+static const double spacingL = 24.0;   // Large padding
+static const double spacingXL = 32.0;  // Extra large padding
+static const double spacingXXL = 48.0; // Section spacing
+```
+
+### UI Implementation Rules
+1. **Always use constants**: Never hardcode colors, spacing, or text styles
+2. **Centralized components**: Use shared widgets from component library
+3. **Consistent patterns**: Follow established design patterns across features
+4. **Responsive design**: Support multiple screen sizes with adaptive layouts
+5. **Accessibility**: Include semantic labels and proper contrast ratios
+6. **Loading states**: Show appropriate loading indicators for all async operations
+7. **Error handling**: Use consistent error display patterns
+
+### File Structure for UI Components
+```
+lib/shared/
+├── constants/
+│   ├── app_colors.dart
+│   ├── app_text_styles.dart
+│   ├── app_spacing.dart
+│   └── app_animations.dart
+├── widgets/
+│   ├── buttons/
+│   ├── inputs/
+│   ├── cards/
+│   └── layouts/
+└── theme/
+    └── app_theme.dart
+```
+
 ## Deployment Pipeline
 1. **Explore**: Read and understand existing code structure
 2. **Plan**: Create GitHub issue following standards (max 100 words)
-3. **Test**: Write tests first following TDD approach
-4. **Code**: Implement with clear commit messages (`type(scope): description`)
-5. **Review**: Use Claude Code subagents with specific feedback
-6. **Test E2E**: Run Playwright MCP tests for web platform
-7. **Deploy**: Firebase deployment via GitHub Actions
-8. **Monitor**: Performance monitoring and analytics
-9. **Iterate**: User feedback integration for continuous improvement
+3. **Design**: Use UI guidelines and centralized components
+4. **Test**: Write tests first following TDD approach
+5. **Code**: Implement with clear commit messages (`type(scope): description`)
+6. **Review**: Use Claude Code subagents with specific feedback
+7. **Test E2E**: Run Playwright MCP tests for web platform
+8. **Deploy**: Firebase deployment via GitHub Actions
+9. **Monitor**: Performance monitoring and analytics
+10. **Iterate**: User feedback integration for continuous improvement
