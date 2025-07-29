@@ -113,11 +113,31 @@ claude mcp add playwright npx -- @playwright/mcp@latest
 claude mcp add firebase
 ```
 
-### Subagent Utilization
-- **Code Review Agent**: Ensures architecture compliance
-- **Testing Agent**: Generates comprehensive tests
-- **UI/UX Agent**: Maintains design consistency
-- **Performance Agent**: Optimizes app performance
+### Specialized Sub-Agents
+
+Our project uses specialized Claude Code sub-agents for focused expertise:
+
+#### Available Sub-Agents:
+- **flutter-architect**: Clean Architecture implementation and code structure
+- **firebase-specialist**: Firestore, Authentication, and real-time features
+- **ui-designer**: Kahoot-style UI components and design system compliance
+- **testing-specialist**: TDD implementation and comprehensive test coverage
+- **code-reviewer**: Quality assurance and architecture compliance validation
+- **performance-optimizer**: Performance optimization and memory management
+
+#### Sub-Agent Usage:
+- **Automatic**: Sub-agents are invoked automatically based on task context
+- **Explicit**: Use "Use the [agent-name] subagent to [specific task]"
+- **Examples**:
+  - "Use the firebase-specialist subagent to implement real-time leaderboard"
+  - "Use the ui-designer subagent to create answer button components"
+  - "Use the testing-specialist subagent to write comprehensive tests"
+
+#### Sub-Agent Coordination:
+- Each sub-agent follows project standards from CLAUDE.md
+- All sub-agents use centralized UI components and approved colors
+- Sub-agents communicate through consistent file structures
+- Code review sub-agent validates all implementations
 
 ## Technology Stack
 
