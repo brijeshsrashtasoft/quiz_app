@@ -81,6 +81,8 @@ dev_dependencies:
   # Testing
   mockito: ^5.4.4
   golden_toolkit: ^0.15.0
+  fake_cloud_firestore: ^3.1.0
+  firebase_auth_mocks: ^0.14.0
   
   # Code Quality
   flutter_lints: ^5.0.0
