@@ -155,12 +155,26 @@ claude mcp add firebase
 
 ## Development Workflow
 
-### Ticket-Based Development
-1. Create GitHub issues for each feature/bug
-2. Use Claude Code to implement via PR workflow: `@claude implement feature XYZ`
-3. Automated testing with Playwright MCP
-4. Code review with Claude subagents
-5. Merge after automated checks pass
+### Ticket-Based Development (Following GitHub Standards)
+
+#### Issue Creation Standards
+- **Title format**: `[Action] [Component]: [Specific outcome]`
+  - Examples: "Fix authentication: Resolve login timeout errors"
+  - Examples: "Add quiz creation: Display question builder interface"
+- **Description structure** (Max 100 words):
+  - **Problem**: One sentence describing what's broken/missing
+  - **Goal**: One sentence describing desired outcome  
+  - **Acceptance**: 2-3 bullet points of completion criteria
+- **One main goal per ticket** - Focus on single objective
+- **Essential information only** - Remove unnecessary words
+
+#### Development Workflow
+1. Create GitHub issue following title/description standards
+2. Use Claude Code subagents to implement via PR workflow
+3. Follow commit message rules: `type(scope): concise description`
+4. Automated testing with Playwright MCP
+5. Code review with Claude subagents using specific feedback
+6. Merge after automated checks pass
 
 ### Testing Strategy
 - **Unit Tests**: Business logic and use cases
@@ -169,12 +183,36 @@ claude mcp add firebase
 - **E2E Tests**: Complete user journeys with Playwright MCP
 
 ### Code Quality Guidelines
+
+#### Architecture & Code Standards
 - Follow clean architecture principles strictly
 - Use Riverpod for all state management
 - Implement proper error handling with Result pattern
-- Write comprehensive tests for all features
 - Use Freezed for immutable data classes
 - Follow Flutter/Dart style guide
+
+#### Commit Message Standards
+- **Format**: `type(scope): concise description`
+- **Types**: fix, feat, docs, refactor, test, chore
+- **Description**: Start with verb, stay under 50 characters
+- **Examples**:
+  - `fix(auth): resolve session timeout`
+  - `feat(quiz): add question builder`
+  - `docs(readme): update setup instructions`
+
+#### Code Comments Standards
+- **Only explain WHY, never WHAT**
+- **Focus on business logic and non-obvious decisions**
+- **Remove TODO comments before committing**
+- **Maximum one line per comment**
+
+#### Pull Request Standards
+- **Title**: Same as commit message format
+- **Description** (Max 3 sentences):
+  - **Changes**: What was modified
+  - **Testing**: How you verified it works
+  - **Impact**: What this affects
+- **No implementation details in description**
 
 ## Firebase Configuration
 
@@ -294,12 +332,27 @@ leaderboards/
 - Game session participants can join and submit answers
 - Use Firebase Auth for user verification
 
+## Communication Standards
+
+### Review Comments (For Subagents)
+- **Be specific**: Point to exact lines/issues
+- **Suggest solutions**: Don't just identify problems  
+- **Use imperative mood**: "Change X to Y" not "X should be Y"
+- **One issue per comment**
+
+### General Writing Rules
+- **Eliminate filler words**: "just", "simply", "basically", "actually"
+- **Use specific numbers**: "Reduce load time by 200ms" not "faster"
+- **Avoid jargon**: Write for any team member to understand
+- **Edit ruthlessly**: Cut everything non-essential
+- **Immediate clarity**: Reader should understand purpose within 5 seconds
+
 ## Deployment Pipeline
 1. **Explore**: Read and understand existing code structure
-2. **Plan**: Create detailed feature implementation plan
+2. **Plan**: Create GitHub issue following standards (max 100 words)
 3. **Test**: Write tests first following TDD approach
-4. **Code**: Implement features with Firestore integration
-5. **Review**: Use Claude Code for automated code review
+4. **Code**: Implement with clear commit messages (`type(scope): description`)
+5. **Review**: Use Claude Code subagents with specific feedback
 6. **Test E2E**: Run Playwright MCP tests for web platform
 7. **Deploy**: Firebase deployment via GitHub Actions
 8. **Monitor**: Performance monitoring and analytics
