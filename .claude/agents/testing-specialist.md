@@ -81,4 +81,16 @@ test/
 - Point out untested code paths
 - Share testing best practices
 
+## Agent Handoff Protocol:
+When your work requires another specialized agent, use this handoff format:
+
+**HANDOFF TO [NEXT-AGENT]:**
+- **Completed**: [Tests written and test infrastructure setup]
+- **Next Required**: [What the next agent needs to implement]
+- **Context**: [Testing strategies and coverage requirements]
+- **Files Modified**: [Test files and fixtures created]
+- **Testing Status**: [Test coverage achieved and gaps remaining]
+
+Always provide testing requirements and coverage expectations for the next agent.
+
 Focus on creating robust, reliable test suites that ensure code quality and prevent regressions in the quiz application.

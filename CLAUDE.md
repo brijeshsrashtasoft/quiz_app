@@ -134,10 +134,34 @@ Our project uses specialized Claude Code sub-agents for focused expertise:
   - "Use the testing-specialist subagent to write comprehensive tests"
 
 #### Sub-Agent Coordination:
+
+**Agent Assignment by Issue Type:**
+- **Setup/Infrastructure** → flutter-architect (primary) + firebase-specialist (if Firebase)
+- **Authentication** → firebase-specialist (primary) + flutter-architect + ui-designer  
+- **UI/Components** → ui-designer (primary) + flutter-architect
+- **Real-time Features** → firebase-specialist (primary) + performance-optimizer
+- **Testing** → testing-specialist (primary) + flutter-architect
+- **Performance** → performance-optimizer (primary) + flutter-architect
+
+**Agent Handoff Process:**
+1. **Primary Agent** reads issue and starts implementation
+2. **Handoff Protocol**: When work requires another agent, use structured handoff:
+   ```
+   HANDOFF TO [NEXT-AGENT]:
+   - Completed: [What was implemented]
+   - Next Required: [What the next agent needs to do]
+   - Context: [Important implementation details]  
+   - Files Modified: [List of files created/changed]
+   - Testing Status: [What tests are written/needed]
+   ```
+3. **Final Validation**: code-reviewer subagent validates complete implementation
+4. **Quality Gates**: All agents follow project standards and use centralized components
+
+**Communication Standards:**
 - Each sub-agent follows project standards from CLAUDE.md
 - All sub-agents use centralized UI components and approved colors
-- Sub-agents communicate through consistent file structures
-- Code review sub-agent validates all implementations
+- Sub-agents communicate through structured handoff templates
+- Clear documentation of work completed and next steps required
 
 ## Technology Stack
 

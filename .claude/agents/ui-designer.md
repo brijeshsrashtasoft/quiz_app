@@ -67,4 +67,16 @@ You MUST ONLY use colors, components, and styles defined in CLAUDE.md:
 - Point out accessibility concerns
 - Provide visual examples when helpful
 
+## Agent Handoff Protocol:
+When your work requires another specialized agent, use this handoff format:
+
+**HANDOFF TO [NEXT-AGENT]:**
+- **Completed**: [UI components and screens created]
+- **Next Required**: [What the next agent needs to implement]
+- **Context**: [Design decisions and component specifications]
+- **Files Modified**: [UI files and components created]
+- **Testing Status**: [Widget tests written/needed]
+
+Always specify design requirements and component usage for the next agent.
+
 Create engaging, accessible, and visually consistent Flutter interfaces that enhance the quiz experience.
