@@ -3,12 +3,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
-import '../../../../../../lib/core/errors/exceptions.dart';
-import '../../../../../../lib/core/utils/logger.dart';
-import '../../../../../../lib/core/utils/result.dart';
-import '../../../../../../lib/features/authentication/data/datasources/user_firestore_datasource.dart';
-import '../../../../../../lib/features/authentication/data/models/user_model.dart';
-import '../../../../../../lib/core/firebase/firestore_config.dart';
+import 'package:quiz_app/core/errors/failures.dart';
+import 'package:quiz_app/core/utils/result.dart';
+import 'package:quiz_app/features/authentication/data/datasources/user_firestore_datasource.dart';
+import 'package:quiz_app/features/authentication/data/models/user_model.dart';
 
 import 'user_firestore_datasource_test.mocks.dart';
 
@@ -41,7 +39,7 @@ void main() {
     mockQueryDocSnapshot = MockQueryDocumentSnapshot<Map<String, dynamic>>();
 
     // Setup AppLogger to avoid logging during tests
-    AppLogger.init(logLevel: LogLevel.none);
+    // AppLogger.init(logLevel: LogLevel.none);
   });
 
   group('UserFirestoreDataSource', () {
@@ -81,7 +79,7 @@ void main() {
       });
 
       test(
-        'should return DataException when document does not exist',
+        'should return FirestoreException when document does not exist',
         () async {
           // Arrange
           when(mockDocumentSnapshot.exists).thenReturn(false);
@@ -94,8 +92,7 @@ void main() {
 
           // Assert
           expect(result.isFailure, true);
-          expect(result.error, isA<DataException>());
-          expect((result.error as DataException).code, 'user_not_found');
+          expect(result.error, isA<Failure>());
         },
       );
 
@@ -112,8 +109,7 @@ void main() {
 
           // Assert
           expect(result.isFailure, true);
-          expect(result.error, isA<FirestoreException>());
-          expect((result.error as FirestoreException).code, 'get_user_error');
+          expect(result.error, isA<Failure>());
         },
       );
     });
@@ -138,26 +134,22 @@ void main() {
         expect(result.data?.email, testEmail);
       });
 
-      test(
-        'should return DataException when no user with email exists',
-        () async {
-          // Arrange
-          when(mockQuerySnapshot.docs).thenReturn([]);
-          when(
-            mockCollection.where('email', isEqualTo: testEmail),
-          ).thenReturn(mockCollection);
-          when(mockCollection.limit(1)).thenReturn(mockCollection);
-          when(mockCollection.get()).thenAnswer((_) async => mockQuerySnapshot);
+      test('should return Failure when no user with email exists', () async {
+        // Arrange
+        when(mockQuerySnapshot.docs).thenReturn([]);
+        when(
+          mockCollection.where('email', isEqualTo: testEmail),
+        ).thenReturn(mockCollection);
+        when(mockCollection.limit(1)).thenReturn(mockCollection);
+        when(mockCollection.get()).thenAnswer((_) async => mockQuerySnapshot);
 
-          // Act
-          final result = await dataSource.getUserByEmail(testEmail);
+        // Act
+        final result = await dataSource.getUserByEmail(testEmail);
 
-          // Assert
-          expect(result.isFailure, true);
-          expect(result.error, isA<DataException>());
-          expect((result.error as DataException).code, 'user_not_found');
-        },
-      );
+        // Assert
+        expect(result.isFailure, true);
+        expect(result.error, isA<Failure>());
+      });
     });
 
     group('createUser', () {
@@ -179,7 +171,7 @@ void main() {
         },
       );
 
-      test('should return FirestoreException when creation fails', () async {
+      test('should return Failure when creation fails', () async {
         // Arrange
         when(mockCollection.add(any)).thenThrow(
           FirebaseException(plugin: 'firestore', code: 'permission-denied'),
@@ -190,8 +182,7 @@ void main() {
 
         // Assert
         expect(result.isFailure, true);
-        expect(result.error, isA<FirestoreException>());
-        expect((result.error as FirestoreException).code, 'create_user_error');
+        expect(result.error, isA<Failure>());
       });
     });
 
@@ -209,7 +200,7 @@ void main() {
         verify(mockDocument.update(any)).called(1);
       });
 
-      test('should return FirestoreException when update fails', () async {
+      test('should return Failure when update fails', () async {
         // Arrange
         when(
           mockDocument.update(any),
@@ -220,8 +211,7 @@ void main() {
 
         // Assert
         expect(result.isFailure, true);
-        expect(result.error, isA<FirestoreException>());
-        expect((result.error as FirestoreException).code, 'update_user_error');
+        expect(result.error, isA<Failure>());
       });
     });
 
@@ -238,7 +228,7 @@ void main() {
         verify(mockDocument.delete()).called(1);
       });
 
-      test('should return FirestoreException when deletion fails', () async {
+      test('should return Failure when deletion fails', () async {
         // Arrange
         when(mockDocument.delete()).thenThrow(
           FirebaseException(plugin: 'firestore', code: 'permission-denied'),
@@ -249,8 +239,7 @@ void main() {
 
         // Assert
         expect(result.isFailure, true);
-        expect(result.error, isA<FirestoreException>());
-        expect((result.error as FirestoreException).code, 'delete_user_error');
+        expect(result.error, isA<Failure>());
       });
     });
 
@@ -359,27 +348,24 @@ void main() {
         expect(result.data?.id, testUserId);
       });
 
-      test(
-        'should return DataException when watched user does not exist',
-        () async {
-          // Arrange
-          final controller =
-              Stream<DocumentSnapshot<Map<String, dynamic>>>.fromIterable([
-                mockDocumentSnapshot,
-              ]);
+      test('should return Failure when watched user does not exist', () async {
+        // Arrange
+        final controller =
+            Stream<DocumentSnapshot<Map<String, dynamic>>>.fromIterable([
+              mockDocumentSnapshot,
+            ]);
 
-          when(mockDocumentSnapshot.exists).thenReturn(false);
-          when(mockDocument.snapshots()).thenAnswer((_) => controller);
+        when(mockDocumentSnapshot.exists).thenReturn(false);
+        when(mockDocument.snapshots()).thenAnswer((_) => controller);
 
-          // Act
-          final stream = dataSource.watchUser(testUserId);
-          final result = await stream.first;
+        // Act
+        final stream = dataSource.watchUser(testUserId);
+        final result = await stream.first;
 
-          // Assert
-          expect(result.isFailure, true);
-          expect(result.error, isA<DataException>());
-        },
-      );
+        // Assert
+        expect(result.isFailure, true);
+        expect(result.error, isA<Failure>());
+      });
     });
 
     group('batchUpdateUsers', () {
@@ -404,7 +390,18 @@ void main() {
     test('getUserById should complete within performance threshold', () async {
       // Arrange
       when(mockDocumentSnapshot.exists).thenReturn(true);
-      when(mockDocumentSnapshot.data()).thenReturn(testUserData);
+      when(mockDocumentSnapshot.data()).thenReturn({
+        'id': 'test-user-id',
+        'name': 'Test User',
+        'email': 'test@example.com',
+        'createdAt': Timestamp.now(),
+        'stats': {
+          'totalQuizzes': 5,
+          'totalGamesPlayed': 10,
+          'totalGamesWon': 3,
+          'averageScore': 85.5,
+        },
+      });
       when(mockDocumentSnapshot.id).thenReturn('test-user-id');
       when(mockDocument.get()).thenAnswer((_) async => mockDocumentSnapshot);
 

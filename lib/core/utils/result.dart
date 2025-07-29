@@ -26,6 +26,12 @@ extension ResultX<T> on Result<T> {
   Failure? get failureOrNull =>
       when(success: (_) => null, failure: (failure) => failure);
 
+  /// Get data if successful (for tests compatibility)
+  T? get data => dataOrNull;
+
+  /// Get error if failure (for tests compatibility)
+  Failure? get error => failureOrNull;
+
   /// Transform success data
   Result<R> transform<R>(R Function(T) transform) {
     return when(

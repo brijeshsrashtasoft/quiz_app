@@ -62,3 +62,28 @@ class CacheException implements Exception {
   @override
   String toString() => 'CacheException: $message';
 }
+
+/// Data source specific exception with type support
+class DataSourceException implements Exception {
+  final String message;
+  final String? code;
+  final DataSourceExceptionType type;
+
+  const DataSourceException.server({required this.message, this.code})
+      : type = DataSourceExceptionType.server;
+
+  const DataSourceException.network({required this.message, this.code})
+      : type = DataSourceExceptionType.network;
+
+  const DataSourceException.auth({required this.message, this.code})
+      : type = DataSourceExceptionType.auth;
+
+  const DataSourceException.cache({required this.message, this.code})
+      : type = DataSourceExceptionType.cache;
+
+  @override
+  String toString() =>
+      'DataSourceException: $message${code != null ? ' (Code: $code)' : ''}';
+}
+
+enum DataSourceExceptionType { server, network, auth, cache }

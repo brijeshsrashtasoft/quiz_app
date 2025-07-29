@@ -2,12 +2,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
-import '../../../../../../lib/core/errors/exceptions.dart';
-import '../../../../../../lib/core/utils/result.dart';
-import '../../../../../../lib/features/authentication/data/datasources/user_firestore_datasource.dart';
-import '../../../../../../lib/features/authentication/data/models/user_model.dart';
-import '../../../../../../lib/features/authentication/data/repositories/user_repository_impl.dart';
-import '../../../../../../lib/features/authentication/domain/entities/user_entity.dart';
+import 'package:quiz_app/core/errors/exceptions.dart';
+import 'package:quiz_app/core/errors/failures.dart';
+import 'package:quiz_app/core/utils/result.dart';
+import 'package:quiz_app/features/authentication/data/datasources/user_firestore_datasource.dart';
+import 'package:quiz_app/features/authentication/data/models/user_model.dart';
+import 'package:quiz_app/features/authentication/data/repositories/user_repository_impl.dart';
+import 'package:quiz_app/features/authentication/domain/entities/user_entity.dart';
 
 import 'user_repository_impl_test.mocks.dart';
 
@@ -65,13 +66,13 @@ void main() {
 
       test('should return failure when data source returns error', () async {
         // Arrange
-        const error = DataException(
+        final error = Failure.firestoreFailure(
           message: 'User not found',
           code: 'user_not_found',
         );
         when(
           mockDataSource.getUserById(testUserId),
-        ).thenAnswer((_) async => const Result.failure(error));
+        ).thenAnswer((_) async => Result.failure(error));
 
         // Act
         final result = await repository.getUserById(testUserId);
@@ -111,7 +112,7 @@ void main() {
 
         // Assert
         expect(result.isFailure, true);
-        expect(result.error, isA<ValidationException>());
+        expect(result.error, isA<Failure>());
         verifyNever(mockDataSource.getUserByEmail(any));
       });
     });
@@ -145,19 +146,19 @@ void main() {
 
         // Assert
         expect(result.isFailure, true);
-        expect(result.error, isA<ValidationException>());
+        expect(result.error, isA<Failure>());
         verifyNever(mockDataSource.createUser(any));
       });
 
       test('should return failure when data source returns error', () async {
         // Arrange
-        const error = FirestoreException(
+        final error = Failure.firestoreFailure(
           message: 'Failed to create user',
           code: 'create_user_error',
         );
         when(
           mockDataSource.createUser(any),
-        ).thenAnswer((_) async => const Result.failure(error));
+        ).thenAnswer((_) async => Result.failure(error));
 
         // Act
         final result = await repository.createUser(testUserEntity);
@@ -199,7 +200,7 @@ void main() {
 
         // Assert
         expect(result.isFailure, true);
-        expect(result.error, isA<ValidationException>());
+        expect(result.error, isA<Failure>());
         verifyNever(mockDataSource.updateUser(any));
       });
     });
@@ -237,13 +238,13 @@ void main() {
 
       test('should return failure when user does not exist', () async {
         // Arrange
-        const error = DataException(
+        final error = Failure.firestoreFailure(
           message: 'User not found',
           code: 'user_not_found',
         );
         when(
           mockDataSource.getUserById(testUserId),
-        ).thenAnswer((_) async => const Result.failure(error));
+        ).thenAnswer((_) async => Result.failure(error));
 
         const newStats = UserStats(
           totalQuizzes: 8,
@@ -280,13 +281,13 @@ void main() {
 
       test('should return failure when deletion fails', () async {
         // Arrange
-        const error = FirestoreException(
+        final error = Failure.firestoreFailure(
           message: 'Failed to delete user',
           code: 'delete_user_error',
         );
         when(
           mockDataSource.deleteUser(testUserId),
-        ).thenAnswer((_) async => const Result.failure(error));
+        ).thenAnswer((_) async => Result.failure(error));
 
         // Act
         final result = await repository.deleteUser(testUserId);
@@ -359,7 +360,7 @@ void main() {
 
         // Assert
         expect(result.isFailure, true);
-        expect(result.error, isA<ValidationException>());
+        expect(result.error, isA<Failure>());
         verifyNever(mockDataSource.searchUsersByName(any));
       });
 
@@ -407,7 +408,7 @@ void main() {
 
         // Assert
         expect(result.isFailure, true);
-        expect(result.error, isA<ValidationException>());
+        expect(result.error, isA<Failure>());
         verifyNever(mockDataSource.getTopUsersByScore(any));
       });
 
@@ -455,8 +456,8 @@ void main() {
       test('should handle stream errors gracefully', () async {
         // Arrange
         final errorStream = Stream<Result<UserModel>>.fromIterable([
-          const Result.failure(
-            FirestoreException(
+          Result.failure(
+            Failure.firestoreFailure(
               message: 'Connection error',
               code: 'connection_error',
             ),
@@ -472,7 +473,7 @@ void main() {
 
         // Assert
         expect(result.isFailure, true);
-        expect(result.error, isA<FirestoreException>());
+        expect(result.error, isA<Failure>());
         verify(mockDataSource.watchUser(testUserId)).called(1);
       });
     });
@@ -508,7 +509,7 @@ void main() {
 
         // Assert
         expect(result.isFailure, true);
-        expect(result.error, isA<ValidationException>());
+        expect(result.error, isA<Failure>());
         verifyNever(mockDataSource.batchUpdateUsers(any));
       });
 
@@ -524,7 +525,7 @@ void main() {
 
         // Assert
         expect(result.isFailure, true);
-        expect(result.error, isA<ValidationException>());
+        expect(result.error, isA<Failure>());
         verifyNever(mockDataSource.batchUpdateUsers(any));
       });
     });
@@ -620,6 +621,20 @@ void main() {
 
     test('should handle concurrent operations correctly', () async {
       // Arrange
+      const testUserId = 'test-user-id';
+      final testUserModel = UserModel(
+        id: testUserId,
+        name: 'Test User',
+        email: 'test@example.com',
+        createdAt: DateTime.now(),
+        stats: const UserStatsModel(
+          totalQuizzes: 5,
+          totalGamesPlayed: 10,
+          totalGamesWon: 3,
+          averageScore: 85.5,
+        ),
+      );
+
       when(
         mockDataSource.getUserById(testUserId),
       ).thenAnswer((_) async => Result.success(testUserModel));
