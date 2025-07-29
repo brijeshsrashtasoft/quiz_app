@@ -11,6 +11,16 @@
       ]
     },
     {
+      "collectionGroup": "users",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "email",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
       "collectionGroup": "quizzes",
       "queryScope": "COLLECTION",
       "fields": [
@@ -35,6 +45,34 @@
         {
           "fieldPath": "createdAt",
           "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "quizzes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "isPublic",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "category",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "quizzes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "title",
+          "order": "ASCENDING"
         }
       ]
     },
@@ -67,12 +105,60 @@
       ]
     },
     {
+      "collectionGroup": "game_sessions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "pin",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "game_sessions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "quizId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "game_sessions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "startedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
       "collectionGroup": "leaderboards",
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "scores",
-          "arrayConfig": "CONTAINS"
+          "fieldPath": "updatedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "leaderboards",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "finalResults",
+          "order": "ASCENDING"
         },
         {
           "fieldPath": "updatedAt",
@@ -81,5 +167,60 @@
       ]
     }
   ],
-  "fieldOverrides": []
+  "fieldOverrides": [
+    {
+      "collectionGroup": "users",
+      "fieldPath": "stats",
+      "indexes": [
+        {
+          "queryScope": "COLLECTION",
+          "fields": [
+            {
+              "fieldPath": "stats.totalGamesPlayed",
+              "order": "DESCENDING"
+            }
+          ]
+        },
+        {
+          "queryScope": "COLLECTION",
+          "fields": [
+            {
+              "fieldPath": "stats.averageScore",
+              "order": "DESCENDING"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "collectionGroup": "game_sessions",
+      "fieldPath": "players",
+      "indexes": [
+        {
+          "queryScope": "COLLECTION",
+          "fields": [
+            {
+              "fieldPath": "players",
+              "arrayConfig": "CONTAINS"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "collectionGroup": "leaderboards",
+      "fieldPath": "scores",
+      "indexes": [
+        {
+          "queryScope": "COLLECTION",
+          "fields": [
+            {
+              "fieldPath": "scores",
+              "arrayConfig": "CONTAINS"
+            }
+          ]
+        }
+      ]
+    }
+  ]
 }

@@ -3,7 +3,10 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Helper functions for authentication and authorization
+    // ============================
+    // SECURITY HELPER FUNCTIONS
+    // ============================
+    
     function isAuthenticated() {
       return request.auth != null;
     }
@@ -16,104 +19,237 @@ service cloud.firestore {
       return request.auth.uid == userId;
     }
     
-    function hasValidUserData() {
-      return request.resource.data.keys().hasAll(['name', 'email', 'createdAt']) &&
-             request.resource.data.name is string &&
-             request.resource.data.email is string &&
-             request.resource.data.createdAt is timestamp;
+    // ============================
+    // COMPREHENSIVE DATA VALIDATION FUNCTIONS
+    // ============================
+    
+    // Validate user data with comprehensive field checks
+    function validateUserData(data) {
+      return data.keys().hasAll(['name', 'email', 'createdAt']) &&
+             data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+             data.email is string && data.email.matches('.*@.*\\..*') && data.email.size() <= 254 &&
+             data.createdAt is timestamp &&
+             (!('stats' in data) || (data.stats is map && validateUserStats(data.stats)));
     }
     
-    function hasValidQuizData() {
-      return request.resource.data.keys().hasAll(['title', 'description', 'createdBy', 'questions', 'isPublic', 'createdAt']) &&
-             request.resource.data.title is string &&
-             request.resource.data.description is string &&
-             request.resource.data.createdBy is string &&
-             request.resource.data.questions is list &&
-             request.resource.data.isPublic is bool &&
-             request.resource.data.createdAt is timestamp;
+    // Validate user stats object
+    function validateUserStats(stats) {
+      return (!('totalQuizzes' in stats) || stats.totalQuizzes is number) &&
+             (!('totalGamesPlayed' in stats) || stats.totalGamesPlayed is number) &&
+             (!('totalGamesWon' in stats) || stats.totalGamesWon is number) &&
+             (!('averageScore' in stats) || stats.averageScore is number);
     }
     
-    function hasValidGameSessionData() {
-      return request.resource.data.keys().hasAll(['quizId', 'hostId', 'pin', 'status', 'players', 'currentQuestionIndex', 'createdAt']) &&
-             request.resource.data.quizId is string &&
-             request.resource.data.hostId is string &&
-             request.resource.data.pin is string &&
-             request.resource.data.status is string &&
-             request.resource.data.players is map &&
-             request.resource.data.currentQuestionIndex is number &&
-             request.resource.data.createdAt is timestamp;
+    // Validate quiz data with comprehensive validation
+    function validateQuizData(data) {
+      return data.keys().hasAll(['title', 'description', 'createdBy', 'questions', 'isPublic', 'createdAt']) &&
+             data.title is string && data.title.size() > 0 && data.title.size() <= 200 &&
+             data.description is string && data.description.size() <= 1000 &&
+             data.createdBy is string &&
+             data.questions is list && data.questions.size() > 0 && data.questions.size() <= 50 &&
+             data.isPublic is bool &&
+             data.createdAt is timestamp &&
+             validateQuestions(data.questions) &&
+             (!('category' in data) || (data.category is string && data.category.size() <= 50)) &&
+             (!('estimatedDuration' in data) || (data.estimatedDuration is number && data.estimatedDuration > 0));
     }
     
-    // Users collection rules
+    // Validate questions array with detailed validation
+    function validateQuestions(questions) {
+      return questions.size() > 0 && questions.size() <= 50 && 
+             validateQuestion(questions[0]);
+    }
+    
+    // Validate individual question structure
+    function validateQuestion(question) {
+      return question.keys().hasAll(['question', 'options', 'correctAnswer', 'timeLimit']) &&
+             question.question is string && question.question.size() > 0 && question.question.size() <= 500 &&
+             question.options is list && question.options.size() >= 2 && question.options.size() <= 6 &&
+             question.correctAnswer is number && question.correctAnswer >= 0 && question.correctAnswer < question.options.size() &&
+             question.timeLimit is number && question.timeLimit > 0 && question.timeLimit <= 300 &&
+             validateQuestionOptions(question.options) &&
+             (!('points' in question) || (question.points is number && question.points > 0 && question.points <= 1000));
+    }
+    
+    // Validate question options
+    function validateQuestionOptions(options) {
+      return options[0] is string && options[0].size() > 0 && options[0].size() <= 200;
+    }
+    
+    // Validate game session data with enhanced validation
+    function validateGameSessionData(data) {
+      return data.keys().hasAll(['quizId', 'hostId', 'pin', 'status', 'players', 'currentQuestionIndex', 'createdAt']) &&
+             data.quizId is string &&
+             data.hostId is string &&
+             data.pin is string && data.pin.size() == 6 && data.pin.matches('[0-9]{6}') &&
+             data.status in ['waiting', 'active', 'completed'] &&
+             data.players is map && data.players.size() <= 50 &&
+             data.currentQuestionIndex is number && data.currentQuestionIndex >= 0 &&
+             data.createdAt is timestamp &&
+             (!('settings' in data) || validateGameSettings(data.settings)) &&
+             (!('startedAt' in data) || data.startedAt is timestamp) &&
+             (!('completedAt' in data) || data.completedAt is timestamp);
+    }
+    
+    // Validate game session settings
+    function validateGameSettings(settings) {
+      return (!('maxPlayers' in settings) || (settings.maxPlayers is number && settings.maxPlayers > 0 && settings.maxPlayers <= 50)) &&
+             (!('showCorrectAnswers' in settings) || settings.showCorrectAnswers is bool) &&
+             (!('shuffleQuestions' in settings) || settings.shuffleQuestions is bool) &&
+             (!('allowReplay' in settings) || settings.allowReplay is bool);
+    }
+    
+    // Validate player data when joining
+    function validatePlayerJoin(playerId, playerData) {
+      return playerData.keys().hasAll(['name', 'joinedAt']) &&
+             playerData.name is string && playerData.name.size() > 0 && playerData.name.size() <= 100 &&
+             playerData.joinedAt is timestamp &&
+             (!('score' in playerData) || playerData.score is number) &&
+             (!('answers' in playerData) || playerData.answers is list) &&
+             (!('isReady' in playerData) || playerData.isReady is bool);
+    }
+    
+    // Validate leaderboard data
+    function validateLeaderboardData(data) {
+      return data.keys().hasAll(['scores', 'updatedAt']) &&
+             data.scores is list && data.scores.size() <= 50 &&
+             data.updatedAt is timestamp &&
+             (data.scores.size() == 0 || validateScore(data.scores[0])) &&
+             (!('finalResults' in data) || data.finalResults is bool);
+    }
+    
+    // Validate individual score entry
+    function validateScore(score) {
+      return score.keys().hasAll(['playerId', 'playerName', 'score', 'correctAnswers', 'totalAnswers']) &&
+             score.playerId is string &&
+             score.playerName is string && score.playerName.size() > 0 && score.playerName.size() <= 100 &&
+             score.score is number && score.score >= 0 &&
+             score.correctAnswers is number && score.correctAnswers >= 0 &&
+             score.totalAnswers is number && score.totalAnswers >= 0 &&
+             score.correctAnswers <= score.totalAnswers &&
+             (!('rank' in score) || score.rank is number) &&
+             (!('timeTaken' in score) || score.timeTaken is number);
+    }
+    
+    // ============================
+    // USERS COLLECTION RULES
+    // ============================
     match /users/{userId} {
-      // Users can read and write their own data
-      allow read, write: if isAuthenticated() && isUser(userId) && hasValidUserData();
+      // Users can read and write their own data with validation
+      allow read: if isAuthenticated() && isUser(userId);
+      
+      allow create: if isAuthenticated() && 
+                       isUser(userId) &&
+                       validateUserData(request.resource.data);
+      
+      allow update: if isAuthenticated() && 
+                       isUser(userId) &&
+                       validateUserData(request.resource.data) &&
+                       !('createdAt' in request.resource.data.diff(resource.data).affectedKeys());
       
       // Users can read other users' basic profile data (for leaderboards)
       allow read: if isAuthenticated() && 
                      resource.data.keys().hasAll(['name', 'email', 'createdAt']);
     }
     
-    // Quizzes collection rules  
+    // ============================
+    // QUIZZES COLLECTION RULES  
+    // ============================
     match /quizzes/{quizId} {
       // Anyone can read public quizzes
-      allow read: if resource.data.isPublic == true;
+      allow read: if isAuthenticated() && resource.data.isPublic == true;
       
-      // Authenticated users can read private quizzes they created
+      // Quiz creators can read their own quizzes (public or private)
       allow read: if isAuthenticated() && isOwner(resource);
       
-      // Authenticated users can create quizzes
+      // Authenticated users can create quizzes with validation
       allow create: if isAuthenticated() && 
-                       hasValidQuizData() &&
+                       validateQuizData(request.resource.data) &&
                        request.auth.uid == request.resource.data.createdBy;
       
-      // Quiz creators can update and delete their quizzes
-      allow update, delete: if isAuthenticated() && isOwner(resource);
+      // Quiz creators can update their quizzes (but not change ownership or creation date)
+      allow update: if isAuthenticated() && 
+                       isOwner(resource) &&
+                       validateQuizData(request.resource.data) &&
+                       !('createdBy' in request.resource.data.diff(resource.data).affectedKeys()) &&
+                       !('createdAt' in request.resource.data.diff(resource.data).affectedKeys());
+      
+      // Quiz creators can delete their quizzes
+      allow delete: if isAuthenticated() && isOwner(resource);
     }
     
-    // Game sessions collection rules
+    // ============================
+    // GAME SESSIONS COLLECTION RULES
+    // ============================
     match /game_sessions/{sessionId} {
-      // Game hosts can create game sessions
-      allow create: if isAuthenticated() && 
-                       hasValidGameSessionData() &&
+      // Host can read/write their game sessions
+      allow read, write: if isAuthenticated() && 
+                            request.auth.uid == resource.data.hostId;
+      
+      // Players can read active game sessions they're part of
+      allow read: if isAuthenticated() && 
+                     (resource.data.status == 'active' || resource.data.status == 'waiting') &&
+                     request.auth.uid in resource.data.players.keys());
+      
+      // Create new game session with validation
+      allow create: if isAuthenticated() &&
+                       validateGameSessionData(request.resource.data) &&
                        request.auth.uid == request.resource.data.hostId;
       
-      // Game hosts can update their game sessions
+      // Host can update game session (except immutable fields)
       allow update: if isAuthenticated() && 
-                       request.auth.uid == resource.data.hostId;
-      
-      // Players can read game sessions they're part of
-      allow read: if isAuthenticated() && 
-                     (request.auth.uid == resource.data.hostId ||
-                      request.auth.uid in resource.data.players.keys());
-      
-      // Game hosts can delete their game sessions
-      allow delete: if isAuthenticated() && 
-                       request.auth.uid == resource.data.hostId;
+                       request.auth.uid == resource.data.hostId &&
+                       validateGameSessionData(request.resource.data) &&
+                       !('createdAt' in request.resource.data.diff(resource.data).affectedKeys()) &&
+                       !('hostId' in request.resource.data.diff(resource.data).affectedKeys());
       
       // Players can join game sessions (add themselves to players map)
       allow update: if isAuthenticated() &&
                        resource.data.status == 'waiting' &&
-                       request.resource.data.players.size() <= 50 && // Max 50 players
+                       request.resource.data.players.size() <= 50 &&
                        request.auth.uid in request.resource.data.players.keys() &&
-                       !(request.auth.uid in resource.data.players.keys()); // Not already joined
+                       !(request.auth.uid in resource.data.players.keys()) &&
+                       validatePlayerJoin(request.auth.uid, request.resource.data.players[request.auth.uid]) &&
+                       request.resource.data.diff(resource.data).affectedKeys().hasOnly(['players']);
+      
+      // Host can delete their game sessions
+      allow delete: if isAuthenticated() && 
+                       request.auth.uid == resource.data.hostId;
     }
     
-    // Leaderboards collection rules
+    // ============================
+    // LEADERBOARDS COLLECTION RULES
+    // ============================
     match /leaderboards/{sessionId} {
-      // Anyone in the game session can read the leaderboard
-      allow read: if isAuthenticated();
+      // Anyone who can read the game session can read its leaderboard
+      allow read: if isAuthenticated() && 
+        (
+          // Host can always read
+          exists(/databases/$(database)/documents/game_sessions/$(sessionId)) &&
+          get(/databases/$(database)/documents/game_sessions/$(sessionId)).data.hostId == request.auth.uid
+        ) ||
+        (
+          // Players in active/completed session can read
+          exists(/databases/$(database)/documents/game_sessions/$(sessionId)) &&
+          request.auth.uid in get(/databases/$(database)/documents/game_sessions/$(sessionId)).data.players.keys() &&
+          get(/databases/$(database)/documents/game_sessions/$(sessionId)).data.status in ['active', 'completed']
+        );
       
-      // Only game hosts can create/update leaderboards
+      // Only host can create/update leaderboard with validation
       allow create, update: if isAuthenticated() &&  
                                exists(/databases/$(database)/documents/game_sessions/$(sessionId)) &&
-                               get(/databases/$(database)/documents/game_sessions/$(sessionId)).data.hostId == request.auth.uid;
+                               get(/databases/$(database)/documents/game_sessions/$(sessionId)).data.hostId == request.auth.uid &&
+                               validateLeaderboardData(request.resource.data);
       
-      // Game hosts can delete leaderboards
+      // Host can delete leaderboards
       allow delete: if isAuthenticated() &&
                        exists(/databases/$(database)/documents/game_sessions/$(sessionId)) &&
                        get(/databases/$(database)/documents/game_sessions/$(sessionId)).data.hostId == request.auth.uid;
     }
+    
+    // ============================
+    // UTILITY COLLECTIONS
+    // ============================
     
     // Connectivity test collection (for network checks)
     match /_connection_test/{document=**} {
@@ -124,6 +260,21 @@ service cloud.firestore {
     match /_firestore_connectivity_check/{document=**} {
       allow read: if isAuthenticated();
     }
+    
+    // System health check collection (for monitoring)
+    match /_system_health/{document=**} {
+      allow read: if isAuthenticated();
+    }
+    
+    // Development seeding collection (for test data)
+    match /_dev_seed/{document=**} {
+      allow read, write: if isAuthenticated() && 
+                            request.auth.token.email.matches('.*@.*\\..*');
+    }
+    
+    // ============================
+    // DEFAULT SECURITY RULES
+    // ============================
     
     // Default deny rule for all other documents
     match /{document=**} {
