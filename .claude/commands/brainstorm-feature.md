@@ -1,5 +1,14 @@
 Brainstorm new feature or change: $ARGUMENTS
 
+**Command Documentation**: This command provides comprehensive 8-step feature analysis and implementation planning.
+
+**Related Documentation**:
+- **CLAUDE.md** - Architecture patterns, UI design system, Firebase configuration, and agent coordination
+- **DEVELOPMENT_GUIDE.md** - Development workflow, timeline planning, and quality standards
+- **docs/github_instaruction.md** - Issue creation standards and commit message formats
+- **.claude/agents/** - Specialized sub-agents for different aspects of implementation
+- **.claude/commands/implement-issue.md** - Follow-up command for actual implementation
+
 **COMPREHENSIVE FEATURE BRAINSTORMING SESSION**
 
 ## 🧠 **STEP 1: FEATURE ANALYSIS**
@@ -22,10 +31,12 @@ Let me analyze this systematically:
 
 ## 🏗️ **STEP 2: TECHNICAL ARCHITECTURE PLANNING**
 
-### **2.1 Clean Architecture Impact:**
+### **2.1 Clean Architecture Impact** (reference CLAUDE.md architecture section):
 - **Domain Layer**: What new entities, use cases, repositories needed?
 - **Data Layer**: Firestore collections, security rules, data models?
 - **Presentation Layer**: New screens, widgets, state management?
+
+**Architecture Reference**: Follow the exact folder structure and patterns defined in CLAUDE.md
 
 ### **2.2 Database Design:**
 - **Firestore Collections**: What new/modified collections needed?
@@ -45,11 +56,13 @@ feature_name/
 
 ## 🎨 **STEP 3: UI/UX DESIGN PLANNING**
 
-### **3.1 Component Requirements:**
+### **3.1 Component Requirements** (reference CLAUDE.md UI/UX Design Guidelines):
 - **New Components**: What centralized components need to be created?
-- **Color Usage**: Which approved colors from the design system?
-- **Animations**: What micro-interactions and transitions?
+- **Color Usage**: Which approved colors from the CLAUDE.md design system?
+- **Animations**: What micro-interactions and transitions (see animation standards)?
 - **Responsive Design**: Mobile, tablet, web considerations?
+
+**Design System Compliance**: MUST use only approved colors, components, and spacing from CLAUDE.md
 
 ### **3.2 Design System Compliance:**
 - **Typography**: Which text styles from the system?
@@ -70,11 +83,13 @@ feature_name/
 
 ## 🔥 **STEP 5: FIREBASE CONSIDERATIONS**
 
-### **5.1 Services Needed:**
+### **5.1 Services Needed** (reference CLAUDE.md Firebase Configuration):
 - **Firestore**: New collections, queries, security rules?
 - **Authentication**: Any auth flow changes?
 - **Cloud Functions**: Server-side logic needed?
 - **Storage**: File uploads or media handling?
+
+**Firebase Reference**: Follow database design and security patterns from CLAUDE.md Firestore section
 
 ### **5.2 Security & Performance:**
 - **Security Rules**: How to protect the new data?
@@ -108,10 +123,12 @@ Based on analysis, I recommend creating these issues:
    - Performance optimization
 ```
 
-### **6.2 Agent Assignment Strategy:**
+### **6.2 Agent Assignment Strategy** (see .claude/agents/ for detailed roles):
 - **Primary Agents**: Which specialized agents for each phase?
-- **Coordination**: How will agents hand off work?
+- **Coordination**: How will agents hand off work (reference CLAUDE.md handoff protocols)?
 - **Validation**: Quality checkpoints throughout?
+
+**Agent Documentation**: Each agent's specific capabilities are documented in `.claude/agents/[agent-name].md`
 
 ## 🚀 **STEP 7: RECOMMENDATIONS & NEXT STEPS**
 
@@ -140,10 +157,18 @@ Based on analysis, I recommend creating these issues:
 - Start implementation of the first issue?
 - Dive deeper into any specific aspect?
 - Explore alternative approaches?
+- Update relevant documentation with brainstorming insights?
+
+**Documentation Note**: Consider updating CLAUDE.md with any new architectural patterns, UI components, or Firebase configurations identified during this brainstorming session.
 
 ---
 
 **Next Command Suggestions:**
-- `gh issue create --title "[TYPE] Feature: Description" --body "Issue content"`
-- `/project:implement-issue {number}` to start development
-- `/project:create-feature {feature-name}` for new feature scaffolding
+- `gh issue create --title "[TYPE] Feature: Description" --body "Issue content"` (follow docs/github_instaruction.md format)
+- `/project:implement-issue {number}` to start development (see .claude/commands/implement-issue.md)
+- `scripts/develop-feature.sh <issue-number>` for automated branch setup
+- `scripts/quality-check.sh` for validation before PR
+
+**Integration**: This brainstorm output directly feeds into the implementation workflow defined in DEVELOPMENT_GUIDE.md
+
+**Documentation Update Requirement**: When brainstorming identifies new patterns, components, or architectural decisions, ensure these insights are captured in relevant documentation for future reference and agent context.

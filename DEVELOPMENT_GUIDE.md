@@ -15,6 +15,7 @@ This guide provides everything you need to develop the Kahoot-style quiz app eff
 ### **🧠 Feature Planning & Design**
 ```bash
 # When you have a new feature idea or change request
+# Implementation: .claude/commands/brainstorm-feature.md
 /project:brainstorm-feature "Add multiplayer team mode for quizzes"
 
 # When creating a completely new feature from scratch  
@@ -22,11 +23,14 @@ This guide provides everything you need to develop the Kahoot-style quiz app eff
 
 # When you need to understand existing codebase
 # Use Read, Glob, Grep tools to explore code
+# Reference architecture in CLAUDE.md for context
 ```
 
 ### **🔧 Development & Implementation**
 ```bash
 # When implementing a specific GitHub issue
+# Implementation: .claude/commands/implement-issue.md
+# Follows agent assignment logic from CLAUDE.md
 /project:implement-issue 11
 
 # When you need to run tests for a specific feature
@@ -83,7 +87,17 @@ firebase projects:list
 flutter run
 ```
 
-#### **1.2 Core Architecture**
+#### **1.2 UI Constants Implementation**
+```bash
+# Implement centralized UI constants from docs/ui_guideline.md
+# This is a prerequisite for all UI development
+# See ticket: docs/tickets/ui-constants-implementation.md
+# Creates color system, typography, spacing, and animations
+flutter create lib/shared/constants/
+# Implement app_colors.dart, app_text_styles.dart, app_spacing.dart
+```
+
+#### **1.3 Core Architecture**
 ```bash
 # Implement clean architecture foundation (usually issue #18)
 /project:implement-issue 18
@@ -93,7 +107,7 @@ flutter analyze
 dart run build_runner build
 ```
 
-#### **1.3 Essential Services**
+#### **1.4 Essential Services**
 ```bash
 # Set up navigation (issue #19)
 /project:implement-issue 19
@@ -453,32 +467,74 @@ gh issue comment <number> --body "Need help with..."
 ### **Development Support**
 - **Architecture Questions**: Use flutter-architect subagent
 - **Firebase Issues**: Use firebase-specialist subagent  
-- **UI/UX Problems**: Use ui-designer subagent
-- **Testing Help**: Use testing-specialist subagent
-- **Performance Issues**: Use performance-optimizer subagent
+- **UI/UX Problems**: Use ui-designer subagent (see `.claude/agents/ui-designer.md`)
+- **Testing Help**: Use testing-specialist subagent (see `.claude/agents/testing-specialist.md`)
+- **Performance Issues**: Use performance-optimizer subagent (see `.claude/agents/performance-optimizer.md`)
+- **Code Quality**: Use code-reviewer subagent (see `.claude/agents/code-reviewer.md`)
 
 ---
 
 ## 🎉 **Quick Command Reference**
 
 ```bash
-# Daily workflow
-./daily-dev.sh
+# Daily workflow (scripts/daily-dev.sh)
+./scripts/daily-dev.sh
 
-# Feature development
-./develop-feature.sh <issue-number>
+# Feature development (scripts/develop-feature.sh)
+./scripts/develop-feature.sh <issue-number>
 
-# Quality checks
-./quality-check.sh
+# Quality checks (scripts/quality-check.sh)
+./scripts/quality-check.sh
 
-# Firebase operations
-./firebase-ops.sh [start|deploy|rules|functions]
+# Firebase operations (scripts/firebase-ops.sh)
+./scripts/firebase-ops.sh [start|deploy|rules|functions]
 
-# Custom commands
+# Custom commands (see .claude/commands/ for implementations)
 /project:brainstorm-feature "feature description"
 /project:implement-issue <number>
 /project:create-feature <name>
 /project:run-tests <feature>
+```
+
+## 📖 **Documentation Hierarchy**
+
+```
+CLAUDE.md (Master)
+├── Architecture & Design Principles
+├── UI/UX Guidelines Reference (→ docs/ui_guideline.md)
+├── Sub-Agent Coordination
+└── Technology Stack
+
+DEVELOPMENT_GUIDE.md (This File)
+├── Command Usage & Workflow
+├── 13-Week Development Timeline
+├── Troubleshooting & Scripts
+└── Quality Gates
+
+docs/ui_guideline.md
+├── Complete Color Palette
+├── Typography System
+├── Component Specifications
+├── Animation Standards
+└── Platform Adaptations
+
+docs/github_instruction.md
+├── GitHub Workflow Standards
+├── Commit Message Formats
+├── PR Templates & Guidelines
+└── Communication Standards
+
+.claude/agents/
+├── flutter-architect.md
+├── firebase-specialist.md
+├── ui-designer.md (references ui_guideline.md)
+├── testing-specialist.md
+├── code-reviewer.md
+└── performance-optimizer.md
+
+.claude/commands/
+├── implement-issue.md
+└── brainstorm-feature.md
 ```
 
 **Happy coding! 🚀**
