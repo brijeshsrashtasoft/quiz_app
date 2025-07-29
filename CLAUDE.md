@@ -155,30 +155,35 @@ Our project uses specialized Claude Code sub-agents for focused expertise:
 - **code-reviewer**: Quality assurance and architecture compliance validation
 - **performance-optimizer**: Performance optimization and memory management
 
-#### Sub-Agent Usage:
-- **Automatic**: Sub-agents are invoked automatically based on task context
-- **Explicit**: Use "Use the [agent-name] subagent to [specific task]"
+#### Sub-Agent Usage (MANDATORY):
+- **ALWAYS USE SUB-AGENTS**: Never work directly - ALWAYS delegate to specialized sub-agents for maximum speed and parallel execution
+- **PARALLEL EXECUTION**: Use multiple sub-agents simultaneously whenever possible to maximize development speed
+- **MANDATORY DELEGATION**: Even simple tasks must be delegated to appropriate sub-agents for consistency and optimization
 - **Examples**:
   - "Use the firebase-specialist subagent to implement real-time leaderboard"
   - "Use the ui-designer subagent to create answer button components"
   - "Use the testing-specialist subagent to write comprehensive tests"
+  - "Use multiple agents in parallel: flutter-architect + ui-designer + testing-specialist"
 
 #### Sub-Agent Coordination:
 
-**Agent Assignment by Issue Type:**
-- **Setup/Infrastructure** → flutter-architect (primary) + firebase-specialist (if Firebase)
-- **Authentication** → firebase-specialist (primary) + flutter-architect + ui-designer  
-- **UI/Components** → ui-designer (primary) + flutter-architect
-- **Real-time Features** → firebase-specialist (primary) + performance-optimizer
-- **Testing** → testing-specialist (primary) + flutter-architect
-- **Performance** → performance-optimizer (primary) + flutter-architect
+**PARALLEL Agent Assignment by Issue Type:**
+- **Setup/Infrastructure** → flutter-architect + firebase-specialist + testing-specialist (ALL WORK IN PARALLEL)
+- **Authentication** → firebase-specialist + flutter-architect + ui-designer + testing-specialist (ALL WORK IN PARALLEL)
+- **UI/Components** → ui-designer + flutter-architect + testing-specialist (ALL WORK IN PARALLEL)
+- **Real-time Features** → firebase-specialist + performance-optimizer + flutter-architect + testing-specialist (ALL WORK IN PARALLEL)
+- **Testing** → testing-specialist + flutter-architect (WORK IN PARALLEL)
+- **Performance** → performance-optimizer + flutter-architect + testing-specialist (ALL WORK IN PARALLEL)
 
-**Agent Handoff Process:**
-1. **Primary Agent** reads issue and starts implementation
-2. **Handoff Protocol**: When work requires another agent, use structured handoff:
+**PARALLEL Execution Process (MANDATORY):**
+1. **Launch Multiple Agents Simultaneously** - Use multiple Task tool calls in single message for maximum parallel execution
+2. **Coordinated Development** - All agents work on their specialization simultaneously
+3. **Platform Verification by ALL** - Every agent must verify platforms build after their changes
+4. **Structured Handoff** - When coordination needed between agents:
    ```
    HANDOFF TO [NEXT-AGENT]:
    - Completed: [What was implemented]
+   - Platform Verification: ✅ PASSED - All platforms build successfully
    - Next Required: [What the next agent needs to do]
    - Context: [Important implementation details]  
    - Files Modified: [List of files created/changed]

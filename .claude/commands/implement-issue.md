@@ -37,39 +37,66 @@ git pull origin development
 git checkout -b feature/issue-$ARGUMENTS-{short-description}
 ```
 
-**STEP 3: AGENT COORDINATION**
+**STEP 3: PARALLEL AGENT COORDINATION (MANDATORY)**
 
-**Primary Agent Instructions:**
-"Use the [primary-agent] subagent to implement issue #$ARGUMENTS. Follow these requirements:
+**CRITICAL**: ALWAYS use multiple sub-agents in parallel for maximum speed. Never work directly - ALWAYS delegate to specialized agents.
 
-1. **Read & Analyze**: First read the issue completely and understand requirements
-2. **Architecture Planning**: Plan implementation following Clean Architecture (see CLAUDE.md)
-3. **TDD Implementation**: Write tests first, then implement (see testing-specialist.md)
-4. **UI Compliance**: Use only approved colors/components from CLAUDE.md design system
-5. **Quality Standards**: Follow GitHub workflow from docs/github_instaruction.md
-6. **Agent Handoff**: When your work requires another agent, use structured handoff protocol:
+**Parallel Execution Instructions:**
+"Launch multiple specialized agents simultaneously using separate Task tool calls in a single message for issue #$ARGUMENTS:
 
-**HANDOFF TO [NEXT-AGENT]:**
-- **Completed**: [What you've implemented]
-- **Next Required**: [What the next agent needs to do]
-- **Context**: [Important implementation details]
-- **Files Modified**: [List of files created/changed]
-- **Testing Status**: [What tests are written/needed]
+**For Setup/Infrastructure Issues**: Launch ALL in parallel:
+- flutter-architect subagent: Clean Architecture implementation
+- firebase-specialist subagent: Firebase integration and configuration
+- testing-specialist subagent: Comprehensive test implementation
 
-Continue until all required agents have contributed."
+**For Authentication Issues**: Launch ALL in parallel:
+- firebase-specialist subagent: Firebase Auth implementation
+- flutter-architect subagent: Clean Architecture integration  
+- ui-designer subagent: Authentication UI components
+- testing-specialist subagent: Authentication test coverage
 
-**STEP 4: FINAL VALIDATION**
+**For UI/Component Issues**: Launch ALL in parallel:
+- ui-designer subagent: UI component implementation
+- flutter-architect subagent: Architecture integration
+- testing-specialist subagent: Widget and integration tests
 
-Use the code-reviewer subagent to validate final implementation:
-"Use the code-reviewer subagent to review the complete implementation for issue #$ARGUMENTS"
+**For Real-time Features**: Launch ALL in parallel:
+- firebase-specialist subagent: Firestore real-time implementation
+- performance-optimizer subagent: Performance optimization
+- flutter-architect subagent: Architecture integration
+- testing-specialist subagent: Real-time test coverage
+
+**EVERY AGENT MUST**:
+1. **Platform Verification**: Run ./scripts/quality-check.sh after implementation
+2. **Parallel Coordination**: Work simultaneously with other assigned agents
+3. **Structured Communication**: Use handoff protocol when coordination needed
+4. **Quality Standards**: Follow all project standards and documentation"
+
+**STEP 4: MANDATORY FINAL VALIDATION**
+
+**CRITICAL**: After ALL parallel agents complete their work, run final validation:
+
+**Final Validation Process:**
+1. **Collect Results**: Gather outputs from all parallel agents
+2. **Platform Verification**: Ensure ALL agents verified platforms successfully
+3. **Code Review**: Launch code-reviewer subagent to validate complete implementation:
+   "Use the code-reviewer subagent to review the complete implementation for issue #$ARGUMENTS"
+4. **Integration Check**: Verify all agent contributions work together seamlessly
 
 **Quality Assurance**: The code-reviewer validates against all standards documented in CLAUDE.md, including:
 - Clean Architecture compliance
-- UI design system adherence
-- Testing coverage requirements
-- Performance standards
-- Security guidelines
+- UI design system adherence (docs/ui_guideline.md)
+- Testing coverage requirements (>80% coverage)
+- Performance standards (sub-200ms real-time)
+- Security guidelines (Firebase rules, authentication)
+- **Platform verification completed by ALL agents**
 - **Documentation updates completed by all agents**
+
+**Integration Validation**:
+- All platforms build successfully after ALL agent changes
+- No conflicts between agent implementations
+- Consistent architecture patterns across all agent contributions
+- Complete feature functionality with all specializations integrated
 
 **STEP 5: COMMIT, PR CREATION & ISSUE COMMUNICATION**
 

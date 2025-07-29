@@ -42,10 +42,18 @@ This guide provides everything you need to develop the Kahoot-style quiz app eff
 ```
 
 **Important**: Every `/project:implement-issue` command now **automatically**:
-- ✅ Creates proper commit with closing reference
+- ✅ Launches multiple specialized sub-agents in parallel for maximum speed
+- ✅ Mandates platform verification by ALL agents (Web, Android, iOS builds)
+- ✅ Creates proper commit with closing reference  
 - ✅ Creates pull request targeting `development` branch
 - ✅ Comments on GitHub issue with implementation summary
 - ✅ Includes quality metrics and next steps
+
+**Parallel Execution**: All tasks are now split across specialized sub-agents working simultaneously:
+- **Setup Issues**: flutter-architect + firebase-specialist + testing-specialist (ALL PARALLEL)
+- **Authentication**: firebase-specialist + flutter-architect + ui-designer + testing-specialist (ALL PARALLEL)
+- **UI Components**: ui-designer + flutter-architect + testing-specialist (ALL PARALLEL)
+- **Real-time Features**: firebase-specialist + performance-optimizer + flutter-architect + testing-specialist (ALL PARALLEL)
 
 ### **🧪 Testing & Quality**
 ```bash
