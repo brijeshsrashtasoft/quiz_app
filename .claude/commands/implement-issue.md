@@ -1,21 +1,47 @@
 Please implement the GitHub issue: $ARGUMENTS
 
-Follow these steps strictly:
-1. **Explore**: Use `gh issue view $ARGUMENTS` to get complete issue details
-2. **Plan**: Read existing relevant files and create implementation plan following TDD approach
-3. **Test First**: Write tests that will fail initially (following TDD)
-4. **Code**: Implement the minimal code to make tests pass
-5. **Verify**: Run tests, linting, and ensure code follows clean architecture
-6. **Commit**: Use format `type(scope): description` referring to issue #$ARGUMENTS
-7. **Review**: Self-review code for architecture compliance before creating PR
+**PARALLEL DEVELOPMENT WORKFLOW - ALWAYS FOLLOW**:
 
-Requirements:
-- Follow Clean Architecture pattern strictly
-- Use Riverpod for state management
-- Implement with Firestore integration where applicable
-- Write comprehensive tests (unit, widget, integration)
-- Follow commit message standards from CLAUDE.md
-- Ensure code passes `flutter analyze` and `dart format`
-- Create PR with proper title format and description
+1. **Setup Branch**: 
+   ```bash
+   git checkout development
+   git pull origin development
+   git checkout -b feature/issue-$ARGUMENTS-{short-description}
+   ```
 
-Remember: One main goal per implementation, focus on the specific issue requirements only.
+2. **Explore**: Use `gh issue view $ARGUMENTS` to get complete issue details
+
+3. **Plan**: Read existing files and create TDD implementation plan
+
+4. **Implement**: 
+   - Write tests first (TDD approach)
+   - Use UI guidelines and centralized components from CLAUDE.md
+   - Follow Clean Architecture pattern strictly
+   - Use approved colors and spacing constants only
+   - Implement Firestore integration where applicable
+
+5. **Verify**: 
+   ```bash
+   flutter test
+   flutter analyze
+   dart format .
+   ```
+
+6. **Commit**: 
+   ```bash
+   git add .
+   git commit -m "type(scope): description - closes #$ARGUMENTS"
+   ```
+
+7. **Create PR to development**: 
+   ```bash
+   git push -u origin feature/issue-$ARGUMENTS-{short-description}
+   gh pr create --base development --title "type(scope): description" --body "PR template filled"
+   ```
+
+**CRITICAL REQUIREMENTS**:
+- NEVER create PR to `main` - ALWAYS to `development`
+- Use centralized components and approved colors only
+- Follow UI guidelines for consistent design
+- Write comprehensive tests before implementation
+- Ensure architecture compliance (data/domain/presentation layers)

@@ -170,13 +170,47 @@ claude mcp add firebase
 - **One main goal per ticket** - Focus on single objective
 - **Essential information only** - Remove unnecessary words
 
-#### Development Workflow
-1. Create GitHub issue following title/description standards
-2. Use Claude Code subagents to implement via PR workflow
-3. Follow commit message rules: `type(scope): concise description`
-4. Automated testing with Playwright MCP
-5. Code review with Claude subagents using specific feedback
-6. Merge after automated checks pass
+#### Parallel Development Workflow
+
+**Branch Strategy**:
+- `main` - Production-ready code (protected)
+- `development` - Main integration branch (all agents pull from here)
+- `feature/issue-{number}-{short-description}` - Individual feature branches
+
+**Development Steps**:
+1. **Start Work**: Always pull latest `development` branch
+   ```bash
+   git checkout development
+   git pull origin development
+   git checkout -b feature/issue-{number}-{short-description}
+   ```
+
+2. **Implement**: Use Claude Code subagents to implement the ticket
+   - Follow TDD approach
+   - Use UI guidelines and centralized components
+   - Write comprehensive tests
+
+3. **Commit**: Follow commit standards
+   ```bash
+   git add .
+   git commit -m "type(scope): description - closes #issue-number"
+   ```
+
+4. **Create PR**: Always create PR from feature branch to `development`
+   ```bash
+   git push -u origin feature/issue-{number}-{short-description}
+   gh pr create --base development --title "type(scope): description" --body "Template content"
+   ```
+
+5. **Review & Merge**: PR reviewed and merged to `development`
+
+6. **Release**: Periodic PRs from `development` to `main` for releases
+
+**Multi-Agent Coordination**:
+- Each agent works on separate feature branch
+- All PRs target `development` branch (never `main` directly)
+- Regular sync with `development` to avoid conflicts
+- Use issue assignments to prevent duplicate work
 
 ### Testing Strategy
 - **Unit Tests**: Business logic and use cases
