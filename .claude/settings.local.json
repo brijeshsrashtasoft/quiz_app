@@ -91,7 +91,8 @@
       "WebFetch(domain:flutter.dev)",
       "WebFetch(domain:pub.dev)",
       "Bash(claude mcp:*)",
-      "Bash(claude:*)"
+      "Bash(claude:*)",
+      "Bash(tree:*)"
     ],
     "deny": [
       "Bash(sudo:*)",
