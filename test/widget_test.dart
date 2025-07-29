@@ -13,12 +13,13 @@ import 'package:quiz_app/main.dart';
 void main() {
   testWidgets('Quiz app loads correctly', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const ProviderScope(
-      child: QuizApp(),
-    ));
+    await tester.pumpWidget(const ProviderScope(child: QuizApp()));
 
     // Verify that our app loads with the correct title.
     expect(find.text('Quiz App with Firebase Integration'), findsOneWidget);
-    expect(find.text('Firebase services configured and ready!'), findsOneWidget);
+    expect(
+      find.text('Firebase services configured and ready!'),
+      findsOneWidget,
+    );
   });
 }

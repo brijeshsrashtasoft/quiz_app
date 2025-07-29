@@ -7,17 +7,18 @@ import 'package:quiz_app/core/firebase/auth_config.dart';
 import 'package:quiz_app/core/errors/exceptions.dart';
 
 // Generate mocks for Firebase Auth dependencies
-@GenerateMocks([
-  FirebaseAuth,
-  User,
-  UserCredential,
-])
+@GenerateMocks([FirebaseAuth, User, UserCredential])
 import 'auth_config_test.mocks.dart';
 
 void main() {
   group('AuthConfig', () {
+    // Mock objects for Firebase Auth testing
+    // These are available for future test enhancements
+    // ignore: unused_local_variable
     late MockFirebaseAuth mockAuth;
+    // ignore: unused_local_variable
     late MockUser mockUser;
+    // ignore: unused_local_variable
     late MockUserCredential mockCredential;
 
     setUp(() {
@@ -88,7 +89,9 @@ void main() {
             email: 'test@example.com',
             password: 'password123',
           ),
-          throwsA(isA<AuthException>()), // Expected to throw in test environment
+          throwsA(
+            isA<AuthException>(),
+          ), // Expected to throw in test environment
         );
       });
 
@@ -157,37 +160,29 @@ void main() {
 
     group('signOut', () {
       test('should sign out successfully', () async {
-        expect(
-          () => AuthConfig.signOut(),
-          returnsNormally,
-        );
+        expect(() => AuthConfig.signOut(), returnsNormally);
       });
     });
 
     group('sendPasswordResetEmail', () {
       test('should send password reset email successfully', () async {
         expect(
-          () => AuthConfig.sendPasswordResetEmail(
-            email: 'test@example.com',
-          ),
+          () => AuthConfig.sendPasswordResetEmail(email: 'test@example.com'),
           throwsA(isA<AuthException>()),
         );
       });
 
       test('should trim email whitespace', () async {
         expect(
-          () => AuthConfig.sendPasswordResetEmail(
-            email: '  test@example.com  ',
-          ),
+          () =>
+              AuthConfig.sendPasswordResetEmail(email: '  test@example.com  '),
           throwsA(isA<AuthException>()),
         );
       });
 
       test('should throw AuthException for invalid email', () async {
         expect(
-          () => AuthConfig.sendPasswordResetEmail(
-            email: 'invalid-email',
-          ),
+          () => AuthConfig.sendPasswordResetEmail(email: 'invalid-email'),
           throwsA(isA<AuthException>()),
         );
       });
@@ -197,11 +192,13 @@ void main() {
       test('should throw AuthException when no current user', () async {
         expect(
           () => AuthConfig.updateUserProfile(displayName: 'New Name'),
-          throwsA(isA<AuthException>().having(
-            (e) => e.message,
-            'message',
-            contains('No user is currently signed in'),
-          )),
+          throwsA(
+            isA<AuthException>().having(
+              (e) => e.message,
+              'message',
+              contains('No user is currently signed in'),
+            ),
+          ),
         );
       });
     });
@@ -210,11 +207,13 @@ void main() {
       test('should throw AuthException when no current user', () async {
         expect(
           () => AuthConfig.deleteUser(),
-          throwsA(isA<AuthException>().having(
-            (e) => e.message,
-            'message', 
-            contains('No user is currently signed in'),
-          )),
+          throwsA(
+            isA<AuthException>().having(
+              (e) => e.message,
+              'message',
+              contains('No user is currently signed in'),
+            ),
+          ),
         );
       });
     });
@@ -247,7 +246,7 @@ class AuthTestHelper {
   static const String validPassword = 'password123';
   static const String weakPassword = '123';
   static const String invalidEmail = 'invalid-email';
-  
+
   static MockUser createMockUser({
     String uid = 'test_uid',
     String email = validEmail,
@@ -261,13 +260,13 @@ class AuthTestHelper {
     when(mockUser.photoURL).thenReturn(photoURL);
     return mockUser;
   }
-  
+
   static MockUserCredential createMockCredential({MockUser? user}) {
     final mockCredential = MockUserCredential();
     when(mockCredential.user).thenReturn(user ?? createMockUser());
     return mockCredential;
   }
-  
+
   static FirebaseAuthException createAuthException(String code) {
     return FirebaseAuthException(code: code, message: 'Test error');
   }

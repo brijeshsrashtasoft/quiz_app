@@ -50,13 +50,7 @@ final authStateProvider = StateProvider<AuthState>((ref) {
 });
 
 /// Authentication state enum
-enum AuthState {
-  initial,
-  loading,
-  authenticated,
-  unauthenticated,
-  error,
-}
+enum AuthState { initial, loading, authenticated, unauthenticated, error }
 
 /// Firestore connection state provider
 final firestoreConnectionProvider = FutureProvider<bool>((ref) {
@@ -64,18 +58,22 @@ final firestoreConnectionProvider = FutureProvider<bool>((ref) {
 });
 
 /// Collection reference providers
-final usersCollectionProvider = Provider<CollectionReference<Map<String, dynamic>>>((ref) {
-  return FirestoreConfig.usersCollection;
-});
+final usersCollectionProvider =
+    Provider<CollectionReference<Map<String, dynamic>>>((ref) {
+      return FirestoreConfig.usersCollection;
+    });
 
-final quizzesCollectionProvider = Provider<CollectionReference<Map<String, dynamic>>>((ref) {
-  return FirestoreConfig.quizzesCollection;
-});
+final quizzesCollectionProvider =
+    Provider<CollectionReference<Map<String, dynamic>>>((ref) {
+      return FirestoreConfig.quizzesCollection;
+    });
 
-final gameSessionsCollectionProvider = Provider<CollectionReference<Map<String, dynamic>>>((ref) {
-  return FirestoreConfig.gameSessionsCollection;
-});
+final gameSessionsCollectionProvider =
+    Provider<CollectionReference<Map<String, dynamic>>>((ref) {
+      return FirestoreConfig.gameSessionsCollection;
+    });
 
-final leaderboardsCollectionProvider = Provider<CollectionReference<Map<String, dynamic>>>((ref) {
-  return FirestoreConfig.leaderboardsCollection;
-});
+final leaderboardsCollectionProvider =
+    Provider<CollectionReference<Map<String, dynamic>>>((ref) {
+      return FirestoreConfig.leaderboardsCollection;
+    });

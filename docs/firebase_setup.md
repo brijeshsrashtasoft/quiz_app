@@ -1,201 +1,80 @@
-# Firebase Configuration Setup
+# Firebase Setup
 
-This document explains how to configure Firebase for the Quiz App project across all platforms.
+- Replace placeholder Firebase config files with your project credentials
+- Required for deployment across all platforms
 
-## Overview
+## Requirements
 
-The project currently uses **placeholder Firebase configuration files** that must be replaced with your own Firebase project credentials before deployment.
-
-## Platform Requirements
-
-### Android Requirements
-- **minSdkVersion**: 23 or higher (already configured)
-- **NDK Version**: 27.0.12077973 (already configured)
-- **Google Services Plugin**: Enabled (already configured)
-
-### iOS Requirements  
-- **Deployment Target**: iOS 13.0 or higher (already configured)
-- **CocoaPods**: Required for Firebase dependencies
+- **Android**: minSdk 23+, NDK 27.0.12077973 ✅
+- **iOS**: 13.0+, CocoaPods required ✅
+- **Web**: Firebase JS SDK ✅
 
 ## Setup Steps
 
 ### 1. Create Firebase Project
+- Go to [Firebase Console](https://console.firebase.google.com/)
+- Create project: `quiz-app-dev` or `quiz-app-prod`
+- Enable Google Analytics
 
-1. Go to [Firebase Console](https://console.firebase.google.com/)
-2. Click "Create a project" or "Add project"
-3. Enter project name (e.g., "quiz-app-production" or "quiz-app-dev")
-4. Enable Google Analytics (recommended)
-5. Complete project creation
+### 2. Enable Services
+- **Authentication**: Email/Password + Google Sign-In
+- **Firestore**: Create database (test mode)
+- **Storage**: Enable file storage
+- **Analytics**: Auto-enabled
+- **Cloud Functions**: Setup later
 
-### 2. Enable Required Firebase Services
+### 3. Configure Android
+- Add Android app: `com.example.quiz_app`
+- Download `google-services.json`
+- Replace: `cp ~/Downloads/google-services.json android/app/`
 
-In your Firebase project console, enable:
+### 4. Configure iOS
+- Add iOS app: `com.example.quiz_app`
+- Download `GoogleService-Info.plist`
+- Replace: `cp ~/Downloads/GoogleService-Info.plist ios/Runner/`
 
-- **Authentication**: Go to Authentication > Sign-in method
-  - Enable Email/Password
-  - Enable Google Sign-In (optional)
-- **Firestore Database**: Go to Firestore Database > Create database
-  - Start in test mode initially
-  - Choose your preferred region
-- **Storage**: Go to Storage > Get started
-- **Analytics**: Should be enabled by default
-- **Cloud Functions**: Go to Functions (will be set up later)
-
-### 3. Configure Android App
-
-1. In Firebase Console, click "Add app" → Android
-2. Enter Android package name: `com.example.quiz_app`
-3. Download `google-services.json`
-4. **Replace** the placeholder file:
-   ```bash
-   # Replace the placeholder with your actual configuration
-   cp ~/Downloads/google-services.json android/app/google-services.json
-   ```
-
-### 4. Configure iOS App
-
-1. In Firebase Console, click "Add app" → iOS
-2. Enter iOS bundle ID: `com.example.quiz_app`
-3. Download `GoogleService-Info.plist`
-4. **Replace** the placeholder file:
-   ```bash
-   # Replace the placeholder with your actual configuration
-   cp ~/Downloads/GoogleService-Info.plist ios/Runner/GoogleService-Info.plist
-   ```
-
-### 5. Configure Web App (Optional)
-
-1. In Firebase Console, click "Add app" → Web
-2. Enter app nickname: "Quiz App Web"
-3. Copy the Firebase config object
-4. Update `lib/core/firebase/firebase_options.dart` with your web configuration
+### 5. Configure Web
+- Add Web app: "Quiz App Web"
+- Copy config object
+- Update `lib/core/firebase/firebase_options.dart`
 
 ## Security Rules
 
-The project includes basic Firestore security rules in `firestore.rules`. Deploy them:
-
-```bash
-firebase deploy --only firestore:rules
-```
-
-### Basic Rules Structure:
-```javascript
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    // Users can read/write their own data
-    match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-    
-    // Quiz rules (implement based on your requirements)
-    match /quizzes/{quizId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null && request.auth.uid == resource.data.createdBy;
-    }
-    
-    // Game session rules
-    match /game_sessions/{sessionId} {
-      allow read, write: if request.auth != null;
-    }
-    
-    // Leaderboard rules
-    match /leaderboards/{sessionId} {
-      allow read: if request.auth != null;
-    }
-  }
-}
-```
+- Deploy: `firebase deploy --only firestore:rules`
+- Users: Read/write own data only
+- Quizzes: Read all, write own
+- Game sessions: Auth required
+- Leaderboards: Read only
 
 ## Environment Management
 
-### Development vs Production
-
-For proper environment separation:
-
-1. **Development Environment**:
-   - Create `quiz-app-dev` Firebase project
-   - Use development configuration files
-   - Test mode Firestore rules
-
-2. **Production Environment**:
-   - Create `quiz-app-prod` Firebase project  
-   - Use production configuration files
-   - Strict Firestore security rules
-
-### Configuration File Management
-
-**Important**: Configuration files are ignored by git for security:
-
-```bash
-# These files are in .gitignore
-android/app/google-services.json
-ios/Runner/GoogleService-Info.plist
-```
-
-**For Development**:
-- Each developer should have their own Firebase project
-- Replace placeholder files with personal project configurations
-- Never commit actual configuration files
+- **Dev**: `quiz-app-dev` project, test rules
+- **Prod**: `quiz-app-prod` project, strict rules
+- **Config files**: Ignored by git for security
+- **Developer setup**: Own Firebase project per dev
 
 ## Verification
 
-After configuration, verify your setup:
+- Run: `./scripts/quality-check.sh`
+- Checks: Config files, requirements, builds
 
-```bash
-# Run platform verification
-./scripts/quality-check.sh
+## Common Issues
 
-# This will verify:
-# - Firebase configuration files exist
-# - Platform requirements are met
-# - All platforms build successfully
-```
-
-## Common Issues & Solutions
-
-### Android Build Failures
-
-**Issue**: `google-services.json` parsing errors
-**Solution**: Ensure the file is valid JSON from Firebase Console
-
-**Issue**: NDK version mismatch  
-**Solution**: File is already configured with correct NDK version
-
-**Issue**: minSdk compatibility  
-**Solution**: Already set to minSdk 23 for Firebase compatibility
-
-### iOS Build Failures
-
-**Issue**: CocoaPods dependency resolution
-**Solution**: 
-```bash
-cd ios
-rm -rf Pods
-pod install
-```
-
-**Issue**: iOS deployment target too low
-**Solution**: Already configured for iOS 13.0+
-
-### Firebase Connection Issues
-
-**Issue**: Firebase not connecting
-**Solution**: Verify configuration files match your Firebase project exactly
-
-**Issue**: Authentication not working
-**Solution**: Check that Authentication is enabled in Firebase Console
+- **Android JSON errors**: Use valid file from Firebase Console
+- **NDK mismatch**: Already configured ✅
+- **iOS CocoaPods**: `cd ios && rm -rf Pods && pod install`
+- **Connection issues**: Verify config files match project
+- **Auth not working**: Enable in Firebase Console
 
 ## Next Steps
 
-1. Replace placeholder configuration files with your Firebase project files
-2. Test the app on all platforms
-3. Deploy Firestore security rules
-4. Set up Firebase hosting for web deployment (optional)
-5. Configure CI/CD with Firebase (see GitHub Actions workflow)
+- Replace placeholder config files
+- Test all platforms
+- Deploy security rules
+- Setup CI/CD (GitHub Actions)
 
 ## References
 
-- [Firebase Flutter Setup Guide](https://firebase.google.com/docs/flutter/setup)
-- [Firebase Security Rules](https://firebase.google.com/docs/firestore/security/get-started)
-- [FlutterFire Documentation](https://firebase.flutter.dev/)
+- [Firebase Flutter Setup](https://firebase.google.com/docs/flutter/setup)
+- [Security Rules](https://firebase.google.com/docs/firestore/security/get-started)
+- [FlutterFire Docs](https://firebase.flutter.dev/)

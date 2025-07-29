@@ -1,14 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 
 import 'package:quiz_app/core/firebase/firebase_core_config.dart';
 
 // Generate mocks for Firebase dependencies
 @GenerateMocks([FirebaseApp])
-import 'firebase_core_config_test.mocks.dart';
-
 void main() {
   group('FirebaseCoreConfig', () {
     setUp(() {
@@ -21,7 +18,7 @@ void main() {
         // This test would require Firebase Test Lab or mocking
         // For now, we test the initialization logic
         expect(FirebaseCoreConfig.isInitialized, isFalse);
-        
+
         // In actual testing, we would mock Firebase.initializeApp
         // await FirebaseCoreConfig.initialize();
         // expect(FirebaseCoreConfig.isInitialized, isTrue);
@@ -49,11 +46,13 @@ void main() {
       test('should throw exception when Firebase not initialized', () {
         expect(
           () => FirebaseCoreConfig.app,
-          throwsA(isA<Exception>().having(
-            (e) => e.toString(),
-            'message',
-            contains('Firebase not initialized'),
-          )),
+          throwsA(
+            isA<Exception>().having(
+              (e) => e.toString(),
+              'message',
+              contains('Firebase not initialized'),
+            ),
+          ),
         );
       });
     });
@@ -66,7 +65,7 @@ class MockFirebaseTestHelper {
     // This would set up Firebase mocks for testing
     // Implementation would depend on specific mocking strategy
   }
-  
+
   static void tearDownFirebaseMocks() {
     // Clean up mocks after tests
   }

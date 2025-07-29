@@ -13,29 +13,28 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   group('Firebase Integration Tests', () {
-    testWidgets('should initialize Firebase and load app', (WidgetTester tester) async {
+    testWidgets('should initialize Firebase and load app', (
+      WidgetTester tester,
+    ) async {
       // Build the app
-      await tester.pumpWidget(
-        const ProviderScope(
-          child: QuizApp(),
-        ),
-      );
+      await tester.pumpWidget(const ProviderScope(child: QuizApp()));
 
       // Wait for Firebase initialization
       await tester.pumpAndSettle();
 
       // Verify app loads with Firebase integration message
       expect(find.text('Quiz App with Firebase Integration'), findsOneWidget);
-      expect(find.text('Firebase services configured and ready!'), findsOneWidget);
+      expect(
+        find.text('Firebase services configured and ready!'),
+        findsOneWidget,
+      );
     });
 
-    testWidgets('should handle Firebase initialization gracefully', (WidgetTester tester) async {
+    testWidgets('should handle Firebase initialization gracefully', (
+      WidgetTester tester,
+    ) async {
       // Test that app doesn't crash even if Firebase initialization fails
-      await tester.pumpWidget(
-        const ProviderScope(
-          child: QuizApp(),
-        ),
-      );
+      await tester.pumpWidget(const ProviderScope(child: QuizApp()));
 
       // Wait for potential initialization
       await tester.pumpAndSettle(const Duration(seconds: 3));
@@ -108,22 +107,19 @@ void main() {
     test('should complete operations within performance thresholds', () async {
       // Test that operations complete within acceptable time limits
       final stopwatch = Stopwatch()..start();
-      
+
       // Test a simple operation
       await FirestoreConfig.checkConnectivity();
-      
+
       stopwatch.stop();
-      
+
       // Should complete within reasonable time (adjust threshold as needed)
       expect(stopwatch.elapsedMilliseconds, lessThan(5000));
     });
 
     test('should handle offline persistence', () {
       // Test offline persistence setup
-      expect(
-        () => FirestoreConfig.enableOfflinePersistence(),
-        returnsNormally,
-      );
+      expect(() => FirestoreConfig.enableOfflinePersistence(), returnsNormally);
     });
   });
 
@@ -140,11 +136,8 @@ void main() {
         () => AuthConfig.updateUserProfile(displayName: 'Test'),
         throwsA(isA<Exception>()),
       );
-      
-      expect(
-        () => AuthConfig.deleteUser(),
-        throwsA(isA<Exception>()),
-      );
+
+      expect(() => AuthConfig.deleteUser(), throwsA(isA<Exception>()));
     });
   });
 
@@ -192,7 +185,7 @@ class FirebaseIntegrationHelper {
         completer.complete();
       }
     });
-    
+
     // Check initialization status periodically
     Timer.periodic(const Duration(milliseconds: 100), (timer) {
       if (FirebaseCoreConfig.isInitialized || completer.isCompleted) {
@@ -202,10 +195,10 @@ class FirebaseIntegrationHelper {
         }
       }
     });
-    
+
     return completer.future;
   }
-  
+
   /// Clean up test data
   static Future<void> cleanupTestData() async {
     // Clean up any test data created during integration tests

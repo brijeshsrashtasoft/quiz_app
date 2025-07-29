@@ -4,7 +4,6 @@ import 'package:mockito/annotations.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:quiz_app/core/firebase/firestore_config.dart';
-import 'package:quiz_app/core/constants/firebase_constants.dart';
 import 'package:quiz_app/core/errors/exceptions.dart';
 
 // Generate mocks for Firestore dependencies
@@ -21,11 +20,13 @@ void main() {
   group('FirestoreConfig', () {
     late MockFirebaseFirestore mockFirestore;
     late MockCollectionReference<Map<String, dynamic>> mockCollection;
+    // ignore: unused_local_variable
     late MockDocumentReference<Map<String, dynamic>> mockDocument;
 
     setUp(() {
       mockFirestore = MockFirebaseFirestore();
       mockCollection = MockCollectionReference<Map<String, dynamic>>();
+      // ignore: unused_local_variable
       mockDocument = MockDocumentReference<Map<String, dynamic>>();
     });
 
@@ -70,50 +71,37 @@ void main() {
 
     group('predefined collections', () {
       test('should provide users collection reference', () {
-        expect(
-          () => FirestoreConfig.usersCollection,
-          returnsNormally,
-        );
+        expect(() => FirestoreConfig.usersCollection, returnsNormally);
       });
 
       test('should provide quizzes collection reference', () {
-        expect(
-          () => FirestoreConfig.quizzesCollection,
-          returnsNormally,
-        );
+        expect(() => FirestoreConfig.quizzesCollection, returnsNormally);
       });
 
       test('should provide game sessions collection reference', () {
-        expect(
-          () => FirestoreConfig.gameSessionsCollection,
-          returnsNormally,
-        );
+        expect(() => FirestoreConfig.gameSessionsCollection, returnsNormally);
       });
 
       test('should provide leaderboards collection reference', () {
-        expect(
-          () => FirestoreConfig.leaderboardsCollection,
-          returnsNormally,
-        );
+        expect(() => FirestoreConfig.leaderboardsCollection, returnsNormally);
       });
     });
 
     group('getBatch', () {
       test('should return WriteBatch instance', () {
-        expect(
-          () => FirestoreConfig.getBatch(),
-          returnsNormally,
-        );
+        expect(() => FirestoreConfig.getBatch(), returnsNormally);
       });
     });
 
     group('runTransaction', () {
       test('should execute transaction successfully', () async {
         // Test transaction execution
-        final result = await FirestoreConfig.runTransaction<String>((transaction) async {
+        final result = await FirestoreConfig.runTransaction<String>((
+          transaction,
+        ) async {
           return 'test_result';
         });
-        
+
         expect(result, equals('test_result'));
       });
 
@@ -157,7 +145,9 @@ void main() {
         // Test cache clearing
         expect(
           () => FirestoreConfig.clearCache(),
-          throwsA(isA<FirestoreException>()), // Expected to throw due to mock setup
+          throwsA(
+            isA<FirestoreException>(),
+          ), // Expected to throw due to mock setup
         );
       });
     });
@@ -168,20 +158,16 @@ void main() {
 class FirestoreTestHelper {
   static const String testCollection = 'test_collection';
   static const String testDocument = 'test_document';
-  
+
   static Map<String, dynamic> createTestUserData() {
     return {
       'name': 'Test User',
-      'email': 'test@example.com',  
+      'email': 'test@example.com',
       'createdAt': DateTime.now(),
-      'stats': {
-        'gamesPlayed': 0,
-        'gamesWon': 0,
-        'totalScore': 0,
-      },
+      'stats': {'gamesPlayed': 0, 'gamesWon': 0, 'totalScore': 0},
     };
   }
-  
+
   static Map<String, dynamic> createTestQuizData() {
     return {
       'title': 'Test Quiz',
@@ -198,7 +184,7 @@ class FirestoreTestHelper {
       'createdAt': DateTime.now(),
     };
   }
-  
+
   static Map<String, dynamic> createTestGameSessionData() {
     return {
       'quizId': 'test_quiz_id',
