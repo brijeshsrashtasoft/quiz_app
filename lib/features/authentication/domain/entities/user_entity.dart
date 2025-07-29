@@ -17,15 +17,13 @@ class UserEntity with _$UserEntity {
   }) = _UserEntity;
 }
 
-/// User statistics entity
+/// User statistics entity matching Firestore schema
 @freezed
 class UserStats with _$UserStats {
   const factory UserStats({
-    @Default(0) int gamesPlayed,
-    @Default(0) int gamesWon,
-    @Default(0) int totalScore,
-    @Default(0) int correctAnswers,
-    @Default(0) int totalQuestions,
+    @Default(0) int totalQuizzes,
+    @Default(0) int totalGamesPlayed,
+    @Default(0) int totalGamesWon,
     @Default(0.0) double averageScore,
     DateTime? lastGameDate,
   }) = _UserStats;
@@ -51,14 +49,13 @@ extension UserEntityX on UserEntity {
 
   /// Get user's win rate as percentage
   double get winRate {
-    if (stats == null || stats!.gamesPlayed == 0) return 0.0;
-    return (stats!.gamesWon / stats!.gamesPlayed) * 100;
+    if (stats == null || stats!.totalGamesPlayed == 0) return 0.0;
+    return (stats!.totalGamesWon / stats!.totalGamesPlayed) * 100;
   }
 
-  /// Get accuracy rate as percentage
-  double get accuracyRate {
-    if (stats == null || stats!.totalQuestions == 0) return 0.0;
-    return (stats!.correctAnswers / stats!.totalQuestions) * 100;
+  /// Check if user is experienced player
+  bool get isExperiencedPlayer {
+    return stats != null && stats!.totalGamesPlayed >= 10;
   }
 
   /// Check if user is new (created within last 7 days)
