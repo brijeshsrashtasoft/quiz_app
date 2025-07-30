@@ -1,5 +1,10 @@
 Please implement GitHub issue: $ARGUMENTS
 
+**⚠️ CRITICAL BRANCH DISCIPLINE ⚠️**
+- **MANDATORY**: All work MUST be done from branches created from `development` branch
+- **NEVER** analyze, checkout, or work on any branch other than your feature branch
+- **IGNORE** all other branches (main, other features) - focus ONLY on `development` → feature branch workflow
+
 **Command Documentation**: This command provides intelligent agent assignment and coordinated implementation of GitHub issues.
 
 **Related Documentation**:
@@ -8,6 +13,20 @@ Please implement GitHub issue: $ARGUMENTS
 - **docs/github_instaruction.md** - GitHub workflow standards and commit message formats
 - **.claude/agents/** - Individual sub-agent roles and responsibilities
 - **scripts/develop-feature.sh** - Automated branch creation for issues
+
+**STEP 0: MANDATORY BRANCH VERIFICATION**
+
+**CRITICAL**: Before any work begins, verify current branch status:
+
+```bash
+# Ensure we're on the correct branch
+current_branch=$(git branch --show-current)
+if [[ "$current_branch" != "development" && ! "$current_branch" =~ ^feature/issue-$ARGUMENTS ]]; then
+    echo "❌ ERROR: Not on development or correct feature branch!"
+    echo "🔧 Switching to development branch..."
+    git checkout development
+fi
+```
 
 **STEP 1: ISSUE ANALYSIS & AGENT ASSIGNMENT**
 
@@ -31,10 +50,22 @@ Based on issue content, determine required agents:
 
 **STEP 2: PARALLEL DEVELOPMENT WORKFLOW**
 
+**🚨 BRANCH CREATION RULES (MANDATORY):**
+- **ALWAYS** create feature branches from `development` branch ONLY
+- **NEVER** create branches from `main` or any other feature branch
+- **DO NOT** analyze or reference code from branches other than your assigned feature branch
+
 ```bash
+# MANDATORY: Ensure we start from development branch
 git checkout development
 git pull origin development
+
+# Create feature branch from development ONLY
 git checkout -b feature/issue-$ARGUMENTS-{short-description}
+
+# Verify correct branch creation
+git log --oneline -1 --decorate
+echo "✅ Feature branch created from development branch"
 ```
 
 **STEP 3: PARALLEL AGENT COORDINATION (MANDATORY)**
@@ -43,6 +74,12 @@ git checkout -b feature/issue-$ARGUMENTS-{short-description}
 
 **Parallel Execution Instructions:**
 "Launch multiple specialized agents simultaneously using separate Task tool calls in a single message for issue #$ARGUMENTS:
+
+**⚠️ AGENT BRANCH DISCIPLINE ⚠️**
+Each agent MUST:
+- Work ONLY on the feature branch created from `development`
+- NEVER checkout or analyze other branches (main, other features)
+- Focus ONLY on their assigned feature/issue-$ARGUMENTS branch
 
 **For Setup/Infrastructure Issues**: Launch ALL in parallel:
 - flutter-architect subagent: Clean Architecture implementation
@@ -67,10 +104,12 @@ git checkout -b feature/issue-$ARGUMENTS-{short-description}
 - testing-specialist subagent: Real-time test coverage
 
 **EVERY AGENT MUST**:
-1. **Platform Verification**: Run ./scripts/quality-check.sh after implementation
-2. **Parallel Coordination**: Work simultaneously with other assigned agents
-3. **Structured Communication**: Use handoff protocol when coordination needed
-4. **Quality Standards**: Follow all project standards and documentation"
+1. **Branch Discipline**: Work ONLY on feature/issue-$ARGUMENTS branch created from development
+2. **Platform Verification**: Run ./scripts/quality-check.sh after implementation
+3. **Parallel Coordination**: Work simultaneously with other assigned agents
+4. **Structured Communication**: Use handoff protocol when coordination needed
+5. **Quality Standards**: Follow all project standards and documentation
+6. **No Branch Hopping**: NEVER checkout or analyze code from other branches"
 
 **STEP 4: MANDATORY FINAL VALIDATION**
 
