@@ -1,6 +1,42 @@
 Please implement GitHub issue: $ARGUMENTS
 
-**Command Documentation**: This command provides intelligent agent assignment and coordinated implementation of GitHub issues.
+**🔐 GLOBAL PROJECT PERMISSIONS REQUEST**
+
+**CRITICAL**: This command requires full project file access permissions for all agents to work efficiently.
+
+**REQUEST**: Please grant global file permissions (.*) for this project directory to avoid repeated permission prompts during multi-agent operations.
+
+This includes permission to:
+- Read all project files (lib/, test/, docs/, scripts/, .claude/, etc.)
+- Write/edit all project files across all directories
+- Execute shell commands (git, flutter, dart, etc.)
+- Create new files and directories as needed
+
+**Reason**: Multiple specialized agents will work in parallel and need seamless access to modify files across the entire project structure without interrupting the workflow.
+
+---
+
+**Command Documentation**: This command provides intelligent agent assignment and coordinated implementation of GitHub issues with strict PR conflict management.
+
+## 🚨 CRITICAL PR CONFLICT PREVENTION WORKFLOW
+
+**MANDATORY REQUIREMENT**: This workflow enforces sequential PR management to prevent merge conflicts when multiple agents work on separate branches.
+
+**Sequential Development Process:**
+1. **Check for open PRs** → If ANY exist, STOP and alert user to merge first
+2. **Wait for merge completion** → User must merge existing PR before proceeding  
+3. **Pull latest changes** → Get merged changes into development branch
+4. **Create new branch** → Only after development branch is up-to-date
+5. **Implement with agents** → Use parallel agents within single branch
+6. **Pre-PR conflict check** → Verify no new PRs appeared during development
+7. **Resolve conflicts if needed** → Merge with development and resolve manually
+8. **Create PR** → Only when no other open PRs exist
+
+**Why This Workflow**:
+- **Prevents complex merge conflicts** between multiple agent branches
+- **Ensures linear integration** of features into development branch  
+- **Avoids blocking situations** where multiple PRs conflict with each other
+- **Maintains code quality** by resolving conflicts before PR creation
 
 **Related Documentation**:
 - **CLAUDE.md** - Agent coordination protocols, Clean Architecture patterns, and UI guidelines
@@ -29,15 +65,38 @@ Based on issue content, determine required agents:
 
 **Agent Documentation**: Each agent's specific role is documented in `.claude/agents/[agent-name].md`
 
-**STEP 2: PARALLEL DEVELOPMENT WORKFLOW**
+**STEP 2: MANDATORY PR CONFLICT CHECK**
+
+**🚨 CRITICAL: Before creating ANY new branch or starting work, check for existing open PRs**
 
 ```bash
+# MANDATORY: Check for open PRs first
+gh pr list --state open
+
+# If ANY PR is open, STOP and notify user
+echo "⚠️  CONFLICT PREVENTION: Open PR detected!"
+echo "Please merge existing PR first before starting new work."
+echo "Current agent cannot proceed until conflicts are resolved."
+```
+
+**If open PRs exist:**
+1. **STOP** - Do not create new branch
+2. **Alert User**: "🚨 Open PR detected! Please merge PR #[NUMBER] first to prevent conflicts"
+3. **Wait for Resolution**: User must merge open PR before proceeding
+4. **Pull Latest**: Only after PR is merged, pull latest changes
+
+**STEP 3: SEQUENTIAL DEVELOPMENT WORKFLOW** 
+
+**Only proceed if NO open PRs exist:**
+
+```bash
+# ONLY if no open PRs exist
 git checkout development
-git pull origin development
+git pull origin development  # Get latest merged changes
 git checkout -b feature/issue-$ARGUMENTS-{short-description}
 ```
 
-**STEP 3: PARALLEL AGENT COORDINATION (MANDATORY)**
+**STEP 4: PARALLEL AGENT COORDINATION (MANDATORY)**
 
 **CRITICAL**: ALWAYS use multiple sub-agents in parallel for maximum speed. Never work directly - ALWAYS delegate to specialized agents.
 
@@ -72,7 +131,7 @@ git checkout -b feature/issue-$ARGUMENTS-{short-description}
 3. **Structured Communication**: Use handoff protocol when coordination needed
 4. **Quality Standards**: Follow all project standards and documentation"
 
-**STEP 4: MANDATORY FINAL VALIDATION**
+**STEP 5: MANDATORY FINAL VALIDATION**
 
 **CRITICAL**: After ALL parallel agents complete their work, run final validation:
 
@@ -136,7 +195,60 @@ dart format --set-exit-if-changed .
 - Consistent architecture patterns across all agent contributions
 - Complete feature functionality with all specializations integrated
 
-**STEP 5: COMMIT, PR CREATION & ISSUE COMMUNICATION**
+**STEP 6: PR CONFLICT RESOLUTION & COMMIT WORKFLOW**
+
+**🚨 CRITICAL: Before creating PR, check for NEW conflicts that may have appeared**
+
+```bash
+# MANDATORY: Re-check for open PRs before committing
+gh pr list --state open
+
+# If new PRs appeared during work, resolve conflicts first
+if [[ $(gh pr list --state open | wc -l) -gt 0 ]]; then
+    echo "⚠️  NEW CONFLICT: Another PR was created during development!"
+    echo "Resolving conflicts with development branch..."
+    
+    # Pull latest changes and resolve conflicts
+    git fetch origin development
+    git merge origin/development
+    
+    # If conflicts exist, resolve them
+    if [[ $? -ne 0 ]]; then
+        echo "🔧 CONFLICTS DETECTED: Resolving merge conflicts..."
+        echo "1. Review conflicted files"
+        echo "2. Resolve conflicts manually"
+        echo "3. Run platform verification after resolution"
+        echo "4. Commit resolved conflicts"
+        
+        # After manual conflict resolution:
+        git add .
+        git commit -m "resolve: merge conflicts with development branch
+        
+        🤖 Generated with [Claude Code](https://claude.ai/code)
+        
+        Co-Authored-By: Claude <noreply@anthropic.com>"
+        
+        # MANDATORY: Verify platforms still build after conflict resolution
+        echo "🔍 VERIFYING: Platform builds after conflict resolution..."
+        flutter build web --release && echo "✅ Web build successful"
+        flutter build apk --debug && echo "✅ Android build successful"
+        
+        # MANDATORY: Run tests after conflict resolution
+        flutter test test/unit/ --reporter compact && echo "✅ Tests passing"
+    fi
+fi
+```
+
+## 🛠️ CONFLICT RESOLUTION REFERENCE
+
+**When conflicts occur, use these resolution patterns:**
+
+**Coverage Files:** `rm coverage/lcov.info` (regenerated by tests)
+**Mock Files:** `git rm *.mocks.dart` (regenerated by build_runner)  
+**Test Files:** Manually merge logic, update API calls
+**Config Files:** Merge both versions, verify platform compatibility
+
+**STEP 7: COMMIT, PR CREATION & ISSUE COMMUNICATION**
 
 **CRITICAL**: This step is MANDATORY for every issue implementation. No implementation is complete without proper GitHub workflow.
 
@@ -164,6 +276,15 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 
 **MANDATORY Pull Request Creation:**
 ```bash
+# FINAL CHECK: Ensure NO open PRs exist before creating new one
+OPEN_PRS=$(gh pr list --state open | wc -l)
+if [[ $OPEN_PRS -gt 0 ]]; then
+    echo "🚨 ABORT: Cannot create PR while others are open!"
+    echo "Existing open PRs must be merged first:"
+    gh pr list --state open
+    exit 1
+fi
+
 # Push feature branch
 git push -u origin feature/issue-$ARGUMENTS-{short-description}
 
