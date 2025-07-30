@@ -39,6 +39,17 @@ class RouteConstants {
   static const String leaderboardGlobal = '/leaderboard/global';
   static const String leaderboardSession = '/leaderboard/session/:sessionId';
 
+  // UI Showcase routes
+  static const String uiShowcase = '/ui-showcase';
+  static const String uiShowcaseButtons = '/ui-showcase/buttons';
+  static const String uiShowcaseAnimations = '/ui-showcase/animations';
+  static const String uiShowcaseTimers = '/ui-showcase/timers';
+  static const String uiShowcaseEffects = '/ui-showcase/effects';
+  static const String uiShowcaseLobby = '/ui-showcase/lobby';
+  static const String uiShowcaseThemes = '/ui-showcase/themes';
+  static const String uiShowcaseLoading = '/ui-showcase/loading';
+  static const String uiShowcaseScores = '/ui-showcase/scores';
+
   // Settings and preferences
   static const String settings = '/settings';
   static const String about = '/about';

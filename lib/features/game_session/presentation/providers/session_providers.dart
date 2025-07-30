@@ -44,10 +44,7 @@ final gameSessionStreamProvider =
                 return session.toEntity();
               },
               failure: (error) {
-                AppLogger.error(
-                  'Failed to watch session: $sessionId',
-                  error,
-                );
+                AppLogger.error('Failed to watch session: $sessionId', error);
                 return null;
               },
             ),
@@ -99,10 +96,7 @@ final gameSessionByPinProvider =
           return session.toEntity();
         },
         failure: (error) {
-          AppLogger.error(
-            'Failed to find session for PIN: $pin',
-            error,
-          );
+          AppLogger.error('Failed to find session for PIN: $pin', error);
           return null;
         },
       );
@@ -183,10 +177,7 @@ final pinAvailabilityProvider = FutureProvider.family<bool, String>((
       return isAvailable;
     },
     failure: (error) {
-      AppLogger.error(
-        'Failed to check PIN availability: $pin',
-        error,
-      );
+      AppLogger.error('Failed to check PIN availability: $pin', error);
       return false;
     },
   );
@@ -326,10 +317,7 @@ class SessionStateNotifier extends StateNotifier<SessionState> {
           state = SessionState.loaded(session.toEntity());
         },
         failure: (error) {
-          AppLogger.error(
-            'Failed to join session: $sessionId',
-            error,
-          );
+          AppLogger.error('Failed to join session: $sessionId', error);
           state = SessionState.error(error.userMessage);
         },
       );
@@ -364,10 +352,7 @@ class SessionStateNotifier extends StateNotifier<SessionState> {
           state = SessionState.loaded(session.toEntity());
         },
         failure: (error) {
-          AppLogger.error(
-            'Failed to leave session: $sessionId',
-            error,
-          );
+          AppLogger.error('Failed to leave session: $sessionId', error);
           state = SessionState.error(error.userMessage);
         },
       );
@@ -393,10 +378,7 @@ class SessionStateNotifier extends StateNotifier<SessionState> {
           state = SessionState.loaded(session.toEntity());
         },
         failure: (error) {
-          AppLogger.error(
-            'Failed to start session: $sessionId',
-            error,
-          );
+          AppLogger.error('Failed to start session: $sessionId', error);
           state = SessionState.error(error.userMessage);
         },
       );

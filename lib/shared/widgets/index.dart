@@ -1,5 +1,13 @@
 // Barrel export file for all shared widgets
-// Reference: docs/ui_guideline.md
+// Reference: docs/ui_guideline.md - Complete Kahoot-style UI system
+
+// Quiz-specific components (NEW - Kahoot-style UI)
+export 'quiz/index.dart';
+
+// Primitive components (NEW - Base animated components)
+export 'primitives/animated_button.dart';
+export 'primitives/shake_widget.dart';
+export 'primitives/responsive_grid.dart';
 
 // Buttons
 export 'buttons/primary_button.dart';

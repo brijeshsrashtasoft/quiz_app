@@ -553,9 +553,9 @@ class AuthService {
         'AuthService',
         'Sending email verification to: ${currentUser.email}',
       );
-      
+
       await currentUser.sendEmailVerification();
-      
+
       AppLogger.firebase('AuthService', 'Email verification sent successfully');
       return const Result.success(null);
     } catch (e) {
@@ -583,7 +583,7 @@ class AuthService {
       }
 
       await currentUser.reload();
-      
+
       AppLogger.firebase('AuthService', 'User data reloaded');
       return const Result.success(null);
     } catch (e) {
