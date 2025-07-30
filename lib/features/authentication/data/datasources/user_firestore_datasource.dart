@@ -3,11 +3,13 @@ import '../../../../core/firebase/firestore_config.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../../core/utils/result.dart';
+import '../../../../core/utils/exception_mapper.dart';
+import '../../../../core/base/base_datasource.dart';
 import '../models/user_model.dart';
 
 /// User Firestore data source implementation
 /// Following CLAUDE.md patterns and Firestore integration
-class UserFirestoreDataSource {
+class UserFirestoreDataSource extends BaseFirebaseDataSource {
   static const String _collection = 'users';
 
   /// Get user by ID
@@ -22,7 +24,10 @@ class UserFirestoreDataSource {
 
       if (!doc.exists) {
         return Result.failure(
-          DataException(message: 'User not found', code: 'user_not_found'),
+          const FirestoreException(
+            message: 'User not found',
+            code: 'user_not_found',
+          ).toFailure(),
         );
       }
 
@@ -37,7 +42,7 @@ class UserFirestoreDataSource {
         FirestoreException(
           message: 'Failed to get user: ${e.toString()}',
           code: 'get_user_error',
-        ),
+        ).toFailure(),
       );
     }
   }
@@ -57,7 +62,10 @@ class UserFirestoreDataSource {
 
       if (query.docs.isEmpty) {
         return Result.failure(
-          DataException(message: 'User not found', code: 'user_not_found'),
+          const FirestoreException(
+            message: 'User not found',
+            code: 'user_not_found',
+          ).toFailure(),
         );
       }
 
@@ -73,7 +81,7 @@ class UserFirestoreDataSource {
         FirestoreException(
           message: 'Failed to get user: ${e.toString()}',
           code: 'get_user_error',
-        ),
+        ).toFailure(),
       );
     }
   }
@@ -101,7 +109,7 @@ class UserFirestoreDataSource {
         FirestoreException(
           message: 'Failed to create user: ${e.toString()}',
           code: 'create_user_error',
-        ),
+        ).toFailure(),
       );
     }
   }
@@ -128,7 +136,7 @@ class UserFirestoreDataSource {
         FirestoreException(
           message: 'Failed to update user: ${e.toString()}',
           code: 'update_user_error',
-        ),
+        ).toFailure(),
       );
     }
   }
@@ -151,7 +159,7 @@ class UserFirestoreDataSource {
         FirestoreException(
           message: 'Failed to delete user: ${e.toString()}',
           code: 'delete_user_error',
-        ),
+        ).toFailure(),
       );
     }
   }
@@ -173,7 +181,7 @@ class UserFirestoreDataSource {
         FirestoreException(
           message: 'Failed to check user existence: ${e.toString()}',
           code: 'check_user_error',
-        ),
+        ).toFailure(),
       );
     }
   }
@@ -211,7 +219,7 @@ class UserFirestoreDataSource {
         FirestoreException(
           message: 'Failed to get users: ${e.toString()}',
           code: 'get_users_error',
-        ),
+        ).toFailure(),
       );
     }
   }
@@ -245,7 +253,7 @@ class UserFirestoreDataSource {
         FirestoreException(
           message: 'Failed to search users: ${e.toString()}',
           code: 'search_users_error',
-        ),
+        ).toFailure(),
       );
     }
   }
@@ -277,7 +285,7 @@ class UserFirestoreDataSource {
         FirestoreException(
           message: 'Failed to get top users: ${e.toString()}',
           code: 'get_top_users_error',
-        ),
+        ).toFailure(),
       );
     }
   }
@@ -290,10 +298,10 @@ class UserFirestoreDataSource {
           .map<Result<UserModel>>((doc) {
             if (!doc.exists) {
               return Result.failure(
-                DataException(
+                const FirestoreException(
                   message: 'User not found',
                   code: 'user_not_found',
-                ),
+                ).toFailure(),
               );
             }
 
@@ -313,7 +321,7 @@ class UserFirestoreDataSource {
           FirestoreException(
             message: 'Failed to setup user watch: ${e.toString()}',
             code: 'watch_setup_error',
-          ),
+          ).toFailure(),
         ),
       );
     }
@@ -351,7 +359,7 @@ class UserFirestoreDataSource {
         FirestoreException(
           message: 'Failed to batch update users: ${e.toString()}',
           code: 'batch_update_error',
-        ),
+        ).toFailure(),
       );
     }
   }

@@ -205,6 +205,114 @@ Our project uses specialized Claude Code sub-agents for focused expertise:
 - Sub-agents communicate through structured handoff templates
 - Clear documentation of work completed and next steps required
 
+### Agent Coordination & Unblocking Protocols (CRITICAL)
+
+**MANDATORY: Continuous Agent Status Monitoring**
+- **Check agent status BEFORE launching**: Use `flutter analyze` to detect blocking issues
+- **Monitor during execution**: Track compilation errors and build failures in real-time
+- **Coordinate unblocking**: Immediately address critical architecture issues that block multiple agents
+
+#### Agent Blocking Detection System
+
+**Critical Blocking Indicators:**
+```bash
+# Run these commands to detect agent blocking issues:
+flutter analyze                    # Detect compilation errors (>50 errors = BLOCKED)
+flutter test --dry-run            # Detect test framework issues  
+dart run build_runner build       # Detect code generation issues
+flutter run --debug --dry-run     # Detect navigation/routing issues
+```
+
+**Blocking Issue Categories:**
+1. **CRITICAL (Blocks ALL agents)**: Missing core architecture, Result pattern issues, code generation failures
+2. **HIGH (Blocks 2+ agents)**: Navigation system missing, UI constants missing, Firebase provider issues  
+3. **MEDIUM (Blocks 1 agent)**: Feature-specific implementation issues, test-specific problems
+
+#### Unblocking Protocol (MANDATORY EXECUTION)
+
+**Phase 1: Immediate Triage (30 seconds)**
+```bash
+# Quick status check command sequence:
+flutter analyze | head -20        # Get first 20 errors for triage
+git status                        # Check working tree state
+flutter doctor                    # Verify Flutter environment
+```
+
+**Phase 2: Critical Fix Implementation (Parallel)**
+- **Launch flutter-architect**: Fix core architecture blocking issues
+- **Launch ui-designer**: Create missing UI constants and theme system
+- **Launch firebase-specialist**: Fix Firebase provider integration
+- **Launch testing-specialist**: Fix test framework and mocking issues
+
+**Phase 3: Agent Coordination During Fixes**
+```
+AGENT UNBLOCKING STATUS UPDATE:
+- Current Blocking Issue: [Specific error/missing component]
+- Fix Status: [IN_PROGRESS/COMPLETED/NEEDS_ASSISTANCE] 
+- Platform Verification: [✅ PASSED / ⚠️ BUILDING / ❌ FAILED]
+- Impact on Other Agents: [Which agents can now proceed]
+- Next Critical Fix: [What needs to be fixed next]
+```
+
+**Phase 4: Immediate Verification & Resume**
+```bash
+# After each critical fix, run verification:
+flutter analyze                   # Must show <10 errors to proceed
+flutter test --dry-run           # Tests must compile successfully
+flutter run --debug --dry-run    # App must compile for all platforms
+```
+
+#### Agent Recovery Workflow
+
+**RECOVERY SEQUENCE (When >50 compilation errors detected):**
+1. **STOP all parallel agents immediately** - Prevent wasted parallel effort
+2. **Triage critical blocking issues** - Identify root cause (architecture/navigation/UI/Firebase)
+3. **Launch coordinated unblocking** - Deploy appropriate specialist agents for fixes
+4. **Verify each fix immediately** - Run platform verification after each component fix
+5. **Resume parallel execution** - Only after <10 compilation errors remain
+6. **Continuous monitoring** - Check agent status every 5 minutes during execution
+
+#### Agent Communication During Crisis
+
+**BLOCKING ALERT FORMAT:**
+```
+🚨 AGENT BLOCKING DETECTED 🚨
+- Total Errors: [Number]
+- Blocked Agents: [List of affected agents]
+- Root Cause: [Architecture/Navigation/UI/Firebase/Tests]
+- Priority: [CRITICAL/HIGH/MEDIUM]
+- Immediate Action: [Specific fix required]
+```
+
+**UNBLOCKING SUCCESS FORMAT:**
+```
+✅ AGENT UNBLOCKED ✅
+- Fixed Component: [What was fixed]
+- Remaining Errors: [Number]
+- Agents Ready to Resume: [List]
+- Platform Status: [All platforms building: YES/NO]
+- Next Steps: [Continue with parallel execution/Additional fixes needed]
+```
+
+#### Parallel Execution Health Monitoring
+
+**MANDATORY: Real-time Agent Health Checks**
+- **Every 5 minutes**: Run `flutter analyze | wc -l` to track error count
+- **After each agent completes a task**: Run platform verification
+- **Before launching new parallel work**: Ensure error count <10
+- **When any agent reports failure**: Immediately check blocking status
+
+**Platform Verification Commands (Required after each fix):**
+```bash
+# Run all three in parallel to verify platform compatibility:
+flutter build web --no-pub & 
+flutter build apk --debug --no-pub &
+flutter build ios --debug --no-pub --simulator &
+wait  # Wait for all builds to complete
+```
+
+This coordination system ensures maximum parallel efficiency while preventing agent blocking cascades.
+
 ## Technology Stack
 
 ### Core Dependencies
