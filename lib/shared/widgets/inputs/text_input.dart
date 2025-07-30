@@ -19,6 +19,7 @@ class CustomTextInput extends StatefulWidget {
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
   final VoidCallback? onTap;
+  final String? Function(String?)? validator;
   final bool obscureText;
   final bool enabled;
   final bool readOnly;
@@ -54,6 +55,7 @@ class CustomTextInput extends StatefulWidget {
     this.onChanged,
     this.onSubmitted,
     this.onTap,
+    this.validator,
     this.obscureText = false,
     this.enabled = true,
     this.readOnly = false,
@@ -143,7 +145,7 @@ class _CustomTextInputState extends State<CustomTextInput> {
             boxShadow: _isFocused
                 ? [
                     BoxShadow(
-                      color: borderColor.withOpacity(0.1),
+                      color: borderColor.withValues(alpha: 0.1),
                       offset: const Offset(0, 2),
                       blurRadius: 8,
                     ),

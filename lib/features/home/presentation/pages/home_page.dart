@@ -6,8 +6,6 @@ import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/constants/app_text_styles.dart';
 import '../../../../shared/constants/app_spacing.dart';
 import '../../../../shared/constants/app_animations.dart';
-import '../../../../shared/widgets/buttons/primary_button.dart';
-import '../../../../shared/widgets/layout/page_layout.dart';
 import '../../../../shared/widgets/navigation/app_navigation_bar.dart';
 import '../../../../shared/widgets/cards/quiz_card.dart';
 import '../../../../core/navigation/route_constants.dart';
@@ -325,11 +323,11 @@ class _HomePageState extends ConsumerState<HomePage>
                       : 0,
                 ),
                 child: QuizCard(
-                  title: quiz['title']!,
-                  description: quiz['description']!,
+                  title: quiz['title'] as String,
+                  description: quiz['description'] as String,
                   questionCount: quiz['questions'] as int,
-                  difficulty: quiz['difficulty']!,
-                  category: quiz['category']!,
+                  difficulty: quiz['difficulty'] as String,
+                  category: quiz['category'] as String,
                   onTap: () {
                     // TODO: Navigate to quiz details
                   },
@@ -397,9 +395,9 @@ class _HomePageState extends ConsumerState<HomePage>
               final isLast = index == recentActivities.length - 1;
 
               return _RecentActivityItem(
-                type: activity['type']!,
-                title: activity['title']!,
-                time: activity['time']!,
+                type: activity['type'] as String,
+                title: activity['title'] as String,
+                time: activity['time'] as String,
                 icon: activity['icon'] as IconData,
                 showDivider: !isLast,
               );

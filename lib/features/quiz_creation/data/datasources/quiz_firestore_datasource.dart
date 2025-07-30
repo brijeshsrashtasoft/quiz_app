@@ -461,7 +461,7 @@ class QuizFirestoreDataSource extends BaseFirebaseDataSource {
       final duration = DateTime.now().difference(startTime);
       AppLogger.performance('Get quiz count by user', duration);
 
-      return Result.success(query.count);
+      return Result.success(query.count ?? 0);
     } catch (e, stackTrace) {
       AppLogger.error(
         'Failed to get quiz count for user: $userId',

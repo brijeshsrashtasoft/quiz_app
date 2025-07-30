@@ -18,6 +18,8 @@ class AppDimensions {
   static const double buttonRadius =
       buttonBorderRadius; // Alias for compatibility
   static const double inputBorderRadius = borderRadiusS; // 8dp - Text inputs
+  static const double inputRadius =
+      inputBorderRadius; // Alias for compatibility
   static const double containerBorderRadius =
       borderRadiusM; // 12dp - General containers
 

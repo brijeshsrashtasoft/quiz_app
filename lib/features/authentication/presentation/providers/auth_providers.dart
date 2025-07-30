@@ -5,11 +5,24 @@ import '../../../../core/utils/result.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../../core/errors/failures.dart';
 import '../../domain/entities/user_entity.dart';
+import '../../domain/entities/auth_state.dart';
+import '../../domain/repositories/auth_repository.dart';
+import '../../data/repositories/auth_repository_impl.dart';
 import '../../data/repositories/user_repository_impl.dart';
 import '../../data/datasources/user_firestore_datasource.dart';
+import '../../data/datasources/auth_firebase_datasource.dart';
 import '../../domain/usecases/get_user_by_id_usecase.dart';
 import '../../domain/usecases/create_user_usecase.dart';
 import '../../domain/usecases/watch_user_usecase.dart';
+import '../../domain/usecases/sign_in_usecase.dart';
+import '../../domain/usecases/sign_in_with_google_usecase.dart';
+import '../../domain/usecases/watch_auth_state_usecase.dart';
+import '../../domain/usecases/sign_up_usecase.dart';
+import '../../domain/usecases/sign_out_usecase.dart';
+import '../../domain/usecases/reset_password_usecase.dart';
+import '../../domain/usecases/get_current_user_usecase.dart';
+import '../../domain/usecases/update_user_profile_usecase.dart';
+import '../../domain/usecases/delete_account_usecase.dart';
 
 /// Firebase Auth state provider - core authentication state
 final firebaseAuthProvider = StreamProvider<User?>((ref) {
@@ -144,25 +157,97 @@ final watchUserProvider = StreamProvider.family<UserEntity?, String>((
   );
 });
 
-/// Authentication service provider
-final authServiceProvider = Provider<AuthService>((ref) {
-  return AuthService();
+/// Authentication Firebase datasource provider
+final authFirebaseDataSourceProvider = Provider<AuthFirebaseDataSource>((ref) {
+  return AuthFirebaseDataSource();
 });
 
-/// Authentication use case providers
+/// User Firestore datasource provider
+final userFirestoreDataSourceProvider = Provider<UserFirestoreDataSource>((
+  ref,
+) {
+  return UserFirestoreDataSource();
+});
+
+/// Auth repository provider
+final authRepositoryProvider = Provider<AuthRepository>((ref) {
+  final authDataSource = ref.read(authFirebaseDataSourceProvider);
+  return AuthRepositoryImpl(authDataSource: authDataSource);
+});
+
+/// User repository provider
+final userRepositoryProvider = Provider<UserRepositoryImpl>((ref) {
+  final userDataSource = ref.read(userFirestoreDataSourceProvider);
+  return UserRepositoryImpl(dataSource: userDataSource);
+});
+
+/// Authentication service provider
+final authServiceProvider = Provider<AuthService>((ref) {
+  return AuthService(ref);
+});
+
+/// User management use case providers
 final getUserByIdUseCaseProvider = Provider<GetUserByIdUseCase>((ref) {
-  final repository = UserRepositoryImpl(dataSource: UserFirestoreDataSource());
+  final repository = ref.read(userRepositoryProvider);
   return GetUserByIdUseCase(repository: repository);
 });
 
 final createUserUseCaseProvider = Provider<CreateUserUseCase>((ref) {
-  final repository = UserRepositoryImpl(dataSource: UserFirestoreDataSource());
+  final repository = ref.read(userRepositoryProvider);
   return CreateUserUseCase(repository: repository);
 });
 
 final watchUserUseCaseProvider = Provider<WatchUserUseCase>((ref) {
-  final repository = UserRepositoryImpl(dataSource: UserFirestoreDataSource());
+  final repository = ref.read(userRepositoryProvider);
   return WatchUserUseCase(repository: repository);
+});
+
+/// Core authentication use case providers
+final signInUseCaseProvider = Provider<SignInUseCase>((ref) {
+  final authRepository = ref.read(authRepositoryProvider);
+  return SignInUseCase(authRepository: authRepository);
+});
+
+final signInWithGoogleUseCaseProvider = Provider<SignInWithGoogleUseCase>((
+  ref,
+) {
+  final authRepository = ref.read(authRepositoryProvider);
+  return SignInWithGoogleUseCase(authRepository: authRepository);
+});
+
+final watchAuthStateUseCaseProvider = Provider<WatchAuthStateUseCase>((ref) {
+  final authRepository = ref.read(authRepositoryProvider);
+  return WatchAuthStateUseCase(authRepository: authRepository);
+});
+
+final signUpUseCaseProvider = Provider<SignUpUseCase>((ref) {
+  return SignUpUseCase();
+});
+
+final signOutUseCaseProvider = Provider<SignOutUseCase>((ref) {
+  return SignOutUseCase();
+});
+
+final resetPasswordUseCaseProvider = Provider<ResetPasswordUseCase>((ref) {
+  return ResetPasswordUseCase();
+});
+
+/// User profile management use case providers
+final getCurrentUserUseCaseProvider = Provider<GetCurrentUserUseCase>((ref) {
+  final repository = ref.read(userRepositoryProvider);
+  return GetCurrentUserUseCase(userRepository: repository);
+});
+
+final updateUserProfileUseCaseProvider = Provider<UpdateUserProfileUseCase>((
+  ref,
+) {
+  final repository = ref.read(userRepositoryProvider);
+  return UpdateUserProfileUseCase(userRepository: repository);
+});
+
+final deleteAccountUseCaseProvider = Provider<DeleteAccountUseCase>((ref) {
+  final repository = ref.read(userRepositoryProvider);
+  return DeleteAccountUseCase(userRepository: repository);
 });
 
 /// Authentication state model
@@ -200,6 +285,10 @@ class AuthState {
 
 /// Authentication service for handling auth operations
 class AuthService {
+  final Ref ref;
+
+  AuthService(this.ref);
+
   /// Sign in with email and password
   Future<Result<UserCredential>> signInWithEmailAndPassword({
     required String email,
@@ -327,6 +416,49 @@ class AuthService {
         Failure.authFailure(
           message: 'Profile update failed: ${e.toString()}',
           code: 'AUTH_PROFILE_UPDATE_ERROR',
+        ),
+      );
+    }
+  }
+
+  /// Sign in with Google
+  Future<Result<User>> signInWithGoogle() async {
+    try {
+      AppLogger.firebase('AuthService', 'Attempting Google sign in');
+
+      // Use the AuthFirebaseDataSource for Google sign-in
+      final authDataSource = ref.read(authFirebaseDataSourceProvider);
+      final result = await authDataSource.signInWithGoogle();
+
+      return result.when(
+        success: (userModel) {
+          AppLogger.firebase(
+            'AuthService',
+            'Google sign in successful for: ${userModel.email}',
+          );
+          final currentUser = AuthConfig.currentUser;
+          if (currentUser != null) {
+            return Result.success(currentUser);
+          } else {
+            return Result.failure(
+              Failure.authFailure(
+                message: 'Google sign in succeeded but no Firebase user found',
+                code: 'AUTH_GOOGLE_NO_USER',
+              ),
+            );
+          }
+        },
+        failure: (failure) {
+          AppLogger.error('Google sign in failed', failure);
+          return Result.failure(failure);
+        },
+      );
+    } catch (e) {
+      AppLogger.error('Google sign in failed', e);
+      return Result.failure(
+        Failure.authFailure(
+          message: 'Google sign in failed: ${e.toString()}',
+          code: 'AUTH_GOOGLE_SIGNIN_ERROR',
         ),
       );
     }

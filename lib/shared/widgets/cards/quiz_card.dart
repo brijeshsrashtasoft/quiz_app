@@ -11,6 +11,8 @@ class QuizCard extends StatefulWidget {
   final String title;
   final String description;
   final int questionCount;
+  final String? difficulty;
+  final String? category;
   final String? imageUrl;
   final VoidCallback? onTap;
   final bool isSelected;
@@ -21,6 +23,8 @@ class QuizCard extends StatefulWidget {
     required this.title,
     required this.description,
     required this.questionCount,
+    this.difficulty,
+    this.category,
     this.imageUrl,
     this.onTap,
     this.isSelected = false,
@@ -74,6 +78,19 @@ class _QuizCardState extends State<QuizCard>
 
   void _handleTapCancel() {
     _animationController.reverse();
+  }
+
+  Color _getDifficultyColor() {
+    switch (widget.difficulty?.toLowerCase()) {
+      case 'easy':
+        return AppColors.mintGreen;
+      case 'medium':
+        return AppColors.warmYellow;
+      case 'hard':
+        return AppColors.coralRed;
+      default:
+        return AppColors.coolGray;
+    }
   }
 
   @override
@@ -170,7 +187,7 @@ class _QuizCardState extends State<QuizCard>
                           Text(
                             widget.description,
                             style: AppTextStyles.cardDescription.copyWith(
-                              color: textColor.withOpacity(0.8),
+                              color: textColor.withValues(alpha: 0.8),
                             ),
                             maxLines: 3,
                             overflow: TextOverflow.ellipsis,
@@ -178,17 +195,21 @@ class _QuizCardState extends State<QuizCard>
 
                           SizedBox(height: AppSpacing.spacingM),
 
-                          // Footer with question count
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          // Footer with metadata tags
+                          Wrap(
+                            spacing: AppSpacing.spacingS,
+                            runSpacing: AppSpacing.spacingXS,
                             children: [
+                              // Question count
                               Container(
                                 padding: EdgeInsets.symmetric(
                                   horizontal: AppSpacing.spacingS,
                                   vertical: AppSpacing.spacingXS,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: AppColors.turquoise.withOpacity(0.1),
+                                  color: AppColors.turquoise.withValues(
+                                    alpha: 0.1,
+                                  ),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Row(
@@ -211,21 +232,78 @@ class _QuizCardState extends State<QuizCard>
                                 ),
                               ),
 
-                              if (widget.isSelected)
+                              // Difficulty badge
+                              if (widget.difficulty != null)
                                 Container(
-                                  padding: EdgeInsets.all(AppSpacing.spacingXS),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.vibrantPurple,
-                                    shape: BoxShape.circle,
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: AppSpacing.spacingS,
+                                    vertical: AppSpacing.spacingXS,
                                   ),
-                                  child: Icon(
-                                    Icons.check,
-                                    size: 16,
-                                    color: AppColors.pureWhite,
+                                  decoration: BoxDecoration(
+                                    color: _getDifficultyColor().withValues(
+                                      alpha: 0.1,
+                                    ),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    widget.difficulty!,
+                                    style: AppTextStyles.caption.copyWith(
+                                      color: _getDifficultyColor(),
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+
+                              // Category badge
+                              if (widget.category != null)
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: AppSpacing.spacingS,
+                                    vertical: AppSpacing.spacingXS,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.vibrantPurple.withValues(
+                                      alpha: 0.1,
+                                    ),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    widget.category!,
+                                    style: AppTextStyles.caption.copyWith(
+                                      color: AppColors.vibrantPurple,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                 ),
                             ],
                           ),
+
+                          // Selected indicator
+                          if (widget.isSelected)
+                            Padding(
+                              padding: EdgeInsets.only(
+                                top: AppSpacing.spacingS,
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  Container(
+                                    padding: EdgeInsets.all(
+                                      AppSpacing.spacingXS,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.vibrantPurple,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      Icons.check,
+                                      size: 16,
+                                      color: AppColors.pureWhite,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                         ],
                       ),
                     ),
