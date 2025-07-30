@@ -152,14 +152,15 @@ class _CustomTextInputState extends State<CustomTextInput> {
                   ]
                 : null,
           ),
-          child: TextField(
+          child: TextFormField(
             controller: widget.controller,
             focusNode: _focusNode,
             keyboardType: widget.keyboardType,
             textInputAction: widget.textInputAction,
             onChanged: widget.onChanged,
-            onSubmitted: widget.onSubmitted,
+            onFieldSubmitted: widget.onSubmitted,
             onTap: widget.onTap,
+            validator: widget.validator,
             obscureText: widget.obscureText,
             enabled: widget.enabled,
             readOnly: widget.readOnly,

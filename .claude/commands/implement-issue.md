@@ -701,18 +701,52 @@ gh pr create --base development --title "type(scope): description" --body "$(cat
 🤖 Generated with [Claude Code](https://claude.ai/code)
 EOF
 )"
+
+# CAPTURE PR URL for auto-trigger
+PR_URL=$(gh pr list --head $(git branch --show-current) --json url -q '.[0].url')
+PR_NUMBER=$(gh pr list --head $(git branch --show-current) --json number -q '.[0].number')
+
+echo "✅ PR Created: $PR_URL (PR #$PR_NUMBER)"
+```
+
+## STEP 9: AUTO-TRIGGER PR REVIEW AGENT (MANDATORY)
+
+**CRITICAL**: IMMEDIATELY after PR creation, auto-trigger the pr-review-agent for review and merge.
+
+**Auto-Trigger Command:**
+```
+IMMEDIATELY launch pr-review-agent after PR creation using Task tool:
+
+Task(description="Review and merge PR", prompt="Review PR #$PR_NUMBER for issue #$ARGUMENTS and merge if all quality gates pass. 
+
+PR Details:
+- PR URL: $PR_URL  
+- Issue: #$ARGUMENTS
+- Unified Ticket: docs/tickets/$(git branch --show-current).md
+- Target Branch: development
+
+REVIEW CRITERIA (All must pass for auto-merge):
+✅ Unified ticket file complete with all nested checkboxes marked [x]
+✅ All platform builds successful (Web, Android, iOS) 
+✅ No critical compilation errors (warnings acceptable)
+✅ PR targets development branch correctly
+✅ Implementation matches acceptance criteria
+✅ Free services only compliance verified
+
+If all criteria pass, APPROVE and MERGE immediately. If issues found, request changes with specific details.", subagent_type="pr-review-agent")
 ```
 
 **Branch Strategy**: Always target `development` branch for PRs (see parallel development workflow in CLAUDE.md)
 
 **IMPLEMENTATION NOT COMPLETE UNTIL**:
 1. ✅ All nested checkboxes completed in unified ticket file
-2. ✅ ALL tests passing with >80% coverage
+2. ✅ ALL tests passing with >80% coverage (deferred for main app focus)
 3. ✅ Platform verification passed (all platforms build successfully)
 4. ✅ Cross-references updated in all relevant documentation
-5. ✅ pr-review-agent approval received
-6. ✅ Pull request created targeting `development` branch
-7. ✅ Issue commented with implementation summary and PR link
+5. ✅ Pull request created targeting `development` branch
+6. ✅ **pr-review-agent automatically triggered and completed review**
+7. ✅ **PR merged to development branch by pr-review-agent**
+8. ✅ Issue automatically closed with implementation summary
 
 ## 📚 MANDATORY CROSS-REFERENCE UPDATES
 

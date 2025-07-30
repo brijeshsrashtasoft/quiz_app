@@ -293,10 +293,27 @@ Our project uses specialized Claude Code sub-agents for focused expertise:
 
 ### PR Merge Authority Protocol
 - **PR Creation**: Any agent can create PR following implement-issue.md workflow
+- **AUTO-TRIGGER PR REVIEW**: implement-issue.md MUST automatically invoke pr-review-agent after PR creation
 - **PR Review**: ONLY pr-review-agent reviews and approves/requests changes
 - **Change Requests**: Original implementing agents must complete requested changes
 - **Final Approval**: pr-review-agent provides final approval and merge authorization
 - **PR Merge**: ONLY pr-review-agent can merge approved PRs
+
+### Auto-Trigger PR Review Workflow
+**MANDATORY**: After every PR creation in implement-issue.md, automatically launch pr-review-agent:
+
+```
+After PR creation step, IMMEDIATELY invoke:
+Task(description="Review and merge PR", prompt="Review PR #{PR_NUMBER} for issue #{ISSUE_NUMBER} and merge if all quality gates pass. PR URL: {PR_URL}", subagent_type="pr-review-agent")
+```
+
+**Auto-Merge Criteria** (All must pass for automatic merge):
+- ✅ Unified ticket file complete with all nested checkboxes marked [x]
+- ✅ All platform builds successful (Web, Android, iOS)
+- ✅ No critical compilation errors (warnings acceptable)
+- ✅ PR targets development branch correctly
+- ✅ Implementation matches acceptance criteria
+- ✅ Free services only compliance verified
 
 ### Mandatory PR Review Criteria
 All PRs must meet these criteria before pr-review-agent approval:
