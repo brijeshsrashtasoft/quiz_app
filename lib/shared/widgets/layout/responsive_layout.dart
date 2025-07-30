@@ -78,24 +78,21 @@ class ResponsivePadding extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     EdgeInsets padding;
-    
+
     if (ScreenSize.isDesktop(context)) {
-      padding = desktopPadding ?? 
-               tabletPadding ?? 
-               mobilePadding ?? 
-               EdgeInsets.all(AppSpacing.spacingL);
+      padding =
+          desktopPadding ??
+          tabletPadding ??
+          mobilePadding ??
+          EdgeInsets.all(AppSpacing.spacingL);
     } else if (ScreenSize.isTablet(context)) {
-      padding = tabletPadding ?? 
-               mobilePadding ?? 
-               EdgeInsets.all(AppSpacing.spacingM);
+      padding =
+          tabletPadding ?? mobilePadding ?? EdgeInsets.all(AppSpacing.spacingM);
     } else {
       padding = mobilePadding ?? EdgeInsets.all(AppSpacing.spacingM);
     }
 
-    return Padding(
-      padding: padding,
-      child: child,
-    );
+    return Padding(padding: padding, child: child);
   }
 }
 

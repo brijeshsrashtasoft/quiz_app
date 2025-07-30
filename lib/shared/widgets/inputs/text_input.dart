@@ -114,13 +114,13 @@ class _CustomTextInputState extends State<CustomTextInput> {
     final borderColor = hasError
         ? (widget.errorBorderColor ?? AppColors.error)
         : _isFocused
-            ? (widget.focusedBorderColor ?? AppColors.vibrantPurple)
-            : (widget.borderColor ?? AppColors.borderLight);
+        ? (widget.focusedBorderColor ?? AppColors.vibrantPurple)
+        : (widget.borderColor ?? AppColors.borderLight);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (widget.label != null) ..[
+        if (widget.label != null) ...[
           Text(
             widget.label!,
             style: AppTextStyles.inputLabel.copyWith(
@@ -129,7 +129,7 @@ class _CustomTextInputState extends State<CustomTextInput> {
           ),
           SizedBox(height: AppSpacing.spacingXS),
         ],
-        
+
         Container(
           decoration: BoxDecoration(
             color: widget.fillColor ?? AppColors.pureWhite,
@@ -175,7 +175,8 @@ class _CustomTextInputState extends State<CustomTextInput> {
               suffixIcon: widget.suffixIcon,
               prefixText: widget.prefixText,
               suffixText: widget.suffixText,
-              contentPadding: widget.contentPadding ??
+              contentPadding:
+                  widget.contentPadding ??
                   EdgeInsets.symmetric(
                     horizontal: AppSpacing.spacingM,
                     vertical: AppSpacing.spacingM,
@@ -189,16 +190,14 @@ class _CustomTextInputState extends State<CustomTextInput> {
             ),
           ),
         ),
-        
-        if (widget.errorText != null) ..[
+
+        if (widget.errorText != null) ...[
           SizedBox(height: AppSpacing.spacingXS),
           Text(
             widget.errorText!,
-            style: AppTextStyles.caption.copyWith(
-              color: AppColors.error,
-            ),
+            style: AppTextStyles.caption.copyWith(color: AppColors.error),
           ),
-        ] else if (widget.helperText != null) ..[
+        ] else if (widget.helperText != null) ...[
           SizedBox(height: AppSpacing.spacingXS),
           Text(
             widget.helperText!,
@@ -282,17 +281,11 @@ class _SearchInputState extends State<SearchInput> {
       keyboardType: TextInputType.text,
       textInputAction: TextInputAction.search,
       autofocus: widget.autofocus,
-      prefixIcon: Icon(
-        Icons.search,
-        color: AppColors.textSecondary,
-      ),
+      prefixIcon: Icon(Icons.search, color: AppColors.textSecondary),
       suffixIcon: _hasText
           ? IconButton(
               onPressed: _onClear,
-              icon: Icon(
-                Icons.clear,
-                color: AppColors.textSecondary,
-              ),
+              icon: Icon(Icons.clear, color: AppColors.textSecondary),
             )
           : null,
     );
@@ -330,10 +323,7 @@ class _PinInputState extends State<PinInput> {
       widget.length,
       (index) => TextEditingController(),
     );
-    _focusNodes = List.generate(
-      widget.length,
-      (index) => FocusNode(),
-    );
+    _focusNodes = List.generate(widget.length, (index) => FocusNode());
     _values = List.filled(widget.length, '');
 
     for (int i = 0; i < widget.length; i++) {
@@ -409,9 +399,7 @@ class _PinInputState extends State<PinInput> {
                   borderRadius: BorderRadius.circular(
                     AppDimensions.inputRadius,
                   ),
-                  borderSide: BorderSide(
-                    color: AppColors.borderLight,
-                  ),
+                  borderSide: BorderSide(color: AppColors.borderLight),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(

@@ -15,7 +15,8 @@ class AppDimensions {
   static const double cardRadius = cardBorderRadius; // Alias for compatibility
   static const double buttonBorderRadius =
       borderRadiusM; // 12dp - Answer buttons
-  static const double buttonRadius = buttonBorderRadius; // Alias for compatibility
+  static const double buttonRadius =
+      buttonBorderRadius; // Alias for compatibility
   static const double inputBorderRadius = borderRadiusS; // 8dp - Text inputs
   static const double containerBorderRadius =
       borderRadiusM; // 12dp - General containers

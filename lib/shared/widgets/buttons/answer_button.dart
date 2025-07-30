@@ -53,20 +53,15 @@ class _AnswerButtonState extends State<AnswerButton>
       duration: AppAnimations.mediumAnimation,
       vsync: this,
     );
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 0.95,
-    ).animate(CurvedAnimation(
-      parent: _scaleController,
-      curve: AppAnimations.bounce,
-    ));
-    _resultAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _resultController,
-      curve: AppAnimations.easeInOut,
-    ));
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
+      CurvedAnimation(parent: _scaleController, curve: AppAnimations.bounce),
+    );
+    _resultAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _resultController,
+        curve: AppAnimations.easeInOut,
+      ),
+    );
   }
 
   @override
@@ -91,11 +86,11 @@ class _AnswerButtonState extends State<AnswerButton>
       if (widget.isCorrect) return AppColors.correctAnswer;
       if (widget.isIncorrect) return AppColors.incorrectAnswer;
     }
-    
+
     if (widget.isSelected && !widget.showResult) {
       return _getShapeColor().withOpacity(0.8);
     }
-    
+
     return _getShapeColor();
   }
 
@@ -146,7 +141,7 @@ class _AnswerButtonState extends State<AnswerButton>
   @override
   Widget build(BuildContext context) {
     final textColor = AppColors.getAccessibleTextColor(_backgroundColor);
-    
+
     return Semantics(
       button: true,
       enabled: !widget.isDisabled,
@@ -173,19 +168,18 @@ class _AnswerButtonState extends State<AnswerButton>
                   color: _backgroundColor,
                   borderRadius: BorderRadius.circular(AppDimensions.cardRadius),
                   border: widget.isSelected && !widget.showResult
-                      ? Border.all(
-                          color: AppColors.pureWhite,
-                          width: 3,
-                        )
+                      ? Border.all(color: AppColors.pureWhite, width: 3)
                       : null,
-                  boxShadow: !widget.isDisabled ? [
-                    BoxShadow(
-                      color: AppColors.shadowButton,
-                      offset: const Offset(0, 2),
-                      blurRadius: 4,
-                      spreadRadius: 0,
-                    ),
-                  ] : null,
+                  boxShadow: !widget.isDisabled
+                      ? [
+                          BoxShadow(
+                            color: AppColors.shadowButton,
+                            offset: const Offset(0, 2),
+                            blurRadius: 4,
+                            spreadRadius: 0,
+                          ),
+                        ]
+                      : null,
                 ),
                 child: Stack(
                   children: [
@@ -238,8 +232,8 @@ class _AnswerButtonState extends State<AnswerButton>
                               scale: _resultAnimation.value,
                               child: Center(
                                 child: Icon(
-                                  widget.isCorrect 
-                                      ? Icons.check_circle 
+                                  widget.isCorrect
+                                      ? Icons.check_circle
                                       : Icons.cancel,
                                   color: textColor,
                                   size: 28,

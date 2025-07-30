@@ -3,12 +3,13 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i4;
+import 'dart:async' as _i3;
 
 import 'package:mockito/mockito.dart' as _i1;
+import 'package:mockito/src/dummies.dart' as _i6;
 import 'package:quiz_app/core/utils/result.dart' as _i2;
 import 'package:quiz_app/features/authentication/data/datasources/user_firestore_datasource.dart'
-    as _i3;
+    as _i4;
 import 'package:quiz_app/features/authentication/data/models/user_model.dart'
     as _i5;
 
@@ -31,101 +32,106 @@ class _FakeResult_0<T> extends _i1.SmartFake implements _i2.Result<T> {
     : super(parent, parentInvocation);
 }
 
+class _FakeFuture_1<T1> extends _i1.SmartFake implements _i3.Future<T1> {
+  _FakeFuture_1(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
 /// A class which mocks [UserFirestoreDataSource].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockUserFirestoreDataSource extends _i1.Mock
-    implements _i3.UserFirestoreDataSource {
+    implements _i4.UserFirestoreDataSource {
   MockUserFirestoreDataSource() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i4.Future<_i2.Result<_i5.UserModel>> getUserById(String? userId) =>
+  _i3.Future<_i2.Result<_i5.UserModel>> getUserById(String? userId) =>
       (super.noSuchMethod(
             Invocation.method(#getUserById, [userId]),
-            returnValue: _i4.Future<_i2.Result<_i5.UserModel>>.value(
+            returnValue: _i3.Future<_i2.Result<_i5.UserModel>>.value(
               _FakeResult_0<_i5.UserModel>(
                 this,
                 Invocation.method(#getUserById, [userId]),
               ),
             ),
           )
-          as _i4.Future<_i2.Result<_i5.UserModel>>);
+          as _i3.Future<_i2.Result<_i5.UserModel>>);
 
   @override
-  _i4.Future<_i2.Result<_i5.UserModel>> getUserByEmail(String? email) =>
+  _i3.Future<_i2.Result<_i5.UserModel>> getUserByEmail(String? email) =>
       (super.noSuchMethod(
             Invocation.method(#getUserByEmail, [email]),
-            returnValue: _i4.Future<_i2.Result<_i5.UserModel>>.value(
+            returnValue: _i3.Future<_i2.Result<_i5.UserModel>>.value(
               _FakeResult_0<_i5.UserModel>(
                 this,
                 Invocation.method(#getUserByEmail, [email]),
               ),
             ),
           )
-          as _i4.Future<_i2.Result<_i5.UserModel>>);
+          as _i3.Future<_i2.Result<_i5.UserModel>>);
 
   @override
-  _i4.Future<_i2.Result<_i5.UserModel>> createUser(_i5.UserModel? user) =>
+  _i3.Future<_i2.Result<_i5.UserModel>> createUser(_i5.UserModel? user) =>
       (super.noSuchMethod(
             Invocation.method(#createUser, [user]),
-            returnValue: _i4.Future<_i2.Result<_i5.UserModel>>.value(
+            returnValue: _i3.Future<_i2.Result<_i5.UserModel>>.value(
               _FakeResult_0<_i5.UserModel>(
                 this,
                 Invocation.method(#createUser, [user]),
               ),
             ),
           )
-          as _i4.Future<_i2.Result<_i5.UserModel>>);
+          as _i3.Future<_i2.Result<_i5.UserModel>>);
 
   @override
-  _i4.Future<_i2.Result<_i5.UserModel>> updateUser(_i5.UserModel? user) =>
+  _i3.Future<_i2.Result<_i5.UserModel>> updateUser(_i5.UserModel? user) =>
       (super.noSuchMethod(
             Invocation.method(#updateUser, [user]),
-            returnValue: _i4.Future<_i2.Result<_i5.UserModel>>.value(
+            returnValue: _i3.Future<_i2.Result<_i5.UserModel>>.value(
               _FakeResult_0<_i5.UserModel>(
                 this,
                 Invocation.method(#updateUser, [user]),
               ),
             ),
           )
-          as _i4.Future<_i2.Result<_i5.UserModel>>);
+          as _i3.Future<_i2.Result<_i5.UserModel>>);
 
   @override
-  _i4.Future<_i2.Result<void>> deleteUser(String? userId) =>
+  _i3.Future<_i2.Result<void>> deleteUser(String? userId) =>
       (super.noSuchMethod(
             Invocation.method(#deleteUser, [userId]),
-            returnValue: _i4.Future<_i2.Result<void>>.value(
+            returnValue: _i3.Future<_i2.Result<void>>.value(
               _FakeResult_0<void>(
                 this,
                 Invocation.method(#deleteUser, [userId]),
               ),
             ),
           )
-          as _i4.Future<_i2.Result<void>>);
+          as _i3.Future<_i2.Result<void>>);
 
   @override
-  _i4.Future<_i2.Result<bool>> userExists(String? userId) =>
+  _i3.Future<_i2.Result<bool>> userExists(String? userId) =>
       (super.noSuchMethod(
             Invocation.method(#userExists, [userId]),
-            returnValue: _i4.Future<_i2.Result<bool>>.value(
+            returnValue: _i3.Future<_i2.Result<bool>>.value(
               _FakeResult_0<bool>(
                 this,
                 Invocation.method(#userExists, [userId]),
               ),
             ),
           )
-          as _i4.Future<_i2.Result<bool>>);
+          as _i3.Future<_i2.Result<bool>>);
 
   @override
-  _i4.Future<_i2.Result<List<_i5.UserModel>>> getUsersCreatedBetween(
+  _i3.Future<_i2.Result<List<_i5.UserModel>>> getUsersCreatedBetween(
     DateTime? startDate,
     DateTime? endDate,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#getUsersCreatedBetween, [startDate, endDate]),
-            returnValue: _i4.Future<_i2.Result<List<_i5.UserModel>>>.value(
+            returnValue: _i3.Future<_i2.Result<List<_i5.UserModel>>>.value(
               _FakeResult_0<List<_i5.UserModel>>(
                 this,
                 Invocation.method(#getUsersCreatedBetween, [
@@ -135,54 +141,73 @@ class MockUserFirestoreDataSource extends _i1.Mock
               ),
             ),
           )
-          as _i4.Future<_i2.Result<List<_i5.UserModel>>>);
+          as _i3.Future<_i2.Result<List<_i5.UserModel>>>);
 
   @override
-  _i4.Future<_i2.Result<List<_i5.UserModel>>> searchUsersByName(
+  _i3.Future<_i2.Result<List<_i5.UserModel>>> searchUsersByName(
     String? query,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#searchUsersByName, [query]),
-            returnValue: _i4.Future<_i2.Result<List<_i5.UserModel>>>.value(
+            returnValue: _i3.Future<_i2.Result<List<_i5.UserModel>>>.value(
               _FakeResult_0<List<_i5.UserModel>>(
                 this,
                 Invocation.method(#searchUsersByName, [query]),
               ),
             ),
           )
-          as _i4.Future<_i2.Result<List<_i5.UserModel>>>);
+          as _i3.Future<_i2.Result<List<_i5.UserModel>>>);
 
   @override
-  _i4.Future<_i2.Result<List<_i5.UserModel>>> getTopUsersByScore(int? limit) =>
+  _i3.Future<_i2.Result<List<_i5.UserModel>>> getTopUsersByScore(int? limit) =>
       (super.noSuchMethod(
             Invocation.method(#getTopUsersByScore, [limit]),
-            returnValue: _i4.Future<_i2.Result<List<_i5.UserModel>>>.value(
+            returnValue: _i3.Future<_i2.Result<List<_i5.UserModel>>>.value(
               _FakeResult_0<List<_i5.UserModel>>(
                 this,
                 Invocation.method(#getTopUsersByScore, [limit]),
               ),
             ),
           )
-          as _i4.Future<_i2.Result<List<_i5.UserModel>>>);
+          as _i3.Future<_i2.Result<List<_i5.UserModel>>>);
 
   @override
-  _i4.Stream<_i2.Result<_i5.UserModel>> watchUser(String? userId) =>
+  _i3.Stream<_i2.Result<_i5.UserModel>> watchUser(String? userId) =>
       (super.noSuchMethod(
             Invocation.method(#watchUser, [userId]),
-            returnValue: _i4.Stream<_i2.Result<_i5.UserModel>>.empty(),
+            returnValue: _i3.Stream<_i2.Result<_i5.UserModel>>.empty(),
           )
-          as _i4.Stream<_i2.Result<_i5.UserModel>>);
+          as _i3.Stream<_i2.Result<_i5.UserModel>>);
 
   @override
-  _i4.Future<_i2.Result<void>> batchUpdateUsers(List<_i5.UserModel>? users) =>
+  _i3.Future<_i2.Result<void>> batchUpdateUsers(List<_i5.UserModel>? users) =>
       (super.noSuchMethod(
             Invocation.method(#batchUpdateUsers, [users]),
-            returnValue: _i4.Future<_i2.Result<void>>.value(
+            returnValue: _i3.Future<_i2.Result<void>>.value(
               _FakeResult_0<void>(
                 this,
                 Invocation.method(#batchUpdateUsers, [users]),
               ),
             ),
           )
-          as _i4.Future<_i2.Result<void>>);
+          as _i3.Future<_i2.Result<void>>);
+
+  @override
+  _i3.Future<T> handleRemoteOperation<T>(_i3.Future<T> Function()? operation) =>
+      (super.noSuchMethod(
+            Invocation.method(#handleRemoteOperation, [operation]),
+            returnValue:
+                _i6.ifNotNull(
+                  _i6.dummyValueOrNull<T>(
+                    this,
+                    Invocation.method(#handleRemoteOperation, [operation]),
+                  ),
+                  (T v) => _i3.Future<T>.value(v),
+                ) ??
+                _FakeFuture_1<T>(
+                  this,
+                  Invocation.method(#handleRemoteOperation, [operation]),
+                ),
+          )
+          as _i3.Future<T>);
 }
