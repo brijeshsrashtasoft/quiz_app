@@ -7,11 +7,8 @@ import '../../../../shared/constants/app_text_styles.dart';
 import '../../../../shared/constants/app_spacing.dart';
 import '../../../../shared/constants/app_animations.dart';
 import '../../../../shared/widgets/buttons/primary_button.dart';
-import '../../../../shared/widgets/layout/page_layout.dart';
 import '../../../../core/navigation/route_constants.dart';
-import '../../../../core/errors/failures.dart';
 import '../providers/auth_providers.dart';
-import '../widgets/auth_header.dart';
 import '../widgets/form_validation_feedback.dart';
 
 /// Email verification page with Firebase Authentication integration
@@ -120,15 +117,23 @@ class _EmailVerificationPageState extends ConsumerState<EmailVerificationPage>
     setState(() => _isCheckingVerification = true);
 
     final authService = ref.read(authServiceProvider);
-    final result = await authService.checkEmailVerification();
+    
+    // First reload user data to get latest verification status
+    final reloadResult = await authService.reloadUser();
 
     if (mounted) {
       setState(() => _isCheckingVerification = false);
 
-      result.when(
-        success: (isVerified) {
+      reloadResult.when(
+        success: (_) {
+          // Check if email is now verified
+          final isVerified = authService.isEmailVerified;
+          
           if (isVerified) {
+            setState(() => _successMessage = 'Email verified successfully!');
             context.go(RouteConstants.home);
+          } else {
+            setState(() => _errorMessage = 'Email not yet verified. Please check your email.');
           }
         },
         failure: (failure) {
