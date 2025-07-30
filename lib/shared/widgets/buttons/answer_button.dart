@@ -58,14 +58,14 @@ class _AnswerButtonState extends State<AnswerButton>
       end: 0.95,
     ).animate(CurvedAnimation(
       parent: _scaleController,
-      curve: AppAnimations.bounceInOut,
+      curve: AppAnimations.bounce,
     ));
     _resultAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
     ).animate(CurvedAnimation(
       parent: _resultController,
-      curve: AppAnimations.slideInOut,
+      curve: AppAnimations.easeInOut,
     ));
   }
 

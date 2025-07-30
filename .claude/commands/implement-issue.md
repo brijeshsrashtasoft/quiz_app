@@ -83,6 +83,44 @@ git checkout -b feature/issue-$ARGUMENTS-{short-description}
    "Use the code-reviewer subagent to review the complete implementation for issue #$ARGUMENTS"
 4. **Integration Check**: Verify all agent contributions work together seamlessly
 
+**🚨 MANDATORY COMPLETION REQUIREMENTS**
+
+**CRITICAL: ALL agents or sub-agents MUST complete 100% of their assigned tasks. NO PARTIAL WORK ALLOWED.**
+
+**Completion Verification Checklist:**
+- [ ] ✅ **ALL agent tasks 100% complete** - No pending work from any assigned agent
+- [ ] ✅ **Platform verification passed** - All platforms (Web, Android, iOS) build and run successfully  
+- [ ] ✅ **Quality metrics achieved** - Tests pass, coverage >80%, no critical errors
+- [ ] ✅ **Documentation updated** - All relevant docs updated by each agent
+- [ ] ✅ **Custom commands updated** - Any new commands or procedures documented
+- [ ] ✅ **Integration validated** - All agent contributions work together seamlessly
+
+**Agent Task Completion Requirements:**
+Each assigned agent MUST deliver:
+1. **100% Implementation**: Complete all components within their specialization
+2. **Comprehensive Testing**: All code covered by appropriate tests (unit/widget/integration)
+3. **Platform Compatibility**: Code verified working on all target platforms
+4. **Documentation Updates**: Update relevant documentation files
+5. **Performance Validation**: Meet all performance requirements in their domain
+6. **Integration Points**: Ensure smooth integration with other agents' work
+
+**Verification Commands:**
+```bash
+# MANDATORY: Verify ALL platforms build successfully
+flutter build web --release
+flutter build apk --release  
+flutter build ios --release --no-codesign
+
+# MANDATORY: Verify ALL tests pass
+flutter test --coverage
+
+# MANDATORY: Verify code quality
+flutter analyze
+dart format --set-exit-if-changed .
+```
+
+**NO PULL REQUEST** can be created until ALL completion requirements are met.
+
 **Quality Assurance**: The code-reviewer validates against all standards documented in CLAUDE.md, including:
 - Clean Architecture compliance
 - UI design system adherence (docs/ui_guideline.md)

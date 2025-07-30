@@ -38,12 +38,35 @@ git checkout -b feature/new-$ARGUMENTS-implementation
    - Use approved colors and spacing only
    - Write widget tests
 
-6. **Integration & PR**:
+6. **MANDATORY Agent Completion Requirements**:
+   - **ALL agents must complete 100% of assigned tasks**
+   - **Platform verification required**: All platforms (Web, Android, iOS) must build successfully
+   - **Documentation updates mandatory**: All relevant docs must be updated
+   - **Custom commands updated**: Any new procedures must be documented
+   - **Integration validated**: All agent contributions must work together seamlessly
+
+7. **Integration & PR**:
    ```bash
-   flutter test && flutter analyze && dart format .
-   git add . && git commit -m "feat($ARGUMENTS): implement feature - closes #issue"
+   # MANDATORY: Platform verification before PR
+   flutter build web --release
+   flutter build apk --release  
+   flutter build ios --release --no-codesign
+   
+   # MANDATORY: Quality checks
+   flutter test --coverage && flutter analyze && dart format .
+   
+   # Commit only after ALL verification passes
+   git add . && git commit -m "feat($ARGUMENTS): implement feature - closes #issue
+
+   🤖 Generated with [Claude Code](https://claude.ai/code)
+   
+   Co-Authored-By: Claude <noreply@anthropic.com>"
+   
    git push -u origin feature/new-$ARGUMENTS-implementation
    gh pr create --base development --title "feat($ARGUMENTS): implement feature"
    ```
 
-**CRITICAL**: Never hardcode colors/spacing - use constants from CLAUDE.md only!
+**CRITICAL**: 
+- Never hardcode colors/spacing - use constants from CLAUDE.md only!
+- **NO PR creation until ALL completion requirements are met**
+- All agents must complete 100% of their tasks before any PR submission
