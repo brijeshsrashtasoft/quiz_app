@@ -50,17 +50,66 @@ This includes permission to:
 - **.claude/agents/** - Individual sub-agent roles and responsibilities
 - **scripts/develop-feature.sh** - Automated branch creation for issues
 
-**STEP 0: MANDATORY BRANCH VERIFICATION**
+**STEP 0: MANDATORY BRANCH VERIFICATION & CONTINUATION CHECK**
 
-**CRITICAL**: Before any work begins, verify current branch status:
+**CRITICAL**: Before any work begins, verify current branch status and check for existing work:
 
 ```bash
-# Ensure we're on the correct branch
+# Get current branch and issue-specific branch names
 current_branch=$(git branch --show-current)
-if [[ "$current_branch" != "development" && ! "$current_branch" =~ ^feature/issue-$ARGUMENTS ]]; then
-    echo "❌ ERROR: Not on development or correct feature branch!"
+target_branch="feature/issue-$ARGUMENTS"
+issue_branch_pattern="^feature/issue-$ARGUMENTS"
+
+# CASE 1: Already on the correct issue branch - CONTINUE EXISTING WORK
+if [[ "$current_branch" =~ $issue_branch_pattern ]]; then
+    echo "✅ CONTINUATION MODE: Already on issue #$ARGUMENTS branch ($current_branch)"
+    echo "🔍 Checking existing work status..."
+    
+    # Check git status for uncommitted changes
+    if [[ -n $(git status --porcelain) ]]; then
+        echo "📝 UNCOMMITTED CHANGES DETECTED:"
+        git status --short
+        echo ""
+        echo "🔄 CONTINUING from existing progress..."
+    else
+        echo "✅ Working directory clean - checking previous commits..."
+        git log --oneline -5 --grep="issue.*$ARGUMENTS" --grep="closes.*#$ARGUMENTS" --grep="#$ARGUMENTS" -i
+        echo ""
+        echo "🔄 CONTINUING implementation from current progress..."
+    fi
+    
+    # Analyze current implementation status
+    echo "📊 CURRENT IMPLEMENTATION STATUS ANALYSIS:"
+    echo "- Branch: $current_branch"
+    echo "- Files changed in this branch:"
+    git diff --name-only $(git merge-base HEAD development)..HEAD | head -10
+    echo ""
+    
+    # Check if tests exist for this issue
+    if ls test/**/*$ARGUMENTS* 2>/dev/null || ls test/**/*error*handling* 2>/dev/null; then
+        echo "🧪 EXISTING TESTS FOUND - will continue TDD approach"
+    else
+        echo "⚠️ NO TESTS FOUND - will implement TDD from current state"
+    fi
+    
+    echo "⏭️ SKIPPING branch creation - continuing with existing work..."
+    
+# CASE 2: On development branch - CREATE NEW BRANCH
+elif [[ "$current_branch" == "development" ]]; then
+    echo "✅ On development branch - proceeding with normal workflow"
+    
+# CASE 3: On wrong branch - SWITCH TO DEVELOPMENT  
+else
+    echo "❌ ERROR: Not on development or correct feature branch ($current_branch)!"
     echo "🔧 Switching to development branch..."
     git checkout development
+    
+    # Verify switch was successful
+    if [[ $(git branch --show-current) != "development" ]]; then
+        echo "🚨 FAILED to switch to development branch!"
+        echo "Please manually switch to development branch and re-run command"
+        exit 1
+    fi
 fi
 ```
 
@@ -109,33 +158,67 @@ echo "Current agent cannot proceed until conflicts are resolved."
 **Only proceed if NO open PRs exist:**
 
 **🚨 BRANCH CREATION RULES (MANDATORY):**
-- **ALWAYS** create feature branches from `development` branch ONLY
+- **ALWAYS** create feature branches from `development` branch ONLY  
 - **NEVER** create branches from `main` or any other feature branch
 - **DO NOT** analyze or reference code from branches other than your assigned feature branch
 
 ```bash
-# ONLY if no open PRs exist
-git checkout development
-git pull origin development  # Get latest merged changes
-git checkout -b feature/issue-$ARGUMENTS-{short-description}
+# Get current branch status again after PR checks
+current_branch=$(git branch --show-current)
+issue_branch_pattern="^feature/issue-$ARGUMENTS"
 
-# Verify correct branch creation
-git log --oneline -1 --decorate
-echo "✅ Feature branch created from development branch"
+# CONTINUATION MODE: Skip branch creation if already on correct branch  
+if [[ "$current_branch" =~ $issue_branch_pattern ]]; then
+    echo "🔄 CONTINUATION MODE: Already on correct branch ($current_branch)"  
+    echo "⏭️ Skipping branch creation - proceeding with existing work"
+    
+    # Ensure we have latest changes from development for context
+    echo "🔄 Fetching latest development changes for context..."
+    git fetch origin development
+    
+    # Show current branch status  
+    git log --oneline -1 --decorate
+    echo "✅ Continuing on existing feature branch"
+    
+# NORMAL MODE: Create new branch from development
+else
+    echo "🆕 NORMAL MODE: Creating new feature branch"
+    
+    # ONLY if no open PRs exist and not already on correct branch
+    git checkout development
+    git pull origin development  # Get latest merged changes
+    git checkout -b feature/issue-$ARGUMENTS-{short-description}
+
+    # Verify correct branch creation
+    git log --oneline -1 --decorate
+    echo "✅ Feature branch created from development branch"
+fi
 ```
 
 **STEP 4: PARALLEL AGENT COORDINATION (MANDATORY)**
 
 **CRITICAL**: ALWAYS use multiple sub-agents in parallel for maximum speed. Never work directly - ALWAYS delegate to specialized agents.
 
-**Parallel Execution Instructions:**
+**CONTEXT-AWARE AGENT INSTRUCTIONS:**
+
+**For CONTINUATION MODE (already on correct branch with existing work):**
+"Continue implementation of issue #$ARGUMENTS using multiple specialized agents in parallel. Current branch analysis shows existing progress - agents should:
+
+1. **Assess Current State**: Review existing implementation and identify completion gaps
+2. **Continue TDD Approach**: Build upon existing tests or implement missing test coverage
+3. **Complete Missing Components**: Finish any incomplete implementations 
+4. **Maintain Consistency**: Ensure new work integrates seamlessly with existing code
+
+**For NORMAL MODE (new implementation):**
 "Launch multiple specialized agents simultaneously using separate Task tool calls in a single message for issue #$ARGUMENTS:
 
 **⚠️ AGENT BRANCH DISCIPLINE ⚠️**
 Each agent MUST:
-- Work ONLY on the feature branch created from `development`
-- NEVER checkout or analyze other branches (main, other features)
+- Work ONLY on the current feature/issue-$ARGUMENTS branch  
+- NEVER checkout or analyze other branches (main, other features, development)
 - Focus ONLY on their assigned feature/issue-$ARGUMENTS branch
+- **CONTINUATION MODE**: Review existing files and implementation before making changes
+- **CONTINUATION MODE**: Integrate new work with existing code patterns and architecture
 
 **For Setup/Infrastructure Issues**: Launch ALL in parallel:
 - flutter-architect subagent: Clean Architecture implementation
@@ -160,12 +243,15 @@ Each agent MUST:
 - testing-specialist subagent: Real-time test coverage
 
 **EVERY AGENT MUST**:
-1. **Branch Discipline**: Work ONLY on feature/issue-$ARGUMENTS branch created from development
-2. **Platform Verification**: Run ./scripts/quality-check.sh after implementation
-3. **Parallel Coordination**: Work simultaneously with other assigned agents
-4. **Structured Communication**: Use handoff protocol when coordination needed
-5. **Quality Standards**: Follow all project standards and documentation
-6. **No Branch Hopping**: NEVER checkout or analyze code from other branches"
+1. **Branch Discipline**: Work ONLY on current feature/issue-$ARGUMENTS branch  
+2. **Continuation Awareness**: Check for existing work before making changes - analyze current files and progress
+3. **TDD Continuation**: If tests exist, ensure they pass; if missing, implement following TDD approach
+4. **Platform Verification**: Run ./scripts/quality-check.sh after implementation
+5. **Parallel Coordination**: Work simultaneously with other assigned agents
+6. **Structured Communication**: Use handoff protocol when coordination needed
+7. **Quality Standards**: Follow all project standards and documentation
+8. **Integration Focus**: Ensure new work integrates seamlessly with existing implementations
+9. **No Branch Hopping**: NEVER checkout or analyze code from other branches"
 
 **STEP 5: MANDATORY FINAL VALIDATION**
 

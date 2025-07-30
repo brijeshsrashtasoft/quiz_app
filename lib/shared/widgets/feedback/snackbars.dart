@@ -183,7 +183,7 @@ class _SnackBarContent extends StatelessWidget {
           Expanded(
             child: Text(
               message,
-              style: AppTextStyles.bodyMedium.copyWith(color: iconColor),
+              style: AppTextStyles.bodyText.copyWith(color: iconColor),
             ),
           ),
           if (actionLabel != null && onAction != null) ...[
@@ -274,8 +274,8 @@ class _LoadingSnackBarContent extends StatelessWidget {
           Expanded(
             child: Text(
               message,
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.textPrimary,
+              style: AppTextStyles.bodyText.copyWith(
+                color: AppColors.charcoal,
               ),
             ),
           ),
@@ -394,7 +394,7 @@ class _ToastWidgetState extends State<_ToastWidget>
                   Expanded(
                     child: Text(
                       widget.message,
-                      style: AppTextStyles.bodyMedium.copyWith(
+                      style: AppTextStyles.bodyText.copyWith(
                         color: AppColors.pureWhite,
                       ),
                     ),

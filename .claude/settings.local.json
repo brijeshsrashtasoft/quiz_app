@@ -93,7 +93,12 @@
       "Bash(claude mcp:*)",
       "Bash(claude:*)",
       "Bash(tree:*)",
-      "Bash(sed:*)"
+      "Bash(sed:*)",
+      "Bash(dart run build_runner build:*)",
+      "Bash(flutter packages pub run build_runner build:*)",
+      "Bash(flutter analyze:*)",
+      "Bash(flutter run:*)",
+      "Bash(flutter build:*)"
     ],
     "deny": [
       "Bash(sudo:*)",
