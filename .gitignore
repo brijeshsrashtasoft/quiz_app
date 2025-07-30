@@ -46,3 +46,13 @@ app.*.map.json
 
 # FVM Version Cache
 .fvm/
+
+# Generated files
+*.g.dart
+*.freezed.dart
+*.mocks.dart
+build_runner.yaml
+
+# Test coverage
+coverage/
+lcov.info
