@@ -93,8 +93,7 @@
       "Bash(claude mcp:*)",
       "Bash(claude:*)",
       "Bash(tree:*)",
-      "Bash(sed:*)",
-      "Bash(cat:*)"
+      "Bash(sed:*)"
     ],
     "deny": [
       "Bash(sudo:*)",
