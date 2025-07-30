@@ -2,19 +2,19 @@ import '../../../../core/base/base_usecase.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/utils/result.dart';
 import '../../../../core/utils/logger.dart';
-import '../entities/auth_entity.dart';
+import '../entities/user_entity.dart';
 import '../repositories/auth_repository.dart';
 
 /// Sign in with email and password use case
 /// Implements Clean Architecture use case pattern
 class SignInWithEmailUseCase
-    extends BaseUseCase<AuthEntity, SignInWithEmailParams> {
+    extends BaseUseCase<UserEntity, SignInWithEmailParams> {
   final AuthRepository repository;
 
   SignInWithEmailUseCase({required this.repository});
 
   @override
-  Future<Result<AuthEntity>> call(SignInWithEmailParams params) async {
+  Future<Result<UserEntity>> call(SignInWithEmailParams params) async {
     try {
       AppLogger.info('SignInWithEmailUseCase: Validating input parameters');
 
@@ -29,17 +29,17 @@ class SignInWithEmailUseCase
       );
 
       // Call repository to sign in
-      final result = await repository.signInWithEmailAndPassword(
+      final result = await repository.signInWithEmailPassword(
         email: params.email,
         password: params.password,
       );
 
       return result.when(
-        success: (authEntity) {
+        success: (userEntity) {
           AppLogger.info(
             'SignInWithEmailUseCase: Sign in successful for ${params.email}',
           );
-          return Result.success(authEntity);
+          return Result.success(userEntity);
         },
         failure: (failure) {
           AppLogger.error(
@@ -61,7 +61,7 @@ class SignInWithEmailUseCase
   }
 
   /// Validate input parameters
-  Result<AuthEntity> _validateParams(SignInWithEmailParams params) {
+  Result<UserEntity> _validateParams(SignInWithEmailParams params) {
     // Validate email format
     if (!_isValidEmail(params.email)) {
       return Result.failure(
@@ -80,7 +80,13 @@ class SignInWithEmailUseCase
       );
     }
 
-    return const Result.success(null);
+    // Return success with dummy result for validation only
+    return Result.success(UserEntity(
+      id: '',
+      email: params.email,
+      name: '',
+      createdAt: DateTime.now(),
+    ));
   }
 
   /// Email validation helper

@@ -8,6 +8,6 @@ class DeleteUserAccountUseCase extends BaseUseCase<void, NoParams> {
 
   @override
   Future<Result<void>> call(NoParams params) async {
-    return await repository.deleteUserAccount();
+    return await repository.deleteCurrentUser();
   }
 }

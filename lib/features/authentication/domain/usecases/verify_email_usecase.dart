@@ -24,6 +24,6 @@ class CheckEmailVerificationUseCase extends BaseUseCaseNoParams<bool> {
 
   @override
   Future<Result<bool>> call() async {
-    return await repository.isEmailVerified();
+    return Result.success(repository.isEmailVerified);
   }
 }
