@@ -280,13 +280,12 @@ class _GameJoinWidgetState extends ConsumerState<GameJoinWidget>
     return Column(
       children: [
         // PIN Input
-        TextInput(
+        CustomTextInput(
           controller: _pinController,
-          labelText: 'Game PIN',
-          hintText: 'Enter 6-digit game PIN',
+          label: 'Game PIN',
+          hint: 'Enter 6-digit game PIN',
           keyboardType: TextInputType.number,
-          textAlign: TextAlign.center,
-          prefixIcon: Icons.pin_outlined,
+          prefixIcon: Icon(Icons.pin_outlined, color: AppColors.coolGray),
           suffixIcon: IconButton(
             icon: const Icon(Icons.content_paste),
             onPressed: _pasteFromClipboard,
@@ -296,7 +295,7 @@ class _GameJoinWidgetState extends ConsumerState<GameJoinWidget>
           textInputAction: TextInputAction.done,
           onSubmitted: (_) => _handleJoinGame(),
           maxLength: 6,
-          style: AppTextStyles.questionText.copyWith(
+          textStyle: AppTextStyles.questionText.copyWith(
             letterSpacing: 4.0,
             fontFamily: 'monospace',
           ),

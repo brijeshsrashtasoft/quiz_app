@@ -30,6 +30,7 @@ class AppColors {
   static const Color offWhite = Color(0xFFF5F3F4);
   static const Color pureWhite = Color(0xFFFFFFFF);
   static const Color lightGray = Color(0xFFDFE6E9);
+  static const Color borderLight = Color(0xFFDFE6E9); // Border color for inputs
 
   // Dark Mode Colors
   static const Color darkBackground = Color(0xFF1E1E1E);

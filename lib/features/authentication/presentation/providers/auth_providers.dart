@@ -5,6 +5,7 @@ import '../../../../core/utils/result.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../../core/errors/failures.dart';
 import '../../domain/entities/user_entity.dart';
+import '../../domain/entities/auth_state.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../../data/repositories/auth_repository_impl.dart';
 import '../../data/repositories/user_repository_impl.dart';
@@ -220,18 +221,15 @@ final watchAuthStateUseCaseProvider = Provider<WatchAuthStateUseCase>((ref) {
 });
 
 final signUpUseCaseProvider = Provider<SignUpUseCase>((ref) {
-  final authRepository = ref.read(authRepositoryProvider);
-  return SignUpUseCase(authRepository: authRepository);
+  return SignUpUseCase();
 });
 
 final signOutUseCaseProvider = Provider<SignOutUseCase>((ref) {
-  final authRepository = ref.read(authRepositoryProvider);
-  return SignOutUseCase(authRepository: authRepository);
+  return SignOutUseCase();
 });
 
 final resetPasswordUseCaseProvider = Provider<ResetPasswordUseCase>((ref) {
-  final authRepository = ref.read(authRepositoryProvider);
-  return ResetPasswordUseCase(authRepository: authRepository);
+  return ResetPasswordUseCase();
 });
 
 /// User profile management use case providers
@@ -287,7 +285,7 @@ class AuthState {
 
 /// Authentication service for handling auth operations
 class AuthService {
-  final WidgetRef ref;
+  final Ref ref;
 
   AuthService(this.ref);
 

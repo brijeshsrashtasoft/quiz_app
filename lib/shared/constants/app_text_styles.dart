@@ -335,6 +335,27 @@ class AppTextStyles {
     return scoreDisplay;
   }
 
+  // Standard Material Design text styles
+  static const TextStyle bodyMedium = TextStyle(
+    fontFamily: _fontFamily,
+    fontFamilyFallback: _fontFamilyFallback,
+    fontSize: 14,
+    fontWeight: FontWeight.w400,
+    height: 1.4,
+    color: AppColors.textPrimary,
+    letterSpacing: 0.25,
+  );
+
+  static const TextStyle headlineMedium = TextStyle(
+    fontFamily: _fontFamily,
+    fontFamilyFallback: _fontFamilyFallback,
+    fontSize: 28,
+    fontWeight: FontWeight.w400,
+    height: 1.3,
+    color: AppColors.textPrimary,
+    letterSpacing: 0,
+  );
+
   static TextStyle getTimerStyle(int timeLeft) {
     if (timeLeft <= 5) return timerDisplayWarning;
     return timerDisplay;

@@ -9,8 +9,8 @@ import '../../../../shared/constants/app_animations.dart';
 import '../../../../shared/widgets/buttons/primary_button.dart';
 import '../../../../shared/widgets/inputs/text_input.dart';
 import '../../../../shared/widgets/layout/page_layout.dart';
-import '../../../../shared/widgets/feedback/loading_indicators.dart';
 import '../../../../core/navigation/route_constants.dart';
+import '../../../../core/errors/failures.dart';
 import '../providers/auth_providers.dart';
 import '../widgets/auth_header.dart';
 import '../widgets/social_auth_buttons.dart';
@@ -154,25 +154,24 @@ class _LoginPageState extends ConsumerState<LoginPage>
             const SizedBox(height: AppSpacing.sectionSpacing),
 
             // Email Input
-            TextInput(
+            CustomTextInput(
               controller: _emailController,
-              labelText: 'Email',
-              hintText: 'Enter your email address',
+              label: 'Email',
+              hint: 'Enter your email address',
               keyboardType: TextInputType.emailAddress,
-              prefixIcon: Icons.email_outlined,
-              validator: _validateEmail,
+              prefixIcon: Icon(Icons.email_outlined, color: AppColors.coolGray),
               textInputAction: TextInputAction.next,
             ),
 
             const SizedBox(height: AppSpacing.spacingL),
 
             // Password Input
-            TextInput(
+            CustomTextInput(
               controller: _passwordController,
-              labelText: 'Password',
-              hintText: 'Enter your password',
+              label: 'Password',
+              hint: 'Enter your password',
               obscureText: _obscurePassword,
-              prefixIcon: Icons.lock_outlined,
+              prefixIcon: Icon(Icons.lock_outlined, color: AppColors.coolGray),
               suffixIcon: IconButton(
                 icon: Icon(
                   _obscurePassword ? Icons.visibility : Icons.visibility_off,
@@ -181,7 +180,6 @@ class _LoginPageState extends ConsumerState<LoginPage>
                 onPressed: () =>
                     setState(() => _obscurePassword = !_obscurePassword),
               ),
-              validator: _validatePassword,
               textInputAction: TextInputAction.done,
               onSubmitted: (_) => _handleLogin(),
             ),

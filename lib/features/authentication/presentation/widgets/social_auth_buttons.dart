@@ -7,6 +7,7 @@ import '../../../../shared/constants/app_spacing.dart';
 import '../../../../shared/constants/app_dimensions.dart';
 import '../../../../shared/constants/app_animations.dart';
 import '../../../../core/navigation/route_constants.dart';
+import '../../../../core/errors/failures.dart';
 import '../providers/auth_providers.dart';
 
 /// Social authentication buttons widget with integrated auth functionality

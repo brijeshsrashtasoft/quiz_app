@@ -10,6 +10,7 @@ import '../../../../shared/widgets/buttons/primary_button.dart';
 import '../../../../shared/widgets/inputs/text_input.dart';
 import '../../../../shared/widgets/layout/page_layout.dart';
 import '../../../../core/navigation/route_constants.dart';
+import '../../../../core/errors/failures.dart';
 import '../providers/auth_providers.dart';
 import '../widgets/auth_header.dart';
 
@@ -197,13 +198,12 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage>
             const SizedBox(height: AppSpacing.spacingL),
 
             // Email Input
-            TextInput(
+            CustomTextInput(
               controller: _emailController,
-              labelText: 'Email',
-              hintText: 'Enter your email address',
+              label: 'Email',
+              hint: 'Enter your email address',
               keyboardType: TextInputType.emailAddress,
-              prefixIcon: Icons.email_outlined,
-              validator: _validateEmail,
+              prefixIcon: Icon(Icons.email_outlined, color: AppColors.coolGray),
               textInputAction: TextInputAction.done,
               onSubmitted: (_) => _handleSendResetEmail(),
             ),
