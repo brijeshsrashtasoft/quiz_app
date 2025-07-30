@@ -67,8 +67,9 @@ void main() {
       useCase = TestUseCase();
     });
 
-    testWidgets('should return success result when operation succeeds', 
-        (tester) async {
+    testWidgets('should return success result when operation succeeds', (
+      tester,
+    ) async {
       // Arrange
       const params = TestParams('success');
 
@@ -80,8 +81,9 @@ void main() {
       expect(result.dataOrNull, equals('test_success'));
     });
 
-    testWidgets('should return failure result when operation fails', 
-        (tester) async {
+    testWidgets('should return failure result when operation fails', (
+      tester,
+    ) async {
       // Arrange
       const params = TestParams('failure');
 
@@ -90,12 +92,13 @@ void main() {
 
       // Assert
       expect(result.isFailure, isTrue);
-      expect(result.failureOrNull?.userMessage, 
-          contains('Server error: test_failure'));
+      expect(
+        result.failureOrNull?.userMessage,
+        contains('Server error: test_failure'),
+      );
     });
 
-    testWidgets('should handle exceptions thrown by use case', 
-        (tester) async {
+    testWidgets('should handle exceptions thrown by use case', (tester) async {
       // Arrange
       const params = TestParams('exception');
 
@@ -128,8 +131,9 @@ void main() {
       useCase = TestSyncUseCase();
     });
 
-    testWidgets('should execute synchronously and return success', 
-        (tester) async {
+    testWidgets('should execute synchronously and return success', (
+      tester,
+    ) async {
       // Arrange
       const params = TestParams('sync_success');
 
@@ -141,8 +145,9 @@ void main() {
       expect(result.dataOrNull, equals('sync_test_success'));
     });
 
-    testWidgets('should execute synchronously and return failure', 
-        (tester) async {
+    testWidgets('should execute synchronously and return failure', (
+      tester,
+    ) async {
       // Arrange
       const params = TestParams('sync_failure');
 
@@ -151,8 +156,10 @@ void main() {
 
       // Assert
       expect(result.isFailure, isTrue);
-      expect(result.failureOrNull?.userMessage, 
-          contains('Validation error: sync_test_failure'));
+      expect(
+        result.failureOrNull?.userMessage,
+        contains('Validation error: sync_test_failure'),
+      );
     });
   });
 
@@ -186,8 +193,10 @@ void main() {
 
       // Assert
       expect(result.isFailure, isTrue);
-      expect(result.failureOrNull?.userMessage, 
-          contains('Network error: stream_test_failure'));
+      expect(
+        result.failureOrNull?.userMessage,
+        contains('Network error: stream_test_failure'),
+      );
     });
   });
 

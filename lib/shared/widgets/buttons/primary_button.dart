@@ -47,13 +47,12 @@ class _PrimaryButtonState extends State<PrimaryButton>
       duration: AppAnimations.shortAnimation,
       vsync: this,
     );
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 0.95,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: AppAnimations.bounce,
-    ));
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: AppAnimations.bounce,
+      ),
+    );
   }
 
   @override
@@ -83,9 +82,9 @@ class _PrimaryButtonState extends State<PrimaryButton>
   @override
   Widget build(BuildContext context) {
     final backgroundColor = widget.backgroundColor ?? AppColors.vibrantPurple;
-    final textColor = widget.textColor ?? 
-        AppColors.getAccessibleTextColor(backgroundColor);
-    
+    final textColor =
+        widget.textColor ?? AppColors.getAccessibleTextColor(backgroundColor);
+
     final isInteractive = !widget.isDisabled && !widget.isLoading;
 
     return Semantics(
@@ -106,18 +105,22 @@ class _PrimaryButtonState extends State<PrimaryButton>
                 width: widget.width ?? double.infinity,
                 height: widget.height ?? AppDimensions.buttonHeight,
                 decoration: BoxDecoration(
-                  color: widget.isDisabled 
-                      ? AppColors.disabled 
+                  color: widget.isDisabled
+                      ? AppColors.disabled
                       : backgroundColor,
-                  borderRadius: BorderRadius.circular(AppDimensions.buttonRadius),
-                  boxShadow: isInteractive ? [
-                    BoxShadow(
-                      color: AppColors.shadowButton,
-                      offset: const Offset(0, 4),
-                      blurRadius: 8,
-                      spreadRadius: 0,
-                    ),
-                  ] : null,
+                  borderRadius: BorderRadius.circular(
+                    AppDimensions.buttonRadius,
+                  ),
+                  boxShadow: isInteractive
+                      ? [
+                          BoxShadow(
+                            color: AppColors.shadowButton,
+                            offset: const Offset(0, 4),
+                            blurRadius: 8,
+                            spreadRadius: 0,
+                          ),
+                        ]
+                      : null,
                 ),
                 child: widget.isLoading
                     ? Center(
@@ -126,7 +129,9 @@ class _PrimaryButtonState extends State<PrimaryButton>
                           height: 24,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(textColor),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              textColor,
+                            ),
                           ),
                         ),
                       )
@@ -134,11 +139,7 @@ class _PrimaryButtonState extends State<PrimaryButton>
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           if (widget.icon != null) ...[
-                            Icon(
-                              widget.icon,
-                              color: textColor,
-                              size: 20,
-                            ),
+                            Icon(widget.icon, color: textColor, size: 20),
                             SizedBox(width: AppSpacing.spacingS),
                           ],
                           Flexible(

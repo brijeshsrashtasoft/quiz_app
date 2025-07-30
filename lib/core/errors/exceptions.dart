@@ -70,16 +70,16 @@ class DataSourceException implements Exception {
   final DataSourceExceptionType type;
 
   const DataSourceException.server({required this.message, this.code})
-      : type = DataSourceExceptionType.server;
+    : type = DataSourceExceptionType.server;
 
   const DataSourceException.network({required this.message, this.code})
-      : type = DataSourceExceptionType.network;
+    : type = DataSourceExceptionType.network;
 
   const DataSourceException.auth({required this.message, this.code})
-      : type = DataSourceExceptionType.auth;
+    : type = DataSourceExceptionType.auth;
 
   const DataSourceException.cache({required this.message, this.code})
-      : type = DataSourceExceptionType.cache;
+    : type = DataSourceExceptionType.cache;
 
   @override
   String toString() =>

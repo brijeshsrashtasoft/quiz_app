@@ -92,7 +92,9 @@
       "WebFetch(domain:pub.dev)",
       "Bash(claude mcp:*)",
       "Bash(claude:*)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(sed:*)",
+      "Bash(cat:*)"
     ],
     "deny": [
       "Bash(sudo:*)",

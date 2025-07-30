@@ -37,25 +37,21 @@ class ResponsiveGrid extends StatelessWidget {
 
   Widget _buildGrid(int columns) {
     if (children.isEmpty) return const SizedBox.shrink();
-    
+
     final rows = <Widget>[];
-    
+
     for (int i = 0; i < children.length; i += columns) {
       final rowChildren = <Widget>[];
-      
+
       for (int j = 0; j < columns && i + j < children.length; j++) {
-        rowChildren.add(
-          Expanded(
-            child: children[i + j],
-          ),
-        );
-        
+        rowChildren.add(Expanded(child: children[i + j]));
+
         // Add spacing between columns (except for last column)
         if (j < columns - 1 && i + j + 1 < children.length) {
           rowChildren.add(SizedBox(width: spacing));
         }
       }
-      
+
       // Fill remaining columns with empty space if needed
       while (rowChildren.length / 2 < columns) {
         if (rowChildren.isNotEmpty) {
@@ -63,7 +59,7 @@ class ResponsiveGrid extends StatelessWidget {
         }
         rowChildren.add(const Expanded(child: SizedBox.shrink()));
       }
-      
+
       rows.add(
         Row(
           crossAxisAlignment: crossAxisAlignment,
@@ -71,13 +67,13 @@ class ResponsiveGrid extends StatelessWidget {
           children: rowChildren,
         ),
       );
-      
+
       // Add spacing between rows (except for last row)
       if (i + columns < children.length) {
         rows.add(SizedBox(height: runSpacing));
       }
     }
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: rows,
@@ -103,43 +99,59 @@ class StaggeredGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (children.isEmpty) return const SizedBox.shrink();
-    
+
     final columnChildren = List.generate(columns, (index) => <Widget>[]);
-    
+
     // Distribute children across columns
     for (int i = 0; i < children.length; i++) {
       columnChildren[i % columns].add(children[i]);
     }
-    
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: columnChildren.asMap().entries.map((entry) {
-        final index = entry.key;
-        final widgets = entry.value;
-        
-        return Expanded(
-          child: Column(
-            children: widgets.asMap().entries.map((widgetEntry) {
-              final widgetIndex = widgetEntry.key;
-              final widget = widgetEntry.value;
-              
-              return Column(
-                children: [
-                  widget,
-                  if (widgetIndex < widgets.length - 1)
-                    SizedBox(height: runSpacing),
-                ],
-              );
-            }).toList(),
-          ),
-        );
-      }).expand((widget) => [
-        widget,
-        if (columnChildren.indexOf(columnChildren.firstWhere(
-          (element) => element == columnChildren[columnChildren.indexOf(widget as List<Widget>)]
-        )) < columns - 1)
-          SizedBox(width: spacing),
-      ]).where((widget) => widget is! List).cast<Widget>().toList(),
+      children: columnChildren
+          .asMap()
+          .entries
+          .map((entry) {
+            final index = entry.key;
+            final widgets = entry.value;
+
+            return Expanded(
+              child: Column(
+                children: widgets.asMap().entries.map((widgetEntry) {
+                  final widgetIndex = widgetEntry.key;
+                  final widget = widgetEntry.value;
+
+                  return Column(
+                    children: [
+                      widget,
+                      if (widgetIndex < widgets.length - 1)
+                        SizedBox(height: runSpacing),
+                    ],
+                  );
+                }).toList(),
+              ),
+            );
+          })
+          .expand(
+            (widget) => [
+              widget,
+              if (columnChildren.indexOf(
+                    columnChildren.firstWhere(
+                      (element) =>
+                          element ==
+                          columnChildren[columnChildren.indexOf(
+                            widget as List<Widget>,
+                          )],
+                    ),
+                  ) <
+                  columns - 1)
+                SizedBox(width: spacing),
+            ],
+          )
+          .where((widget) => widget is! List)
+          .cast<Widget>()
+          .toList(),
     );
   }
 }
@@ -162,28 +174,19 @@ class GridItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget content = child;
-    
+
     if (padding != null) {
-      content = Padding(
-        padding: padding!,
-        child: content,
-      );
+      content = Padding(padding: padding!, child: content);
     }
-    
+
     if (decoration != null) {
-      content = Container(
-        decoration: decoration,
-        child: content,
-      );
+      content = Container(decoration: decoration, child: content);
     }
-    
+
     if (aspectRatio != null) {
-      content = AspectRatio(
-        aspectRatio: aspectRatio!,
-        child: content,
-      );
+      content = AspectRatio(aspectRatio: aspectRatio!, child: content);
     }
-    
+
     return content;
   }
 }

@@ -44,20 +44,18 @@ class _QuizCardState extends State<QuizCard>
       duration: AppAnimations.shortAnimation,
       vsync: this,
     );
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 0.98,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: AppAnimations.bounce,
-    ));
-    _elevationAnimation = Tween<double>(
-      begin: 4.0,
-      end: 8.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: AppAnimations.easeInOut,
-    ));
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.98).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: AppAnimations.bounce,
+      ),
+    );
+    _elevationAnimation = Tween<double>(begin: 4.0, end: 8.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: AppAnimations.easeInOut,
+      ),
+    );
   }
 
   @override
@@ -85,7 +83,8 @@ class _QuizCardState extends State<QuizCard>
 
     return Semantics(
       button: true,
-      label: '${widget.title}. ${widget.description}. ${widget.questionCount} questions',
+      label:
+          '${widget.title}. ${widget.description}. ${widget.questionCount} questions',
       child: AnimatedBuilder(
         animation: _animationController,
         builder: (context, child) {
@@ -106,10 +105,7 @@ class _QuizCardState extends State<QuizCard>
                   color: cardColor,
                   borderRadius: BorderRadius.circular(AppDimensions.cardRadius),
                   border: widget.isSelected
-                      ? Border.all(
-                          color: AppColors.vibrantPurple,
-                          width: 2,
-                        )
+                      ? Border.all(color: AppColors.vibrantPurple, width: 2)
                       : null,
                   boxShadow: [
                     BoxShadow(
@@ -151,7 +147,7 @@ class _QuizCardState extends State<QuizCard>
                             )
                           : null,
                     ),
-                    
+
                     // Content
                     Padding(
                       padding: EdgeInsets.all(AppSpacing.spacingM),
@@ -167,9 +163,9 @@ class _QuizCardState extends State<QuizCard>
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          
+
                           SizedBox(height: AppSpacing.spacingS),
-                          
+
                           // Description
                           Text(
                             widget.description,
@@ -179,9 +175,9 @@ class _QuizCardState extends State<QuizCard>
                             maxLines: 3,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          
+
                           SizedBox(height: AppSpacing.spacingM),
-                          
+
                           // Footer with question count
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -214,7 +210,7 @@ class _QuizCardState extends State<QuizCard>
                                   ],
                                 ),
                               ),
-                              
+
                               if (widget.isSelected)
                                 Container(
                                   padding: EdgeInsets.all(AppSpacing.spacingXS),
