@@ -2,7 +2,8 @@ import '../../../../core/errors/exceptions.dart';
 import '../../../../core/utils/result.dart';
 import '../../../../core/utils/exception_mapper.dart';
 import '../../../../core/base/base_repository.dart';
-import '../../domain/entities/quiz_entity.dart';
+import '../../domain/entities/quiz.dart';
+import '../../domain/entities/question_entities.dart';
 import '../../domain/repositories/quiz_repository.dart';
 import '../datasources/quiz_firestore_datasource.dart';
 import '../models/quiz_model.dart';
@@ -15,7 +16,7 @@ class QuizRepositoryImpl extends BaseRepository implements QuizRepository {
   QuizRepositoryImpl({required this.dataSource});
 
   @override
-  Future<Result<QuizEntity>> getQuizById(String quizId) async {
+  Future<Result<Quiz>> getQuizById(String quizId) async {
     try {
       if (quizId.isEmpty) {
         return Result.failure(
@@ -42,14 +43,14 @@ class QuizRepositoryImpl extends BaseRepository implements QuizRepository {
   }
 
   @override
-  Future<Result<QuizEntity>> createQuiz(QuizEntity quiz) async {
+  Future<Result<Quiz>> createQuiz(Quiz quiz) async {
     try {
       final validationError = _validateQuiz(quiz);
       if (validationError != null) {
         return Result.failure(validationError.toFailure());
       }
 
-      final quizModel = quiz.toModel();
+      final quizModel = QuizModel.fromEntity(quiz);
       final result = await dataSource.createQuiz(quizModel);
 
       return result.when(
@@ -67,14 +68,14 @@ class QuizRepositoryImpl extends BaseRepository implements QuizRepository {
   }
 
   @override
-  Future<Result<QuizEntity>> updateQuiz(QuizEntity quiz) async {
+  Future<Result<Quiz>> updateQuiz(Quiz quiz) async {
     try {
       final validationError = _validateQuiz(quiz);
       if (validationError != null) {
         return Result.failure(validationError.toFailure());
       }
 
-      final quizModel = quiz.toModel();
+      final quizModel = QuizModel.fromEntity(quiz);
       final result = await dataSource.updateQuiz(quizModel);
 
       return result.when(
@@ -114,7 +115,7 @@ class QuizRepositoryImpl extends BaseRepository implements QuizRepository {
   }
 
   @override
-  Future<Result<List<QuizEntity>>> getPublicQuizzes({
+  Future<Result<List<Quiz>>> getPublicQuizzes({
     int? limit,
     DateTime? lastCreatedAt,
   }) async {
@@ -125,8 +126,7 @@ class QuizRepositoryImpl extends BaseRepository implements QuizRepository {
       }
 
       final result = await dataSource.getPublicQuizzes(
-        limit: limit,
-        lastCreatedAt: lastCreatedAt,
+        limit: limit ?? 20,
       );
 
       return result.when(
@@ -146,7 +146,7 @@ class QuizRepositoryImpl extends BaseRepository implements QuizRepository {
   }
 
   @override
-  Future<Result<List<QuizEntity>>> getQuizzesByUser(
+  Future<Result<List<Quiz>>> getQuizzesByUser(
     String userId, {
     int? limit,
     DateTime? lastCreatedAt,
@@ -167,8 +167,7 @@ class QuizRepositoryImpl extends BaseRepository implements QuizRepository {
 
       final result = await dataSource.getQuizzesByUser(
         userId,
-        limit: limit,
-        lastCreatedAt: lastCreatedAt,
+        limit: limit ?? 20,
       );
 
       return result.when(
@@ -188,7 +187,7 @@ class QuizRepositoryImpl extends BaseRepository implements QuizRepository {
   }
 
   @override
-  Future<Result<List<QuizEntity>>> getQuizzesByCategory(
+  Future<Result<List<Quiz>>> getQuizzesByCategory(
     String category, {
     int? limit,
     DateTime? lastCreatedAt,
@@ -209,8 +208,7 @@ class QuizRepositoryImpl extends BaseRepository implements QuizRepository {
 
       final result = await dataSource.getQuizzesByCategory(
         category,
-        limit: limit,
-        lastCreatedAt: lastCreatedAt,
+        limit: limit ?? 20,
       );
 
       return result.when(
@@ -230,7 +228,7 @@ class QuizRepositoryImpl extends BaseRepository implements QuizRepository {
   }
 
   @override
-  Future<Result<List<QuizEntity>>> searchQuizzesByTitle(String query) async {
+  Future<Result<List<Quiz>>> searchQuizzesByTitle(String query) async {
     try {
       if (query.length < 2) {
         return Result.failure(
@@ -262,14 +260,14 @@ class QuizRepositoryImpl extends BaseRepository implements QuizRepository {
   }
 
   @override
-  Future<Result<List<QuizEntity>>> getPopularQuizzes(int limit) async {
+  Future<Result<List<Quiz>>> getPopularQuizzes(int limit) async {
     try {
       final validationError = _validatePaginationParams(limit);
       if (validationError != null) {
         return Result.failure(validationError.toFailure());
       }
 
-      final result = await dataSource.getPopularQuizzes(limit);
+      final result = await dataSource.getPopularQuizzes(limit: limit);
 
       return result.when(
         success: (quizModels) => Result.success(
@@ -288,14 +286,14 @@ class QuizRepositoryImpl extends BaseRepository implements QuizRepository {
   }
 
   @override
-  Future<Result<List<QuizEntity>>> getRecentQuizzes(int limit) async {
+  Future<Result<List<Quiz>>> getRecentQuizzes(int limit) async {
     try {
       final validationError = _validatePaginationParams(limit);
       if (validationError != null) {
         return Result.failure(validationError.toFailure());
       }
 
-      final result = await dataSource.getRecentQuizzes(limit);
+      final result = await dataSource.getRecentQuizzes(limit: limit);
 
       return result.when(
         success: (quizModels) => Result.success(
@@ -372,7 +370,7 @@ class QuizRepositoryImpl extends BaseRepository implements QuizRepository {
   }
 
   @override
-  Stream<Result<QuizEntity>> watchQuiz(String quizId) {
+  Stream<Result<Quiz>> watchQuiz(String quizId) {
     try {
       if (quizId.isEmpty) {
         return Stream.value(
@@ -403,7 +401,7 @@ class QuizRepositoryImpl extends BaseRepository implements QuizRepository {
   }
 
   @override
-  Future<Result<void>> batchCreateQuizzes(List<QuizEntity> quizzes) async {
+  Future<Result<void>> batchCreateQuizzes(List<Quiz> quizzes) async {
     try {
       if (quizzes.isEmpty) {
         return Result.failure(
@@ -429,7 +427,7 @@ class QuizRepositoryImpl extends BaseRepository implements QuizRepository {
         }
       }
 
-      final quizModels = quizzes.map((quiz) => quiz.toModel()).toList();
+      final quizModels = quizzes.map((quiz) => QuizModel.fromEntity(quiz)).toList();
 
       return await dataSource.batchCreateQuizzes(quizModels);
     } catch (e) {
@@ -472,12 +470,189 @@ class QuizRepositoryImpl extends BaseRepository implements QuizRepository {
     }
   }
 
+  @override
+  Future<Result<Quiz>> publishQuiz(String quizId) async {
+    try {
+      if (quizId.isEmpty) {
+        return Result.failure(
+          const ValidationException(
+            message: 'Quiz ID cannot be empty',
+          ).toFailure(),
+        );
+      }
+
+      // First validate the quiz
+      final validationResult = await validateQuiz(quizId);
+      return validationResult.when(
+        success: (validation) async {
+          if (!validation.isValid) {
+            return Result.failure(
+              ValidationException(
+                message: 'Quiz validation failed: ${validation.errors.join(', ')}',
+              ).toFailure(),
+            );
+          }
+
+          // If valid, publish the quiz
+          final result = await dataSource.publishQuiz(quizId);
+          return result.when(
+            success: (quizModel) => Result.success(quizModel.toEntity()),
+            failure: (error) => Result.failure(error),
+          );
+        },
+        failure: (error) => Result.failure(error),
+      );
+    } catch (e) {
+      return Result.failure(
+        ServerException(
+          message: 'Failed to publish quiz: ${e.toString()}',
+          code: 'publish_quiz_error',
+        ).toFailure(),
+      );
+    }
+  }
+
+  @override
+  Future<Result<Quiz>> unpublishQuiz(String quizId) async {
+    try {
+      if (quizId.isEmpty) {
+        return Result.failure(
+          const ValidationException(
+            message: 'Quiz ID cannot be empty',
+          ).toFailure(),
+        );
+      }
+
+      final result = await dataSource.unpublishQuiz(quizId);
+      return result.when(
+        success: (quizModel) => Result.success(quizModel.toEntity()),
+        failure: (error) => Result.failure(error),
+      );
+    } catch (e) {
+      return Result.failure(
+        ServerException(
+          message: 'Failed to unpublish quiz: ${e.toString()}',
+          code: 'unpublish_quiz_error',
+        ).toFailure(),
+      );
+    }
+  }
+
+  @override
+  Future<Result<Quiz>> cloneQuiz(String quizId, String newOwnerId) async {
+    try {
+      if (quizId.isEmpty || newOwnerId.isEmpty) {
+        return Result.failure(
+          const ValidationException(
+            message: 'Quiz ID and new owner ID cannot be empty',
+          ).toFailure(),
+        );
+      }
+
+      final result = await dataSource.cloneQuiz(quizId, newOwnerId);
+      return result.when(
+        success: (quizModel) => Result.success(quizModel.toEntity()),
+        failure: (error) => Result.failure(error),
+      );
+    } catch (e) {
+      return Result.failure(
+        ServerException(
+          message: 'Failed to clone quiz: ${e.toString()}',
+          code: 'clone_quiz_error',
+        ).toFailure(),
+      );
+    }
+  }
+
+  @override
+  Future<Result<List<Quiz>>> getDraftQuizzes(String userId) async {
+    try {
+      if (userId.isEmpty) {
+        return Result.failure(
+          const ValidationException(
+            message: 'User ID cannot be empty',
+          ).toFailure(),
+        );
+      }
+
+      final result = await dataSource.getDraftQuizzes(userId);
+      return result.when(
+        success: (quizModels) => Result.success(
+          quizModels.map((model) => model.toEntity()).toList(),
+        ),
+        failure: (error) => Result.failure(error),
+      );
+    } catch (e) {
+      return Result.failure(
+        ServerException(
+          message: 'Failed to get draft quizzes: ${e.toString()}',
+          code: 'get_draft_quizzes_error',
+        ).toFailure(),
+      );
+    }
+  }
+
+  @override
+  Future<Result<QuizValidationResult>> validateQuiz(String quizId) async {
+    try {
+      if (quizId.isEmpty) {
+        return Result.failure(
+          const ValidationException(
+            message: 'Quiz ID cannot be empty',
+          ).toFailure(),
+        );
+      }
+
+      // Get the quiz first
+      final quizResult = await getQuizById(quizId);
+      return quizResult.when(
+        success: (quiz) {
+          final errors = <String>[];
+          final warnings = <String>[];
+
+          // Validate quiz structure
+          final validationError = _validateQuiz(quiz);
+          if (validationError != null) {
+            errors.add(validationError.message);
+          }
+
+          // Additional publishing requirements
+          if (!quiz.isValid) {
+            errors.add('Quiz does not meet basic validity requirements');
+          }
+
+          if (quiz.questions.length < 3) {
+            warnings.add('Quiz has less than 3 questions, may not be suitable for multiplayer');
+          }
+
+          if (quiz.metadata.coverImageUrl == null || quiz.metadata.coverImageUrl!.isEmpty) {
+            warnings.add('Quiz does not have a cover image');
+          }
+
+          return Result.success(
+            errors.isEmpty
+                ? QuizValidationResult.valid()
+                : QuizValidationResult.invalid(errors, warnings),
+          );
+        },
+        failure: (error) => Result.failure(error),
+      );
+    } catch (e) {
+      return Result.failure(
+        ServerException(
+          message: 'Failed to validate quiz: ${e.toString()}',
+          code: 'validate_quiz_error',
+        ).toFailure(),
+      );
+    }
+  }
+
   // ===========================
   // PRIVATE VALIDATION METHODS
   // ===========================
 
   /// Validate quiz entity
-  ValidationException? _validateQuiz(QuizEntity quiz) {
+  ValidationException? _validateQuiz(Quiz quiz) {
     if (quiz.title.isEmpty) {
       return const ValidationException(message: 'Quiz title cannot be empty');
     }
@@ -523,14 +698,14 @@ class QuizRepositoryImpl extends BaseRepository implements QuizRepository {
       if (questionError != null) return questionError;
     }
 
-    if (quiz.category != null && quiz.category!.length > 100) {
+    if (quiz.metadata.category.length > 100) {
       return const ValidationException(
         message: 'Category name cannot exceed 100 characters',
       );
     }
 
-    if (quiz.estimatedDuration != null) {
-      if (quiz.estimatedDuration! < 1 || quiz.estimatedDuration! > 1440) {
+    if (quiz.metadata.estimatedDuration != null) {
+      if (quiz.metadata.estimatedDuration! < 1 || quiz.metadata.estimatedDuration! > 1440) {
         return const ValidationException(
           message: 'Estimated duration must be between 1 and 1440 minutes',
         );
@@ -541,39 +716,42 @@ class QuizRepositoryImpl extends BaseRepository implements QuizRepository {
   }
 
   /// Validate question entity
-  ValidationException? _validateQuestion(QuestionEntity question, int index) {
-    if (question.question.isEmpty) {
+  ValidationException? _validateQuestion(Question question, int index) {
+    // Get question options for validation
+    final options = question.options;
+    
+    if (question.questionText.isEmpty) {
       return ValidationException(
         message: 'Question $index text cannot be empty',
       );
     }
 
-    if (question.question.length > 500) {
+    if (question.questionText.length > 500) {
       return ValidationException(
         message: 'Question $index text cannot exceed 500 characters',
       );
     }
 
-    if (question.options.length < 2) {
+    if (options.length < 2) {
       return ValidationException(
         message: 'Question $index must have at least 2 options',
       );
     }
 
-    if (question.options.length > 6) {
+    if (options.length > 6) {
       return ValidationException(
         message: 'Question $index cannot have more than 6 options',
       );
     }
 
-    for (int i = 0; i < question.options.length; i++) {
-      if (question.options[i].isEmpty) {
+    for (int i = 0; i < options.length; i++) {
+      if (options[i].isEmpty) {
         return ValidationException(
           message: 'Question $index option ${i + 1} cannot be empty',
         );
       }
 
-      if (question.options[i].length > 200) {
+      if (options[i].length > 200) {
         return ValidationException(
           message:
               'Question $index option ${i + 1} cannot exceed 200 characters',
@@ -581,20 +759,20 @@ class QuizRepositoryImpl extends BaseRepository implements QuizRepository {
       }
     }
 
-    if (question.correctAnswer < 0 ||
-        question.correctAnswer >= question.options.length) {
+    if (question.correctAnswerIndex < 0 ||
+        question.correctAnswerIndex >= options.length) {
       return ValidationException(
         message: 'Question $index has invalid correct answer index',
       );
     }
 
-    if (question.timeLimit < 5 || question.timeLimit > 300) {
+    if (question.questionTimeLimit < 5 || question.questionTimeLimit > 300) {
       return ValidationException(
         message: 'Question $index time limit must be between 5 and 300 seconds',
       );
     }
 
-    if (question.points < 10 || question.points > 1000) {
+    if (question.questionPoints < 10 || question.questionPoints > 1000) {
       return ValidationException(
         message: 'Question $index points must be between 10 and 1000',
       );

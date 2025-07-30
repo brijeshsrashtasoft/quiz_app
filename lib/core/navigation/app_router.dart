@@ -5,6 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'route_constants.dart';
 import 'auth_guard.dart';
 import 'pages/placeholder_pages.dart';
+import '../../features/quiz_creation/presentation/pages/quiz_creation_page.dart' as quiz_pages;
+import '../../features/quiz_creation/presentation/pages/quiz_preview_page.dart';
+import '../../features/quiz_creation/presentation/pages/quiz_publish_page.dart';
+import '../../features/quiz_creation/presentation/pages/quiz_management_page.dart';
 import 'navigation_utils.dart';
 import '../../features/authentication/presentation/pages/login_page.dart';
 import '../../features/authentication/presentation/pages/register_page.dart';
@@ -115,22 +119,22 @@ class AppRouter {
       GoRoute(
         path: RouteConstants.quizCreation,
         name: 'quiz-creation',
-        builder: (context, state) => const QuizCreationPage(),
+        builder: (context, state) => const quiz_pages.QuizCreationPage(),
         routes: [
           GoRoute(
             path: 'form',
             name: 'quiz-creation-form',
-            builder: (context, state) => const QuizCreationFormPage(),
+            builder: (context, state) => const quiz_pages.QuizCreationPage(),
           ),
           GoRoute(
             path: 'preview',
             name: 'quiz-creation-preview',
-            builder: (context, state) => const QuizCreationPreviewPage(),
+            builder: (context, state) => const QuizPreviewPage(),
           ),
           GoRoute(
             path: 'publish',
             name: 'quiz-creation-publish',
-            builder: (context, state) => const QuizCreationPublishPage(),
+            builder: (context, state) => const QuizPublishPage(),
           ),
         ],
       ),

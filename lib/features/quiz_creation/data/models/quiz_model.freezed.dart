@@ -28,8 +28,14 @@ mixin _$QuizModel {
   List<QuestionModel> get questions => throw _privateConstructorUsedError;
   bool get isPublic => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
-  String? get category => throw _privateConstructorUsedError;
-  int? get estimatedDuration => throw _privateConstructorUsedError;
+  QuizMetadataModel get metadata => throw _privateConstructorUsedError;
+  DateTime? get updatedAt => throw _privateConstructorUsedError;
+  DateTime? get publishedAt => throw _privateConstructorUsedError;
+  bool get isDraft => throw _privateConstructorUsedError;
+  int get playCount => throw _privateConstructorUsedError;
+  double get averageScore => throw _privateConstructorUsedError;
+  int get totalRatings => throw _privateConstructorUsedError;
+  double get rating => throw _privateConstructorUsedError;
 
   /// Serializes this QuizModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -54,9 +60,17 @@ abstract class $QuizModelCopyWith<$Res> {
     List<QuestionModel> questions,
     bool isPublic,
     DateTime createdAt,
-    String? category,
-    int? estimatedDuration,
+    QuizMetadataModel metadata,
+    DateTime? updatedAt,
+    DateTime? publishedAt,
+    bool isDraft,
+    int playCount,
+    double averageScore,
+    int totalRatings,
+    double rating,
   });
+
+  $QuizMetadataModelCopyWith<$Res> get metadata;
 }
 
 /// @nodoc
@@ -81,8 +95,14 @@ class _$QuizModelCopyWithImpl<$Res, $Val extends QuizModel>
     Object? questions = null,
     Object? isPublic = null,
     Object? createdAt = null,
-    Object? category = freezed,
-    Object? estimatedDuration = freezed,
+    Object? metadata = null,
+    Object? updatedAt = freezed,
+    Object? publishedAt = freezed,
+    Object? isDraft = null,
+    Object? playCount = null,
+    Object? averageScore = null,
+    Object? totalRatings = null,
+    Object? rating = null,
   }) {
     return _then(
       _value.copyWith(
@@ -114,17 +134,51 @@ class _$QuizModelCopyWithImpl<$Res, $Val extends QuizModel>
                 ? _value.createdAt
                 : createdAt // ignore: cast_nullable_to_non_nullable
                       as DateTime,
-            category: freezed == category
-                ? _value.category
-                : category // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            estimatedDuration: freezed == estimatedDuration
-                ? _value.estimatedDuration
-                : estimatedDuration // ignore: cast_nullable_to_non_nullable
-                      as int?,
+            metadata: null == metadata
+                ? _value.metadata
+                : metadata // ignore: cast_nullable_to_non_nullable
+                      as QuizMetadataModel,
+            updatedAt: freezed == updatedAt
+                ? _value.updatedAt
+                : updatedAt // ignore: cast_nullable_to_non_nullable
+                      as DateTime?,
+            publishedAt: freezed == publishedAt
+                ? _value.publishedAt
+                : publishedAt // ignore: cast_nullable_to_non_nullable
+                      as DateTime?,
+            isDraft: null == isDraft
+                ? _value.isDraft
+                : isDraft // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            playCount: null == playCount
+                ? _value.playCount
+                : playCount // ignore: cast_nullable_to_non_nullable
+                      as int,
+            averageScore: null == averageScore
+                ? _value.averageScore
+                : averageScore // ignore: cast_nullable_to_non_nullable
+                      as double,
+            totalRatings: null == totalRatings
+                ? _value.totalRatings
+                : totalRatings // ignore: cast_nullable_to_non_nullable
+                      as int,
+            rating: null == rating
+                ? _value.rating
+                : rating // ignore: cast_nullable_to_non_nullable
+                      as double,
           )
           as $Val,
     );
+  }
+
+  /// Create a copy of QuizModel
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $QuizMetadataModelCopyWith<$Res> get metadata {
+    return $QuizMetadataModelCopyWith<$Res>(_value.metadata, (value) {
+      return _then(_value.copyWith(metadata: value) as $Val);
+    });
   }
 }
 
@@ -145,9 +199,18 @@ abstract class _$$QuizModelImplCopyWith<$Res>
     List<QuestionModel> questions,
     bool isPublic,
     DateTime createdAt,
-    String? category,
-    int? estimatedDuration,
+    QuizMetadataModel metadata,
+    DateTime? updatedAt,
+    DateTime? publishedAt,
+    bool isDraft,
+    int playCount,
+    double averageScore,
+    int totalRatings,
+    double rating,
   });
+
+  @override
+  $QuizMetadataModelCopyWith<$Res> get metadata;
 }
 
 /// @nodoc
@@ -171,8 +234,14 @@ class __$$QuizModelImplCopyWithImpl<$Res>
     Object? questions = null,
     Object? isPublic = null,
     Object? createdAt = null,
-    Object? category = freezed,
-    Object? estimatedDuration = freezed,
+    Object? metadata = null,
+    Object? updatedAt = freezed,
+    Object? publishedAt = freezed,
+    Object? isDraft = null,
+    Object? playCount = null,
+    Object? averageScore = null,
+    Object? totalRatings = null,
+    Object? rating = null,
   }) {
     return _then(
       _$QuizModelImpl(
@@ -204,14 +273,38 @@ class __$$QuizModelImplCopyWithImpl<$Res>
             ? _value.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
                   as DateTime,
-        category: freezed == category
-            ? _value.category
-            : category // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        estimatedDuration: freezed == estimatedDuration
-            ? _value.estimatedDuration
-            : estimatedDuration // ignore: cast_nullable_to_non_nullable
-                  as int?,
+        metadata: null == metadata
+            ? _value.metadata
+            : metadata // ignore: cast_nullable_to_non_nullable
+                  as QuizMetadataModel,
+        updatedAt: freezed == updatedAt
+            ? _value.updatedAt
+            : updatedAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
+        publishedAt: freezed == publishedAt
+            ? _value.publishedAt
+            : publishedAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
+        isDraft: null == isDraft
+            ? _value.isDraft
+            : isDraft // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        playCount: null == playCount
+            ? _value.playCount
+            : playCount // ignore: cast_nullable_to_non_nullable
+                  as int,
+        averageScore: null == averageScore
+            ? _value.averageScore
+            : averageScore // ignore: cast_nullable_to_non_nullable
+                  as double,
+        totalRatings: null == totalRatings
+            ? _value.totalRatings
+            : totalRatings // ignore: cast_nullable_to_non_nullable
+                  as int,
+        rating: null == rating
+            ? _value.rating
+            : rating // ignore: cast_nullable_to_non_nullable
+                  as double,
       ),
     );
   }
@@ -219,7 +312,7 @@ class __$$QuizModelImplCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class _$QuizModelImpl implements _QuizModel {
+class _$QuizModelImpl extends _QuizModel {
   const _$QuizModelImpl({
     required this.id,
     required this.title,
@@ -228,9 +321,16 @@ class _$QuizModelImpl implements _QuizModel {
     required final List<QuestionModel> questions,
     required this.isPublic,
     required this.createdAt,
-    this.category,
-    this.estimatedDuration,
-  }) : _questions = questions;
+    required this.metadata,
+    this.updatedAt,
+    this.publishedAt,
+    this.isDraft = false,
+    this.playCount = 0,
+    this.averageScore = 0.0,
+    this.totalRatings = 0,
+    this.rating = 0.0,
+  }) : _questions = questions,
+       super._();
 
   factory _$QuizModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$QuizModelImplFromJson(json);
@@ -256,13 +356,30 @@ class _$QuizModelImpl implements _QuizModel {
   @override
   final DateTime createdAt;
   @override
-  final String? category;
+  final QuizMetadataModel metadata;
   @override
-  final int? estimatedDuration;
+  final DateTime? updatedAt;
+  @override
+  final DateTime? publishedAt;
+  @override
+  @JsonKey()
+  final bool isDraft;
+  @override
+  @JsonKey()
+  final int playCount;
+  @override
+  @JsonKey()
+  final double averageScore;
+  @override
+  @JsonKey()
+  final int totalRatings;
+  @override
+  @JsonKey()
+  final double rating;
 
   @override
   String toString() {
-    return 'QuizModel(id: $id, title: $title, description: $description, createdBy: $createdBy, questions: $questions, isPublic: $isPublic, createdAt: $createdAt, category: $category, estimatedDuration: $estimatedDuration)';
+    return 'QuizModel(id: $id, title: $title, description: $description, createdBy: $createdBy, questions: $questions, isPublic: $isPublic, createdAt: $createdAt, metadata: $metadata, updatedAt: $updatedAt, publishedAt: $publishedAt, isDraft: $isDraft, playCount: $playCount, averageScore: $averageScore, totalRatings: $totalRatings, rating: $rating)';
   }
 
   @override
@@ -284,10 +401,20 @@ class _$QuizModelImpl implements _QuizModel {
                 other.isPublic == isPublic) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
-            (identical(other.category, category) ||
-                other.category == category) &&
-            (identical(other.estimatedDuration, estimatedDuration) ||
-                other.estimatedDuration == estimatedDuration));
+            (identical(other.metadata, metadata) ||
+                other.metadata == metadata) &&
+            (identical(other.updatedAt, updatedAt) ||
+                other.updatedAt == updatedAt) &&
+            (identical(other.publishedAt, publishedAt) ||
+                other.publishedAt == publishedAt) &&
+            (identical(other.isDraft, isDraft) || other.isDraft == isDraft) &&
+            (identical(other.playCount, playCount) ||
+                other.playCount == playCount) &&
+            (identical(other.averageScore, averageScore) ||
+                other.averageScore == averageScore) &&
+            (identical(other.totalRatings, totalRatings) ||
+                other.totalRatings == totalRatings) &&
+            (identical(other.rating, rating) || other.rating == rating));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -301,8 +428,14 @@ class _$QuizModelImpl implements _QuizModel {
     const DeepCollectionEquality().hash(_questions),
     isPublic,
     createdAt,
-    category,
-    estimatedDuration,
+    metadata,
+    updatedAt,
+    publishedAt,
+    isDraft,
+    playCount,
+    averageScore,
+    totalRatings,
+    rating,
   );
 
   /// Create a copy of QuizModel
@@ -319,7 +452,7 @@ class _$QuizModelImpl implements _QuizModel {
   }
 }
 
-abstract class _QuizModel implements QuizModel {
+abstract class _QuizModel extends QuizModel {
   const factory _QuizModel({
     required final String id,
     required final String title,
@@ -328,9 +461,16 @@ abstract class _QuizModel implements QuizModel {
     required final List<QuestionModel> questions,
     required final bool isPublic,
     required final DateTime createdAt,
-    final String? category,
-    final int? estimatedDuration,
+    required final QuizMetadataModel metadata,
+    final DateTime? updatedAt,
+    final DateTime? publishedAt,
+    final bool isDraft,
+    final int playCount,
+    final double averageScore,
+    final int totalRatings,
+    final double rating,
   }) = _$QuizModelImpl;
+  const _QuizModel._() : super._();
 
   factory _QuizModel.fromJson(Map<String, dynamic> json) =
       _$QuizModelImpl.fromJson;
@@ -350,274 +490,26 @@ abstract class _QuizModel implements QuizModel {
   @override
   DateTime get createdAt;
   @override
-  String? get category;
+  QuizMetadataModel get metadata;
   @override
-  int? get estimatedDuration;
+  DateTime? get updatedAt;
+  @override
+  DateTime? get publishedAt;
+  @override
+  bool get isDraft;
+  @override
+  int get playCount;
+  @override
+  double get averageScore;
+  @override
+  int get totalRatings;
+  @override
+  double get rating;
 
   /// Create a copy of QuizModel
   /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$QuizModelImplCopyWith<_$QuizModelImpl> get copyWith =>
-      throw _privateConstructorUsedError;
-}
-
-QuestionModel _$QuestionModelFromJson(Map<String, dynamic> json) {
-  return _QuestionModel.fromJson(json);
-}
-
-/// @nodoc
-mixin _$QuestionModel {
-  String get question => throw _privateConstructorUsedError;
-  List<String> get options => throw _privateConstructorUsedError;
-  int get correctAnswer => throw _privateConstructorUsedError;
-  int get timeLimit => throw _privateConstructorUsedError;
-  int get points => throw _privateConstructorUsedError;
-
-  /// Serializes this QuestionModel to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of QuestionModel
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $QuestionModelCopyWith<QuestionModel> get copyWith =>
-      throw _privateConstructorUsedError;
-}
-
-/// @nodoc
-abstract class $QuestionModelCopyWith<$Res> {
-  factory $QuestionModelCopyWith(
-    QuestionModel value,
-    $Res Function(QuestionModel) then,
-  ) = _$QuestionModelCopyWithImpl<$Res, QuestionModel>;
-  @useResult
-  $Res call({
-    String question,
-    List<String> options,
-    int correctAnswer,
-    int timeLimit,
-    int points,
-  });
-}
-
-/// @nodoc
-class _$QuestionModelCopyWithImpl<$Res, $Val extends QuestionModel>
-    implements $QuestionModelCopyWith<$Res> {
-  _$QuestionModelCopyWithImpl(this._value, this._then);
-
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
-
-  /// Create a copy of QuestionModel
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? question = null,
-    Object? options = null,
-    Object? correctAnswer = null,
-    Object? timeLimit = null,
-    Object? points = null,
-  }) {
-    return _then(
-      _value.copyWith(
-            question: null == question
-                ? _value.question
-                : question // ignore: cast_nullable_to_non_nullable
-                      as String,
-            options: null == options
-                ? _value.options
-                : options // ignore: cast_nullable_to_non_nullable
-                      as List<String>,
-            correctAnswer: null == correctAnswer
-                ? _value.correctAnswer
-                : correctAnswer // ignore: cast_nullable_to_non_nullable
-                      as int,
-            timeLimit: null == timeLimit
-                ? _value.timeLimit
-                : timeLimit // ignore: cast_nullable_to_non_nullable
-                      as int,
-            points: null == points
-                ? _value.points
-                : points // ignore: cast_nullable_to_non_nullable
-                      as int,
-          )
-          as $Val,
-    );
-  }
-}
-
-/// @nodoc
-abstract class _$$QuestionModelImplCopyWith<$Res>
-    implements $QuestionModelCopyWith<$Res> {
-  factory _$$QuestionModelImplCopyWith(
-    _$QuestionModelImpl value,
-    $Res Function(_$QuestionModelImpl) then,
-  ) = __$$QuestionModelImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call({
-    String question,
-    List<String> options,
-    int correctAnswer,
-    int timeLimit,
-    int points,
-  });
-}
-
-/// @nodoc
-class __$$QuestionModelImplCopyWithImpl<$Res>
-    extends _$QuestionModelCopyWithImpl<$Res, _$QuestionModelImpl>
-    implements _$$QuestionModelImplCopyWith<$Res> {
-  __$$QuestionModelImplCopyWithImpl(
-    _$QuestionModelImpl _value,
-    $Res Function(_$QuestionModelImpl) _then,
-  ) : super(_value, _then);
-
-  /// Create a copy of QuestionModel
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? question = null,
-    Object? options = null,
-    Object? correctAnswer = null,
-    Object? timeLimit = null,
-    Object? points = null,
-  }) {
-    return _then(
-      _$QuestionModelImpl(
-        question: null == question
-            ? _value.question
-            : question // ignore: cast_nullable_to_non_nullable
-                  as String,
-        options: null == options
-            ? _value._options
-            : options // ignore: cast_nullable_to_non_nullable
-                  as List<String>,
-        correctAnswer: null == correctAnswer
-            ? _value.correctAnswer
-            : correctAnswer // ignore: cast_nullable_to_non_nullable
-                  as int,
-        timeLimit: null == timeLimit
-            ? _value.timeLimit
-            : timeLimit // ignore: cast_nullable_to_non_nullable
-                  as int,
-        points: null == points
-            ? _value.points
-            : points // ignore: cast_nullable_to_non_nullable
-                  as int,
-      ),
-    );
-  }
-}
-
-/// @nodoc
-@JsonSerializable()
-class _$QuestionModelImpl implements _QuestionModel {
-  const _$QuestionModelImpl({
-    required this.question,
-    required final List<String> options,
-    required this.correctAnswer,
-    required this.timeLimit,
-    this.points = 100,
-  }) : _options = options;
-
-  factory _$QuestionModelImpl.fromJson(Map<String, dynamic> json) =>
-      _$$QuestionModelImplFromJson(json);
-
-  @override
-  final String question;
-  final List<String> _options;
-  @override
-  List<String> get options {
-    if (_options is EqualUnmodifiableListView) return _options;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_options);
-  }
-
-  @override
-  final int correctAnswer;
-  @override
-  final int timeLimit;
-  @override
-  @JsonKey()
-  final int points;
-
-  @override
-  String toString() {
-    return 'QuestionModel(question: $question, options: $options, correctAnswer: $correctAnswer, timeLimit: $timeLimit, points: $points)';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$QuestionModelImpl &&
-            (identical(other.question, question) ||
-                other.question == question) &&
-            const DeepCollectionEquality().equals(other._options, _options) &&
-            (identical(other.correctAnswer, correctAnswer) ||
-                other.correctAnswer == correctAnswer) &&
-            (identical(other.timeLimit, timeLimit) ||
-                other.timeLimit == timeLimit) &&
-            (identical(other.points, points) || other.points == points));
-  }
-
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    question,
-    const DeepCollectionEquality().hash(_options),
-    correctAnswer,
-    timeLimit,
-    points,
-  );
-
-  /// Create a copy of QuestionModel
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$QuestionModelImplCopyWith<_$QuestionModelImpl> get copyWith =>
-      __$$QuestionModelImplCopyWithImpl<_$QuestionModelImpl>(this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$QuestionModelImplToJson(this);
-  }
-}
-
-abstract class _QuestionModel implements QuestionModel {
-  const factory _QuestionModel({
-    required final String question,
-    required final List<String> options,
-    required final int correctAnswer,
-    required final int timeLimit,
-    final int points,
-  }) = _$QuestionModelImpl;
-
-  factory _QuestionModel.fromJson(Map<String, dynamic> json) =
-      _$QuestionModelImpl.fromJson;
-
-  @override
-  String get question;
-  @override
-  List<String> get options;
-  @override
-  int get correctAnswer;
-  @override
-  int get timeLimit;
-  @override
-  int get points;
-
-  /// Create a copy of QuestionModel
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$QuestionModelImplCopyWith<_$QuestionModelImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
