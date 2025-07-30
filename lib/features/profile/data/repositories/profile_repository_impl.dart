@@ -35,7 +35,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
           final remoteProfile = await remoteDataSource.getProfile(userId);
           await localDataSource.cacheProfile(remoteProfile);
           await localDataSource.setLastSyncTimestamp(userId, DateTime.now());
-          
+
           return Result.success(remoteProfile.toEntity());
         } catch (e) {
           AppLogger.warning('Failed to get remote profile, trying cache', e);
@@ -49,9 +49,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
     } catch (e) {
       AppLogger.error('Get profile failed', e);
       return Result.failure(
-        Failure.serverFailure(
-          message: 'Failed to get profile',
-        ),
+        Failure.serverFailure(message: 'Failed to get profile'),
       );
     }
   }
@@ -61,33 +59,36 @@ class ProfileRepositoryImpl implements ProfileRepository {
     if (cachedProfile != null) {
       return Result.success(cachedProfile.toEntity());
     }
-    
-    return Result.failure(
-      Failure.serverFailure(
-        message: 'Profile not found',
-      ),
-    );
+
+    return Result.failure(Failure.serverFailure(message: 'Profile not found'));
   }
 
   @override
-  Future<Result<UserProfileEntity>> updateProfile(UserProfileEntity profile) async {
+  Future<Result<UserProfileEntity>> updateProfile(
+    UserProfileEntity profile,
+  ) async {
     try {
-      AppLogger.info('ProfileRepositoryImpl', 'Updating profile: ${profile.id}');
+      AppLogger.info(
+        'ProfileRepositoryImpl',
+        'Updating profile: ${profile.id}',
+      );
 
       if (await networkInfo.isConnected) {
         final profileModel = UserProfileModel.fromEntity(profile);
-        final updatedProfile = await remoteDataSource.updateProfile(profileModel);
-        
+        final updatedProfile = await remoteDataSource.updateProfile(
+          profileModel,
+        );
+
         // Cache updated profile
         await localDataSource.cacheProfile(updatedProfile);
         await localDataSource.setLastSyncTimestamp(profile.id, DateTime.now());
-        
+
         return Result.success(updatedProfile.toEntity());
       } else {
         // Offline: Cache for later sync
         final profileModel = UserProfileModel.fromEntity(profile);
         await localDataSource.cacheProfile(profileModel);
-        
+
         return Result.failure(
           Failure.networkFailure(
             message: 'Profile update will sync when online',
@@ -96,19 +97,13 @@ class ProfileRepositoryImpl implements ProfileRepository {
       }
     } catch (e) {
       AppLogger.error('Update profile failed', e);
-      
+
       if (e is ServerException) {
-        return Result.failure(
-          Failure.serverFailure(
-            message: e.message,
-          ),
-        );
+        return Result.failure(Failure.serverFailure(message: e.message));
       }
-      
+
       return Result.failure(
-        Failure.serverFailure(
-          message: 'Failed to update profile',
-        ),
+        Failure.serverFailure(message: 'Failed to update profile'),
       );
     }
   }
@@ -130,19 +125,13 @@ class ProfileRepositoryImpl implements ProfileRepository {
       return Result.success(avatarUrl);
     } catch (e) {
       AppLogger.error('Upload avatar failed', e);
-      
+
       if (e is ServerException) {
-        return Result.failure(
-          Failure.serverFailure(
-            message: e.message,
-          ),
-        );
+        return Result.failure(Failure.serverFailure(message: e.message));
       }
-      
+
       return Result.failure(
-        Failure.serverFailure(
-          message: 'Failed to upload avatar',
-        ),
+        Failure.serverFailure(message: 'Failed to upload avatar'),
       );
     }
   }
@@ -164,19 +153,13 @@ class ProfileRepositoryImpl implements ProfileRepository {
       return Result.success(null);
     } catch (e) {
       AppLogger.error('Delete avatar failed', e);
-      
+
       if (e is ServerException) {
-        return Result.failure(
-          Failure.serverFailure(
-            message: e.message,
-          ),
-        );
+        return Result.failure(Failure.serverFailure(message: e.message));
       }
-      
+
       return Result.failure(
-        Failure.serverFailure(
-          message: 'Failed to delete avatar',
-        ),
+        Failure.serverFailure(message: 'Failed to delete avatar'),
       );
     }
   }
@@ -184,7 +167,10 @@ class ProfileRepositoryImpl implements ProfileRepository {
   @override
   Future<Result<bool>> isUsernameAvailable(String username) async {
     try {
-      AppLogger.info('ProfileRepositoryImpl', 'Checking username availability: $username');
+      AppLogger.info(
+        'ProfileRepositoryImpl',
+        'Checking username availability: $username',
+      );
 
       if (!(await networkInfo.isConnected)) {
         return Result.failure(
@@ -198,15 +184,11 @@ class ProfileRepositoryImpl implements ProfileRepository {
       return Result.success(isAvailable);
     } catch (e) {
       AppLogger.error('Username availability check failed', e);
-      
+
       if (e is ServerException) {
-        return Result.failure(
-          Failure.validationFailure(
-            message: e.message,
-          ),
-        );
+        return Result.failure(Failure.validationFailure(message: e.message));
       }
-      
+
       return Result.failure(
         Failure.validationFailure(
           message: 'Failed to check username availability',
@@ -216,75 +198,84 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }
 
   @override
-  Future<Result<UserProfileEntity>> updateUserStats(String userId, UserStats stats) async {
+  Future<Result<UserProfileEntity>> updateUserStats(
+    String userId,
+    UserStats stats,
+  ) async {
     try {
       AppLogger.info('ProfileRepositoryImpl', 'Updating user stats: $userId');
 
       if (await networkInfo.isConnected) {
         final statsModel = UserStatsModel.fromEntity(stats);
-        final updatedProfile = await remoteDataSource.updateUserStats(userId, statsModel);
-        
+        final updatedProfile = await remoteDataSource.updateUserStats(
+          userId,
+          statsModel,
+        );
+
         // Cache updated profile and stats
         await localDataSource.cacheProfile(updatedProfile);
         await localDataSource.cacheUserStats(userId, statsModel);
         await localDataSource.setLastSyncTimestamp(userId, DateTime.now());
-        
+
         return Result.success(updatedProfile.toEntity());
       } else {
         // Offline: Cache for later sync
         final statsModel = UserStatsModel.fromEntity(stats);
         await localDataSource.cacheUserStats(userId, statsModel);
-        
+
         return Result.failure(
-          Failure.networkFailure(
-            message: 'Stats update will sync when online',
-          ),
+          Failure.networkFailure(message: 'Stats update will sync when online'),
         );
       }
     } catch (e) {
       AppLogger.error('Update user stats failed', e);
-      
+
       if (e is ServerException) {
-        return Result.failure(
-          Failure.serverFailure(
-            message: e.message,
-          ),
-        );
+        return Result.failure(Failure.serverFailure(message: e.message));
       }
-      
+
       return Result.failure(
-        Failure.serverFailure(
-          message: 'Failed to update user statistics',
-        ),
+        Failure.serverFailure(message: 'Failed to update user statistics'),
       );
     }
   }
 
   @override
-  Future<Result<UserProfileEntity>> updateUserPreferences(String userId, UserPreferences preferences) async {
+  Future<Result<UserProfileEntity>> updateUserPreferences(
+    String userId,
+    UserPreferences preferences,
+  ) async {
     try {
-      AppLogger.info('ProfileRepositoryImpl', 'Updating user preferences: $userId');
+      AppLogger.info(
+        'ProfileRepositoryImpl',
+        'Updating user preferences: $userId',
+      );
 
       final preferencesModel = UserPreferencesModel.fromEntity(preferences);
-      
+
       // Always cache preferences locally for immediate app behavior
       await localDataSource.cacheUserPreferences(userId, preferencesModel);
 
       if (await networkInfo.isConnected) {
-        final updatedProfile = await remoteDataSource.updateUserPreferences(userId, preferencesModel);
+        final updatedProfile = await remoteDataSource.updateUserPreferences(
+          userId,
+          preferencesModel,
+        );
         await localDataSource.cacheProfile(updatedProfile);
         await localDataSource.setLastSyncTimestamp(userId, DateTime.now());
-        
+
         return Result.success(updatedProfile.toEntity());
       } else {
         // Offline: Return current cached profile with updated preferences
         final cachedProfile = await localDataSource.getCachedProfile(userId);
         if (cachedProfile != null) {
-          final updatedProfile = cachedProfile.copyWith(preferences: preferencesModel);
+          final updatedProfile = cachedProfile.copyWith(
+            preferences: preferencesModel,
+          );
           await localDataSource.cacheProfile(updatedProfile);
           return Result.success(updatedProfile.toEntity());
         }
-        
+
         return Result.failure(
           Failure.networkFailure(
             message: 'Preferences update will sync when online',
@@ -293,35 +284,38 @@ class ProfileRepositoryImpl implements ProfileRepository {
       }
     } catch (e) {
       AppLogger.error('Update user preferences failed', e);
-      
+
       if (e is ServerException) {
-        return Result.failure(
-          Failure.serverFailure(
-            message: e.message,
-          ),
-        );
+        return Result.failure(Failure.serverFailure(message: e.message));
       }
-      
+
       return Result.failure(
-        Failure.serverFailure(
-          message: 'Failed to update user preferences',
-        ),
+        Failure.serverFailure(message: 'Failed to update user preferences'),
       );
     }
   }
 
   @override
-  Future<Result<UserProfileEntity>> updatePrivacySettings(String userId, PrivacySettings privacySettings) async {
+  Future<Result<UserProfileEntity>> updatePrivacySettings(
+    String userId,
+    PrivacySettings privacySettings,
+  ) async {
     try {
-      AppLogger.info('ProfileRepositoryImpl', 'Updating privacy settings: $userId');
+      AppLogger.info(
+        'ProfileRepositoryImpl',
+        'Updating privacy settings: $userId',
+      );
 
       if (await networkInfo.isConnected) {
         final privacyModel = PrivacySettingsModel.fromEntity(privacySettings);
-        final updatedProfile = await remoteDataSource.updatePrivacySettings(userId, privacyModel);
-        
+        final updatedProfile = await remoteDataSource.updatePrivacySettings(
+          userId,
+          privacyModel,
+        );
+
         await localDataSource.cacheProfile(updatedProfile);
         await localDataSource.setLastSyncTimestamp(userId, DateTime.now());
-        
+
         return Result.success(updatedProfile.toEntity());
       } else {
         return Result.failure(
@@ -332,35 +326,40 @@ class ProfileRepositoryImpl implements ProfileRepository {
       }
     } catch (e) {
       AppLogger.error('Update privacy settings failed', e);
-      
+
       if (e is ServerException) {
-        return Result.failure(
-          Failure.serverFailure(
-            message: e.message,
-          ),
-        );
+        return Result.failure(Failure.serverFailure(message: e.message));
       }
-      
+
       return Result.failure(
-        Failure.serverFailure(
-          message: 'Failed to update privacy settings',
-        ),
+        Failure.serverFailure(message: 'Failed to update privacy settings'),
       );
     }
   }
 
   @override
-  Future<Result<UserProfileEntity>> updateOnboardingStatus(String userId, OnboardingStatus onboardingStatus) async {
+  Future<Result<UserProfileEntity>> updateOnboardingStatus(
+    String userId,
+    OnboardingStatus onboardingStatus,
+  ) async {
     try {
-      AppLogger.info('ProfileRepositoryImpl', 'Updating onboarding status: $userId');
+      AppLogger.info(
+        'ProfileRepositoryImpl',
+        'Updating onboarding status: $userId',
+      );
 
       if (await networkInfo.isConnected) {
-        final onboardingModel = OnboardingStatusModel.fromEntity(onboardingStatus);
-        final updatedProfile = await remoteDataSource.updateOnboardingStatus(userId, onboardingModel);
-        
+        final onboardingModel = OnboardingStatusModel.fromEntity(
+          onboardingStatus,
+        );
+        final updatedProfile = await remoteDataSource.updateOnboardingStatus(
+          userId,
+          onboardingModel,
+        );
+
         await localDataSource.cacheProfile(updatedProfile);
         await localDataSource.setLastSyncTimestamp(userId, DateTime.now());
-        
+
         return Result.success(updatedProfile.toEntity());
       } else {
         return Result.failure(
@@ -371,19 +370,13 @@ class ProfileRepositoryImpl implements ProfileRepository {
       }
     } catch (e) {
       AppLogger.error('Update onboarding status failed', e);
-      
+
       if (e is ServerException) {
-        return Result.failure(
-          Failure.serverFailure(
-            message: e.message,
-          ),
-        );
+        return Result.failure(Failure.serverFailure(message: e.message));
       }
-      
+
       return Result.failure(
-        Failure.serverFailure(
-          message: 'Failed to update onboarding status',
-        ),
+        Failure.serverFailure(message: 'Failed to update onboarding status'),
       );
     }
   }
@@ -403,23 +396,17 @@ class ProfileRepositoryImpl implements ProfileRepository {
 
       await remoteDataSource.deleteAccount(userId);
       await localDataSource.removeCachedProfile(userId);
-      
+
       return Result.success(null);
     } catch (e) {
       AppLogger.error('Delete account failed', e);
-      
+
       if (e is ServerException) {
-        return Result.failure(
-          Failure.serverFailure(
-            message: e.message,
-          ),
-        );
+        return Result.failure(Failure.serverFailure(message: e.message));
       }
-      
+
       return Result.failure(
-        Failure.serverFailure(
-          message: 'Failed to delete account',
-        ),
+        Failure.serverFailure(message: 'Failed to delete account'),
       );
     }
   }
@@ -439,23 +426,17 @@ class ProfileRepositoryImpl implements ProfileRepository {
 
       final profiles = await remoteDataSource.searchProfiles(query);
       final entities = profiles.map((profile) => profile.toEntity()).toList();
-      
+
       return Result.success(entities);
     } catch (e) {
       AppLogger.error('Search profiles failed', e);
-      
+
       if (e is ServerException) {
-        return Result.failure(
-          Failure.serverFailure(
-            message: e.message,
-          ),
-        );
+        return Result.failure(Failure.serverFailure(message: e.message));
       }
-      
+
       return Result.failure(
-        Failure.serverFailure(
-          message: 'Failed to search profiles',
-        ),
+        Failure.serverFailure(message: 'Failed to search profiles'),
       );
     }
   }
@@ -475,29 +456,25 @@ class ProfileRepositoryImpl implements ProfileRepository {
 
       final profiles = await remoteDataSource.getTopUsers(limit);
       final entities = profiles.map((profile) => profile.toEntity()).toList();
-      
+
       return Result.success(entities);
     } catch (e) {
       AppLogger.error('Get top users failed', e);
-      
+
       if (e is ServerException) {
-        return Result.failure(
-          Failure.serverFailure(
-            message: e.message,
-          ),
-        );
+        return Result.failure(Failure.serverFailure(message: e.message));
       }
-      
+
       return Result.failure(
-        Failure.serverFailure(
-          message: 'Failed to get top users',
-        ),
+        Failure.serverFailure(message: 'Failed to get top users'),
       );
     }
   }
 
   @override
-  Future<Result<List<UserProfileEntity>>> getUserConnections(String userId) async {
+  Future<Result<List<UserProfileEntity>>> getUserConnections(
+    String userId,
+  ) async {
     // This would be implemented based on your connection/friend system requirements
     // For now, returning empty list as connections feature is not in current scope
     return Result.success(<UserProfileEntity>[]);
@@ -508,34 +485,35 @@ class ProfileRepositoryImpl implements ProfileRepository {
     try {
       AppLogger.info('ProfileRepositoryImpl', 'Watching profile: $userId');
 
-      return remoteDataSource.watchProfile(userId).map((profile) {
-        // Cache received profile updates
-        localDataSource.cacheProfile(profile);
-        localDataSource.setLastSyncTimestamp(userId, DateTime.now());
-        
-        return Result.success(profile.toEntity());
-      }).handleError((error) {
-        AppLogger.error('Watch profile stream error', error);
-        return Result.failure(
-          Failure.serverFailure(
-            message: 'Failed to watch profile',
-          ),
-        );
-      });
+      return remoteDataSource
+          .watchProfile(userId)
+          .map((profile) {
+            // Cache received profile updates
+            localDataSource.cacheProfile(profile);
+            localDataSource.setLastSyncTimestamp(userId, DateTime.now());
+
+            return Result.success(profile.toEntity());
+          })
+          .handleError((error) {
+            AppLogger.error('Watch profile stream error', error);
+            return Result.failure(
+              Failure.serverFailure(message: 'Failed to watch profile'),
+            );
+          });
     } catch (e) {
       AppLogger.error('Watch profile failed', e);
       return Stream.value(
         Result.failure(
-          Failure.serverFailure(
-            message: 'Failed to watch profile',
-          ),
+          Failure.serverFailure(message: 'Failed to watch profile'),
         ),
       );
     }
   }
 
   @override
-  Future<Result<List<String>>> getProfileCompletionSuggestions(String userId) async {
+  Future<Result<List<String>>> getProfileCompletionSuggestions(
+    String userId,
+  ) async {
     try {
       final profileResult = await getProfile(userId);
       if (!profileResult.isSuccess) {
@@ -565,9 +543,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
     } catch (e) {
       AppLogger.error('Get profile completion suggestions failed', e);
       return Result.failure(
-        Failure.serverFailure(
-          message: 'Failed to get suggestions',
-        ),
+        Failure.serverFailure(message: 'Failed to get suggestions'),
       );
     }
   }
@@ -578,17 +554,13 @@ class ProfileRepositoryImpl implements ProfileRepository {
       // Basic validation rules
       if (profile.name.isEmpty) {
         return Result.failure(
-          Failure.serverFailure(
-            message: 'Name cannot be empty',
-          ),
+          Failure.serverFailure(message: 'Name cannot be empty'),
         );
       }
 
       if (profile.email.isEmpty) {
         return Result.failure(
-          Failure.serverFailure(
-            message: 'Email cannot be empty',
-          ),
+          Failure.serverFailure(message: 'Email cannot be empty'),
         );
       }
 
@@ -604,15 +576,15 @@ class ProfileRepositoryImpl implements ProfileRepository {
     } catch (e) {
       AppLogger.error('Validate profile data failed', e);
       return Result.failure(
-        Failure.serverFailure(
-          message: 'Profile validation failed',
-        ),
+        Failure.serverFailure(message: 'Profile validation failed'),
       );
     }
   }
 
   @override
-  Future<Result<Map<String, dynamic>>> getUserActivitySummary(String userId) async {
+  Future<Result<Map<String, dynamic>>> getUserActivitySummary(
+    String userId,
+  ) async {
     try {
       final profileResult = await getProfile(userId);
       if (!profileResult.isSuccess) {
@@ -639,9 +611,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
     } catch (e) {
       AppLogger.error('Get user activity summary failed', e);
       return Result.failure(
-        Failure.serverFailure(
-          message: 'Failed to get activity summary',
-        ),
+        Failure.serverFailure(message: 'Failed to get activity summary'),
       );
     }
   }
@@ -657,20 +627,20 @@ class ProfileRepositoryImpl implements ProfileRepository {
       final profile = profileResult.dataOrNull!;
       // Level is calculated automatically in the entity extension
       // This method could trigger achievements or notifications
-      
+
       return Result.success(profile);
     } catch (e) {
       AppLogger.error('Update user level failed', e);
       return Result.failure(
-        Failure.serverFailure(
-          message: 'Failed to update user level',
-        ),
+        Failure.serverFailure(message: 'Failed to update user level'),
       );
     }
   }
 
   @override
-  Future<Result<List<UserProfileEntity>>> getUsersByRegion(String region) async {
+  Future<Result<List<UserProfileEntity>>> getUsersByRegion(
+    String region,
+  ) async {
     // This would be implemented based on your regional requirements
     // For now, returning empty list as regional features are not in current scope
     return Result.success(<UserProfileEntity>[]);
@@ -679,7 +649,10 @@ class ProfileRepositoryImpl implements ProfileRepository {
   @override
   Future<Result<void>> blockUser(String userId, String targetUserId) async {
     try {
-      AppLogger.info('ProfileRepositoryImpl', 'Blocking user: $userId -> $targetUserId');
+      AppLogger.info(
+        'ProfileRepositoryImpl',
+        'Blocking user: $userId -> $targetUserId',
+      );
 
       if (!(await networkInfo.isConnected)) {
         return Result.failure(
@@ -693,19 +666,13 @@ class ProfileRepositoryImpl implements ProfileRepository {
       return Result.success(null);
     } catch (e) {
       AppLogger.error('Block user failed', e);
-      
+
       if (e is ServerException) {
-        return Result.failure(
-          Failure.serverFailure(
-            message: e.message,
-          ),
-        );
+        return Result.failure(Failure.serverFailure(message: e.message));
       }
-      
+
       return Result.failure(
-        Failure.serverFailure(
-          message: 'Failed to block user',
-        ),
+        Failure.serverFailure(message: 'Failed to block user'),
       );
     }
   }
@@ -713,7 +680,10 @@ class ProfileRepositoryImpl implements ProfileRepository {
   @override
   Future<Result<void>> unblockUser(String userId, String targetUserId) async {
     try {
-      AppLogger.info('ProfileRepositoryImpl', 'Unblocking user: $userId -> $targetUserId');
+      AppLogger.info(
+        'ProfileRepositoryImpl',
+        'Unblocking user: $userId -> $targetUserId',
+      );
 
       if (!(await networkInfo.isConnected)) {
         return Result.failure(
@@ -727,19 +697,13 @@ class ProfileRepositoryImpl implements ProfileRepository {
       return Result.success(null);
     } catch (e) {
       AppLogger.error('Unblock user failed', e);
-      
+
       if (e is ServerException) {
-        return Result.failure(
-          Failure.serverFailure(
-            message: e.message,
-          ),
-        );
+        return Result.failure(Failure.serverFailure(message: e.message));
       }
-      
+
       return Result.failure(
-        Failure.serverFailure(
-          message: 'Failed to unblock user',
-        ),
+        Failure.serverFailure(message: 'Failed to unblock user'),
       );
     }
   }
@@ -761,27 +725,28 @@ class ProfileRepositoryImpl implements ProfileRepository {
       return Result.success(blockedUsers);
     } catch (e) {
       AppLogger.error('Get blocked users failed', e);
-      
+
       if (e is ServerException) {
-        return Result.failure(
-          Failure.serverFailure(
-            message: e.message,
-          ),
-        );
+        return Result.failure(Failure.serverFailure(message: e.message));
       }
-      
+
       return Result.failure(
-        Failure.serverFailure(
-          message: 'Failed to get blocked users',
-        ),
+        Failure.serverFailure(message: 'Failed to get blocked users'),
       );
     }
   }
 
   @override
-  Future<Result<void>> reportUser(String reporterId, String reportedUserId, String reason) async {
+  Future<Result<void>> reportUser(
+    String reporterId,
+    String reportedUserId,
+    String reason,
+  ) async {
     try {
-      AppLogger.info('ProfileRepositoryImpl', 'Reporting user: $reporterId -> $reportedUserId');
+      AppLogger.info(
+        'ProfileRepositoryImpl',
+        'Reporting user: $reporterId -> $reportedUserId',
+      );
 
       if (!(await networkInfo.isConnected)) {
         return Result.failure(
@@ -795,25 +760,21 @@ class ProfileRepositoryImpl implements ProfileRepository {
       return Result.success(null);
     } catch (e) {
       AppLogger.error('Report user failed', e);
-      
+
       if (e is ServerException) {
-        return Result.failure(
-          Failure.serverFailure(
-            message: e.message,
-          ),
-        );
+        return Result.failure(Failure.serverFailure(message: e.message));
       }
-      
+
       return Result.failure(
-        Failure.serverFailure(
-          message: 'Failed to report user',
-        ),
+        Failure.serverFailure(message: 'Failed to report user'),
       );
     }
   }
 
   @override
-  Future<Result<List<Map<String, dynamic>>>> getUserReports(String userId) async {
+  Future<Result<List<Map<String, dynamic>>>> getUserReports(
+    String userId,
+  ) async {
     // This would be implemented for admin users to view reports
     // For now, returning empty list as admin features are not in current scope
     return Result.success(<Map<String, dynamic>>[]);

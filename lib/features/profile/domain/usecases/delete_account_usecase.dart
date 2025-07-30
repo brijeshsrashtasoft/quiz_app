@@ -23,18 +23,14 @@ class DeleteAccountUseCase extends BaseUseCase<void, DeleteAccountParams> {
       // Validate user permissions (only user can delete their own account)
       if (params.requestingUserId != params.userId && !params.isAdminRequest) {
         return Result.failure(
-          Failure.authFailure(
-            message: 'You can only delete your own account',
-          ),
+          Failure.authFailure(message: 'You can only delete your own account'),
         );
       }
 
       // Confirm deletion with password or confirmation token
       if (!params.isConfirmed) {
         return Result.failure(
-          Failure.serverFailure(
-            message: 'Account deletion must be confirmed',
-          ),
+          Failure.serverFailure(message: 'Account deletion must be confirmed'),
         );
       }
 

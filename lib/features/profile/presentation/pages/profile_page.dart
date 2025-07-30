@@ -8,10 +8,7 @@ import '../providers/profile_providers.dart';
 class ProfilePage extends ConsumerStatefulWidget {
   final String? userId;
 
-  const ProfilePage({
-    super.key,
-    this.userId,
-  });
+  const ProfilePage({super.key, this.userId});
 
   @override
   ConsumerState<ProfilePage> createState() => _ProfilePageState();
@@ -21,11 +18,13 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   @override
   void initState() {
     super.initState();
-    
+
     // Load profile on page init
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (widget.userId != null) {
-        ref.read(currentUserProfileProvider.notifier).loadProfile(widget.userId!);
+        ref
+            .read(currentUserProfileProvider.notifier)
+            .loadProfile(widget.userId!);
       }
     });
   }
@@ -51,9 +50,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       body: profileAsync.when(
         data: (profile) {
           if (profile == null) {
-            return const Center(
-              child: Text('Profile not found'),
-            );
+            return const Center(child: Text('Profile not found'));
           }
 
           return SingleChildScrollView(
@@ -63,42 +60,36 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               children: [
                 // Profile header with avatar and basic info
                 _buildProfileHeader(profile),
-                
+
                 const SizedBox(height: 24),
-                
+
                 // Profile completion indicator
                 _buildCompletionIndicator(completionPercentage),
-                
+
                 const SizedBox(height: 24),
-                
+
                 // User statistics
                 _buildStatsSection(profile),
-                
+
                 const SizedBox(height: 24),
-                
+
                 // Quick actions
                 _buildQuickActions(),
-                
+
                 const SizedBox(height: 24),
-                
+
                 // Settings sections
                 _buildSettingsSection(),
               ],
             ),
           );
         },
-        loading: () => const Center(
-          child: CircularProgressIndicator(),
-        ),
+        loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stackTrace) => Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.error_outline,
-                size: 64,
-                color: Colors.red,
-              ),
+              const Icon(Icons.error_outline, size: 64, color: Colors.red),
               const SizedBox(height: 16),
               Text(
                 'Failed to load profile',
@@ -114,7 +105,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               ElevatedButton(
                 onPressed: () {
                   if (widget.userId != null) {
-                    ref.read(currentUserProfileProvider.notifier).loadProfile(widget.userId!);
+                    ref
+                        .read(currentUserProfileProvider.notifier)
+                        .loadProfile(widget.userId!);
                   }
                 },
                 child: const Text('Retry'),
@@ -140,14 +133,16 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   : null,
               child: profile.profileImageUrl == null
                   ? Text(
-                      profile.name.isNotEmpty ? profile.name[0].toUpperCase() : 'U',
+                      profile.name.isNotEmpty
+                          ? profile.name[0].toUpperCase()
+                          : 'U',
                       style: const TextStyle(fontSize: 24),
                     )
                   : null,
             ),
-            
+
             const SizedBox(width: 16),
-            
+
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -160,9 +155,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     const SizedBox(height: 4),
                     Text(
                       '@${profile.username}',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey[600],
-                      ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
                     ),
                   ],
                   if (profile.bio != null && profile.bio!.isNotEmpty) ...[
@@ -212,38 +207,30 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
   Widget _buildStatsSection(profile) {
     final stats = profile.stats;
-    
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Statistics',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+            Text('Statistics', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 16),
-            
+
             if (stats != null) ...[
               Row(
                 children: [
                   Expanded(
-                    child: _buildStatItem('Games Played', stats.totalGamesPlayed.toString()),
+                    child: _buildStatItem(
+                      'Games Played',
+                      stats.totalGamesPlayed.toString(),
+                    ),
                   ),
                   Expanded(
-                    child: _buildStatItem('Games Won', stats.totalGamesWon.toString()),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildStatItem('Win Rate', '${profile.winRate.toStringAsFixed(1)}%'),
-                  ),
-                  Expanded(
-                    child: _buildStatItem('Total Points', stats.totalPoints.toString()),
+                    child: _buildStatItem(
+                      'Games Won',
+                      stats.totalGamesWon.toString(),
+                    ),
                   ),
                 ],
               ),
@@ -251,15 +238,40 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               Row(
                 children: [
                   Expanded(
-                    child: _buildStatItem('Current Streak', stats.currentStreak.toString()),
+                    child: _buildStatItem(
+                      'Win Rate',
+                      '${profile.winRate.toStringAsFixed(1)}%',
+                    ),
                   ),
                   Expanded(
-                    child: _buildStatItem('Best Streak', stats.bestStreak.toString()),
+                    child: _buildStatItem(
+                      'Total Points',
+                      stats.totalPoints.toString(),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildStatItem(
+                      'Current Streak',
+                      stats.currentStreak.toString(),
+                    ),
+                  ),
+                  Expanded(
+                    child: _buildStatItem(
+                      'Best Streak',
+                      stats.bestStreak.toString(),
+                    ),
                   ),
                 ],
               ),
             ] else ...[
-              const Text('No statistics available. Play some games to see your stats!'),
+              const Text(
+                'No statistics available. Play some games to see your stats!',
+              ),
             ],
           ],
         ),
@@ -280,9 +292,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         ),
         Text(
           label,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Colors.grey[600],
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
         ),
       ],
     );
@@ -300,7 +312,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 16),
-            
+
             Wrap(
               spacing: 8.0,
               runSpacing: 8.0,
@@ -360,12 +372,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Settings',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+            Text('Settings', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 16),
-            
+
             ListTile(
               leading: const Icon(Icons.tune),
               title: const Text('Game Preferences'),
@@ -375,7 +384,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 // Navigate to preferences
               },
             ),
-            
+
             ListTile(
               leading: const Icon(Icons.privacy_tip),
               title: const Text('Privacy Settings'),
@@ -385,7 +394,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 // Navigate to privacy settings
               },
             ),
-            
+
             ListTile(
               leading: const Icon(Icons.help_outline),
               title: const Text('Help & Support'),
@@ -395,12 +404,15 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 // Navigate to help
               },
             ),
-            
+
             const Divider(),
-            
+
             ListTile(
               leading: const Icon(Icons.logout, color: Colors.red),
-              title: const Text('Sign Out', style: TextStyle(color: Colors.red)),
+              title: const Text(
+                'Sign Out',
+                style: TextStyle(color: Colors.red),
+              ),
               onTap: () {
                 // Show sign out confirmation
                 _showSignOutDialog();

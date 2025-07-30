@@ -15,7 +15,9 @@ import '../../data/datasources/profile_local_datasource.dart';
 /// Following CLAUDE.md patterns and Clean Architecture
 
 // Data source providers
-final profileRemoteDataSourceProvider = Provider<ProfileRemoteDataSource>((ref) {
+final profileRemoteDataSourceProvider = Provider<ProfileRemoteDataSource>((
+  ref,
+) {
   return ProfileFirebaseDataSource();
 });
 
@@ -24,7 +26,8 @@ final profileLocalDataSourceProvider = Provider<ProfileLocalDataSource>((ref) {
   return sharedPrefs.when(
     data: (prefs) => ProfileSharedPrefsDataSource(prefs: prefs),
     loading: () => throw Exception('SharedPreferences not yet loaded'),
-    error: (error, stack) => throw Exception('Failed to load SharedPreferences: $error'),
+    error: (error, stack) =>
+        throw Exception('Failed to load SharedPreferences: $error'),
   );
 });
 
@@ -38,7 +41,9 @@ final profileRepositoryProvider = Provider<ProfileRepository>((ref) {
 });
 
 // Use case providers
-final updateUserProfileUseCaseProvider = Provider<UpdateUserProfileUseCase>((ref) {
+final updateUserProfileUseCaseProvider = Provider<UpdateUserProfileUseCase>((
+  ref,
+) {
   return UpdateUserProfileUseCase(
     profileRepository: ref.read(profileRepositoryProvider),
   );
@@ -56,7 +61,9 @@ final deleteAccountUseCaseProvider = Provider<DeleteAccountUseCase>((ref) {
   );
 });
 
-final validateUsernameUseCaseProvider = Provider<ValidateUsernameUseCase>((ref) {
+final validateUsernameUseCaseProvider = Provider<ValidateUsernameUseCase>((
+  ref,
+) {
   return ValidateUsernameUseCase(
     profileRepository: ref.read(profileRepositoryProvider),
   );
@@ -68,18 +75,24 @@ final getUserStatsUseCaseProvider = Provider<GetUserStatsUseCase>((ref) {
   );
 });
 
-final updatePreferencesUseCaseProvider = Provider<UpdatePreferencesUseCase>((ref) {
+final updatePreferencesUseCaseProvider = Provider<UpdatePreferencesUseCase>((
+  ref,
+) {
   return UpdatePreferencesUseCase(
     profileRepository: ref.read(profileRepositoryProvider),
   );
 });
 
 // Profile state providers
-final currentUserProfileProvider = StateNotifierProvider<CurrentUserProfileNotifier, AsyncValue<UserProfileEntity?>>((ref) {
-  return CurrentUserProfileNotifier(
-    profileRepository: ref.read(profileRepositoryProvider),
-  );
-});
+final currentUserProfileProvider =
+    StateNotifierProvider<
+      CurrentUserProfileNotifier,
+      AsyncValue<UserProfileEntity?>
+    >((ref) {
+      return CurrentUserProfileNotifier(
+        profileRepository: ref.read(profileRepositoryProvider),
+      );
+    });
 
 final profileCompletionProvider = Provider<double>((ref) {
   final profileAsync = ref.watch(currentUserProfileProvider);
@@ -123,14 +136,14 @@ final avatarUploadLoadingProvider = StateProvider<bool>((ref) => false);
 final usernameValidationProvider = StateProvider<String?>((ref) => null);
 
 /// Current user profile state notifier
-class CurrentUserProfileNotifier extends StateNotifier<AsyncValue<UserProfileEntity?>> {
+class CurrentUserProfileNotifier
+    extends StateNotifier<AsyncValue<UserProfileEntity?>> {
   final ProfileRepository _profileRepository;
   String? _currentUserId;
 
-  CurrentUserProfileNotifier({
-    required ProfileRepository profileRepository,
-  })  : _profileRepository = profileRepository,
-        super(const AsyncValue.loading());
+  CurrentUserProfileNotifier({required ProfileRepository profileRepository})
+    : _profileRepository = profileRepository,
+      super(const AsyncValue.loading());
 
   /// Load user profile
   Future<void> loadProfile(String userId) async {
@@ -143,7 +156,7 @@ class CurrentUserProfileNotifier extends StateNotifier<AsyncValue<UserProfileEnt
     state = const AsyncValue.loading();
 
     final result = await _profileRepository.getProfile(userId);
-    
+
     state = result.when(
       success: (profile) => AsyncValue.data(profile),
       failure: (failure) => AsyncValue.error(failure, StackTrace.current),
@@ -151,21 +164,21 @@ class CurrentUserProfileNotifier extends StateNotifier<AsyncValue<UserProfileEnt
   }
 
   /// Update profile
-  Future<Result<UserProfileEntity>> updateProfile(UserProfileEntity profile) async {
+  Future<Result<UserProfileEntity>> updateProfile(
+    UserProfileEntity profile,
+  ) async {
     if (_currentUserId == null) {
       return Result.failure(
-        Failure.serverFailure(
-          message: 'No user logged in',
-        ),
+        Failure.serverFailure(message: 'No user logged in'),
       );
     }
 
     final result = await _profileRepository.updateProfile(profile);
-    
+
     if (result.isSuccess) {
       state = AsyncValue.data(result.dataOrNull);
     }
-    
+
     return result;
   }
 
@@ -173,56 +186,63 @@ class CurrentUserProfileNotifier extends StateNotifier<AsyncValue<UserProfileEnt
   Future<Result<UserProfileEntity>> updateStats(UserStats stats) async {
     if (_currentUserId == null) {
       return Result.failure(
-        Failure.serverFailure(
-          message: 'No user logged in',
-        ),
+        Failure.serverFailure(message: 'No user logged in'),
       );
     }
 
-    final result = await _profileRepository.updateUserStats(_currentUserId!, stats);
-    
+    final result = await _profileRepository.updateUserStats(
+      _currentUserId!,
+      stats,
+    );
+
     if (result.isSuccess) {
       state = AsyncValue.data(result.dataOrNull);
     }
-    
+
     return result;
   }
 
   /// Update preferences
-  Future<Result<UserProfileEntity>> updatePreferences(UserPreferences preferences) async {
+  Future<Result<UserProfileEntity>> updatePreferences(
+    UserPreferences preferences,
+  ) async {
     if (_currentUserId == null) {
       return Result.failure(
-        Failure.serverFailure(
-          message: 'No user logged in',
-        ),
+        Failure.serverFailure(message: 'No user logged in'),
       );
     }
 
-    final result = await _profileRepository.updateUserPreferences(_currentUserId!, preferences);
-    
+    final result = await _profileRepository.updateUserPreferences(
+      _currentUserId!,
+      preferences,
+    );
+
     if (result.isSuccess) {
       state = AsyncValue.data(result.dataOrNull);
     }
-    
+
     return result;
   }
 
   /// Update privacy settings
-  Future<Result<UserProfileEntity>> updatePrivacySettings(PrivacySettings privacySettings) async {
+  Future<Result<UserProfileEntity>> updatePrivacySettings(
+    PrivacySettings privacySettings,
+  ) async {
     if (_currentUserId == null) {
       return Result.failure(
-        Failure.serverFailure(
-          message: 'No user logged in',
-        ),
+        Failure.serverFailure(message: 'No user logged in'),
       );
     }
 
-    final result = await _profileRepository.updatePrivacySettings(_currentUserId!, privacySettings);
-    
+    final result = await _profileRepository.updatePrivacySettings(
+      _currentUserId!,
+      privacySettings,
+    );
+
     if (result.isSuccess) {
       state = AsyncValue.data(result.dataOrNull);
     }
-    
+
     return result;
   }
 
@@ -230,9 +250,7 @@ class CurrentUserProfileNotifier extends StateNotifier<AsyncValue<UserProfileEnt
   Future<Result<String>> uploadAvatar(File imageFile) async {
     if (_currentUserId == null) {
       return Result.failure(
-        Failure.serverFailure(
-          message: 'No user logged in',
-        ),
+        Failure.serverFailure(message: 'No user logged in'),
       );
     }
 
@@ -243,9 +261,7 @@ class CurrentUserProfileNotifier extends StateNotifier<AsyncValue<UserProfileEnt
   Future<Result<void>> deleteAvatar() async {
     if (_currentUserId == null) {
       return Result.failure(
-        Failure.serverFailure(
-          message: 'No user logged in',
-        ),
+        Failure.serverFailure(message: 'No user logged in'),
       );
     }
 
@@ -261,13 +277,13 @@ class CurrentUserProfileNotifier extends StateNotifier<AsyncValue<UserProfileEnt
   Future<Result<List<String>>> getCompletionSuggestions() async {
     if (_currentUserId == null) {
       return Result.failure(
-        Failure.serverFailure(
-          message: 'No user logged in',
-        ),
+        Failure.serverFailure(message: 'No user logged in'),
       );
     }
 
-    return await _profileRepository.getProfileCompletionSuggestions(_currentUserId!);
+    return await _profileRepository.getProfileCompletionSuggestions(
+      _currentUserId!,
+    );
   }
 
   /// Watch profile for real-time updates
@@ -275,17 +291,20 @@ class CurrentUserProfileNotifier extends StateNotifier<AsyncValue<UserProfileEnt
     _currentUserId = userId;
     state = const AsyncValue.loading();
 
-    _profileRepository.watchProfile(userId).listen(
-      (result) {
-        state = result.when(
-          success: (profile) => AsyncValue.data(profile),
-          failure: (failure) => AsyncValue.error(failure, StackTrace.current),
+    _profileRepository
+        .watchProfile(userId)
+        .listen(
+          (result) {
+            state = result.when(
+              success: (profile) => AsyncValue.data(profile),
+              failure: (failure) =>
+                  AsyncValue.error(failure, StackTrace.current),
+            );
+          },
+          onError: (error) {
+            state = AsyncValue.error(error, StackTrace.current);
+          },
         );
-      },
-      onError: (error) {
-        state = AsyncValue.error(error, StackTrace.current);
-      },
-    );
   }
 
   /// Clear profile state
@@ -301,20 +320,24 @@ final networkInfoProvider = Provider<NetworkInfo>((ref) {
 });
 
 /// Profile search provider for finding other users
-final profileSearchProvider = StateNotifierProvider<ProfileSearchNotifier, AsyncValue<List<UserProfileEntity>>>((ref) {
-  return ProfileSearchNotifier(
-    profileRepository: ref.read(profileRepositoryProvider),
-  );
-});
+final profileSearchProvider =
+    StateNotifierProvider<
+      ProfileSearchNotifier,
+      AsyncValue<List<UserProfileEntity>>
+    >((ref) {
+      return ProfileSearchNotifier(
+        profileRepository: ref.read(profileRepositoryProvider),
+      );
+    });
 
 /// Profile search state notifier
-class ProfileSearchNotifier extends StateNotifier<AsyncValue<List<UserProfileEntity>>> {
+class ProfileSearchNotifier
+    extends StateNotifier<AsyncValue<List<UserProfileEntity>>> {
   final ProfileRepository _profileRepository;
 
-  ProfileSearchNotifier({
-    required ProfileRepository profileRepository,
-  })  : _profileRepository = profileRepository,
-        super(const AsyncValue.data([]));
+  ProfileSearchNotifier({required ProfileRepository profileRepository})
+    : _profileRepository = profileRepository,
+      super(const AsyncValue.data([]));
 
   /// Search profiles by query
   Future<void> searchProfiles(String query) async {
@@ -326,7 +349,7 @@ class ProfileSearchNotifier extends StateNotifier<AsyncValue<List<UserProfileEnt
     state = const AsyncValue.loading();
 
     final result = await _profileRepository.searchProfiles(query);
-    
+
     state = result.when(
       success: (profiles) => AsyncValue.data(profiles),
       failure: (failure) => AsyncValue.error(failure, StackTrace.current),
@@ -340,10 +363,13 @@ class ProfileSearchNotifier extends StateNotifier<AsyncValue<List<UserProfileEnt
 }
 
 /// Top users leaderboard provider
-final topUsersProvider = FutureProvider.family<List<UserProfileEntity>, int>((ref, limit) async {
+final topUsersProvider = FutureProvider.family<List<UserProfileEntity>, int>((
+  ref,
+  limit,
+) async {
   final repository = ref.read(profileRepositoryProvider);
   final result = await repository.getTopUsers(limit);
-  
+
   return result.when(
     success: (users) => users,
     failure: (failure) => throw failure,

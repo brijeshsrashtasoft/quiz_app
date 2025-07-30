@@ -75,6 +75,10 @@ class ErrorService {
       validationFailure: (_, __) => true,
       cacheFailure: (_) => false,
       unknownFailure: (_) => false,
+      securityFailure: (_, __) => false,
+      biometricFailure: (_, __) => true,
+      sessionFailure: (_, __) => false,
+      deviceFailure: (_, __) => false,
     );
   }
 
@@ -88,6 +92,10 @@ class ErrorService {
       validationFailure: (_, __) => ErrorLogLevel.info,
       cacheFailure: (_) => ErrorLogLevel.warning,
       unknownFailure: (_) => ErrorLogLevel.fatal,
+      securityFailure: (_, __) => ErrorLogLevel.error,
+      biometricFailure: (_, __) => ErrorLogLevel.warning,
+      sessionFailure: (_, __) => ErrorLogLevel.error,
+      deviceFailure: (_, __) => ErrorLogLevel.warning,
     );
   }
 

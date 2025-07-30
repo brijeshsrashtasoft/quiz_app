@@ -164,8 +164,8 @@ extension UserProfileEntityX on UserProfileEntity {
   /// Check if onboarding is complete
   bool get isOnboardingComplete {
     return (onboardingStatus?.profileSetupComplete ?? false) &&
-           (onboardingStatus?.preferencesSet ?? false) &&
-           (onboardingStatus?.privacySettingsSet ?? false);
+        (onboardingStatus?.preferencesSet ?? false) &&
+        (onboardingStatus?.privacySettingsSet ?? false);
   }
 
   /// Get completion percentage for profile setup

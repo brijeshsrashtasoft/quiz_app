@@ -132,6 +132,74 @@ service cloud.firestore {
     }
     
     // ============================
+    // SECURITY DATA VALIDATION FUNCTIONS
+    // ============================
+    
+    // Validate user session data
+    function validateSessionData(data) {
+      return data.keys().hasAll(['sessionId', 'userId', 'createdAt', 'lastActiveAt', 'deviceId', 'deviceName', 'deviceType', 'ipAddress', 'userAgent', 'isActive']) &&
+             data.sessionId is string && data.sessionId.size() > 0 &&
+             data.userId is string && data.userId.size() > 0 &&
+             data.createdAt is timestamp &&
+             data.lastActiveAt is timestamp &&
+             data.deviceId is string && data.deviceId.size() > 0 &&
+             data.deviceName is string && data.deviceName.size() > 0 && data.deviceName.size() <= 200 &&
+             data.deviceType in ['mobile', 'tablet', 'desktop', 'unknown'] &&
+             data.ipAddress is string && data.ipAddress.size() > 0 && data.ipAddress.size() <= 45 &&
+             data.userAgent is string && data.userAgent.size() <= 500 &&
+             data.isActive is bool &&
+             (!('trustLevel' in data) || data.trustLevel in ['unknown', 'trusted', 'suspicious', 'revoked']) &&
+             (!('expiresAt' in data) || data.expiresAt is timestamp) &&
+             (!('metadata' in data) || data.metadata is map);
+    }
+    
+    // Validate user device data
+    function validateDeviceData(data) {
+      return data.keys().hasAll(['deviceId', 'userId', 'deviceName', 'deviceType', 'platform', 'firstSeenAt', 'lastSeenAt']) &&
+             data.deviceId is string && data.deviceId.size() > 0 &&
+             data.userId is string && data.userId.size() > 0 &&
+             data.deviceName is string && data.deviceName.size() > 0 && data.deviceName.size() <= 200 &&
+             data.deviceType in ['mobile', 'tablet', 'desktop', 'unknown'] &&
+             data.platform in ['android', 'ios', 'web', 'windows', 'macos', 'linux', 'unknown'] &&
+             data.firstSeenAt is timestamp &&
+             data.lastSeenAt is timestamp &&
+             (!('trustLevel' in data) || data.trustLevel in ['unknown', 'trusted', 'suspicious', 'revoked']) &&
+             (!('isRevoked' in data) || data.isRevoked is bool) &&
+             (!('fcmToken' in data) || (data.fcmToken is string && data.fcmToken.size() <= 500)) &&
+             (!('deviceFingerprint' in data) || data.deviceFingerprint is map) &&
+             (!('sessionIds' in data) || (data.sessionIds is list && data.sessionIds.size() <= 50));
+    }
+    
+    // Validate security event data
+    function validateSecurityEventData(data) {
+      return data.keys().hasAll(['eventId', 'userId', 'eventType', 'timestamp', 'severity', 'description']) &&
+             data.eventId is string && data.eventId.size() > 0 &&
+             data.userId is string && data.userId.size() > 0 &&
+             data.eventType in ['login_success', 'login_failed', 'password_change', 'session_terminated', 'suspicious_activity', 'new_device', 'device_revoked'] &&
+             data.timestamp is timestamp &&
+             data.severity in ['low', 'medium', 'high', 'critical'] &&
+             data.description is string && data.description.size() > 0 && data.description.size() <= 1000 &&
+             (!('deviceId' in data) || (data.deviceId is string && data.deviceId.size() > 0)) &&
+             (!('ipAddress' in data) || (data.ipAddress is string && data.ipAddress.size() <= 45)) &&
+             (!('userAgent' in data) || (data.userAgent is string && data.userAgent.size() <= 500)) &&
+             (!('metadata' in data) || data.metadata is map);
+    }
+    
+    // Validate security settings data
+    function validateSecuritySettingsData(data) {
+      return data.keys().hasAll(['userId']) &&
+             data.userId is string && data.userId.size() > 0 &&
+             (!('twoFactorEnabled' in data) || data.twoFactorEnabled is bool) &&
+             (!('sessionTimeoutEnabled' in data) || data.sessionTimeoutEnabled is bool) &&
+             (!('sessionTimeoutMinutes' in data) || (data.sessionTimeoutMinutes is number && data.sessionTimeoutMinutes >= 5 && data.sessionTimeoutMinutes <= 1440)) &&
+             (!('maxActiveSessions' in data) || (data.maxActiveSessions is number && data.maxActiveSessions >= 1 && data.maxActiveSessions <= 20)) &&
+             (!('suspiciousActivityAlerts' in data) || data.suspiciousActivityAlerts is bool) &&
+             (!('newDeviceAlerts' in data) || data.newDeviceAlerts is bool) &&
+             (!('trustedDevices' in data) || (data.trustedDevices is list && data.trustedDevices.size() <= 50)) &&
+             (!('lastUpdated' in data) || data.lastUpdated is timestamp);
+    }
+    
+    // ============================
     // USERS COLLECTION RULES
     // ============================
     match /users/{userId} {
@@ -150,6 +218,61 @@ service cloud.firestore {
       // Users can read other users' basic profile data (for leaderboards)
       allow read: if isAuthenticated() && 
                      resource.data.keys().hasAll(['name', 'email', 'createdAt']);
+      
+      // ============================
+      // USER SESSIONS SUBCOLLECTION
+      // ============================
+      match /sessions/{sessionId} {
+        // Users can only access their own sessions
+        allow read, write: if isAuthenticated() && isUser(userId);
+        
+        // Validate session data structure
+        allow create, update: if isAuthenticated() && 
+                                 isUser(userId) &&
+                                 validateSessionData(request.resource.data);
+      }
+      
+      // ============================
+      // USER DEVICES SUBCOLLECTION
+      // ============================
+      match /devices/{deviceId} {
+        // Users can only access their own devices
+        allow read, write: if isAuthenticated() && isUser(userId);
+        
+        // Validate device data structure
+        allow create, update: if isAuthenticated() && 
+                                 isUser(userId) &&
+                                 validateDeviceData(request.resource.data);
+      }
+      
+      // ============================
+      // SECURITY EVENTS SUBCOLLECTION
+      // ============================
+      match /security_events/{eventId} {
+        // Users can read their own security events but only append new ones
+        allow read: if isAuthenticated() && isUser(userId);
+        
+        // Security events are append-only (no updates allowed)
+        allow create: if isAuthenticated() && 
+                         isUser(userId) &&
+                         validateSecurityEventData(request.resource.data);
+        
+        // No updates or deletes allowed for security events (audit trail)
+        allow update, delete: if false;
+      }
+      
+      // ============================
+      // USER SETTINGS SUBCOLLECTION
+      // ============================
+      match /settings/{settingType} {
+        // Users can read and write their own settings
+        allow read, write: if isAuthenticated() && isUser(userId);
+        
+        // Validate security settings when updating security document
+        allow create, update: if isAuthenticated() && 
+                                 isUser(userId) &&
+                                 (settingType != 'security' || validateSecuritySettingsData(request.resource.data));
+      }
     }
     
     // ============================

@@ -63,9 +63,7 @@ class UploadAvatarUseCase extends BaseUseCase<String, UploadAvatarParams> {
       // Check if file exists
       if (!imageFile.existsSync()) {
         return Result.failure(
-          Failure.validationFailure(
-            message: 'Image file does not exist',
-          ),
+          Failure.validationFailure(message: 'Image file does not exist'),
         );
       }
 
@@ -98,9 +96,7 @@ class UploadAvatarUseCase extends BaseUseCase<String, UploadAvatarParams> {
       return Result.success(null);
     } catch (e) {
       return Result.failure(
-        Failure.validationFailure(
-          message: 'Failed to validate image file',
-        ),
+        Failure.validationFailure(message: 'Failed to validate image file'),
       );
     }
   }

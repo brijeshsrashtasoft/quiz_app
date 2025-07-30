@@ -59,9 +59,7 @@ class GetUserStatsUseCase extends BaseUseCase<UserStats, GetUserStatsParams> {
     } catch (e) {
       AppLogger.error('Get user stats failed', e);
       return Result.failure(
-        Failure.serverFailure(
-          message: 'Failed to retrieve user statistics',
-        ),
+        Failure.serverFailure(message: 'Failed to retrieve user statistics'),
       );
     }
   }

@@ -9,7 +9,7 @@ import 'package:quiz_app/core/navigation/route_constants.dart';
 import 'package:quiz_app/features/authentication/presentation/providers/auth_providers.dart';
 import 'package:quiz_app/features/authentication/domain/entities/user_entity.dart';
 import '../../../test_config.dart';
-import '../../../helpers/test_utilities.dart';
+import '../../../mocks/navigation_mocks.dart';
 import 'auth_guard_test.mocks.dart';
 
 /// Generate mocks for testing
@@ -33,15 +33,7 @@ void main() {
       TestCategory.unit,
       () async {
         // ARRANGE
-        final authenticatedState = AuthState.authenticated(
-          firebaseUser: MockFirebaseUser(),
-          user: UserEntity(
-            id: 'test-user-123',
-            name: 'Test User',
-            email: 'test@example.com',
-            createdAt: DateTime.now(),
-          ),
-        );
+        final authenticatedState = MockAuthStates.authenticated();
 
         when(
           mockContainer.read(authStateProvider.future),
@@ -132,15 +124,7 @@ void main() {
       TestCategory.unit,
       () async {
         // ARRANGE
-        final authenticatedState = AuthState.authenticated(
-          firebaseUser: MockFirebaseUser(),
-          user: UserEntity(
-            id: 'test-user-123',
-            name: 'Test User',
-            email: 'test@example.com',
-            createdAt: DateTime.now(),
-          ),
-        );
+        final authenticatedState = MockAuthStates.authenticated();
 
         when(
           mockContainer.read(authStateProvider.future),
@@ -184,7 +168,7 @@ void main() {
       TestCategory.unit,
       () async {
         // ARRANGE
-        when(mockState.pathParameters).thenReturn({'sessionId': null});
+        when(mockState.pathParameters).thenReturn(<String, String>{});
 
         // ACT
         final result = await sessionGuard.canActivate(mockContext, mockState);
@@ -238,7 +222,7 @@ void main() {
 
     testCase('should redirect on invalid quiz ID', TestCategory.unit, () async {
       // ARRANGE
-      when(mockState.pathParameters).thenReturn({'quizId': null});
+      when(mockState.pathParameters).thenReturn(<String, String>{});
 
       // ACT
       final result = await ownershipGuard.canActivate(mockContext, mockState);
@@ -482,11 +466,4 @@ void main() {
       },
     );
   });
-}
-
-/// Mock classes for testing
-class MockFirebaseUser {
-  String get uid => 'test-user-123';
-  String get email => 'test@example.com';
-  String get displayName => 'Test User';
 }

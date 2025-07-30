@@ -4,7 +4,9 @@ import '../firebase/firebase_core_config.dart';
 import '../utils/logger.dart';
 
 /// SharedPreferences provider
-final sharedPreferencesProvider = FutureProvider<SharedPreferences>((ref) async {
+final sharedPreferencesProvider = FutureProvider<SharedPreferences>((
+  ref,
+) async {
   try {
     AppLogger.info('Initializing SharedPreferences...');
     final prefs = await SharedPreferences.getInstance();

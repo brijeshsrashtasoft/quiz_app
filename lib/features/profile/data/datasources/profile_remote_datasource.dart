@@ -27,13 +27,22 @@ abstract class ProfileRemoteDataSource {
   Future<UserProfileModel> updateUserStats(String userId, UserStatsModel stats);
 
   /// Update user preferences
-  Future<UserProfileModel> updateUserPreferences(String userId, UserPreferencesModel preferences);
+  Future<UserProfileModel> updateUserPreferences(
+    String userId,
+    UserPreferencesModel preferences,
+  );
 
   /// Update privacy settings
-  Future<UserProfileModel> updatePrivacySettings(String userId, PrivacySettingsModel privacySettings);
+  Future<UserProfileModel> updatePrivacySettings(
+    String userId,
+    PrivacySettingsModel privacySettings,
+  );
 
   /// Update onboarding status
-  Future<UserProfileModel> updateOnboardingStatus(String userId, OnboardingStatusModel onboardingStatus);
+  Future<UserProfileModel> updateOnboardingStatus(
+    String userId,
+    OnboardingStatusModel onboardingStatus,
+  );
 
   /// Delete user account
   Future<void> deleteAccount(String userId);
@@ -55,7 +64,11 @@ abstract class ProfileRemoteDataSource {
   Future<List<String>> getBlockedUsers(String userId);
 
   /// Report user
-  Future<void> reportUser(String reporterId, String reportedUserId, String reason);
+  Future<void> reportUser(
+    String reporterId,
+    String reportedUserId,
+    String reason,
+  );
 }
 
 /// Firebase implementation of ProfileRemoteDataSource
@@ -66,13 +79,15 @@ class ProfileFirebaseDataSource implements ProfileRemoteDataSource {
   ProfileFirebaseDataSource({
     FirebaseFirestore? firestore,
     FirebaseStorage? storage,
-  })  : _firestore = firestore ?? FirebaseFirestore.instance,
-        _storage = storage ?? FirebaseStorage.instance;
+  }) : _firestore = firestore ?? FirebaseFirestore.instance,
+       _storage = storage ?? FirebaseStorage.instance;
 
   /// Collection references
   CollectionReference get _usersCollection => _firestore.collection('users');
-  CollectionReference get _blockedUsersCollection => _firestore.collection('blocked_users');
-  CollectionReference get _reportsCollection => _firestore.collection('user_reports');
+  CollectionReference get _blockedUsersCollection =>
+      _firestore.collection('blocked_users');
+  CollectionReference get _reportsCollection =>
+      _firestore.collection('user_reports');
 
   @override
   Future<UserProfileModel> getProfile(String userId) async {
@@ -81,10 +96,7 @@ class ProfileFirebaseDataSource implements ProfileRemoteDataSource {
 
       final doc = await _usersCollection.doc(userId).get();
       if (!doc.exists) {
-        throw ServerException(
-          message: 'Profile not found',
-          code: '404',
-        );
+        throw ServerException(message: 'Profile not found', code: '404');
       }
 
       final data = doc.data() as Map<String, dynamic>;
@@ -92,29 +104,28 @@ class ProfileFirebaseDataSource implements ProfileRemoteDataSource {
     } catch (e) {
       AppLogger.error('Get profile failed', e);
       if (e is ServerException) rethrow;
-      throw ServerException(
-        message: 'Failed to get profile',
-        code: '500',
-      );
+      throw ServerException(message: 'Failed to get profile', code: '500');
     }
   }
 
   @override
   Future<UserProfileModel> updateProfile(UserProfileModel profile) async {
     try {
-      AppLogger.info('ProfileFirebaseDataSource', 'Updating profile: ${profile.id}');
+      AppLogger.info(
+        'ProfileFirebaseDataSource',
+        'Updating profile: ${profile.id}',
+      );
 
       final updatedProfile = profile.copyWith(updatedAt: DateTime.now());
-      
-      await _usersCollection.doc(profile.id).update(updatedProfile.toFirestore());
-      
+
+      await _usersCollection
+          .doc(profile.id)
+          .update(updatedProfile.toFirestore());
+
       return updatedProfile;
     } catch (e) {
       AppLogger.error('Update profile failed', e);
-      throw ServerException(
-        message: 'Failed to update profile',
-        code: '500',
-      );
+      throw ServerException(message: 'Failed to update profile', code: '500');
     }
   }
 
@@ -124,23 +135,25 @@ class ProfileFirebaseDataSource implements ProfileRemoteDataSource {
       AppLogger.info('ProfileFirebaseDataSource', 'Uploading avatar: $userId');
 
       // Create storage reference
-      final storageRef = _storage.ref().child('avatars/$userId/${DateTime.now().millisecondsSinceEpoch}');
-      
+      final storageRef = _storage.ref().child(
+        'avatars/$userId/${DateTime.now().millisecondsSinceEpoch}',
+      );
+
       // Upload file
       final uploadTask = storageRef.putFile(imageFile);
       final snapshot = await uploadTask;
-      
+
       // Get download URL
       final downloadUrl = await snapshot.ref.getDownloadURL();
-      
-      AppLogger.info('ProfileFirebaseDataSource', 'Avatar upload successful: $userId');
+
+      AppLogger.info(
+        'ProfileFirebaseDataSource',
+        'Avatar upload successful: $userId',
+      );
       return downloadUrl;
     } catch (e) {
       AppLogger.error('Avatar upload failed', e);
-      throw ServerException(
-        message: 'Failed to upload avatar',
-        code: '500',
-      );
+      throw ServerException(message: 'Failed to upload avatar', code: '500');
     }
   }
 
@@ -150,33 +163,39 @@ class ProfileFirebaseDataSource implements ProfileRemoteDataSource {
       AppLogger.info('ProfileFirebaseDataSource', 'Deleting avatar: $userId');
 
       // List all files in user's avatar folder
-      final listResult = await _storage.ref().child('avatars/$userId').listAll();
-      
+      final listResult = await _storage
+          .ref()
+          .child('avatars/$userId')
+          .listAll();
+
       // Delete all avatar files
       for (final item in listResult.items) {
         await item.delete();
       }
-      
-      AppLogger.info('ProfileFirebaseDataSource', 'Avatar deletion successful: $userId');
+
+      AppLogger.info(
+        'ProfileFirebaseDataSource',
+        'Avatar deletion successful: $userId',
+      );
     } catch (e) {
       AppLogger.error('Avatar deletion failed', e);
-      throw ServerException(
-        message: 'Failed to delete avatar',
-        code: '500',
-      );
+      throw ServerException(message: 'Failed to delete avatar', code: '500');
     }
   }
 
   @override
   Future<bool> isUsernameAvailable(String username) async {
     try {
-      AppLogger.info('ProfileFirebaseDataSource', 'Checking username availability: $username');
+      AppLogger.info(
+        'ProfileFirebaseDataSource',
+        'Checking username availability: $username',
+      );
 
       final query = await _usersCollection
           .where('username', isEqualTo: username)
           .limit(1)
           .get();
-      
+
       return query.docs.isEmpty;
     } catch (e) {
       AppLogger.error('Username check failed', e);
@@ -188,9 +207,15 @@ class ProfileFirebaseDataSource implements ProfileRemoteDataSource {
   }
 
   @override
-  Future<UserProfileModel> updateUserStats(String userId, UserStatsModel stats) async {
+  Future<UserProfileModel> updateUserStats(
+    String userId,
+    UserStatsModel stats,
+  ) async {
     try {
-      AppLogger.info('ProfileFirebaseDataSource', 'Updating user stats: $userId');
+      AppLogger.info(
+        'ProfileFirebaseDataSource',
+        'Updating user stats: $userId',
+      );
 
       await _usersCollection.doc(userId).update({
         'stats': stats.toFirestore(),
@@ -208,9 +233,15 @@ class ProfileFirebaseDataSource implements ProfileRemoteDataSource {
   }
 
   @override
-  Future<UserProfileModel> updateUserPreferences(String userId, UserPreferencesModel preferences) async {
+  Future<UserProfileModel> updateUserPreferences(
+    String userId,
+    UserPreferencesModel preferences,
+  ) async {
     try {
-      AppLogger.info('ProfileFirebaseDataSource', 'Updating user preferences: $userId');
+      AppLogger.info(
+        'ProfileFirebaseDataSource',
+        'Updating user preferences: $userId',
+      );
 
       await _usersCollection.doc(userId).update({
         'preferences': preferences.toFirestore(),
@@ -228,9 +259,15 @@ class ProfileFirebaseDataSource implements ProfileRemoteDataSource {
   }
 
   @override
-  Future<UserProfileModel> updatePrivacySettings(String userId, PrivacySettingsModel privacySettings) async {
+  Future<UserProfileModel> updatePrivacySettings(
+    String userId,
+    PrivacySettingsModel privacySettings,
+  ) async {
     try {
-      AppLogger.info('ProfileFirebaseDataSource', 'Updating privacy settings: $userId');
+      AppLogger.info(
+        'ProfileFirebaseDataSource',
+        'Updating privacy settings: $userId',
+      );
 
       await _usersCollection.doc(userId).update({
         'privacySettings': privacySettings.toFirestore(),
@@ -248,9 +285,15 @@ class ProfileFirebaseDataSource implements ProfileRemoteDataSource {
   }
 
   @override
-  Future<UserProfileModel> updateOnboardingStatus(String userId, OnboardingStatusModel onboardingStatus) async {
+  Future<UserProfileModel> updateOnboardingStatus(
+    String userId,
+    OnboardingStatusModel onboardingStatus,
+  ) async {
     try {
-      AppLogger.info('ProfileFirebaseDataSource', 'Updating onboarding status: $userId');
+      AppLogger.info(
+        'ProfileFirebaseDataSource',
+        'Updating onboarding status: $userId',
+      );
 
       await _usersCollection.doc(userId).update({
         'onboardingStatus': onboardingStatus.toFirestore(),
@@ -304,13 +347,13 @@ class ProfileFirebaseDataSource implements ProfileRemoteDataSource {
         AppLogger.warning('Avatar deletion failed during account deletion', e);
       }
 
-      AppLogger.info('ProfileFirebaseDataSource', 'Account deletion successful: $userId');
+      AppLogger.info(
+        'ProfileFirebaseDataSource',
+        'Account deletion successful: $userId',
+      );
     } catch (e) {
       AppLogger.error('Account deletion failed', e);
-      throw ServerException(
-        message: 'Failed to delete account',
-        code: '500',
-      );
+      throw ServerException(message: 'Failed to delete account', code: '500');
     }
   }
 
@@ -326,14 +369,15 @@ class ProfileFirebaseDataSource implements ProfileRemoteDataSource {
           .get();
 
       return querySnapshot.docs
-          .map((doc) => UserProfileModel.fromFirestore(doc.data() as Map<String, dynamic>))
+          .map(
+            (doc) => UserProfileModel.fromFirestore(
+              doc.data() as Map<String, dynamic>,
+            ),
+          )
           .toList();
     } catch (e) {
       AppLogger.error('Search profiles failed', e);
-      throw ServerException(
-        message: 'Failed to search profiles',
-        code: '500',
-      );
+      throw ServerException(message: 'Failed to search profiles', code: '500');
     }
   }
 
@@ -348,14 +392,15 @@ class ProfileFirebaseDataSource implements ProfileRemoteDataSource {
           .get();
 
       return querySnapshot.docs
-          .map((doc) => UserProfileModel.fromFirestore(doc.data() as Map<String, dynamic>))
+          .map(
+            (doc) => UserProfileModel.fromFirestore(
+              doc.data() as Map<String, dynamic>,
+            ),
+          )
           .toList();
     } catch (e) {
       AppLogger.error('Get top users failed', e);
-      throw ServerException(
-        message: 'Failed to get top users',
-        code: '500',
-      );
+      throw ServerException(message: 'Failed to get top users', code: '500');
     }
   }
 
@@ -366,26 +411,25 @@ class ProfileFirebaseDataSource implements ProfileRemoteDataSource {
 
       return _usersCollection.doc(userId).snapshots().map((doc) {
         if (!doc.exists) {
-          throw ServerException(
-            message: 'Profile not found',
-            code: '404',
-          );
+          throw ServerException(message: 'Profile not found', code: '404');
         }
-        return UserProfileModel.fromFirestore(doc.data() as Map<String, dynamic>);
+        return UserProfileModel.fromFirestore(
+          doc.data() as Map<String, dynamic>,
+        );
       });
     } catch (e) {
       AppLogger.error('Watch profile failed', e);
-      throw ServerException(
-        message: 'Failed to watch profile',
-        code: '500',
-      );
+      throw ServerException(message: 'Failed to watch profile', code: '500');
     }
   }
 
   @override
   Future<void> blockUser(String userId, String targetUserId) async {
     try {
-      AppLogger.info('ProfileFirebaseDataSource', 'Blocking user: $userId -> $targetUserId');
+      AppLogger.info(
+        'ProfileFirebaseDataSource',
+        'Blocking user: $userId -> $targetUserId',
+      );
 
       await _blockedUsersCollection.add({
         'userId': userId,
@@ -394,17 +438,17 @@ class ProfileFirebaseDataSource implements ProfileRemoteDataSource {
       });
     } catch (e) {
       AppLogger.error('Block user failed', e);
-      throw ServerException(
-        message: 'Failed to block user',
-        code: '500',
-      );
+      throw ServerException(message: 'Failed to block user', code: '500');
     }
   }
 
   @override
   Future<void> unblockUser(String userId, String targetUserId) async {
     try {
-      AppLogger.info('ProfileFirebaseDataSource', 'Unblocking user: $userId -> $targetUserId');
+      AppLogger.info(
+        'ProfileFirebaseDataSource',
+        'Unblocking user: $userId -> $targetUserId',
+      );
 
       final query = await _blockedUsersCollection
           .where('userId', isEqualTo: userId)
@@ -416,24 +460,27 @@ class ProfileFirebaseDataSource implements ProfileRemoteDataSource {
       }
     } catch (e) {
       AppLogger.error('Unblock user failed', e);
-      throw ServerException(
-        message: 'Failed to unblock user',
-        code: '500',
-      );
+      throw ServerException(message: 'Failed to unblock user', code: '500');
     }
   }
 
   @override
   Future<List<String>> getBlockedUsers(String userId) async {
     try {
-      AppLogger.info('ProfileFirebaseDataSource', 'Getting blocked users: $userId');
+      AppLogger.info(
+        'ProfileFirebaseDataSource',
+        'Getting blocked users: $userId',
+      );
 
       final query = await _blockedUsersCollection
           .where('userId', isEqualTo: userId)
           .get();
 
       return query.docs
-          .map((doc) => (doc.data() as Map<String, dynamic>)['blockedUserId'] as String)
+          .map(
+            (doc) =>
+                (doc.data() as Map<String, dynamic>)['blockedUserId'] as String,
+          )
           .toList();
     } catch (e) {
       AppLogger.error('Get blocked users failed', e);
@@ -445,9 +492,16 @@ class ProfileFirebaseDataSource implements ProfileRemoteDataSource {
   }
 
   @override
-  Future<void> reportUser(String reporterId, String reportedUserId, String reason) async {
+  Future<void> reportUser(
+    String reporterId,
+    String reportedUserId,
+    String reason,
+  ) async {
     try {
-      AppLogger.info('ProfileFirebaseDataSource', 'Reporting user: $reporterId -> $reportedUserId');
+      AppLogger.info(
+        'ProfileFirebaseDataSource',
+        'Reporting user: $reporterId -> $reportedUserId',
+      );
 
       await _reportsCollection.add({
         'reporterId': reporterId,
@@ -458,10 +512,7 @@ class ProfileFirebaseDataSource implements ProfileRemoteDataSource {
       });
     } catch (e) {
       AppLogger.error('Report user failed', e);
-      throw ServerException(
-        message: 'Failed to report user',
-        code: '500',
-      );
+      throw ServerException(message: 'Failed to report user', code: '500');
     }
   }
 }
