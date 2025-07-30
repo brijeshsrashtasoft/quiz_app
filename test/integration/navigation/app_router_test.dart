@@ -16,10 +16,10 @@ void main() {
     testWidgets('navigates to login route', (tester) async {
       await tester.pumpWidget(MaterialApp.router(routerConfig: router));
 
-      // Should start at splash route (default initial location)
+      // Should start at login route
       expect(
         router.routerDelegate.currentConfiguration.uri.path,
-        equals(RouteConstants.splash),
+        equals(RouteConstants.login),
       );
     });
 
@@ -57,7 +57,7 @@ void main() {
 
       expect(
         router.routerDelegate.currentConfiguration.uri.path,
-        equals('/quiz/$quizId'),
+        equals('${RouteConstants.quizDetail}/$quizId'),
       );
     });
 
@@ -70,7 +70,7 @@ void main() {
 
       expect(
         router.routerDelegate.currentConfiguration.uri.path,
-        equals('/game/$sessionPin'),
+        equals('${RouteConstants.gameSession}/$sessionPin'),
       );
     });
 
@@ -121,8 +121,10 @@ void main() {
         MaterialApp.router(routerConfig: routerWithDeepLink),
       );
 
-      // For this test, just verify the router is accessible
-      expect(routerWithDeepLink, isNotNull);
+      expect(
+        routerWithDeepLink.routerDelegate.currentConfiguration.uri.path,
+        equals(deepLink),
+      );
     });
 
     testWidgets('redirects unauthenticated users', (tester) async {
@@ -192,7 +194,7 @@ void main() {
 
   group('Route Guards Tests', () {
     testWidgets('protects authenticated routes', (tester) async {
-      final router = AppRouter.router;
+      final router = AppRouter.createRouter();
 
       await tester.pumpWidget(MaterialApp.router(routerConfig: router));
 
@@ -207,7 +209,7 @@ void main() {
     });
 
     testWidgets('allows access to public routes', (tester) async {
-      final router = AppRouter.router;
+      final router = AppRouter.createRouter();
 
       await tester.pumpWidget(MaterialApp.router(routerConfig: router));
 
@@ -224,7 +226,7 @@ void main() {
 
   group('Error Handling Tests', () {
     testWidgets('handles unknown routes', (tester) async {
-      final router = AppRouter.router;
+      final router = AppRouter.createRouter();
 
       await tester.pumpWidget(MaterialApp.router(routerConfig: router));
 
@@ -238,7 +240,7 @@ void main() {
     });
 
     testWidgets('handles malformed URLs', (tester) async {
-      final router = AppRouter.router;
+      final router = AppRouter.createRouter();
 
       await tester.pumpWidget(MaterialApp.router(routerConfig: router));
 
@@ -253,7 +255,7 @@ void main() {
 
   group('Browser Integration Tests', () {
     testWidgets('updates browser URL on navigation', (tester) async {
-      final router = AppRouter.router;
+      final router = AppRouter.createRouter();
 
       await tester.pumpWidget(MaterialApp.router(routerConfig: router));
 
@@ -268,7 +270,7 @@ void main() {
     });
 
     testWidgets('handles browser back button', (tester) async {
-      final router = AppRouter.router;
+      final router = AppRouter.createRouter();
 
       await tester.pumpWidget(MaterialApp.router(routerConfig: router));
 

@@ -178,21 +178,15 @@ class _SnackBarContent extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(
-            icon,
-            color: iconColor,
-            size: 24,
-          ),
+          Icon(icon, color: iconColor, size: 24),
           SizedBox(width: AppSpacing.spacingM),
           Expanded(
             child: Text(
               message,
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: iconColor,
-              ),
+              style: AppTextStyles.bodyMedium.copyWith(color: iconColor),
             ),
           ),
-          if (actionLabel != null && onAction != null) ..[
+          if (actionLabel != null && onAction != null) ...[
             SizedBox(width: AppSpacing.spacingM),
             TextButton(
               onPressed: onAction,
@@ -205,9 +199,7 @@ class _SnackBarContent extends StatelessWidget {
               ),
               child: Text(
                 actionLabel!,
-                style: AppTextStyles.buttonText.copyWith(
-                  color: iconColor,
-                ),
+                style: AppTextStyles.buttonText.copyWith(color: iconColor),
               ),
             ),
           ],
@@ -226,7 +218,9 @@ class LoadingSnackBar {
   }) {
     final snackBar = SnackBar(
       content: _LoadingSnackBarContent(message: message),
-      duration: duration ?? const Duration(days: 1), // Long duration for manual dismiss
+      duration:
+          duration ??
+          const Duration(days: 1), // Long duration for manual dismiss
       backgroundColor: Colors.transparent,
       elevation: 0,
       behavior: SnackBarBehavior.floating,
@@ -246,9 +240,7 @@ class LoadingSnackBar {
 class _LoadingSnackBarContent extends StatelessWidget {
   final String message;
 
-  const _LoadingSnackBarContent({
-    required this.message,
-  });
+  const _LoadingSnackBarContent({required this.message});
 
   @override
   Widget build(BuildContext context) {
@@ -353,14 +345,8 @@ class _ToastWidgetState extends State<_ToastWidget>
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, -1),
       end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOut,
-    ));
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(_controller);
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(_controller);
 
     _controller.forward();
   }

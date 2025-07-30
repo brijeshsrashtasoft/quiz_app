@@ -57,7 +57,7 @@ class _LoadingSpinnerState extends State<LoadingSpinner>
             ),
           ),
         ),
-        if (widget.message != null) ..[
+        if (widget.message != null) ...[
           SizedBox(height: AppSpacing.spacingM),
           Text(
             widget.message!,
@@ -101,19 +101,14 @@ class _PulsingDotsState extends State<PulsingDots>
     super.initState();
     _controllers = List.generate(
       widget.dotCount,
-      (index) => AnimationController(
-        duration: widget.duration,
-        vsync: this,
-      ),
+      (index) => AnimationController(duration: widget.duration, vsync: this),
     );
-    
+
     _animations = _controllers.map((controller) {
-      return Tween<double>(begin: 0.4, end: 1.0).animate(
-        CurvedAnimation(
-          parent: controller,
-          curve: Curves.easeInOut,
-        ),
-      );
+      return Tween<double>(
+        begin: 0.4,
+        end: 1.0,
+      ).animate(CurvedAnimation(parent: controller, curve: Curves.easeInOut));
     }).toList();
 
     _startAnimations();
@@ -147,12 +142,11 @@ class _PulsingDotsState extends State<PulsingDots>
             return Container(
               width: widget.dotSize,
               height: widget.dotSize,
-              margin: EdgeInsets.symmetric(
-                horizontal: widget.dotSize * 0.25,
-              ),
+              margin: EdgeInsets.symmetric(horizontal: widget.dotSize * 0.25),
               decoration: BoxDecoration(
-                color: (widget.color ?? AppColors.vibrantPurple)
-                    .withOpacity(_animations[index].value),
+                color: (widget.color ?? AppColors.vibrantPurple).withOpacity(
+                  _animations[index].value,
+                ),
                 shape: BoxShape.circle,
               ),
             );
@@ -192,17 +186,12 @@ class _ShimmerLoadingState extends State<ShimmerLoading>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: widget.duration,
-      vsync: this,
-    );
-    _animation = Tween<double>(begin: -1.0, end: 2.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeInOut,
-      ),
-    );
-    
+    _controller = AnimationController(duration: widget.duration, vsync: this);
+    _animation = Tween<double>(
+      begin: -1.0,
+      end: 2.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+
     if (widget.enabled) {
       _controller.repeat();
     }
@@ -243,11 +232,7 @@ class _ShimmerLoadingState extends State<ShimmerLoading>
             return LinearGradient(
               begin: Alignment.centerLeft,
               end: Alignment.centerRight,
-              colors: [
-                baseColor,
-                highlightColor,
-                baseColor,
-              ],
+              colors: [baseColor, highlightColor, baseColor],
               stops: [
                 _animation.value - 1,
                 _animation.value,
@@ -307,12 +292,8 @@ class ListItemPlaceholder extends StatelessWidget {
       padding: EdgeInsets.all(AppSpacing.spacingM),
       child: Row(
         children: [
-          if (showAvatar) ..[
-            const ContentPlaceholder(
-              width: 48,
-              height: 48,
-              borderRadius: 24,
-            ),
+          if (showAvatar) ...[
+            const ContentPlaceholder(width: 48, height: 48, borderRadius: 24),
             SizedBox(width: AppSpacing.spacingM),
           ],
           Expanded(
@@ -324,10 +305,7 @@ class ListItemPlaceholder extends StatelessWidget {
                   padding: EdgeInsets.only(
                     bottom: index < lineCount - 1 ? AppSpacing.spacingS : 0,
                   ),
-                  child: ContentPlaceholder(
-                    width: width,
-                    height: 16,
-                  ),
+                  child: ContentPlaceholder(width: width, height: 16),
                 );
               }),
             ),
@@ -343,11 +321,7 @@ class CardPlaceholder extends StatelessWidget {
   final double height;
   final bool showImage;
 
-  const CardPlaceholder({
-    super.key,
-    this.height = 200,
-    this.showImage = true,
-  });
+  const CardPlaceholder({super.key, this.height = 200, this.showImage = true});
 
   @override
   Widget build(BuildContext context) {
@@ -357,7 +331,7 @@ class CardPlaceholder extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (showImage) ..[
+          if (showImage) ...[
             Expanded(
               flex: 3,
               child: const ContentPlaceholder(
@@ -372,20 +346,11 @@ class CardPlaceholder extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const ContentPlaceholder(
-                  width: double.infinity,
-                  height: 20,
-                ),
+                const ContentPlaceholder(width: double.infinity, height: 20),
                 SizedBox(height: AppSpacing.spacingS),
-                const ContentPlaceholder(
-                  width: 200,
-                  height: 16,
-                ),
+                const ContentPlaceholder(width: 200, height: 16),
                 SizedBox(height: AppSpacing.spacingS),
-                const ContentPlaceholder(
-                  width: 120,
-                  height: 14,
-                ),
+                const ContentPlaceholder(width: 120, height: 14),
               ],
             ),
           ),
