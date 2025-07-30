@@ -14,6 +14,7 @@ import '../../../../core/errors/failures.dart';
 import '../providers/auth_providers.dart';
 import '../widgets/auth_header.dart';
 import '../widgets/social_auth_buttons.dart';
+import '../widgets/form_validation_feedback.dart';
 
 /// Login page with Firebase Authentication integration
 /// Following Kahoot-style engaging UI design
@@ -25,7 +26,7 @@ class LoginPage extends ConsumerStatefulWidget {
 }
 
 class _LoginPageState extends ConsumerState<LoginPage>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, FormValidationMixin {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -115,7 +116,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
 
   @override
   Widget build(BuildContext context) {
-    return AppScaffold(
+    return Scaffold(
       backgroundColor: AppColors.offWhite,
       body: SafeArea(
         child: AnimatedBuilder(
@@ -161,6 +162,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
               keyboardType: TextInputType.emailAddress,
               prefixIcon: Icon(Icons.email_outlined, color: AppColors.coolGray),
               textInputAction: TextInputAction.next,
+              validator: validateEmail,
             ),
 
             const SizedBox(height: AppSpacing.spacingL),
@@ -182,6 +184,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
               ),
               textInputAction: TextInputAction.done,
               onSubmitted: (_) => _handleLogin(),
+              validator: (value) => validatePassword(value, minLength: 6),
             ),
 
             const SizedBox(height: AppSpacing.spacingM),
