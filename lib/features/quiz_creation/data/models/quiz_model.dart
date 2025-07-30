@@ -1,14 +1,19 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import '../../domain/entities/quiz_entity.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../domain/entities/quiz.dart';
+import '../../domain/entities/question_entities.dart';
+import 'question_model.dart';
+import 'quiz_metadata_model.dart';
 
 part 'quiz_model.freezed.dart';
 part 'quiz_model.g.dart';
 
-/// Quiz model for data layer
-/// Following CLAUDE.md patterns and Firestore integration
+/// Quiz model for data layer with Firestore serialization
+/// Following Clean Architecture patterns from CLAUDE.md
 @freezed
 class QuizModel with _$QuizModel {
+  const QuizModel._();
+  
   const factory QuizModel({
     required String id,
     required String title,
@@ -17,64 +22,45 @@ class QuizModel with _$QuizModel {
     required List<QuestionModel> questions,
     required bool isPublic,
     required DateTime createdAt,
-    String? category,
-    int? estimatedDuration,
+    required QuizMetadataModel metadata,
+    DateTime? updatedAt,
+    DateTime? publishedAt,
+    @Default(false) bool isDraft,
+    @Default(0) int playCount,
+    @Default(0.0) double averageScore,
+    @Default(0) int totalRatings,
+    @Default(0.0) double rating,
   }) = _QuizModel;
-
-  /// Create from Firestore document data
-  factory QuizModel.fromFirestore(Map<String, dynamic> data) {
-    return QuizModel(
-      id: data['id'] as String,
-      title: data['title'] as String,
-      description: data['description'] as String,
-      createdBy: data['createdBy'] as String,
-      questions: (data['questions'] as List<dynamic>)
-          .map((q) => QuestionModel.fromMap(q as Map<String, dynamic>))
-          .toList(),
-      isPublic: data['isPublic'] as bool,
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
-      category: data['category'] as String?,
-      estimatedDuration: data['estimatedDuration'] as int?,
-    );
-  }
-
-  /// Create from JSON
+  
   factory QuizModel.fromJson(Map<String, dynamic> json) =>
       _$QuizModelFromJson(json);
-}
-
-/// Question model for data layer
-@freezed
-class QuestionModel with _$QuestionModel {
-  const factory QuestionModel({
-    required String question,
-    required List<String> options,
-    required int correctAnswer,
-    required int timeLimit,
-    @Default(100) int points,
-  }) = _QuestionModel;
-
-  /// Create from Firestore map
-  factory QuestionModel.fromMap(Map<String, dynamic> data) {
-    return QuestionModel(
-      question: data['question'] as String,
-      options: List<String>.from(data['options'] as List<dynamic>),
-      correctAnswer: data['correctAnswer'] as int,
-      timeLimit: data['timeLimit'] as int,
-      points: data['points'] as int? ?? 100,
+  
+  /// Convert from domain entity
+  factory QuizModel.fromEntity(Quiz entity) {
+    return QuizModel(
+      id: entity.id,
+      title: entity.title,
+      description: entity.description,
+      createdBy: entity.createdBy,
+      questions: entity.questions
+          .map((q) => QuestionModel.fromEntity(q))
+          .toList(),
+      isPublic: entity.isPublic,
+      createdAt: entity.createdAt,
+      metadata: QuizMetadataModel.fromEntity(entity.metadata),
+      updatedAt: entity.updatedAt,
+      publishedAt: entity.publishedAt,
+      isDraft: entity.isDraft,
+      playCount: entity.playCount,
+      averageScore: entity.averageScore,
+      totalRatings: entity.totalRatings,
+      rating: entity.rating,
     );
   }
-
-  /// Create from JSON
-  factory QuestionModel.fromJson(Map<String, dynamic> json) =>
-      _$QuestionModelFromJson(json);
-}
-
-/// Extensions for model conversions
-extension QuizModelX on QuizModel {
+  
   /// Convert to domain entity
-  QuizEntity toEntity() {
-    return QuizEntity(
+  Quiz toEntity() {
+    return Quiz(
       id: id,
       title: title,
       description: description,
@@ -82,86 +68,99 @@ extension QuizModelX on QuizModel {
       questions: questions.map((q) => q.toEntity()).toList(),
       isPublic: isPublic,
       createdAt: createdAt,
-      category: category,
-      estimatedDuration: estimatedDuration,
+      metadata: metadata.toEntity(),
+      updatedAt: updatedAt,
+      publishedAt: publishedAt,
+      isDraft: isDraft,
+      playCount: playCount,
+      averageScore: averageScore,
+      totalRatings: totalRatings,
+      rating: rating,
     );
   }
-
-  /// Convert to Firestore map
+  
+  /// Convert to Firestore format
   Map<String, dynamic> toFirestore() {
-    final data = <String, dynamic>{
-      'id': id,
+    return {
       'title': title,
       'description': description,
       'createdBy': createdBy,
       'questions': questions.map((q) => q.toFirestore()).toList(),
       'isPublic': isPublic,
       'createdAt': Timestamp.fromDate(createdAt),
+      'metadata': metadata.toFirestore(),
+      if (updatedAt != null) 'updatedAt': Timestamp.fromDate(updatedAt!),
+      if (publishedAt != null) 'publishedAt': Timestamp.fromDate(publishedAt!),
+      'isDraft': isDraft,
+      'playCount': playCount,
+      'averageScore': averageScore,
+      'totalRatings': totalRatings,
+      'rating': rating,
     };
-
-    if (category != null) {
-      data['category'] = category;
-    }
-
-    if (estimatedDuration != null) {
-      data['estimatedDuration'] = estimatedDuration;
-    }
-
-    return data;
   }
-}
-
-extension QuestionModelX on QuestionModel {
-  /// Convert to domain entity
-  QuestionEntity toEntity() {
-    return QuestionEntity(
-      question: question,
-      options: options,
-      correctAnswer: correctAnswer,
-      timeLimit: timeLimit,
-      points: points,
+  
+  /// Create from Firestore document
+  factory QuizModel.fromFirestore(
+    DocumentSnapshot<Map<String, dynamic>> doc,
+  ) {
+    final data = doc.data()!;
+    
+    return QuizModel(
+      id: doc.id,
+      title: data['title'] as String,
+      description: data['description'] as String,
+      createdBy: data['createdBy'] as String,
+      questions: (data['questions'] as List)
+          .map((q) => QuestionModel.fromFirestore(q as Map<String, dynamic>))
+          .toList(),
+      isPublic: data['isPublic'] as bool? ?? false,
+      createdAt: (data['createdAt'] as Timestamp).toDate(),
+      metadata: QuizMetadataModel.fromFirestore(
+        data['metadata'] as Map<String, dynamic>,
+      ),
+      updatedAt: data['updatedAt'] != null
+          ? (data['updatedAt'] as Timestamp).toDate()
+          : null,
+      publishedAt: data['publishedAt'] != null
+          ? (data['publishedAt'] as Timestamp).toDate()
+          : null,
+      isDraft: data['isDraft'] as bool? ?? false,
+      playCount: data['playCount'] as int? ?? 0,
+      averageScore: (data['averageScore'] as num?)?.toDouble() ?? 0.0,
+      totalRatings: data['totalRatings'] as int? ?? 0,
+      rating: (data['rating'] as num?)?.toDouble() ?? 0.0,
     );
   }
-
-  /// Convert to Firestore map
-  Map<String, dynamic> toFirestore() {
-    return {
-      'question': question,
-      'options': options,
-      'correctAnswer': correctAnswer,
-      'timeLimit': timeLimit,
-      'points': points,
-    };
-  }
-}
-
-/// Factory extensions for entity to model conversion
-extension QuizEntityX on QuizEntity {
-  /// Convert to data model
-  QuizModel toModel() {
+  
+  /// Create from Firestore data map (for subcollections)
+  factory QuizModel.fromFirestoreData(
+    String id,
+    Map<String, dynamic> data,
+  ) {
     return QuizModel(
       id: id,
-      title: title,
-      description: description,
-      createdBy: createdBy,
-      questions: questions.map((q) => q.toModel()).toList(),
-      isPublic: isPublic,
-      createdAt: createdAt,
-      category: category,
-      estimatedDuration: estimatedDuration,
-    );
-  }
-}
-
-extension QuestionEntityX on QuestionEntity {
-  /// Convert to data model
-  QuestionModel toModel() {
-    return QuestionModel(
-      question: question,
-      options: options,
-      correctAnswer: correctAnswer,
-      timeLimit: timeLimit,
-      points: points,
+      title: data['title'] as String,
+      description: data['description'] as String,
+      createdBy: data['createdBy'] as String,
+      questions: (data['questions'] as List)
+          .map((q) => QuestionModel.fromFirestore(q as Map<String, dynamic>))
+          .toList(),
+      isPublic: data['isPublic'] as bool? ?? false,
+      createdAt: (data['createdAt'] as Timestamp).toDate(),
+      metadata: QuizMetadataModel.fromFirestore(
+        data['metadata'] as Map<String, dynamic>,
+      ),
+      updatedAt: data['updatedAt'] != null
+          ? (data['updatedAt'] as Timestamp).toDate()
+          : null,
+      publishedAt: data['publishedAt'] != null
+          ? (data['publishedAt'] as Timestamp).toDate()
+          : null,
+      isDraft: data['isDraft'] as bool? ?? false,
+      playCount: data['playCount'] as int? ?? 0,
+      averageScore: (data['averageScore'] as num?)?.toDouble() ?? 0.0,
+      totalRatings: data['totalRatings'] as int? ?? 0,
+      rating: (data['rating'] as num?)?.toDouble() ?? 0.0,
     );
   }
 }

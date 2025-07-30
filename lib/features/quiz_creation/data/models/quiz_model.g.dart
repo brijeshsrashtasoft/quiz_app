@@ -17,8 +17,20 @@ _$QuizModelImpl _$$QuizModelImplFromJson(Map<String, dynamic> json) =>
           .toList(),
       isPublic: json['isPublic'] as bool,
       createdAt: DateTime.parse(json['createdAt'] as String),
-      category: json['category'] as String?,
-      estimatedDuration: (json['estimatedDuration'] as num?)?.toInt(),
+      metadata: QuizMetadataModel.fromJson(
+        json['metadata'] as Map<String, dynamic>,
+      ),
+      updatedAt: json['updatedAt'] == null
+          ? null
+          : DateTime.parse(json['updatedAt'] as String),
+      publishedAt: json['publishedAt'] == null
+          ? null
+          : DateTime.parse(json['publishedAt'] as String),
+      isDraft: json['isDraft'] as bool? ?? false,
+      playCount: (json['playCount'] as num?)?.toInt() ?? 0,
+      averageScore: (json['averageScore'] as num?)?.toDouble() ?? 0.0,
+      totalRatings: (json['totalRatings'] as num?)?.toInt() ?? 0,
+      rating: (json['rating'] as num?)?.toDouble() ?? 0.0,
     );
 
 Map<String, dynamic> _$$QuizModelImplToJson(_$QuizModelImpl instance) =>
@@ -30,26 +42,12 @@ Map<String, dynamic> _$$QuizModelImplToJson(_$QuizModelImpl instance) =>
       'questions': instance.questions,
       'isPublic': instance.isPublic,
       'createdAt': instance.createdAt.toIso8601String(),
-      'category': instance.category,
-      'estimatedDuration': instance.estimatedDuration,
-    };
-
-_$QuestionModelImpl _$$QuestionModelImplFromJson(Map<String, dynamic> json) =>
-    _$QuestionModelImpl(
-      question: json['question'] as String,
-      options: (json['options'] as List<dynamic>)
-          .map((e) => e as String)
-          .toList(),
-      correctAnswer: (json['correctAnswer'] as num).toInt(),
-      timeLimit: (json['timeLimit'] as num).toInt(),
-      points: (json['points'] as num?)?.toInt() ?? 100,
-    );
-
-Map<String, dynamic> _$$QuestionModelImplToJson(_$QuestionModelImpl instance) =>
-    <String, dynamic>{
-      'question': instance.question,
-      'options': instance.options,
-      'correctAnswer': instance.correctAnswer,
-      'timeLimit': instance.timeLimit,
-      'points': instance.points,
+      'metadata': instance.metadata,
+      'updatedAt': instance.updatedAt?.toIso8601String(),
+      'publishedAt': instance.publishedAt?.toIso8601String(),
+      'isDraft': instance.isDraft,
+      'playCount': instance.playCount,
+      'averageScore': instance.averageScore,
+      'totalRatings': instance.totalRatings,
+      'rating': instance.rating,
     };

@@ -352,6 +352,7 @@ mixin _$QuestionEntity {
   int get correctAnswer => throw _privateConstructorUsedError;
   int get timeLimit => throw _privateConstructorUsedError;
   int get points => throw _privateConstructorUsedError;
+  String? get imageUrl => throw _privateConstructorUsedError;
 
   /// Create a copy of QuestionEntity
   /// with the given fields replaced by the non-null parameter values.
@@ -373,6 +374,7 @@ abstract class $QuestionEntityCopyWith<$Res> {
     int correctAnswer,
     int timeLimit,
     int points,
+    String? imageUrl,
   });
 }
 
@@ -396,6 +398,7 @@ class _$QuestionEntityCopyWithImpl<$Res, $Val extends QuestionEntity>
     Object? correctAnswer = null,
     Object? timeLimit = null,
     Object? points = null,
+    Object? imageUrl = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -419,6 +422,10 @@ class _$QuestionEntityCopyWithImpl<$Res, $Val extends QuestionEntity>
                 ? _value.points
                 : points // ignore: cast_nullable_to_non_nullable
                       as int,
+            imageUrl: freezed == imageUrl
+                ? _value.imageUrl
+                : imageUrl // ignore: cast_nullable_to_non_nullable
+                      as String?,
           )
           as $Val,
     );
@@ -440,6 +447,7 @@ abstract class _$$QuestionEntityImplCopyWith<$Res>
     int correctAnswer,
     int timeLimit,
     int points,
+    String? imageUrl,
   });
 }
 
@@ -462,6 +470,7 @@ class __$$QuestionEntityImplCopyWithImpl<$Res>
     Object? correctAnswer = null,
     Object? timeLimit = null,
     Object? points = null,
+    Object? imageUrl = freezed,
   }) {
     return _then(
       _$QuestionEntityImpl(
@@ -485,6 +494,10 @@ class __$$QuestionEntityImplCopyWithImpl<$Res>
             ? _value.points
             : points // ignore: cast_nullable_to_non_nullable
                   as int,
+        imageUrl: freezed == imageUrl
+            ? _value.imageUrl
+            : imageUrl // ignore: cast_nullable_to_non_nullable
+                  as String?,
       ),
     );
   }
@@ -499,6 +512,7 @@ class _$QuestionEntityImpl implements _QuestionEntity {
     required this.correctAnswer,
     required this.timeLimit,
     this.points = 100,
+    this.imageUrl,
   }) : _options = options;
 
   @override
@@ -518,10 +532,12 @@ class _$QuestionEntityImpl implements _QuestionEntity {
   @override
   @JsonKey()
   final int points;
+  @override
+  final String? imageUrl;
 
   @override
   String toString() {
-    return 'QuestionEntity(question: $question, options: $options, correctAnswer: $correctAnswer, timeLimit: $timeLimit, points: $points)';
+    return 'QuestionEntity(question: $question, options: $options, correctAnswer: $correctAnswer, timeLimit: $timeLimit, points: $points, imageUrl: $imageUrl)';
   }
 
   @override
@@ -536,7 +552,9 @@ class _$QuestionEntityImpl implements _QuestionEntity {
                 other.correctAnswer == correctAnswer) &&
             (identical(other.timeLimit, timeLimit) ||
                 other.timeLimit == timeLimit) &&
-            (identical(other.points, points) || other.points == points));
+            (identical(other.points, points) || other.points == points) &&
+            (identical(other.imageUrl, imageUrl) ||
+                other.imageUrl == imageUrl));
   }
 
   @override
@@ -547,6 +565,7 @@ class _$QuestionEntityImpl implements _QuestionEntity {
     correctAnswer,
     timeLimit,
     points,
+    imageUrl,
   );
 
   /// Create a copy of QuestionEntity
@@ -568,6 +587,7 @@ abstract class _QuestionEntity implements QuestionEntity {
     required final int correctAnswer,
     required final int timeLimit,
     final int points,
+    final String? imageUrl,
   }) = _$QuestionEntityImpl;
 
   @override
@@ -580,6 +600,8 @@ abstract class _QuestionEntity implements QuestionEntity {
   int get timeLimit;
   @override
   int get points;
+  @override
+  String? get imageUrl;
 
   /// Create a copy of QuestionEntity
   /// with the given fields replaced by the non-null parameter values.

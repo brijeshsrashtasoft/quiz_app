@@ -28,6 +28,7 @@ class QuestionEntity with _$QuestionEntity {
     required int correctAnswer,
     required int timeLimit,
     @Default(100) int points,
+    String? imageUrl,
   }) = _QuestionEntity;
 }
 
