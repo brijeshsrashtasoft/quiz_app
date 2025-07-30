@@ -88,78 +88,84 @@ final leaderboardsCollectionProvider =
 /// Following CLAUDE.md <200ms latency requirements
 
 /// Stream provider for user data with real-time updates
-final userStreamProvider = StreamProvider.family<Result<UserModel>, String>((ref, userId) {
+final userStreamProvider = StreamProvider.family<Result<UserModel>, String>((
+  ref,
+  userId,
+) {
   final dataSource = ref.watch(userDataSourceProvider);
   return dataSource.watchUser(userId);
 });
 
 /// Stream provider for game session updates
-final gameSessionStreamProvider = 
+final gameSessionStreamProvider =
     StreamProvider.family<Result<GameSessionEntity>, String>((ref, sessionId) {
-  return FirestoreConfig.gameSessionsCollection
-      .doc(sessionId)
-      .snapshots()
-      .map((snapshot) {
-        if (!snapshot.exists) {
-          return Result.failure(
-            const Failure.firestoreFailure(
-              message: 'Game session not found',
-              code: 'session_not_found',
-            ),
-          );
-        }
-        
-        try {
-          final data = snapshot.data()!;
-          data['id'] = snapshot.id;
-          return Result.success(GameSessionEntity.fromMap(data));
-        } catch (e) {
-          return Result.failure(
-            Failure.firestoreFailure(
-              message: 'Failed to parse game session: ${e.toString()}',
-              code: 'parse_error',
-            ),
-          );
-        }
-      });
-});
+      return FirestoreConfig.gameSessionsCollection
+          .doc(sessionId)
+          .snapshots()
+          .map((snapshot) {
+            if (!snapshot.exists) {
+              return Result.failure(
+                const Failure.firestoreFailure(
+                  message: 'Game session not found',
+                  code: 'session_not_found',
+                ),
+              );
+            }
+
+            try {
+              final data = snapshot.data()!;
+              data['id'] = snapshot.id;
+              return Result.success(GameSessionEntity.fromMap(data));
+            } catch (e) {
+              return Result.failure(
+                Failure.firestoreFailure(
+                  message: 'Failed to parse game session: ${e.toString()}',
+                  code: 'parse_error',
+                ),
+              );
+            }
+          });
+    });
 
 /// Stream provider for live leaderboard updates
-final leaderboardStreamProvider = 
+final leaderboardStreamProvider =
     StreamProvider.family<Result<LeaderboardEntity>, String>((ref, sessionId) {
-  return FirestoreConfig.leaderboardsCollection
-      .doc(sessionId)
-      .snapshots()
-      .map((snapshot) {
-        if (!snapshot.exists) {
-          return Result.failure(
-            const Failure.firestoreFailure(
-              message: 'Leaderboard not found',
-              code: 'leaderboard_not_found',
-            ),
-          );
-        }
-        
-        try {
-          final data = snapshot.data()!;
-          data['id'] = snapshot.id;
-          return Result.success(LeaderboardEntity.fromMap(data));
-        } catch (e) {
-          return Result.failure(
-            Failure.firestoreFailure(
-              message: 'Failed to parse leaderboard: ${e.toString()}',
-              code: 'parse_error',
-            ),
-          );
-        }
-      });
-});
+      return FirestoreConfig.leaderboardsCollection
+          .doc(sessionId)
+          .snapshots()
+          .map((snapshot) {
+            if (!snapshot.exists) {
+              return Result.failure(
+                const Failure.firestoreFailure(
+                  message: 'Leaderboard not found',
+                  code: 'leaderboard_not_found',
+                ),
+              );
+            }
+
+            try {
+              final data = snapshot.data()!;
+              data['id'] = snapshot.id;
+              return Result.success(LeaderboardEntity.fromMap(data));
+            } catch (e) {
+              return Result.failure(
+                Failure.firestoreFailure(
+                  message: 'Failed to parse leaderboard: ${e.toString()}',
+                  code: 'parse_error',
+                ),
+              );
+            }
+          });
+    });
 
 /// Performance-optimized providers with caching
 /// Following CLAUDE.md performance requirements
 
 /// Cached user data provider
-final cachedUserProvider = FutureProvider.family<Result<UserModel>, String>((ref, userId) async {
+final cachedUserProvider = FutureProvider.family<Result<UserModel>, String>((
+  ref,
+  userId,
+) async {
   final dataSource = ref.watch(userDataSourceProvider);
   return await dataSource.getUserById(userId);
 });
@@ -182,33 +188,29 @@ class FirebaseErrorHandler {
   /// Convert Firebase exception to Failure
   Failure handleFirebaseException(dynamic exception) {
     final exceptionString = exception.toString().toLowerCase();
-    
+
     if (exceptionString.contains('permission-denied')) {
       return const Failure.authFailure(
         message: 'Permission denied',
         code: 'permission_denied',
       );
     }
-    
+
     if (exceptionString.contains('not-found')) {
       return const Failure.firestoreFailure(
         message: 'Document not found',
         code: 'not_found',
       );
     }
-    
+
     if (exceptionString.contains('unavailable')) {
-      return const Failure.networkFailure(
-        message: 'Service unavailable',
-      );
+      return const Failure.networkFailure(message: 'Service unavailable');
     }
-    
+
     if (exceptionString.contains('deadline-exceeded')) {
-      return const Failure.networkFailure(
-        message: 'Request timeout',
-      );
+      return const Failure.networkFailure(message: 'Request timeout');
     }
-    
+
     return Failure.firestoreFailure(
       message: 'Firebase operation failed',
       code: 'unknown_firebase_error',

@@ -14,11 +14,10 @@ Widget buildTestableWidget(
   return MaterialApp(
     theme: theme ?? AppTheme.lightTheme,
     locale: locale,
-    navigatorObservers: navigatorObservers ?? 
+    navigatorObservers:
+        navigatorObservers ??
         (navigatorObserver != null ? [navigatorObserver] : []),
-    home: Scaffold(
-      body: child,
-    ),
+    home: Scaffold(body: child),
   );
 }
 
@@ -32,9 +31,7 @@ Widget buildTestableWidgetWithRouter(
   return MaterialApp(
     theme: theme ?? AppTheme.lightTheme,
     initialRoute: initialRoute,
-    routes: routes ?? {
-      '/': (context) => Scaffold(body: child),
-    },
+    routes: routes ?? {'/': (context) => Scaffold(body: child)},
   );
 }
 
@@ -58,20 +55,14 @@ Future<void> longPress(
   Finder finder, {
   Duration duration = const Duration(milliseconds: 500),
 }) async {
-  final gesture = await tester.startGesture(
-    tester.getCenter(finder),
-  );
+  final gesture = await tester.startGesture(tester.getCenter(finder));
   await tester.pump(duration);
   await gesture.up();
   await tester.pump();
 }
 
 /// Helper function to simulate swipe gesture
-Future<void> swipe(
-  WidgetTester tester,
-  Finder finder,
-  Offset offset,
-) async {
+Future<void> swipe(WidgetTester tester, Finder finder, Offset offset) async {
   await tester.drag(finder, offset);
   await tester.pumpAndSettle();
 }
@@ -94,11 +85,7 @@ Future<void> scrollUntilVisible(
   Finder scrollable, {
   double delta = 100.0,
 }) async {
-  await tester.scrollUntilVisible(
-    item,
-    delta,
-    scrollable: scrollable,
-  );
+  await tester.scrollUntilVisible(item, delta, scrollable: scrollable);
 }
 
 /// Custom matchers for widget testing
@@ -152,8 +139,8 @@ class WidgetMatchers {
   static Matcher hasTextStyle(TextStyle expectedStyle) {
     return predicate<Text>((text) {
       return text.style?.fontSize == expectedStyle.fontSize &&
-             text.style?.color == expectedStyle.color &&
-             text.style?.fontWeight == expectedStyle.fontWeight;
+          text.style?.color == expectedStyle.color &&
+          text.style?.fontWeight == expectedStyle.fontWeight;
     }, 'has text style $expectedStyle');
   }
 }
@@ -235,7 +222,7 @@ class TestDataBuilders {
 /// Mock navigator observer for testing navigation
 class MockNavigatorObserver extends NavigatorObserver {
   final List<Route<dynamic>> routes = [];
-  
+
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
     routes.add(route);
@@ -267,7 +254,10 @@ class MockNavigatorObserver extends NavigatorObserver {
   }
 
   @override
-  void didStartUserGesture(Route<dynamic> route, Route<dynamic>? previousRoute) {
+  void didStartUserGesture(
+    Route<dynamic> route,
+    Route<dynamic>? previousRoute,
+  ) {
     // Implementation for new method
   }
 
@@ -286,12 +276,16 @@ class Mock {
 /// Extension methods for widget testing
 extension WidgetTesterExtensions on WidgetTester {
   /// Pump widget with default duration
-  Future<void> pumpWithDuration([Duration duration = const Duration(milliseconds: 100)]) async {
+  Future<void> pumpWithDuration([
+    Duration duration = const Duration(milliseconds: 100),
+  ]) async {
     await pump(duration);
   }
 
   /// Pump and settle with timeout
-  Future<void> pumpAndSettleWithTimeout([Duration timeout = const Duration(seconds: 5)]) async {
+  Future<void> pumpAndSettleWithTimeout([
+    Duration timeout = const Duration(seconds: 5),
+  ]) async {
     await pumpAndSettle(timeout);
   }
 
