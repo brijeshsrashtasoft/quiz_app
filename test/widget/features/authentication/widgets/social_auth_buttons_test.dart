@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:quiz_app/features/authentication/presentation/widgets/social_auth_buttons.dart';
 import 'package:quiz_app/shared/constants/app_colors.dart';
-import '../../../../../test_config.dart';
+import '../../../../test_config.dart';
 
 void main() {
   testGroup('SocialAuthButtons Widget Tests', TestCategory.widget, () {

@@ -33,3 +33,10 @@ export 'deep_link/game_join_widget.dart';
 // Feedback
 export 'feedback/loading_indicators.dart';
 export 'feedback/snackbars.dart';
+
+// Security
+export 'security/biometric_prompt_widget.dart';
+export 'security/session_management_widgets.dart';
+export 'security/device_management_widgets.dart';
+export 'security/security_settings_widgets.dart';
+export 'security/security_widgets_example.dart';

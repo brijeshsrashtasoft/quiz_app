@@ -29,6 +29,24 @@ class Failure with _$Failure {
 
   const factory Failure.unknownFailure({required String message}) =
       UnknownFailure;
+
+  const factory Failure.securityFailure({
+    required String message,
+    String? code,
+  }) = SecurityFailure;
+
+  const factory Failure.biometricFailure({
+    required String message,
+    String? code,
+  }) = BiometricFailure;
+
+  const factory Failure.sessionFailure({
+    required String message,
+    String? code,
+  }) = SessionFailure;
+
+  const factory Failure.deviceFailure({required String message, String? code}) =
+      DeviceFailure;
 }
 
 /// Extension for user-friendly error messages
@@ -42,6 +60,10 @@ extension FailureX on Failure {
       validationFailure: (message, fieldErrors) => 'Validation error: $message',
       cacheFailure: (message) => 'Cache error: $message',
       unknownFailure: (message) => 'Unknown error: $message',
+      securityFailure: (message, code) => 'Security error: $message',
+      biometricFailure: (message, code) => 'Biometric error: $message',
+      sessionFailure: (message, code) => 'Session error: $message',
+      deviceFailure: (message, code) => 'Device error: $message',
     );
   }
 }

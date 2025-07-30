@@ -223,6 +223,209 @@ class AuthConfig {
     }
   }
 
+  /// Get current user's ID token for API calls
+  static Future<String?> getIdToken({bool forceRefresh = false}) async {
+    try {
+      final user = currentUser;
+      if (user == null) {
+        AppLogger.warning('Auth', 'No user signed in for token request');
+        return null;
+      }
+
+      final token = await user.getIdToken(forceRefresh);
+      if (forceRefresh) {
+        AppLogger.firebase(
+          'Auth',
+          'ID token refreshed for user: ${user.email}',
+        );
+      }
+
+      return token;
+    } catch (e) {
+      AppLogger.error('Failed to get ID token', e);
+      throw AuthException(
+        message: 'Failed to get authentication token',
+        code: 'token_error',
+      );
+    }
+  }
+
+  /// Refresh the current user's ID token
+  static Future<String?> refreshIdToken() async {
+    return await getIdToken(forceRefresh: true);
+  }
+
+  /// Get token result with custom claims
+  static Future<IdTokenResult?> getIdTokenResult({
+    bool forceRefresh = false,
+  }) async {
+    try {
+      final user = currentUser;
+      if (user == null) {
+        return null;
+      }
+
+      return await user.getIdTokenResult(forceRefresh);
+    } catch (e) {
+      AppLogger.error('Failed to get ID token result', e);
+      throw AuthException(
+        message: 'Failed to get token result',
+        code: 'token_result_error',
+      );
+    }
+  }
+
+  /// Check if user's token needs refresh (expires within 5 minutes)
+  static Future<bool> needsTokenRefresh() async {
+    try {
+      final tokenResult = await getIdTokenResult();
+      if (tokenResult == null) {
+        return false;
+      }
+
+      final expirationTime = tokenResult.expirationTime;
+      if (expirationTime == null) {
+        return true; // If we can't determine expiration, refresh to be safe
+      }
+
+      final now = DateTime.now();
+      final fiveMinutesFromNow = now.add(const Duration(minutes: 5));
+
+      return expirationTime.isBefore(fiveMinutesFromNow);
+    } catch (e) {
+      AppLogger.error('Failed to check token refresh need', e);
+      return true; // If we can't check, assume refresh is needed
+    }
+  }
+
+  /// Automatically refresh token if needed
+  static Future<String?> ensureFreshToken() async {
+    try {
+      final needsRefresh = await needsTokenRefresh();
+      return await getIdToken(forceRefresh: needsRefresh);
+    } catch (e) {
+      AppLogger.error('Failed to ensure fresh token', e);
+      return null;
+    }
+  }
+
+  /// Reauthenticate user with email and password (required for sensitive operations)
+  static Future<UserCredential> reauthenticateWithEmailAndPassword({
+    required String password,
+  }) async {
+    try {
+      final user = currentUser;
+      if (user == null || user.email == null) {
+        throw AuthException(
+          message: 'No user is currently signed in',
+          code: 'no_current_user',
+        );
+      }
+
+      final credential = EmailAuthProvider.credential(
+        email: user.email!,
+        password: password,
+      );
+
+      final result = await user.reauthenticateWithCredential(credential);
+      AppLogger.firebase('Auth', 'User reauthenticated: ${user.email}');
+
+      return result;
+    } on FirebaseAuthException catch (e) {
+      AppLogger.error('Reauthentication failed', e);
+      throw AuthException(message: _getAuthErrorMessage(e.code), code: e.code);
+    } catch (e) {
+      AppLogger.error('Unexpected error during reauthentication', e);
+      throw AuthException(
+        message: 'An unexpected error occurred during reauthentication',
+        code: 'unknown_error',
+      );
+    }
+  }
+
+  /// Change user password (requires recent authentication)
+  static Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    try {
+      // First reauthenticate the user
+      await reauthenticateWithEmailAndPassword(password: currentPassword);
+
+      // Then update the password
+      final user = currentUser;
+      if (user == null) {
+        throw AuthException(
+          message: 'No user is currently signed in',
+          code: 'no_current_user',
+        );
+      }
+
+      await user.updatePassword(newPassword);
+      AppLogger.firebase('Auth', 'Password changed for user: ${user.email}');
+    } on FirebaseAuthException catch (e) {
+      AppLogger.error('Password change failed', e);
+      throw AuthException(message: _getAuthErrorMessage(e.code), code: e.code);
+    } catch (e) {
+      AppLogger.error('Unexpected error during password change', e);
+      throw AuthException(
+        message: 'An unexpected error occurred during password change',
+        code: 'unknown_error',
+      );
+    }
+  }
+
+  /// Send email verification to current user
+  static Future<void> sendEmailVerification() async {
+    try {
+      final user = currentUser;
+      if (user == null) {
+        throw AuthException(
+          message: 'No user is currently signed in',
+          code: 'no_current_user',
+        );
+      }
+
+      if (user.emailVerified) {
+        AppLogger.firebase('Auth', 'Email already verified for: ${user.email}');
+        return;
+      }
+
+      await user.sendEmailVerification();
+      AppLogger.firebase('Auth', 'Email verification sent to: ${user.email}');
+    } on FirebaseAuthException catch (e) {
+      AppLogger.error('Email verification failed', e);
+      throw AuthException(message: _getAuthErrorMessage(e.code), code: e.code);
+    } catch (e) {
+      AppLogger.error('Unexpected error during email verification', e);
+      throw AuthException(
+        message: 'An unexpected error occurred during email verification',
+        code: 'unknown_error',
+      );
+    }
+  }
+
+  /// Check if current user's email is verified
+  static bool get isEmailVerified {
+    return currentUser?.emailVerified ?? false;
+  }
+
+  /// Reload current user data (to check for email verification updates)
+  static Future<void> reloadUser() async {
+    try {
+      final user = currentUser;
+      if (user == null) {
+        return;
+      }
+
+      await user.reload();
+      AppLogger.firebase('Auth', 'User data reloaded for: ${user.email}');
+    } catch (e) {
+      AppLogger.error('Failed to reload user', e);
+      // Don't throw - this is not critical
+    }
+  }
+
   /// Get user-friendly error messages
   static String _getAuthErrorMessage(String errorCode) {
     switch (errorCode) {

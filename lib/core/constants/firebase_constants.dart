@@ -10,6 +10,36 @@ class FirebaseConstants {
   // Auth Configuration
   static const int sessionTimeoutMinutes = 30;
   static const int maxLoginAttempts = 3;
+  static const int tokenRefreshThresholdMinutes = 5;
+  static const int maxActiveSessions = 5;
+
+  // Security Collections (subcollections under users)
+  static const String sessionsSubcollection = 'sessions';
+  static const String devicesSubcollection = 'devices';
+  static const String securityEventsSubcollection = 'security_events';
+  static const String settingsSubcollection = 'settings';
+  static const String securitySettingsDoc = 'security';
+
+  // Security Event Types
+  static const String loginSuccessEvent = 'login_success';
+  static const String loginFailedEvent = 'login_failed';
+  static const String passwordChangeEvent = 'password_change';
+  static const String sessionTerminatedEvent = 'session_terminated';
+  static const String suspiciousActivityEvent = 'suspicious_activity';
+  static const String newDeviceEvent = 'new_device';
+  static const String deviceRevokedEvent = 'device_revoked';
+
+  // Security Severity Levels
+  static const String lowSeverity = 'low';
+  static const String mediumSeverity = 'medium';
+  static const String highSeverity = 'high';
+  static const String criticalSeverity = 'critical';
+
+  // Device Trust Levels
+  static const String unknownTrust = 'unknown';
+  static const String trustedTrust = 'trusted';
+  static const String suspiciousTrust = 'suspicious';
+  static const String revokedTrust = 'revoked';
 
   // Game Configuration
   static const int maxPlayersPerSession = 50;
