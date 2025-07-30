@@ -26,7 +26,7 @@ class AuthConfig {
 
       // Set language code for auth errors
       auth.setLanguageCode('en');
-      
+
       // Configure authentication persistence
       _configurePersistence(auth);
 
@@ -46,14 +46,16 @@ class AuthConfig {
     try {
       // Authentication persistence is handled automatically by Firebase Auth
       // but we can configure additional settings here
-      
+
       // Set auth persistence (this is handled automatically by Firebase)
       // Firebase Auth automatically persists user authentication state
       // across app restarts on all platforms (Web, Android, iOS)
-      
+
       AppLogger.firebase('Auth', 'Authentication persistence configured');
     } catch (e) {
-      AppLogger.warning('Failed to configure auth persistence: ${e.toString()}');
+      AppLogger.warning(
+        'Failed to configure auth persistence: ${e.toString()}',
+      );
       // Non-critical error, continue with default behavior
     }
   }

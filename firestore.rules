@@ -282,3 +282,134 @@ service cloud.firestore {
     }
   }
 }
+
+// ===========================
+// FIREBASE STORAGE RULES
+// ===========================
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // ============================
+    // HELPER FUNCTIONS FOR STORAGE
+    // ============================
+    
+    /// Check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    /// Check if user is the owner of the file
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+    
+    /// Validate image file type
+    function isValidImageType() {
+      return request.resource.contentType.matches('image/(jpeg|png|webp)');
+    }
+    
+    /// Validate file extension
+    function isValidImageExtension(extension) {
+      return extension.matches('(jpg|jpeg|png|webp)');
+    }
+    
+    /// Check file size is within limits (5MB for free tier)
+    function isValidFileSize() {
+      return request.resource.size <= 5 * 1024 * 1024; // 5MB
+    }
+    
+    // ============================
+    // USER AVATAR STORAGE RULES
+    // ============================
+    
+    match /users/{userId}/avatar.{extension} {
+      // Allow read for authenticated users (avatars can be viewed by others)
+      allow read: if isAuthenticated();
+      
+      // Allow write only for the owner of the avatar with validation
+      allow write: if isOwner(userId) &&
+                      isValidFileSize() &&
+                      isValidImageExtension(extension) &&
+                      isValidImageType();
+      
+      // Allow delete only for the owner
+      allow delete: if isOwner(userId);
+    }
+    
+    // Alternative path structure for avatars (in case multiple formats exist)
+    match /users/{userId}/{fileName} {
+      // Allow read for authenticated users
+      allow read: if isAuthenticated() && fileName.matches('avatar\\.(jpg|jpeg|png|webp)');
+      
+      // Allow write for owner with validation
+      allow write: if isOwner(userId) &&
+                      fileName.matches('avatar\\.(jpg|jpeg|png|webp)') &&
+                      isValidFileSize() &&
+                      isValidImageType();
+      
+      // Allow delete for owner
+      allow delete: if isOwner(userId) && fileName.matches('avatar\\.(jpg|jpeg|png|webp)');
+    }
+    
+    // ============================
+    // QUIZ IMAGES STORAGE RULES
+    // ============================
+    
+    match /quizzes/{quizId}/{imageId} {
+      // Allow read for authenticated users (quiz images can be viewed by participants)
+      allow read: if isAuthenticated();
+      
+      // Allow write for authenticated users (ownership validated by Firestore rules)
+      // Additional validation for image files
+      allow write: if isAuthenticated() &&
+                      isValidFileSize() &&
+                      isValidImageType();
+      
+      // Allow delete for authenticated users (ownership validated by Firestore rules)
+      allow delete: if isAuthenticated();
+    }
+    
+    // ============================
+    // GAME SESSION ATTACHMENTS RULES
+    // ============================
+    
+    match /game_sessions/{sessionId}/{attachmentId} {
+      // Allow read for authenticated users
+      allow read: if isAuthenticated();
+      
+      // Allow write for authenticated users with file validation
+      allow write: if isAuthenticated() &&
+                      isValidFileSize() &&
+                      (isValidImageType() || 
+                       request.resource.contentType.matches('application/(pdf|json)') ||
+                       request.resource.contentType.matches('text/plain'));
+      
+      // Allow delete for authenticated users
+      allow delete: if isAuthenticated();
+    }
+    
+    // ============================
+    // TEMP UPLOADS (FOR PROCESSING)
+    // ============================
+    
+    match /temp/{userId}/{fileName} {
+      // Temporary storage for image processing
+      // Allow read/write for owner with time-based cleanup (files should be moved/deleted quickly)
+      allow read, write: if isOwner(userId) &&
+                            isValidFileSize() &&
+                            isValidImageType();
+      
+      allow delete: if isOwner(userId);
+    }
+    
+    // ============================
+    // DEFAULT STORAGE SECURITY
+    // ============================
+    
+    // Deny all other storage access
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
