@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/constants/app_text_styles.dart';
 import '../../../../shared/constants/app_spacing.dart';
 import '../../../../shared/constants/app_dimensions.dart';
 import '../../../../shared/constants/app_animations.dart';
+import '../../../../core/navigation/route_constants.dart';
+import '../providers/auth_providers.dart';
 
-/// Social authentication buttons widget
+/// Social authentication buttons widget with integrated auth functionality
 /// Provides consistent UI for social login options
-class SocialAuthButtons extends StatelessWidget {
+class SocialAuthButtons extends ConsumerStatefulWidget {
   final VoidCallback? onGooglePressed;
   final VoidCallback? onApplePressed;
   final VoidCallback? onFacebookPressed;
@@ -22,19 +26,73 @@ class SocialAuthButtons extends StatelessWidget {
   });
 
   @override
+  ConsumerState<SocialAuthButtons> createState() => _SocialAuthButtonsState();
+}
+
+class _SocialAuthButtonsState extends ConsumerState<SocialAuthButtons> {
+  bool _isGoogleLoading = false;
+
+  Future<void> _handleGoogleSignIn() async {
+    if (widget.onGooglePressed != null) {
+      widget.onGooglePressed!();
+      return;
+    }
+
+    setState(() => _isGoogleLoading = true);
+
+    try {
+      final authService = ref.read(authServiceProvider);
+      final result = await authService.signInWithGoogle();
+
+      if (mounted) {
+        result.when(
+          success: (_) {
+            // Navigation handled by auth state listener
+            context.go(RouteConstants.home);
+          },
+          failure: (failure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(failure.userMessage),
+                backgroundColor: AppColors.error,
+              ),
+            );
+          },
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Google sign-in failed: ${e.toString()}'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isGoogleLoading = false);
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final isLoading = widget.isLoading || _isGoogleLoading;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         // Google Sign In
         _SocialAuthButton(
-          text: 'Continue with Google',
+          text: _isGoogleLoading ? 'Signing in...' : 'Continue with Google',
           icon: Icons.g_mobiledata, // Placeholder - would use Google logo
           backgroundColor: AppColors.pureWhite,
           textColor: AppColors.charcoal,
           borderColor: AppColors.lightGray,
-          onPressed: isLoading ? null : onGooglePressed,
-          isEnabled: onGooglePressed != null,
+          onPressed: isLoading ? null : _handleGoogleSignIn,
+          isEnabled: !isLoading,
+          isLoading: _isGoogleLoading,
         ),
 
         const SizedBox(height: AppSpacing.spacingM),
@@ -46,8 +104,9 @@ class SocialAuthButtons extends StatelessWidget {
             icon: Icons.apple, // Placeholder - would use Apple logo
             backgroundColor: AppColors.charcoal,
             textColor: AppColors.pureWhite,
-            onPressed: isLoading ? null : onApplePressed,
-            isEnabled: onApplePressed != null,
+            onPressed: isLoading ? null : widget.onApplePressed,
+            isEnabled: widget.onApplePressed != null && !isLoading,
+            isLoading: false, // Apple sign-in loading state not implemented yet
           ),
 
           const SizedBox(height: AppSpacing.spacingM),
@@ -59,8 +118,10 @@ class SocialAuthButtons extends StatelessWidget {
           icon: Icons.facebook, // Placeholder - would use Facebook logo
           backgroundColor: const Color(0xFF1877F2), // Facebook Blue
           textColor: AppColors.pureWhite,
-          onPressed: isLoading ? null : onFacebookPressed,
-          isEnabled: onFacebookPressed != null,
+          onPressed: isLoading ? null : widget.onFacebookPressed,
+          isEnabled: widget.onFacebookPressed != null && !isLoading,
+          isLoading:
+              false, // Facebook sign-in loading state not implemented yet
         ),
       ],
     );
@@ -76,6 +137,7 @@ class _SocialAuthButton extends StatefulWidget {
   final Color? borderColor;
   final VoidCallback? onPressed;
   final bool isEnabled;
+  final bool isLoading;
 
   const _SocialAuthButton({
     required this.text,
@@ -85,6 +147,7 @@ class _SocialAuthButton extends StatefulWidget {
     this.borderColor,
     this.onPressed,
     this.isEnabled = true,
+    this.isLoading = false,
   });
 
   @override
@@ -179,13 +242,25 @@ class _SocialAuthButtonState extends State<_SocialAuthButton>
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
-                      widget.icon,
-                      color: widget.isEnabled
-                          ? widget.textColor
-                          : AppColors.coolGray,
-                      size: 24,
-                    ),
+                    if (widget.isLoading)
+                      SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            widget.textColor,
+                          ),
+                        ),
+                      )
+                    else
+                      Icon(
+                        widget.icon,
+                        color: widget.isEnabled
+                            ? widget.textColor
+                            : AppColors.coolGray,
+                        size: 24,
+                      ),
                     const SizedBox(width: AppSpacing.spacingM),
                     Text(
                       widget.text,
