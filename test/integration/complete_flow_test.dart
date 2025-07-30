@@ -28,7 +28,10 @@ void main() {
 
       await tester.enterText(find.byKey(const Key('name_input')), testName);
       await tester.enterText(find.byKey(const Key('email_input')), testEmail);
-      await tester.enterText(find.byKey(const Key('password_input')), testPassword);
+      await tester.enterText(
+        find.byKey(const Key('password_input')),
+        testPassword,
+      );
 
       // Submit registration
       await tester.tap(find.byKey(const Key('register_button')));
@@ -45,8 +48,14 @@ void main() {
       final quizTitle = 'Test Quiz ${TestUtilities.randomString(4)}';
       final quizDescription = 'A test quiz created during integration testing';
 
-      await tester.enterText(find.byKey(const Key('quiz_title_input')), quizTitle);
-      await tester.enterText(find.byKey(const Key('quiz_description_input')), quizDescription);
+      await tester.enterText(
+        find.byKey(const Key('quiz_title_input')),
+        quizTitle,
+      );
+      await tester.enterText(
+        find.byKey(const Key('quiz_description_input')),
+        quizDescription,
+      );
 
       // Add questions
       for (int i = 0; i < 3; i++) {
@@ -242,7 +251,10 @@ void main() {
       expect(find.text('Title is required'), findsOneWidget);
 
       // Fix the error
-      await tester.enterText(find.byKey(const Key('quiz_title_input')), 'Valid Title');
+      await tester.enterText(
+        find.byKey(const Key('quiz_title_input')),
+        'Valid Title',
+      );
       await tester.tap(find.byKey(const Key('save_quiz_button')));
       await tester.pumpAndSettle();
 
@@ -260,14 +272,14 @@ void main() {
         // Home -> Quiz Creation -> Back
         await tester.tap(find.byKey(const Key('create_quiz_fab')));
         await tester.pumpAndSettle();
-        
+
         await tester.tap(find.byKey(const Key('back_button')));
         await tester.pumpAndSettle();
 
         // Home -> Settings -> Back
         await tester.tap(find.byKey(const Key('settings_button')));
         await tester.pumpAndSettle();
-        
+
         await tester.tap(find.byKey(const Key('back_button')));
         await tester.pumpAndSettle();
       }
@@ -293,7 +305,9 @@ void main() {
       await tester.pumpAndSettle();
 
       final updatedSemantics = tester.allSemantics;
-      final textFields = updatedSemantics.where((s) => s.hasFlag(SemanticsFlag.isTextField));
+      final textFields = updatedSemantics.where(
+        (s) => s.hasFlag(SemanticsFlag.isTextField),
+      );
       expect(textFields.length, greaterThan(0));
     });
 

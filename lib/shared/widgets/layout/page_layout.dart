@@ -42,9 +42,7 @@ class PageLayout extends StatelessWidget {
     return Scaffold(
       backgroundColor: backgroundColor ?? AppColors.backgroundLight,
       appBar: showAppBar ? (appBar ?? _buildDefaultAppBar(context)) : null,
-      body: ResponsiveSafeArea(
-        child: body,
-      ),
+      body: ResponsiveSafeArea(child: body),
       floatingActionButton: floatingActionButton,
       bottomNavigationBar: bottomNavigationBar,
       drawer: drawer,
@@ -98,13 +96,13 @@ class LoadingPageLayout extends StatelessWidget {
                 spinnerColor ?? AppColors.vibrantPurple,
               ),
             ),
-            if (message != null) ..[
+            if (message != null) ...[
               SizedBox(height: AppSpacing.spacingL),
               Text(
                 message!,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: AppColors.textSecondary,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -158,12 +156,12 @@ class ErrorPageLayout extends StatelessWidget {
               SizedBox(height: AppSpacing.spacingM),
               Text(
                 message,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: AppColors.textSecondary,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary),
                 textAlign: TextAlign.center,
               ),
-              if (onRetry != null) ..[
+              if (onRetry != null) ...[
                 SizedBox(height: AppSpacing.spacingL),
                 ElevatedButton(
                   onPressed: onRetry,
@@ -204,11 +202,7 @@ class EmptyStateLayout extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (imagePath != null)
-              Image.asset(
-                imagePath!,
-                width: 120,
-                height: 120,
-              )
+              Image.asset(imagePath!, width: 120, height: 120)
             else
               Icon(
                 icon ?? Icons.inbox_outlined,
@@ -218,20 +212,20 @@ class EmptyStateLayout extends StatelessWidget {
             SizedBox(height: AppSpacing.spacingL),
             Text(
               title,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: AppColors.textPrimary,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(color: AppColors.textPrimary),
               textAlign: TextAlign.center,
             ),
             SizedBox(height: AppSpacing.spacingM),
             Text(
               message,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary),
               textAlign: TextAlign.center,
             ),
-            if (action != null) ..[
+            if (action != null) ...[
               SizedBox(height: AppSpacing.spacingL),
               action!,
             ],

@@ -10,22 +10,18 @@ void main() {
   group('PrimaryButton Widget Tests', () {
     testWidgets('renders correctly with text', (tester) async {
       const testText = 'Test Button';
-      
+
       await tester.pumpWidget(
-        buildTestableWidget(
-          const PrimaryButton(
-            text: testText,
-          ),
-        ),
+        buildTestableWidget(const PrimaryButton(text: testText)),
       );
-      
+
       expect(find.text(testText), findsOneWidget);
       expect(find.byType(PrimaryButton), findsOneWidget);
     });
 
     testWidgets('calls onPressed when tapped', (tester) async {
       bool wasPressed = false;
-      
+
       await tester.pumpWidget(
         buildTestableWidget(
           PrimaryButton(
@@ -34,14 +30,14 @@ void main() {
           ),
         ),
       );
-      
+
       await tester.tap(find.byType(PrimaryButton));
       expect(wasPressed, isTrue);
     });
 
     testWidgets('does not respond to tap when disabled', (tester) async {
       bool wasPressed = false;
-      
+
       await tester.pumpWidget(
         buildTestableWidget(
           PrimaryButton(
@@ -51,7 +47,7 @@ void main() {
           ),
         ),
       );
-      
+
       await tester.tap(find.byType(PrimaryButton));
       expect(wasPressed, isFalse);
     });
@@ -59,13 +55,10 @@ void main() {
     testWidgets('shows loading indicator when loading', (tester) async {
       await tester.pumpWidget(
         buildTestableWidget(
-          const PrimaryButton(
-            text: 'Test Button',
-            isLoading: true,
-          ),
+          const PrimaryButton(text: 'Test Button', isLoading: true),
         ),
       );
-      
+
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
       expect(find.text('Test Button'), findsNothing);
     });
@@ -73,13 +66,10 @@ void main() {
     testWidgets('displays icon when provided', (tester) async {
       await tester.pumpWidget(
         buildTestableWidget(
-          const PrimaryButton(
-            text: 'Test Button',
-            icon: Icons.star,
-          ),
+          const PrimaryButton(text: 'Test Button', icon: Icons.star),
         ),
       );
-      
+
       expect(find.byIcon(Icons.star), findsOneWidget);
       expect(find.text('Test Button'), findsOneWidget);
     });
@@ -94,14 +84,16 @@ void main() {
           ),
         ),
       );
-      
+
       final container = tester.widget<Container>(
-        find.descendant(
-          of: find.byType(PrimaryButton),
-          matching: find.byType(Container),
-        ).first,
+        find
+            .descendant(
+              of: find.byType(PrimaryButton),
+              matching: find.byType(Container),
+            )
+            .first,
       );
-      
+
       final decoration = container.decoration as BoxDecoration;
       expect(decoration.color, equals(Colors.red));
     });
@@ -109,33 +101,28 @@ void main() {
     testWidgets('applies disabled style when disabled', (tester) async {
       await tester.pumpWidget(
         buildTestableWidget(
-          const PrimaryButton(
-            text: 'Test Button',
-            isDisabled: true,
-          ),
+          const PrimaryButton(text: 'Test Button', isDisabled: true),
         ),
       );
-      
+
       final container = tester.widget<Container>(
-        find.descendant(
-          of: find.byType(PrimaryButton),
-          matching: find.byType(Container),
-        ).first,
+        find
+            .descendant(
+              of: find.byType(PrimaryButton),
+              matching: find.byType(Container),
+            )
+            .first,
       );
-      
+
       final decoration = container.decoration as BoxDecoration;
       expect(decoration.color, equals(AppColors.disabled));
     });
 
     testWidgets('has proper semantics', (tester) async {
       await tester.pumpWidget(
-        buildTestableWidget(
-          const PrimaryButton(
-            text: 'Test Button',
-          ),
-        ),
+        buildTestableWidget(const PrimaryButton(text: 'Test Button')),
       );
-      
+
       final semantics = tester.getSemantics(find.byType(PrimaryButton));
       expect(semantics.hasFlag(ui.SemanticsFlag.isButton), isTrue);
       expect(semantics.label?.trim(), equals('Test Button'));
@@ -144,13 +131,10 @@ void main() {
     testWidgets('animates on tap', (tester) async {
       await tester.pumpWidget(
         buildTestableWidget(
-          PrimaryButton(
-            text: 'Test Button',
-            onPressed: () {},
-          ),
+          PrimaryButton(text: 'Test Button', onPressed: () {}),
         ),
       );
-      
+
       // Get initial transform
       final initialTransform = tester.widget<Transform>(
         find.descendant(
@@ -158,14 +142,14 @@ void main() {
           matching: find.byType(Transform),
         ),
       );
-      
+
       // Start tap gesture
       final gesture = await tester.startGesture(
         tester.getCenter(find.byType(PrimaryButton)),
       );
-      
+
       await tester.pump(const Duration(milliseconds: 50));
-      
+
       // Transform should have changed during animation
       final animatedTransform = tester.widget<Transform>(
         find.descendant(
@@ -173,9 +157,9 @@ void main() {
           matching: find.byType(Transform),
         ),
       );
-      
+
       expect(animatedTransform, isNot(equals(initialTransform)));
-      
+
       await gesture.up();
       await tester.pumpAndSettle();
     });
@@ -183,7 +167,7 @@ void main() {
     testWidgets('respects custom width and height', (tester) async {
       const customWidth = 200.0;
       const customHeight = 60.0;
-      
+
       await tester.pumpWidget(
         buildTestableWidget(
           const PrimaryButton(
@@ -193,14 +177,16 @@ void main() {
           ),
         ),
       );
-      
+
       final container = tester.widget<Container>(
-        find.descendant(
-          of: find.byType(PrimaryButton),
-          matching: find.byType(Container),
-        ).first,
+        find
+            .descendant(
+              of: find.byType(PrimaryButton),
+              matching: find.byType(Container),
+            )
+            .first,
       );
-      
+
       // Check if custom dimensions are applied through the widget structure
       expect(container, isNotNull);
       expect(find.byType(PrimaryButton), findsOneWidget);

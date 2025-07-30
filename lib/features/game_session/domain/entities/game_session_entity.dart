@@ -19,6 +19,34 @@ class GameSessionEntity with _$GameSessionEntity {
     DateTime? startedAt,
     DateTime? completedAt,
   }) = _GameSessionEntity;
+
+  /// Create from Firestore map
+  factory GameSessionEntity.fromMap(Map<String, dynamic> map) {
+    return GameSessionEntity(
+      id: map['id'] ?? '',
+      quizId: map['quizId'] ?? '',
+      hostId: map['hostId'] ?? '',
+      pin: map['pin'] ?? '',
+      status: GameSessionStatus.values.firstWhere(
+        (s) => s.name == (map['status'] ?? 'waiting'),
+        orElse: () => GameSessionStatus.waiting,
+      ),
+      players: (map['players'] as Map<String, dynamic>? ?? {}).map(
+        (key, value) => MapEntry(key, PlayerEntity.fromMap(value)),
+      ),
+      currentQuestionIndex: map['currentQuestionIndex'] ?? 0,
+      createdAt: DateTime.fromMillisecondsSinceEpoch(map['createdAt'] ?? 0),
+      settings: map['settings'] != null
+          ? GameSessionSettings.fromMap(map['settings'])
+          : null,
+      startedAt: map['startedAt'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(map['startedAt'])
+          : null,
+      completedAt: map['completedAt'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(map['completedAt'])
+          : null,
+    );
+  }
 }
 
 /// Player entity within game session
@@ -31,6 +59,17 @@ class PlayerEntity with _$PlayerEntity {
     @Default([]) List<int> answers,
     @Default(false) bool isReady,
   }) = _PlayerEntity;
+
+  /// Create from Firestore map
+  factory PlayerEntity.fromMap(Map<String, dynamic> map) {
+    return PlayerEntity(
+      name: map['name'] ?? '',
+      joinedAt: DateTime.fromMillisecondsSinceEpoch(map['joinedAt'] ?? 0),
+      score: map['score'] ?? 0,
+      answers: List<int>.from(map['answers'] ?? []),
+      isReady: map['isReady'] ?? false,
+    );
+  }
 }
 
 /// Game session settings entity
@@ -42,6 +81,16 @@ class GameSessionSettings with _$GameSessionSettings {
     @Default(false) bool shuffleQuestions,
     @Default(true) bool allowReplay,
   }) = _GameSessionSettings;
+
+  /// Create from Firestore map
+  factory GameSessionSettings.fromMap(Map<String, dynamic> map) {
+    return GameSessionSettings(
+      maxPlayers: map['maxPlayers'] ?? 50,
+      showCorrectAnswers: map['showCorrectAnswers'] ?? true,
+      shuffleQuestions: map['shuffleQuestions'] ?? false,
+      allowReplay: map['allowReplay'] ?? true,
+    );
+  }
 }
 
 /// Game session status enum

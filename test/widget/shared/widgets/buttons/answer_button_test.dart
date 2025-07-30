@@ -9,24 +9,24 @@ void main() {
   group('AnswerButton Widget Tests', () {
     testWidgets('renders correctly with text and shape', (tester) async {
       const testText = 'Answer Option A';
-      
+
       await tester.pumpWidget(
         buildTestableWidget(
-          const AnswerButton(
-            text: testText,
-            shape: AnswerShape.triangle,
-          ),
+          const AnswerButton(text: testText, shape: AnswerShape.triangle),
         ),
       );
-      
+
       expect(find.text(testText), findsOneWidget);
       expect(find.byType(AnswerButton), findsOneWidget);
-      expect(find.byIcon(Icons.change_history), findsOneWidget); // Triangle icon
+      expect(
+        find.byIcon(Icons.change_history),
+        findsOneWidget,
+      ); // Triangle icon
     });
 
     testWidgets('calls onPressed when tapped', (tester) async {
       bool wasPressed = false;
-      
+
       await tester.pumpWidget(
         buildTestableWidget(
           AnswerButton(
@@ -36,14 +36,14 @@ void main() {
           ),
         ),
       );
-      
+
       await tester.tap(find.byType(AnswerButton));
       expect(wasPressed, isTrue);
     });
 
     testWidgets('does not respond to tap when disabled', (tester) async {
       bool wasPressed = false;
-      
+
       await tester.pumpWidget(
         buildTestableWidget(
           AnswerButton(
@@ -54,7 +54,7 @@ void main() {
           ),
         ),
       );
-      
+
       await tester.tap(find.byType(AnswerButton));
       expect(wasPressed, isFalse);
     });
@@ -63,40 +63,38 @@ void main() {
       // Test triangle (red)
       await tester.pumpWidget(
         buildTestableWidget(
-          const AnswerButton(
-            text: 'Answer A',
-            shape: AnswerShape.triangle,
-          ),
+          const AnswerButton(text: 'Answer A', shape: AnswerShape.triangle),
         ),
       );
-      
+
       Container container = tester.widget<Container>(
-        find.descendant(
-          of: find.byType(AnswerButton),
-          matching: find.byType(Container),
-        ).first,
+        find
+            .descendant(
+              of: find.byType(AnswerButton),
+              matching: find.byType(Container),
+            )
+            .first,
       );
-      
+
       BoxDecoration decoration = container.decoration as BoxDecoration;
       expect(decoration.color, equals(AppColors.triangleRed));
-      
+
       // Test diamond (green)
       await tester.pumpWidget(
         buildTestableWidget(
-          const AnswerButton(
-            text: 'Answer B',
-            shape: AnswerShape.diamond,
-          ),
+          const AnswerButton(text: 'Answer B', shape: AnswerShape.diamond),
         ),
       );
-      
+
       container = tester.widget<Container>(
-        find.descendant(
-          of: find.byType(AnswerButton),
-          matching: find.byType(Container),
-        ).first,
+        find
+            .descendant(
+              of: find.byType(AnswerButton),
+              matching: find.byType(Container),
+            )
+            .first,
       );
-      
+
       decoration = container.decoration as BoxDecoration;
       expect(decoration.color, equals(AppColors.diamondGreen));
     });
@@ -109,19 +107,17 @@ void main() {
         (AnswerShape.circle, Icons.circle),
         (AnswerShape.square, Icons.square),
       ];
-      
+
       for (final (shape, expectedIcon) in shapes) {
         await tester.pumpWidget(
-          buildTestableWidget(
-            AnswerButton(
-              text: 'Answer',
-              shape: shape,
-            ),
-          ),
+          buildTestableWidget(AnswerButton(text: 'Answer', shape: shape)),
         );
-        
-        expect(find.byIcon(expectedIcon), findsOneWidget,
-            reason: 'Expected $expectedIcon for $shape');
+
+        expect(
+          find.byIcon(expectedIcon),
+          findsOneWidget,
+          reason: 'Expected $expectedIcon for $shape',
+        );
       }
     });
 
@@ -135,17 +131,22 @@ void main() {
           ),
         ),
       );
-      
+
       final container = tester.widget<Container>(
-        find.descendant(
-          of: find.byType(AnswerButton),
-          matching: find.byType(Container),
-        ).first,
+        find
+            .descendant(
+              of: find.byType(AnswerButton),
+              matching: find.byType(Container),
+            )
+            .first,
       );
-      
+
       final decoration = container.decoration as BoxDecoration;
       expect(decoration.border, isNotNull);
-      expect((decoration.border as Border).top.color, equals(AppColors.pureWhite));
+      expect(
+        (decoration.border as Border).top.color,
+        equals(AppColors.pureWhite),
+      );
       expect((decoration.border as Border).top.width, equals(3.0));
     });
 
@@ -161,19 +162,21 @@ void main() {
           ),
         ),
       );
-      
+
       expect(find.byIcon(Icons.check_circle), findsOneWidget);
-      
+
       Container container = tester.widget<Container>(
-        find.descendant(
-          of: find.byType(AnswerButton),
-          matching: find.byType(Container),
-        ).first,
+        find
+            .descendant(
+              of: find.byType(AnswerButton),
+              matching: find.byType(Container),
+            )
+            .first,
       );
-      
+
       BoxDecoration decoration = container.decoration as BoxDecoration;
       expect(decoration.color, equals(AppColors.correctAnswer));
-      
+
       // Test incorrect answer
       await tester.pumpWidget(
         buildTestableWidget(
@@ -185,16 +188,18 @@ void main() {
           ),
         ),
       );
-      
+
       expect(find.byIcon(Icons.cancel), findsOneWidget);
-      
+
       container = tester.widget<Container>(
-        find.descendant(
-          of: find.byType(AnswerButton),
-          matching: find.byType(Container),
-        ).first,
+        find
+            .descendant(
+              of: find.byType(AnswerButton),
+              matching: find.byType(Container),
+            )
+            .first,
       );
-      
+
       decoration = container.decoration as BoxDecoration;
       expect(decoration.color, equals(AppColors.incorrectAnswer));
     });
@@ -202,13 +207,10 @@ void main() {
     testWidgets('has proper semantics', (tester) async {
       await tester.pumpWidget(
         buildTestableWidget(
-          const AnswerButton(
-            text: 'Answer A',
-            shape: AnswerShape.diamond,
-          ),
+          const AnswerButton(text: 'Answer A', shape: AnswerShape.diamond),
         ),
       );
-      
+
       final semantics = tester.getSemantics(find.byType(AnswerButton));
       expect(semantics.hasFlag(ui.SemanticsFlag.isButton), isTrue);
       expect(semantics.label, equals('diamond answer: Answer A'));
@@ -225,10 +227,10 @@ void main() {
           ),
         ),
       );
-      
+
       // Initially no result indicator
       expect(find.byIcon(Icons.check_circle), findsNothing);
-      
+
       // Update to show result
       await tester.pumpWidget(
         buildTestableWidget(
@@ -240,31 +242,30 @@ void main() {
           ),
         ),
       );
-      
+
       // Should trigger animation
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
-      
+
       expect(find.byIcon(Icons.check_circle), findsOneWidget);
     });
 
     testWidgets('applies proper margin and dimensions', (tester) async {
       await tester.pumpWidget(
         buildTestableWidget(
-          const AnswerButton(
-            text: 'Answer A',
-            shape: AnswerShape.circle,
-          ),
+          const AnswerButton(text: 'Answer A', shape: AnswerShape.circle),
         ),
       );
-      
+
       final container = tester.widget<Container>(
-        find.descendant(
-          of: find.byType(AnswerButton),
-          matching: find.byType(Container),
-        ).first,
+        find
+            .descendant(
+              of: find.byType(AnswerButton),
+              matching: find.byType(Container),
+            )
+            .first,
       );
-      
+
       expect(container.margin, isNotNull);
       // Container width is not directly accessible, checking constraints instead
       expect(container.constraints, isNull); // No explicit constraints set

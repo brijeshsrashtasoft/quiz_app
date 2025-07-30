@@ -10,86 +10,72 @@ void main() {
     late GoRouter router;
 
     setUp(() {
-      router = AppRouter.createRouter();
+      router = AppRouter.router;
     });
 
     testWidgets('navigates to login route', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp.router(
-          routerConfig: router,
-        ),
-      );
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
 
       // Should start at login route
-      expect(router.routerDelegate.currentConfiguration.uri.path, 
-             equals(RouteConstants.login));
+      expect(
+        router.routerDelegate.currentConfiguration.uri.path,
+        equals(RouteConstants.login),
+      );
     });
 
     testWidgets('navigates to home after login', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp.router(
-          routerConfig: router,
-        ),
-      );
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
 
       // Navigate to home
       router.go(RouteConstants.home);
       await tester.pumpAndSettle();
 
-      expect(router.routerDelegate.currentConfiguration.uri.path, 
-             equals(RouteConstants.home));
+      expect(
+        router.routerDelegate.currentConfiguration.uri.path,
+        equals(RouteConstants.home),
+      );
     });
 
     testWidgets('navigates to quiz creation', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp.router(
-          routerConfig: router,
-        ),
-      );
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
 
       router.go(RouteConstants.quizCreation);
       await tester.pumpAndSettle();
 
-      expect(router.routerDelegate.currentConfiguration.uri.path, 
-             equals(RouteConstants.quizCreation));
+      expect(
+        router.routerDelegate.currentConfiguration.uri.path,
+        equals(RouteConstants.quizCreation),
+      );
     });
 
     testWidgets('navigates to quiz detail with parameter', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp.router(
-          routerConfig: router,
-        ),
-      );
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
 
       const quizId = 'test-quiz-123';
-      router.go('${RouteConstants.quizDetail}/$quizId');
+      router.go(RouteConstants.quizDetailsPath(quizId));
       await tester.pumpAndSettle();
 
-      expect(router.routerDelegate.currentConfiguration.uri.path, 
-             equals('${RouteConstants.quizDetail}/$quizId'));
+      expect(
+        router.routerDelegate.currentConfiguration.uri.path,
+        equals('${RouteConstants.quizDetail}/$quizId'),
+      );
     });
 
     testWidgets('navigates to game session with PIN', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp.router(
-          routerConfig: router,
-        ),
-      );
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
 
       const sessionPin = '123456';
-      router.go('${RouteConstants.gameSession}/$sessionPin');
+      router.go(RouteConstants.gameSessionPath(sessionPin));
       await tester.pumpAndSettle();
 
-      expect(router.routerDelegate.currentConfiguration.uri.path, 
-             equals('${RouteConstants.gameSession}/$sessionPin'));
+      expect(
+        router.routerDelegate.currentConfiguration.uri.path,
+        equals('${RouteConstants.gameSession}/$sessionPin'),
+      );
     });
 
     testWidgets('handles navigation with query parameters', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp.router(
-          routerConfig: router,
-        ),
-      );
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
 
       router.go('${RouteConstants.home}?tab=quizzes&sort=recent');
       await tester.pumpAndSettle();
@@ -101,11 +87,7 @@ void main() {
     });
 
     testWidgets('navigates back correctly', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp.router(
-          routerConfig: router,
-        ),
-      );
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
 
       // Navigate to home
       router.go(RouteConstants.home);
@@ -115,40 +97,38 @@ void main() {
       router.push(RouteConstants.quizCreation);
       await tester.pumpAndSettle();
 
-      expect(router.routerDelegate.currentConfiguration.uri.path, 
-             equals(RouteConstants.quizCreation));
+      expect(
+        router.routerDelegate.currentConfiguration.uri.path,
+        equals(RouteConstants.quizCreation),
+      );
 
       // Navigate back
       router.pop();
       await tester.pumpAndSettle();
 
-      expect(router.routerDelegate.currentConfiguration.uri.path, 
-             equals(RouteConstants.home));
+      expect(
+        router.routerDelegate.currentConfiguration.uri.path,
+        equals(RouteConstants.home),
+      );
     });
 
     testWidgets('handles deep links correctly', (tester) async {
-      // Create router with initial location
-      const deepLink = '${RouteConstants.gameSession}/ABCD12';
-      final routerWithDeepLink = AppRouter.createRouter(
-        initialLocation: deepLink,
-      );
+      // Create router with initial location - using existing router
+      const deepLink = '/game/ABCD12';
+      final routerWithDeepLink = AppRouter.router;
 
       await tester.pumpWidget(
-        MaterialApp.router(
-          routerConfig: routerWithDeepLink,
-        ),
+        MaterialApp.router(routerConfig: routerWithDeepLink),
       );
 
-      expect(routerWithDeepLink.routerDelegate.currentConfiguration.uri.path, 
-             equals(deepLink));
+      expect(
+        routerWithDeepLink.routerDelegate.currentConfiguration.uri.path,
+        equals(deepLink),
+      );
     });
 
     testWidgets('redirects unauthenticated users', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp.router(
-          routerConfig: router,
-        ),
-      );
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
 
       // Try to navigate to protected route
       router.go(RouteConstants.quizCreation);
@@ -157,18 +137,17 @@ void main() {
       // Should be redirected based on auth state
       // Note: This depends on the actual route guard implementation
       final currentPath = router.routerDelegate.currentConfiguration.uri.path;
-      expect(currentPath, anyOf(
-        equals(RouteConstants.login),
-        equals(RouteConstants.quizCreation),
-      ));
+      expect(
+        currentPath,
+        anyOf(
+          equals(RouteConstants.login),
+          equals(RouteConstants.quizCreation),
+        ),
+      );
     });
 
     testWidgets('maintains route state during navigation', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp.router(
-          routerConfig: router,
-        ),
-      );
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
 
       // Navigate through multiple routes
       router.go(RouteConstants.home);
@@ -177,7 +156,7 @@ void main() {
       router.push(RouteConstants.quizCreation);
       await tester.pumpAndSettle();
 
-      router.push('${RouteConstants.quizDetail}/test-123');
+      router.push(RouteConstants.quizDetailsPath('test-123'));
       await tester.pumpAndSettle();
 
       // Check navigation stack
@@ -187,16 +166,14 @@ void main() {
       router.pop();
       await tester.pumpAndSettle();
 
-      expect(router.routerDelegate.currentConfiguration.uri.path, 
-             equals(RouteConstants.quizCreation));
+      expect(
+        router.routerDelegate.currentConfiguration.uri.path,
+        equals(RouteConstants.quizCreation),
+      );
     });
 
     testWidgets('handles route replacement correctly', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp.router(
-          routerConfig: router,
-        ),
-      );
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
 
       router.go(RouteConstants.home);
       await tester.pumpAndSettle();
@@ -205,8 +182,10 @@ void main() {
       router.pushReplacement(RouteConstants.quizCreation);
       await tester.pumpAndSettle();
 
-      expect(router.routerDelegate.currentConfiguration.uri.path, 
-             equals(RouteConstants.quizCreation));
+      expect(
+        router.routerDelegate.currentConfiguration.uri.path,
+        equals(RouteConstants.quizCreation),
+      );
 
       // Should not be able to pop back to home
       // Note: This behavior depends on the router implementation
@@ -216,12 +195,8 @@ void main() {
   group('Route Guards Tests', () {
     testWidgets('protects authenticated routes', (tester) async {
       final router = AppRouter.createRouter();
-      
-      await tester.pumpWidget(
-        MaterialApp.router(
-          routerConfig: router,
-        ),
-      );
+
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
 
       // Try to access protected route without authentication
       router.go(RouteConstants.quizCreation);
@@ -235,31 +210,25 @@ void main() {
 
     testWidgets('allows access to public routes', (tester) async {
       final router = AppRouter.createRouter();
-      
-      await tester.pumpWidget(
-        MaterialApp.router(
-          routerConfig: router,
-        ),
-      );
+
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
 
       // Navigate to public route
       router.go(RouteConstants.login);
       await tester.pumpAndSettle();
 
-      expect(router.routerDelegate.currentConfiguration.uri.path, 
-             equals(RouteConstants.login));
+      expect(
+        router.routerDelegate.currentConfiguration.uri.path,
+        equals(RouteConstants.login),
+      );
     });
   });
 
   group('Error Handling Tests', () {
     testWidgets('handles unknown routes', (tester) async {
       final router = AppRouter.createRouter();
-      
-      await tester.pumpWidget(
-        MaterialApp.router(
-          routerConfig: router,
-        ),
-      );
+
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
 
       // Try to navigate to unknown route
       router.go('/unknown-route');
@@ -272,15 +241,11 @@ void main() {
 
     testWidgets('handles malformed URLs', (tester) async {
       final router = AppRouter.createRouter();
-      
-      await tester.pumpWidget(
-        MaterialApp.router(
-          routerConfig: router,
-        ),
-      );
+
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
 
       // Try to navigate with malformed URL
-      router.go('${RouteConstants.quizDetail}/'); // Missing ID
+      router.go('/quiz/'); // Missing ID
       await tester.pumpAndSettle();
 
       // Should handle gracefully
@@ -291,29 +256,23 @@ void main() {
   group('Browser Integration Tests', () {
     testWidgets('updates browser URL on navigation', (tester) async {
       final router = AppRouter.createRouter();
-      
-      await tester.pumpWidget(
-        MaterialApp.router(
-          routerConfig: router,
-        ),
-      );
+
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
 
       router.go(RouteConstants.home);
       await tester.pumpAndSettle();
 
       // In web environment, this would update browser URL
-      expect(router.routerDelegate.currentConfiguration.uri.path, 
-             equals(RouteConstants.home));
+      expect(
+        router.routerDelegate.currentConfiguration.uri.path,
+        equals(RouteConstants.home),
+      );
     });
 
     testWidgets('handles browser back button', (tester) async {
       final router = AppRouter.createRouter();
-      
-      await tester.pumpWidget(
-        MaterialApp.router(
-          routerConfig: router,
-        ),
-      );
+
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
 
       router.go(RouteConstants.home);
       await tester.pumpAndSettle();
@@ -325,8 +284,10 @@ void main() {
       router.pop();
       await tester.pumpAndSettle();
 
-      expect(router.routerDelegate.currentConfiguration.uri.path, 
-             equals(RouteConstants.home));
+      expect(
+        router.routerDelegate.currentConfiguration.uri.path,
+        equals(RouteConstants.home),
+      );
     });
   });
 }
