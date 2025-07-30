@@ -56,14 +56,15 @@ This is a Kahoot-style interactive quiz application built with Flutter, Firestor
 ### Development Workflow (Explore → Plan → Code → Commit)
 1. **Explore**: Always read relevant files first using Read/Glob tools
 2. **Plan**: Create detailed implementation plans before coding
-3. **Code**: Implement solutions following TDD approach
+3. **Code**: Implement solutions focusing on working functionality
 4. **Commit**: Make incremental commits with clear messages
 
 ### Development Approach
-- Focus on clean, working implementation
+- **FOCUS ON MAIN APP FIRST**: Implement core functionality before tests
 - Ensure all platforms build successfully (Web, Android, iOS)
 - Verify basic functionality works across platforms
 - Commit working code frequently
+- Tests will be added later after main features are complete
 
 ### Context Management
 - Use `/clear` command to maintain focused context
@@ -92,19 +93,18 @@ This is a Kahoot-style interactive quiz application built with Flutter, Firestor
   - [ ] Architecture setup (flutter-architect)
   - [ ] Firebase integration (firebase-specialist)
   - [ ] UI components (ui-designer)
-  - [ ] Testing framework (testing-specialist)
+  - [ ] Testing framework (testing-specialist) [SKIP FOR NOW - FOCUS ON MAIN APP]
 ### 📊 Agent-Specific Progress
 #### flutter-architect Agent
 - [ ] Clean Architecture implementation
   - [ ] Domain layer entities
   - [ ] Repository contracts
-#### testing-specialist Agent
-- [ ] Comprehensive test suite
-  - [ ] Unit test coverage >80%
-  - [ ] Widget test implementations
-## Test Execution Status
-- [ ] **ALL tests passing**: Required before PR creation
-- [ ] **Coverage threshold met**: >80% coverage achieved
+#### testing-specialist Agent [SKIP FOR NOW]
+- [ ] Comprehensive test suite [DEFERRED]
+  - [ ] Unit test coverage [DEFERRED]
+  - [ ] Widget test implementations [DEFERRED]
+## Test Execution Status [NOT REQUIRED CURRENTLY]
+- [ ] **Tests**: Will be added after main app features complete
 ```
 
 **Session Continuity**:
@@ -300,30 +300,29 @@ Our project uses specialized Claude Code sub-agents for focused expertise:
 
 ### Mandatory PR Review Criteria
 All PRs must meet these criteria before pr-review-agent approval:
-- ✅ **Unified Ticket Complete**: All nested checkboxes marked [x] in docs/tickets/{branch-name}.md
-- ✅ **Test Validation**: All test categories passing with >80% coverage
-- ✅ **Platform Verification**: Web, Android, iOS builds successful
+- ✅ **Unified Ticket Complete**: All implementation tasks marked [x] in docs/tickets/{branch-name}.md
+- ✅ **Platform Verification**: Web, Android, iOS builds successful and apps run
 - ✅ **Code Quality**: Clean Architecture compliance and quality standards met
 - ✅ **Documentation Updates**: Cross-references updated in relevant files
 - ✅ **Security Audit**: No security vulnerabilities or hardcoded secrets
+- ⏸️ **Tests**: Deferred until main app features are complete
 
-### Test Validation Requirements (MANDATORY)
-**NEW CRITICAL REQUIREMENT**: All test cases MUST be updated and passing before PR creation.
+### Platform Verification Requirements (FOCUS ON BUILD SUCCESS)
+**CURRENT PRIORITY**: Focus on main app implementation. Tests will be added later.
 
-**Test Categories That MUST Pass**:
-1. **Unit Tests**: All business logic and use cases (>80% coverage)
-2. **Widget Tests**: All UI components and interactions
-3. **Integration Tests**: Complete feature workflows
-4. **E2E Tests**: End-to-end user scenarios
-5. **Performance Tests**: All benchmarks and thresholds met
+**Platform Build Requirements**:
+1. **Web Build**: Must compile successfully
+2. **Android Build**: Must compile successfully
+3. **iOS Build**: Must compile successfully
+4. **App Execution**: App must launch and run on all platforms
+5. **Basic Functionality**: Core features must work
 
-**Test Execution Commands (Required before PR)**:
+**Platform Verification Commands (Required before PR)**:
 ```bash
-# MANDATORY: All tests must pass
-flutter test --coverage                         # >80% coverage required
-dart run build_runner build --delete-conflicting-outputs  # Update mocks
-flutter analyze                                 # No critical issues
-dart format --set-exit-if-changed .           # Code formatting
+# FOCUS: Platform builds must succeed
+flutter analyze                                 # No critical errors
+dart format .                                   # Code formatting
+dart run build_runner build --delete-conflicting-outputs  # Generate code
 flutter build web && flutter build apk && flutter build ios  # Platform builds
 ```
 
@@ -466,8 +465,8 @@ flutter run -d chrome --release         # ✅ Web app must launch and run
 flutter run -d android --release        # ✅ Android app must launch and run
 flutter run -d "iPhone Simulator" --release # ✅ iOS app must launch and run
 
-# 4. MANDATORY: Test Suite MUST pass
-flutter test                            # ✅ All tests must pass
+# 4. Platform Functionality Check
+# Tests will be added after main app implementation is complete
 ```
 
 #### Platform Verification Requirements
@@ -620,15 +619,12 @@ echo "================================================="
 - `cached_network_image` - Image caching
 - `flutter_svg` - Vector graphics
 
-### Testing
-- `flutter_test` - Widget and unit testing
-- `mockito` - Mocking for tests  
-- `golden_toolkit` - Golden file testing
-- `integration_test` - Integration testing
-- **TDD Framework** - Complete test automation infrastructure
-- **scripts/tdd-workflow.sh** - Automated Red-Green-Refactor workflow
-- **test_config.dart** - Centralized test configuration and utilities
-- **Coverage Reporting** - Automated lcov-based coverage generation
+### Testing (DEFERRED - FOCUS ON MAIN APP)
+- `flutter_test` - Widget and unit testing [Will be added later]
+- `mockito` - Mocking for tests [Will be added later]
+- `golden_toolkit` - Golden file testing [Will be added later]
+- `integration_test` - Integration testing [Will be added later]
+- **Note**: Test infrastructure will be implemented after main app features are complete
 
 ### Utilities
 - `uuid` - Unique identifiers
@@ -674,9 +670,9 @@ echo "================================================="
    ```
 
 2. **Implement**: Use Claude Code subagents to implement the ticket
-   - Follow TDD approach
+   - Focus on working functionality first
    - Use UI guidelines and centralized components
-   - Write comprehensive tests
+   - Platform builds must succeed
 
 3. **Commit**: Follow commit standards
    ```bash
@@ -700,11 +696,12 @@ echo "================================================="
 - Regular sync with `development` to avoid conflicts
 - Use issue assignments to prevent duplicate work
 
-### Platform Verification Strategy
+### Platform Verification Strategy (MAIN APP FOCUS)
 - **Build Verification**: Ensure all platforms compile successfully
 - **Basic Functionality**: Verify app launches and runs on all platforms
-- **Cross-Platform**: Test on Web, Android, and iOS
-- **Performance**: Basic app performance and responsiveness
+- **Cross-Platform**: Build and run on Web, Android, and iOS
+- **Feature Implementation**: Focus on core features working properly
+- **Tests**: Will be added after main functionality is complete
 
 ### Code Quality Guidelines
 
@@ -928,7 +925,7 @@ lib/shared/
 1. **Explore**: Read and understand existing code structure
 2. **Plan**: Create GitHub issue following standards (max 100 words) - see `docs/github_instruction.md`
 3. **Design**: Use UI guidelines and centralized components (defined in this file)
-4. **Test**: Write tests first following TDD approach - see `.claude/agents/testing-specialist.md`
+4. **Build**: Ensure platform builds succeed - focus on main app functionality
 5. **Code**: Implement with clear commit messages (`type(scope): description`) - see `docs/github_instruction.md`
 6. **Review**: Use Claude Code subagents with specific feedback - see `.claude/agents/code-reviewer.md`
 7. **Test E2E**: Run Playwright MCP tests for web platform

@@ -34,8 +34,8 @@ This guide provides everything you need to develop the Kahoot-style quiz app eff
 # Follows agent assignment logic from CLAUDE.md
 /project:implement-issue 11
 
-# When you need to run tests for a specific feature
-/project:run-tests authentication
+# When you need to verify platform builds
+/project:verify-platforms
 
 # When generating code structure
 /project:generate-code
@@ -50,18 +50,18 @@ This guide provides everything you need to develop the Kahoot-style quiz app eff
 - ✅ Includes quality metrics and next steps
 
 **Parallel Execution**: All tasks are now split across specialized sub-agents working simultaneously:
-- **Setup Issues**: flutter-architect + firebase-specialist + testing-specialist (ALL PARALLEL)
-- **Authentication**: firebase-specialist + flutter-architect + ui-designer + testing-specialist (ALL PARALLEL)
-- **UI Components**: ui-designer + flutter-architect + testing-specialist (ALL PARALLEL)
-- **Real-time Features**: firebase-specialist + performance-optimizer + flutter-architect + testing-specialist (ALL PARALLEL)
+- **Setup Issues**: flutter-architect + firebase-specialist (ALL PARALLEL)
+- **Authentication**: firebase-specialist + flutter-architect + ui-designer (ALL PARALLEL)
+- **UI Components**: ui-designer + flutter-architect (ALL PARALLEL)
+- **Real-time Features**: firebase-specialist + performance-optimizer + flutter-architect (ALL PARALLEL)
+- **Note**: Testing specialist work deferred until main app complete
 
-### **🧪 Testing & Quality**
+### **🏗️ Platform Verification & Quality**
 ```bash
-# Run comprehensive test suite
-flutter test
-
-# Run tests with coverage
-flutter test --coverage
+# Verify all platforms build
+flutter build web --release
+flutter build apk --release
+flutter build ios --release --no-codesign
 
 # Analyze code quality
 flutter analyze
@@ -96,7 +96,7 @@ firebase deploy
 - Issue #4: Firestore Database Schema ✅ COMPLETED
 - Issue #11: Firebase Configuration ✅ COMPLETED
 - Issue #12: Authentication System ✅ COMPLETED
-- Issue #17: Testing Framework ✅ COMPLETED
+- Issue #17: Testing Framework [DEFERRED - FOCUS ON MAIN APP]
 - Issue #18: Clean Architecture Foundation ✅ COMPLETED
 - Issue #19: Navigation System ✅ COMPLETED
 - Issue #20: Error Handling ✅ COMPLETED
@@ -126,14 +126,14 @@ firebase deploy
 # Issue #3: Development Tools and CI/CD ✅ COMPLETED
 # Issue #4: Firestore Database Schema ✅ COMPLETED
 # Issue #11: Firebase Configuration ✅ COMPLETED
-# Issue #17: Testing Framework ✅ COMPLETED
+# Issue #17: Testing Framework [DEFERRED - FOCUS ON MAIN APP]
 # Issue #18: Clean Architecture Foundation ✅ COMPLETED
 # Issue #19: Navigation System ✅ COMPLETED  
 # Issue #20: Error Handling ✅ COMPLETED
 
 # Foundation verification commands
 flutter analyze          # Should show minimal issues
-flutter test            # Core tests should pass
+flutter build web       # Web build should succeed
 firebase emulators:start # Should start successfully
 flutter run -d chrome   # Should launch web app
 ```
@@ -154,7 +154,7 @@ flutter run -d chrome   # Should launch web app
 # ✅ ALREADY COMPLETED: Issue #12 (Basic authentication system)
 
 # Verify enhanced authentication
-flutter test test/features/authentication/
+flutter build web && flutter build apk
 firebase emulators:start
 flutter run
 ```
@@ -163,7 +163,7 @@ flutter run
 - **Agent A (firebase-specialist)**: Issues #6, #7 (Domain & Data layers)
 - **Agent B (ui-designer)**: Issue #8 (Authentication UI enhancement)
 - **Agent C (firebase-specialist)**: Issues #9, #10 (Profile management & Security)
-- **Agent D (testing-specialist)**: Comprehensive authentication testing
+- **Testing**: [DEFERRED] Will be added after main app features complete
 
 ### **Phase 3: Core Quiz Features** ⏱️ *2-3 weeks* ⚠️ **READY TO START**
 
@@ -179,11 +179,11 @@ flutter run
 # Agent A (flutter-architect): Quiz creation business logic and architecture  
 # Agent B (ui-designer): Kahoot-style UI components and quiz interface
 # Agent C (firebase-specialist): Quiz data storage and real-time features
-# Agent D (testing-specialist): Quiz creation and UI component testing
+# Testing: [DEFERRED] Will be added after main app complete
 
-# Test quiz features
-flutter test test/features/quiz_creation/
-flutter test test/shared/widgets/
+# Verify quiz features build
+flutter build web
+flutter build apk
 firebase emulators:start
 flutter run
 ```
