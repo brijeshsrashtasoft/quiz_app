@@ -9,6 +9,7 @@ import 'package:mockito/mockito.dart';
 
 import 'package:quiz_app/core/utils/result.dart';
 import 'package:quiz_app/core/errors/failures.dart';
+import 'package:quiz_app/core/base/base_usecase.dart';
 import 'package:quiz_app/features/authentication/domain/entities/user_entity.dart';
 import 'package:quiz_app/features/authentication/domain/repositories/user_repository.dart';
 import 'package:quiz_app/features/authentication/domain/usecases/create_user_usecase.dart';
@@ -181,7 +182,8 @@ void main() {
         // Assert
         expect(result.isFailure, isTrue);
         expect(result.error?.userMessage, contains('Network'));
-        expect(result.error?.code, equals('network_timeout'));
+        final firestoreFailure = result.error as FirestoreFailure?;
+        expect(firestoreFailure?.code, equals('network_timeout'));
         verify(mockRepository.createUser(testUser)).called(1);
       });
     });

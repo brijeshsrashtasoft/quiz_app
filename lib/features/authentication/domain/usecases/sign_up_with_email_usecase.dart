@@ -2,19 +2,19 @@ import '../../../../core/base/base_usecase.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/utils/result.dart';
 import '../../../../core/utils/logger.dart';
-import '../entities/auth_entity.dart';
+import '../entities/user_entity.dart';
 import '../repositories/auth_repository.dart';
 
 /// Sign up with email and password use case
 /// Implements Clean Architecture use case pattern
 class SignUpWithEmailUseCase
-    extends BaseUseCase<AuthEntity, SignUpWithEmailParams> {
+    extends BaseUseCase<UserEntity, SignUpWithEmailParams> {
   final AuthRepository repository;
 
   SignUpWithEmailUseCase({required this.repository});
 
   @override
-  Future<Result<AuthEntity>> call(SignUpWithEmailParams params) async {
+  Future<Result<UserEntity>> call(SignUpWithEmailParams params) async {
     try {
       AppLogger.info('SignUpWithEmailUseCase: Validating input parameters');
 
@@ -29,24 +29,19 @@ class SignUpWithEmailUseCase
       );
 
       // Call repository to create user
-      final result = await repository.createUserWithEmailAndPassword(
+      final result = await repository.createUserWithEmailPassword(
         email: params.email,
         password: params.password,
+        name: params.displayName ?? '',
       );
 
       return result.when(
-        success: (authEntity) async {
+        success: (userEntity) async {
           AppLogger.info(
             'SignUpWithEmailUseCase: Sign up successful for ${params.email}',
           );
 
-          // Update profile with display name if provided
-          if (params.displayName != null) {
-            AppLogger.info('SignUpWithEmailUseCase: Updating display name');
-            await repository.updateUserProfile(displayName: params.displayName);
-          }
-
-          return Result.success(authEntity);
+          return Result.success(userEntity);
         },
         failure: (failure) {
           AppLogger.error(
@@ -68,13 +63,12 @@ class SignUpWithEmailUseCase
   }
 
   /// Validate input parameters
-  Result<AuthEntity> _validateParams(SignUpWithEmailParams params) {
+  Result<UserEntity> _validateParams(SignUpWithEmailParams params) {
     // Validate email format
     if (!_isValidEmail(params.email)) {
       return Result.failure(
         ValidationFailure(
           message: 'Please enter a valid email address',
-          code: 'invalid-email',
         ),
       );
     }
@@ -84,7 +78,6 @@ class SignUpWithEmailUseCase
       return Result.failure(
         ValidationFailure(
           message: 'Password must be at least 8 characters long',
-          code: 'weak-password',
         ),
       );
     }
@@ -95,12 +88,17 @@ class SignUpWithEmailUseCase
       return Result.failure(
         ValidationFailure(
           message: 'Display name must be between 1 and 100 characters',
-          code: 'invalid-display-name',
         ),
       );
     }
 
-    return const Result.success(null);
+    // Return success with dummy result for validation only
+    return Result.success(UserEntity(
+      id: '',
+      email: params.email,
+      name: params.displayName ?? '',
+      createdAt: DateTime.now(),
+    ));
   }
 
   /// Email validation helper

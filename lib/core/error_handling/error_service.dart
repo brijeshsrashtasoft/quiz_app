@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../errors/failures.dart';
-import '../errors/exceptions.dart';
 import '../utils/logger.dart';
 import '../utils/exception_mapper.dart';
 import '../../shared/widgets/feedback/snackbars.dart';

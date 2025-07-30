@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../firebase/firebase_core_config.dart';
 import '../utils/logger.dart';
-import '../utils/result.dart';
 
 /// Firebase initialization provider
 final firebaseInitializationProvider = FutureProvider<bool>((ref) async {

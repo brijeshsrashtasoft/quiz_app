@@ -79,9 +79,8 @@ void main() {
         expect(result.isFailure, isTrue);
         expect(result.failureOrNull, isA<ValidationFailure>());
         final failure = result.failureOrNull as ValidationFailure;
-        expect(failure.field, equals('email'));
-        expect(failure.code, equals('VALIDATION_EMAIL_REQUIRED'));
-        expect(failure.userMessage, equals('Email address is required'));
+        expect(failure.fieldErrors?['email'], equals('VALIDATION_EMAIL_REQUIRED'));
+        expect(failure.message, equals('Email address is required'));
       });
 
       test('should return validation failure when password is empty', () async {
@@ -95,9 +94,8 @@ void main() {
         expect(result.isFailure, isTrue);
         expect(result.failureOrNull, isA<ValidationFailure>());
         final failure = result.failureOrNull as ValidationFailure;
-        expect(failure.field, equals('password'));
-        expect(failure.code, equals('VALIDATION_PASSWORD_REQUIRED'));
-        expect(failure.userMessage, equals('Password is required'));
+        expect(failure.fieldErrors?['password'], equals('VALIDATION_PASSWORD_REQUIRED'));
+        expect(failure.message, equals('Password is required'));
       });
 
       test(
@@ -116,10 +114,9 @@ void main() {
           expect(result.isFailure, isTrue);
           expect(result.failureOrNull, isA<ValidationFailure>());
           final failure = result.failureOrNull as ValidationFailure;
-          expect(failure.field, equals('email'));
-          expect(failure.code, equals('VALIDATION_EMAIL_INVALID'));
+          expect(failure.fieldErrors?['email'], equals('VALIDATION_EMAIL_INVALID'));
           expect(
-            failure.userMessage,
+            failure.message,
             equals('Please enter a valid email address'),
           );
         },
@@ -164,8 +161,7 @@ void main() {
             );
             expect(result.failureOrNull, isA<ValidationFailure>());
             final failure = result.failureOrNull as ValidationFailure;
-            expect(failure.field, equals('email'));
-            expect(failure.code, equals('VALIDATION_EMAIL_INVALID'));
+            expect(failure.fieldErrors?['email'], equals('VALIDATION_EMAIL_INVALID'));
           }
         }
       });
@@ -242,8 +238,7 @@ void main() {
         expect(result.isFailure, isTrue);
         expect(result.failureOrNull, isA<ValidationFailure>());
         final failure = result.failureOrNull as ValidationFailure;
-        expect(failure.field, equals('email'));
-        expect(failure.code, equals('VALIDATION_EMAIL_REQUIRED'));
+        expect(failure.fieldErrors?['email'], equals('VALIDATION_EMAIL_REQUIRED'));
       });
 
       test('should preserve email case sensitivity', () async {

@@ -1,3 +1,5 @@
+library auth_usecases;
+
 /// Authentication use cases exports
 /// Following CLAUDE.md Clean Architecture patterns
 ///
@@ -9,6 +11,7 @@ export 'sign_in_usecase.dart';
 export 'sign_up_usecase.dart';
 export 'sign_out_usecase.dart';
 export 'reset_password_usecase.dart';
+export 'sign_in_with_google_usecase.dart';
 
 // User profile management use cases
 export 'get_current_user_usecase.dart';
@@ -19,3 +22,11 @@ export 'delete_account_usecase.dart';
 export 'create_user_usecase.dart';
 export 'get_user_by_id_usecase.dart';
 export 'watch_user_usecase.dart';
+export 'watch_auth_state_usecase.dart';
+
+// Security and validation use cases
+export 'validate_password_usecase.dart';
+export 'send_email_verification_usecase.dart';
+export 'reauthenticate_usecase.dart';
+export 'update_password_usecase.dart';
+export 'update_email_usecase.dart';
