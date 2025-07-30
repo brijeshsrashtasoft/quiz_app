@@ -61,15 +61,13 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage>
       ),
     );
 
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0.0, 0.2),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: AppAnimations.easeOut,
-      ),
-    );
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0.0, 0.2), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _animationController,
+            curve: AppAnimations.easeOut,
+          ),
+        );
 
     _animationController.forward();
   }
@@ -77,7 +75,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage>
   void _initializeFormData() {
     final authState = ref.read(authStateProvider);
     final user = authState.value?.user;
-    
+
     if (user != null) {
       _displayNameController.text = user.displayName ?? '';
       _usernameController.text = user.username ?? '';
@@ -115,35 +113,36 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage>
     if (!_hasUnsavedChanges) return true;
 
     return await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Unsaved Changes', style: AppTextStyles.sectionHeader),
-        content: Text(
-          'You have unsaved changes. Are you sure you want to leave?',
-          style: AppTextStyles.bodyText,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(
-              'Stay',
-              style: AppTextStyles.buttonText.copyWith(
-                color: AppColors.coolGray,
-              ),
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('Unsaved Changes', style: AppTextStyles.sectionHeader),
+            content: Text(
+              'You have unsaved changes. Are you sure you want to leave?',
+              style: AppTextStyles.bodyText,
             ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(
-              'Leave',
-              style: AppTextStyles.buttonText.copyWith(
-                color: AppColors.error,
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: Text(
+                  'Stay',
+                  style: AppTextStyles.buttonText.copyWith(
+                    color: AppColors.coolGray,
+                  ),
+                ),
               ),
-            ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: Text(
+                  'Leave',
+                  style: AppTextStyles.buttonText.copyWith(
+                    color: AppColors.error,
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-    ) ?? false;
+        ) ??
+        false;
   }
 
   Future<void> _saveProfile() async {
@@ -167,7 +166,9 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage>
           SnackBar(
             content: Text(
               'Profile updated successfully!',
-              style: AppTextStyles.bodyText.copyWith(color: AppColors.pureWhite),
+              style: AppTextStyles.bodyText.copyWith(
+                color: AppColors.pureWhite,
+              ),
             ),
             backgroundColor: AppColors.success,
             behavior: SnackBarBehavior.floating,
@@ -189,7 +190,9 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage>
           SnackBar(
             content: Text(
               'Failed to update profile: $e',
-              style: AppTextStyles.bodyText.copyWith(color: AppColors.pureWhite),
+              style: AppTextStyles.bodyText.copyWith(
+                color: AppColors.pureWhite,
+              ),
             ),
             backgroundColor: AppColors.error,
             behavior: SnackBarBehavior.floating,
@@ -333,9 +336,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage>
         children: [
           Text(
             'Profile Photo',
-            style: AppTextStyles.sectionHeader.copyWith(
-              fontSize: 20,
-            ),
+            style: AppTextStyles.sectionHeader.copyWith(fontSize: 20),
           ),
 
           const SizedBox(height: AppSpacing.spacingL),
@@ -381,9 +382,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage>
         children: [
           Text(
             'Profile Information',
-            style: AppTextStyles.sectionHeader.copyWith(
-              fontSize: 20,
-            ),
+            style: AppTextStyles.sectionHeader.copyWith(fontSize: 20),
           ),
 
           const SizedBox(height: AppSpacing.spacingL),
@@ -453,7 +452,9 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage>
                 }
               },
               style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: AppSpacing.spacingM),
+                padding: const EdgeInsets.symmetric(
+                  vertical: AppSpacing.spacingM,
+                ),
                 side: BorderSide(color: AppColors.coolGray),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),

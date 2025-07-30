@@ -94,19 +94,26 @@ void main() {
         print('DEBUG: expiredSession.expiresAt: ${expiredSession.expiresAt}');
         print('DEBUG: DateTime.now(): ${DateTime.now()}');
         print('DEBUG: expiredSession.isExpired: ${expiredSession.isExpired}');
-        print('DEBUG: expiredSession.isNearExpiration: ${expiredSession.isNearExpiration}');
+        print(
+          'DEBUG: expiredSession.isNearExpiration: ${expiredSession.isNearExpiration}',
+        );
         print('DEBUG: expiredSession.isActive: ${expiredSession.isActive}');
-        print('DEBUG: expiredSession.needsRefresh: ${expiredSession.needsRefresh}');
-        
+        print(
+          'DEBUG: expiredSession.needsRefresh: ${expiredSession.needsRefresh}',
+        );
+
         // Act & Assert
         expect(validSession.needsRefresh, isFalse);
         expect(nearExpirationSession.needsRefresh, isTrue);
-        
-        // Expired sessions shouldn't need refresh 
+
+        // Expired sessions shouldn't need refresh
         // Note: expired sessions actually DO have isNearExpiration = true because
         // "30 minutes from now" is still after their expiration time
         // But since they're expired, the business logic should not require refresh
-        expect(expiredSession.needsRefresh, expiredSession.isNearExpiration && expiredSession.isActive);
+        expect(
+          expiredSession.needsRefresh,
+          expiredSession.isNearExpiration && expiredSession.isActive,
+        );
       });
 
       test('should return correct session status', () {
@@ -114,7 +121,7 @@ void main() {
         expect(validSession.status, equals('active'));
         expect(expiredSession.status, equals('expired'));
         expect(nearExpirationSession.status, equals('expiring'));
-        
+
         final inactiveSession = validSession.copyWith(isActive: false);
         expect(inactiveSession.status, equals('inactive'));
       });
@@ -165,24 +172,27 @@ void main() {
     });
 
     group('Performance Tests', () {
-      test('should perform session operations within performance requirements', () {
-        // Arrange
-        final stopwatch = Stopwatch()..start();
+      test(
+        'should perform session operations within performance requirements',
+        () {
+          // Arrange
+          final stopwatch = Stopwatch()..start();
 
-        // Act - Perform multiple operations
-        for (int i = 0; i < 1000; i++) {
-          validSession.isExpired;
-          validSession.isNearExpiration;
-          validSession.needsRefresh;
-          validSession.status;
-          validSession.durationInMinutes;
-        }
+          // Act - Perform multiple operations
+          for (int i = 0; i < 1000; i++) {
+            validSession.isExpired;
+            validSession.isNearExpiration;
+            validSession.needsRefresh;
+            validSession.status;
+            validSession.durationInMinutes;
+          }
 
-        stopwatch.stop();
+          stopwatch.stop();
 
-        // Assert - Should complete within 200ms (CLAUDE.md requirement)
-        expect(stopwatch.elapsedMilliseconds, lessThan(200));
-      });
+          // Assert - Should complete within 200ms (CLAUDE.md requirement)
+          expect(stopwatch.elapsedMilliseconds, lessThan(200));
+        },
+      );
 
       test('should handle concurrent session access', () {
         // Act & Assert - Multiple property accesses should be thread-safe
@@ -201,20 +211,26 @@ void main() {
         expect(validSession.userId.isNotEmpty, isTrue);
         expect(validSession.deviceId.isNotEmpty, isTrue);
         expect(validSession.createdAt.isBefore(validSession.expiresAt), isTrue);
-        expect(validSession.createdAt.isBefore(DateTime.now().add(const Duration(seconds: 1))), isTrue);
+        expect(
+          validSession.createdAt.isBefore(
+            DateTime.now().add(const Duration(seconds: 1)),
+          ),
+          isTrue,
+        );
       });
 
       test('should handle memory-efficient operations', () {
         // Act - Create multiple sessions and ensure they don't leak memory
-        final sessions = List.generate(1000, (index) => validSession.copyWith(
-          id: 'session-$index',
-        ));
+        final sessions = List.generate(
+          1000,
+          (index) => validSession.copyWith(id: 'session-$index'),
+        );
 
         // Assert
         expect(sessions.length, equals(1000));
         expect(sessions.first.id, equals('session-0'));
         expect(sessions.last.id, equals('session-999'));
-        
+
         // Verify that each session maintains its properties correctly
         for (final session in sessions) {
           expect(session.userId, equals(validSession.userId));
@@ -265,14 +281,17 @@ void main() {
       test('should maintain immutability with copyWith', () {
         // Arrange
         final originalId = validSession.id;
-        
+
         // Act
         final copiedSession = validSession.copyWith(id: 'new-id');
 
         // Assert
         expect(validSession.id, equals(originalId)); // Original unchanged
         expect(copiedSession.id, equals('new-id')); // Copy changed
-        expect(validSession.userId, equals(copiedSession.userId)); // Other fields preserved
+        expect(
+          validSession.userId,
+          equals(copiedSession.userId),
+        ); // Other fields preserved
       });
     });
   });

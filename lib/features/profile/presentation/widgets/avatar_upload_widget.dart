@@ -141,7 +141,7 @@ class _AvatarUploadWidgetState extends State<AvatarUploadWidget>
     setState(() {
       _selectedImage = null;
     });
-    
+
     // Call callback to remove image from server
     if (widget.onImageRemoved != null) {
       widget.onImageRemoved!();

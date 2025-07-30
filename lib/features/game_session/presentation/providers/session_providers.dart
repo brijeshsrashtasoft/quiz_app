@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/utils/logger.dart';
+import '../../../../core/errors/failures.dart';
 import '../../domain/entities/game_session_entity.dart';
 import '../../data/models/game_session_model.dart';
 import '../../data/repositories/game_session_repository_impl.dart';
@@ -18,7 +19,7 @@ final gameSessionRepositoryProvider = Provider<GameSessionRepositoryImpl>((
   ref,
 ) {
   final dataSource = ref.read(gameSessionDataSourceProvider);
-  return GameSessionRepositoryImpl(dataSource);
+  return GameSessionRepositoryImpl(dataSource: dataSource);
 });
 
 /// Stream provider for watching a specific game session
@@ -45,7 +46,7 @@ final gameSessionStreamProvider =
               failure: (error) {
                 AppLogger.error(
                   'Failed to watch session: $sessionId',
-                  error.exception,
+                  error,
                 );
                 return null;
               },
@@ -72,7 +73,7 @@ final gameSessionProvider = FutureProvider.family<GameSessionEntity?, String>((
       return session.toEntity();
     },
     failure: (error) {
-      AppLogger.error('Failed to fetch session: $sessionId', error.exception);
+      AppLogger.error('Failed to fetch session: $sessionId', error);
       return null;
     },
   );
@@ -100,7 +101,7 @@ final gameSessionByPinProvider =
         failure: (error) {
           AppLogger.error(
             'Failed to find session for PIN: $pin',
-            error.exception,
+            error,
           );
           return null;
         },
@@ -125,7 +126,7 @@ final activeGameSessionsProvider = FutureProvider<List<GameSessionEntity>>((
       return sessions.map((s) => s.toEntity()).toList();
     },
     failure: (error) {
-      AppLogger.error('Failed to fetch active sessions', error.exception);
+      AppLogger.error('Failed to fetch active sessions', error);
       return [];
     },
   );
@@ -157,7 +158,7 @@ final userHostedSessionsProvider = FutureProvider<List<GameSessionEntity>>((
       return sessions.map((s) => s.toEntity()).toList();
     },
     failure: (error) {
-      AppLogger.error('Failed to fetch hosted sessions', error.exception);
+      AppLogger.error('Failed to fetch hosted sessions', error);
       return [];
     },
   );
@@ -184,7 +185,7 @@ final pinAvailabilityProvider = FutureProvider.family<bool, String>((
     failure: (error) {
       AppLogger.error(
         'Failed to check PIN availability: $pin',
-        error.exception,
+        error,
       );
       return false;
     },
@@ -327,9 +328,9 @@ class SessionStateNotifier extends StateNotifier<SessionState> {
         failure: (error) {
           AppLogger.error(
             'Failed to join session: $sessionId',
-            error.exception,
+            error,
           );
-          state = SessionState.error(error.message);
+          state = SessionState.error(error.userMessage);
         },
       );
     } catch (e) {
@@ -365,9 +366,9 @@ class SessionStateNotifier extends StateNotifier<SessionState> {
         failure: (error) {
           AppLogger.error(
             'Failed to leave session: $sessionId',
-            error.exception,
+            error,
           );
-          state = SessionState.error(error.message);
+          state = SessionState.error(error.userMessage);
         },
       );
     } catch (e) {
@@ -394,9 +395,9 @@ class SessionStateNotifier extends StateNotifier<SessionState> {
         failure: (error) {
           AppLogger.error(
             'Failed to start session: $sessionId',
-            error.exception,
+            error,
           );
-          state = SessionState.error(error.message);
+          state = SessionState.error(error.userMessage);
         },
       );
     } catch (e) {
@@ -432,9 +433,9 @@ class SessionStateNotifier extends StateNotifier<SessionState> {
         failure: (error) {
           AppLogger.error(
             'Failed to update score for session: $sessionId',
-            error.exception,
+            error,
           );
-          state = SessionState.error(error.message);
+          state = SessionState.error(error.userMessage);
         },
       );
     } catch (e) {
@@ -462,9 +463,9 @@ class SessionStateNotifier extends StateNotifier<SessionState> {
         failure: (error) {
           AppLogger.error(
             'Failed to update question for session: $sessionId',
-            error.exception,
+            error,
           );
-          state = SessionState.error(error.message);
+          state = SessionState.error(error.userMessage);
         },
       );
     } catch (e) {
@@ -573,46 +574,4 @@ extension SessionStateX on SessionState {
   };
 }
 
-/// Extension to convert model to entity
-extension GameSessionModelToEntity on GameSessionModel {
-  GameSessionEntity toEntity() {
-    return GameSessionEntity(
-      id: id,
-      quizId: quizId,
-      hostId: hostId,
-      pin: pin,
-      status: status,
-      players: players.map((key, value) => MapEntry(key, value.toEntity())),
-      currentQuestionIndex: currentQuestionIndex,
-      createdAt: createdAt,
-      settings: settings?.toEntity(),
-      startedAt: startedAt,
-      completedAt: completedAt,
-    );
-  }
-}
-
-/// Extension for player model to entity conversion
-extension PlayerModelToEntity on PlayerModel {
-  PlayerEntity toEntity() {
-    return PlayerEntity(
-      name: name,
-      joinedAt: joinedAt,
-      score: score,
-      answers: answers,
-      isReady: isReady,
-    );
-  }
-}
-
-/// Extension for game session settings model to entity conversion
-extension GameSessionSettingsModelToEntity on GameSessionSettingsModel {
-  GameSessionSettings toEntity() {
-    return GameSessionSettings(
-      maxPlayers: maxPlayers,
-      showCorrectAnswers: showCorrectAnswers,
-      shuffleQuestions: shuffleQuestions,
-      allowReplay: allowReplay,
-    );
-  }
-}
+// Extensions removed as they already exist in the models file

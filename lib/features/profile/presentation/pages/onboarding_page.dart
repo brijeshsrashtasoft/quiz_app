@@ -61,21 +61,16 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
     );
 
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _fadeController,
-        curve: AppAnimations.easeInOut,
-      ),
+      CurvedAnimation(parent: _fadeController, curve: AppAnimations.easeInOut),
     );
 
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(1.0, 0.0),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _slideController,
-        curve: AppAnimations.easeOut,
-      ),
-    );
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(1.0, 0.0), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _slideController,
+            curve: AppAnimations.easeOut,
+          ),
+        );
 
     _fadeController.forward();
     _slideController.forward();
@@ -143,7 +138,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
         return true; // Welcome step, always can proceed
       case 1:
         return _displayNameController.text.isNotEmpty &&
-               _usernameController.text.isNotEmpty;
+            _usernameController.text.isNotEmpty;
       case 2:
         return true; // Avatar step, optional
       case 3:
@@ -167,7 +162,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
                 children: [
                   // Progress Header
                   _buildProgressHeader(),
-                  
+
                   // Page Content
                   Expanded(
                     child: AnimatedBuilder(
@@ -189,7 +184,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
                       },
                     ),
                   ),
-                  
+
                   // Navigation Footer
                   _buildNavigationFooter(),
                 ],
@@ -223,14 +218,16 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
               ),
             ],
           ),
-          
+
           const SizedBox(height: AppSpacing.spacingM),
-          
+
           // Progress Bar
           LinearProgressIndicator(
             value: (_currentStep + 1) / _totalSteps,
             backgroundColor: AppColors.lightGray,
-            valueColor: const AlwaysStoppedAnimation<Color>(AppColors.vibrantPurple),
+            valueColor: const AlwaysStoppedAnimation<Color>(
+              AppColors.vibrantPurple,
+            ),
             borderRadius: BorderRadius.circular(4),
           ),
         ],
@@ -265,9 +262,9 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
               color: AppColors.pureWhite,
             ),
           ),
-          
+
           const SizedBox(height: AppSpacing.sectionSpacing),
-          
+
           Text(
             'Welcome to Quiz Master!',
             style: AppTextStyles.gameTitle.copyWith(
@@ -275,19 +272,17 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
             ),
             textAlign: TextAlign.center,
           ),
-          
+
           const SizedBox(height: AppSpacing.spacingL),
-          
+
           Text(
             'Let\'s set up your profile and get you ready to play amazing quizzes with friends!',
-            style: AppTextStyles.bodyText.copyWith(
-              fontSize: 18,
-            ),
+            style: AppTextStyles.bodyText.copyWith(fontSize: 18),
             textAlign: TextAlign.center,
           ),
-          
+
           const SizedBox(height: AppSpacing.sectionSpacing),
-          
+
           // Features Preview
           _buildFeaturesList(),
         ],
@@ -343,7 +338,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: AppSpacing.spacingL),
-          
+
           Text(
             'Tell us about yourself',
             style: AppTextStyles.gameTitle.copyWith(
@@ -351,33 +346,25 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
               color: AppColors.charcoal,
             ),
           ),
-          
+
           const SizedBox(height: AppSpacing.spacingM),
-          
+
           Text(
             'This information will help other players identify you in games.',
-            style: AppTextStyles.bodyText.copyWith(
-              color: AppColors.coolGray,
-            ),
+            style: AppTextStyles.bodyText.copyWith(color: AppColors.coolGray),
           ),
-          
+
           const SizedBox(height: AppSpacing.sectionSpacing),
-          
-          DisplayNameFieldWidget(
-            controller: _displayNameController,
-          ),
-          
+
+          DisplayNameFieldWidget(controller: _displayNameController),
+
           const SizedBox(height: AppSpacing.spacingL),
-          
-          UsernameFieldWidget(
-            controller: _usernameController,
-          ),
-          
+
+          UsernameFieldWidget(controller: _usernameController),
+
           const SizedBox(height: AppSpacing.spacingL),
-          
-          BioFieldWidget(
-            controller: _bioController,
-          ),
+
+          BioFieldWidget(controller: _bioController),
         ],
       ),
     );
@@ -389,7 +376,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
       child: Column(
         children: [
           const SizedBox(height: AppSpacing.spacingL),
-          
+
           Text(
             'Choose your avatar',
             style: AppTextStyles.gameTitle.copyWith(
@@ -398,19 +385,17 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
             ),
             textAlign: TextAlign.center,
           ),
-          
+
           const SizedBox(height: AppSpacing.spacingM),
-          
+
           Text(
             'Add a profile photo to personalize your account. You can always change this later.',
-            style: AppTextStyles.bodyText.copyWith(
-              color: AppColors.coolGray,
-            ),
+            style: AppTextStyles.bodyText.copyWith(color: AppColors.coolGray),
             textAlign: TextAlign.center,
           ),
-          
+
           const SizedBox(height: AppSpacing.sectionSpacing),
-          
+
           AvatarUploadWidget(
             onImageSelected: (image) {
               setState(() {
@@ -422,9 +407,9 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
                 ? _displayNameController.text[0].toUpperCase()
                 : 'U',
           ),
-          
+
           const SizedBox(height: AppSpacing.spacingL),
-          
+
           if (_avatarImage == null)
             Text(
               'Tap the avatar to add a photo',
@@ -434,9 +419,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
           else
             Text(
               'Great! Tap again to change your photo',
-              style: AppTextStyles.caption.copyWith(
-                color: AppColors.success,
-              ),
+              style: AppTextStyles.caption.copyWith(color: AppColors.success),
               textAlign: TextAlign.center,
             ),
         ],
@@ -451,7 +434,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: AppSpacing.spacingL),
-          
+
           Text(
             'Set your preferences',
             style: AppTextStyles.gameTitle.copyWith(
@@ -459,18 +442,16 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
               color: AppColors.charcoal,
             ),
           ),
-          
+
           const SizedBox(height: AppSpacing.spacingM),
-          
+
           Text(
             'Customize your experience with these settings. You can change them anytime in settings.',
-            style: AppTextStyles.bodyText.copyWith(
-              color: AppColors.coolGray,
-            ),
+            style: AppTextStyles.bodyText.copyWith(color: AppColors.coolGray),
           ),
-          
+
           const SizedBox(height: AppSpacing.sectionSpacing),
-          
+
           _buildPreferenceToggle(
             'Email Notifications',
             'Get notified about game invites and updates',
@@ -479,7 +460,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
             _emailNotifications,
             (value) => setState(() => _emailNotifications = value),
           ),
-          
+
           _buildPreferenceToggle(
             'Push Notifications',
             'Receive notifications on your device',
@@ -488,7 +469,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
             _pushNotifications,
             (value) => setState(() => _pushNotifications = value),
           ),
-          
+
           _buildPreferenceToggle(
             'Public Profile',
             'Allow others to view your profile and stats',
@@ -540,15 +521,11 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
               color: iconColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(
-              icon,
-              color: iconColor,
-              size: 20,
-            ),
+            child: Icon(icon, color: iconColor, size: 20),
           ),
-          
+
           const SizedBox(width: AppSpacing.spacingM),
-          
+
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -560,19 +537,12 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
                   ),
                 ),
                 const SizedBox(height: AppSpacing.spacingXS),
-                Text(
-                  description,
-                  style: AppTextStyles.caption,
-                ),
+                Text(description, style: AppTextStyles.caption),
               ],
             ),
           ),
-          
-          Switch(
-            value: value,
-            onChanged: onChanged,
-            activeColor: iconColor,
-          ),
+
+          Switch(value: value, onChanged: onChanged, activeColor: iconColor),
         ],
       ),
     );
@@ -604,7 +574,9 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
               child: OutlinedButton(
                 onPressed: _previousStep,
                 style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.spacingM),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: AppSpacing.spacingM,
+                  ),
                   side: BorderSide(color: AppColors.coolGray),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -624,7 +596,9 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
           Expanded(
             flex: _currentStep > 0 ? 2 : 1,
             child: PrimaryButton(
-              text: _currentStep == _totalSteps - 1 ? 'Get Started!' : 'Continue',
+              text: _currentStep == _totalSteps - 1
+                  ? 'Get Started!'
+                  : 'Continue',
               onPressed: _canProceed() ? _nextStep : null,
               backgroundColor: _canProceed()
                   ? AppColors.vibrantPurple

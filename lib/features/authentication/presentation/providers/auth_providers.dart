@@ -535,4 +535,71 @@ class AuthService {
 
   /// Get current user ID
   String? get currentUserId => AuthConfig.currentUserId;
+
+  /// Send email verification
+  Future<Result<void>> sendEmailVerification() async {
+    try {
+      final currentUser = AuthConfig.currentUser;
+      if (currentUser == null) {
+        return Result.failure(
+          Failure.authFailure(
+            message: 'No user signed in',
+            code: 'AUTH_NO_USER',
+          ),
+        );
+      }
+
+      AppLogger.firebase(
+        'AuthService',
+        'Sending email verification to: ${currentUser.email}',
+      );
+      
+      await currentUser.sendEmailVerification();
+      
+      AppLogger.firebase('AuthService', 'Email verification sent successfully');
+      return const Result.success(null);
+    } catch (e) {
+      AppLogger.error('Email verification failed', e);
+      return Result.failure(
+        Failure.authFailure(
+          message: 'Email verification failed: ${e.toString()}',
+          code: 'AUTH_EMAIL_VERIFICATION_ERROR',
+        ),
+      );
+    }
+  }
+
+  /// Reload user data
+  Future<Result<void>> reloadUser() async {
+    try {
+      final currentUser = AuthConfig.currentUser;
+      if (currentUser == null) {
+        return Result.failure(
+          Failure.authFailure(
+            message: 'No user signed in',
+            code: 'AUTH_NO_USER',
+          ),
+        );
+      }
+
+      await currentUser.reload();
+      
+      AppLogger.firebase('AuthService', 'User data reloaded');
+      return const Result.success(null);
+    } catch (e) {
+      AppLogger.error('User reload failed', e);
+      return Result.failure(
+        Failure.authFailure(
+          message: 'User reload failed: ${e.toString()}',
+          code: 'AUTH_RELOAD_ERROR',
+        ),
+      );
+    }
+  }
+
+  /// Check if email is verified
+  bool get isEmailVerified {
+    final currentUser = AuthConfig.currentUser;
+    return currentUser?.emailVerified ?? false;
+  }
 }

@@ -37,7 +37,9 @@ class DeleteAvatarUseCase extends BaseUseCase<void, NoParams> {
       final startTime = DateTime.now();
 
       // Step 1: Delete avatar from Firebase Storage
-      final deleteResult = await storageDataSource.deleteAvatar(currentUser.uid);
+      final deleteResult = await storageDataSource.deleteAvatar(
+        currentUser.uid,
+      );
       if (deleteResult.isFailure) {
         AppLogger.error(
           'Failed to delete avatar from storage: ${currentUser.uid}',

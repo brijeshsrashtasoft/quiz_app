@@ -20,7 +20,8 @@ class EnhancedProfilePage extends ConsumerStatefulWidget {
   const EnhancedProfilePage({super.key});
 
   @override
-  ConsumerState<EnhancedProfilePage> createState() => _EnhancedProfilePageState();
+  ConsumerState<EnhancedProfilePage> createState() =>
+      _EnhancedProfilePageState();
 }
 
 class _EnhancedProfilePageState extends ConsumerState<EnhancedProfilePage>
@@ -52,15 +53,13 @@ class _EnhancedProfilePageState extends ConsumerState<EnhancedProfilePage>
       ),
     );
 
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0.0, 0.3),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: AppAnimations.easeOut,
-      ),
-    );
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0.0, 0.3), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _animationController,
+            curve: AppAnimations.easeOut,
+          ),
+        );
 
     _animationController.forward();
   }
@@ -96,38 +95,39 @@ class _EnhancedProfilePageState extends ConsumerState<EnhancedProfilePage>
 
   Future<bool> _showSignOutDialog() async {
     return await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        title: Text('Sign Out', style: AppTextStyles.sectionHeader),
-        content: Text(
-          'Are you sure you want to sign out?',
-          style: AppTextStyles.bodyText,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(
-              'Cancel',
-              style: AppTextStyles.buttonText.copyWith(
-                color: AppColors.coolGray,
-              ),
+          context: context,
+          builder: (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
             ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(
-              'Sign Out',
-              style: AppTextStyles.buttonText.copyWith(
-                color: AppColors.error,
-              ),
+            title: Text('Sign Out', style: AppTextStyles.sectionHeader),
+            content: Text(
+              'Are you sure you want to sign out?',
+              style: AppTextStyles.bodyText,
             ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: Text(
+                  'Cancel',
+                  style: AppTextStyles.buttonText.copyWith(
+                    color: AppColors.coolGray,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: Text(
+                  'Sign Out',
+                  style: AppTextStyles.buttonText.copyWith(
+                    color: AppColors.error,
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-    ) ?? false;
+        ) ??
+        false;
   }
 
   @override
@@ -169,7 +169,7 @@ class _EnhancedProfilePageState extends ConsumerState<EnhancedProfilePage>
       slivers: [
         // Collapsible Header
         _buildSliverAppBar(user),
-        
+
         // Content
         SliverToBoxAdapter(
           child: Column(
@@ -228,9 +228,7 @@ class _EnhancedProfilePageState extends ConsumerState<EnhancedProfilePage>
           ),
         ),
         background: Container(
-          decoration: const BoxDecoration(
-            gradient: AppColors.purpleGradient,
-          ),
+          decoration: const BoxDecoration(gradient: AppColors.purpleGradient),
           child: SafeArea(
             child: Padding(
               padding: AppSpacing.allL,
@@ -238,7 +236,7 @@ class _EnhancedProfilePageState extends ConsumerState<EnhancedProfilePage>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const SizedBox(height: AppSpacing.spacingXL),
-                  
+
                   // Profile Avatar
                   AvatarUploadWidget(
                     currentImageUrl: user.photoURL,
@@ -277,7 +275,7 @@ class _EnhancedProfilePageState extends ConsumerState<EnhancedProfilePage>
                     ),
 
                   const SizedBox(height: AppSpacing.spacingXS),
-                  
+
                   Text(
                     user.email,
                     style: AppTextStyles.caption.copyWith(
@@ -344,7 +342,10 @@ class _EnhancedProfilePageState extends ConsumerState<EnhancedProfilePage>
               value: 'signout',
               child: ListTile(
                 leading: Icon(Icons.logout, color: AppColors.error),
-                title: Text('Sign Out', style: TextStyle(color: AppColors.error)),
+                title: Text(
+                  'Sign Out',
+                  style: TextStyle(color: AppColors.error),
+                ),
                 contentPadding: EdgeInsets.zero,
               ),
             ),
@@ -362,9 +363,7 @@ class _EnhancedProfilePageState extends ConsumerState<EnhancedProfilePage>
         children: [
           Text(
             'Quick Actions',
-            style: AppTextStyles.sectionHeader.copyWith(
-              fontSize: 20,
-            ),
+            style: AppTextStyles.sectionHeader.copyWith(fontSize: 20),
           ),
 
           const SizedBox(height: AppSpacing.spacingM),
@@ -457,9 +456,7 @@ class _EnhancedProfilePageState extends ConsumerState<EnhancedProfilePage>
         children: [
           Text(
             'Account Management',
-            style: AppTextStyles.sectionHeader.copyWith(
-              fontSize: 20,
-            ),
+            style: AppTextStyles.sectionHeader.copyWith(fontSize: 20),
           ),
 
           const SizedBox(height: AppSpacing.spacingM),
@@ -470,7 +467,9 @@ class _EnhancedProfilePageState extends ConsumerState<EnhancedProfilePage>
                 SnackBar(
                   content: Text(
                     'Data export started. You will receive an email when ready.',
-                    style: AppTextStyles.bodyText.copyWith(color: AppColors.pureWhite),
+                    style: AppTextStyles.bodyText.copyWith(
+                      color: AppColors.pureWhite,
+                    ),
                   ),
                   backgroundColor: AppColors.turquoise,
                   behavior: SnackBarBehavior.floating,
@@ -488,7 +487,9 @@ class _EnhancedProfilePageState extends ConsumerState<EnhancedProfilePage>
                 SnackBar(
                   content: Text(
                     'Game data cleared successfully.',
-                    style: AppTextStyles.bodyText.copyWith(color: AppColors.pureWhite),
+                    style: AppTextStyles.bodyText.copyWith(
+                      color: AppColors.pureWhite,
+                    ),
                   ),
                   backgroundColor: AppColors.success,
                   behavior: SnackBarBehavior.floating,
@@ -506,7 +507,9 @@ class _EnhancedProfilePageState extends ConsumerState<EnhancedProfilePage>
                 SnackBar(
                   content: Text(
                     'Account deletion initiated.',
-                    style: AppTextStyles.bodyText.copyWith(color: AppColors.pureWhite),
+                    style: AppTextStyles.bodyText.copyWith(
+                      color: AppColors.pureWhite,
+                    ),
                   ),
                   backgroundColor: AppColors.error,
                   behavior: SnackBarBehavior.floating,

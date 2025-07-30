@@ -77,6 +77,10 @@ extension FailureX on Failure {
       validationFailure: (message, fieldErrors) => null,
       cacheFailure: (message) => null,
       unknownFailure: (message) => null,
+      securityFailure: (message, code) => code,
+      biometricFailure: (message, code) => code,
+      sessionFailure: (message, code) => code,
+      deviceFailure: (message, code) => code,
     );
   }
 }

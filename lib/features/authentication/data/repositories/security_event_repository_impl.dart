@@ -5,6 +5,7 @@ import '../../domain/entities/security_event_entity.dart';
 import '../../domain/entities/user_session.dart' show SecuritySettings;
 import '../../domain/repositories/security_repository.dart';
 import '../datasources/session_firestore_datasource.dart';
+import '../models/session_models.dart' show SecuritySettingsModel;
 
 /// Implementation of ISecurityRepository using Firestore
 /// Following CLAUDE.md Clean Architecture and free tier patterns
@@ -55,10 +56,15 @@ class SecurityEventRepositoryImpl implements ISecurityRepository {
 
       return Result.success(securityEventEntity);
     } catch (e) {
-      AppLogger.error('SecurityEventRepository: Failed to log security event', e);
-      return Result.failure(Failure.securityFailure(
-        message: 'Failed to log security event: ${e.toString()}',
-      ));
+      AppLogger.error(
+        'SecurityEventRepository: Failed to log security event',
+        e,
+      );
+      return Result.failure(
+        Failure.securityFailure(
+          message: 'Failed to log security event: ${e.toString()}',
+        ),
+      );
     }
   }
 
@@ -87,7 +93,7 @@ class SecurityEventRepositoryImpl implements ISecurityRepository {
           (sev) => sev.toString().split('.').last == model.severity,
           orElse: () => SecurityEventSeverity.low,
         );
-        
+
         return SecurityEventEntity(
           id: model.eventId,
           userId: model.userId,
@@ -103,15 +109,22 @@ class SecurityEventRepositoryImpl implements ISecurityRepository {
 
       // Apply date filter if specified
       final filteredEvents = endDate != null
-          ? securityEvents.where((event) => event.timestamp.isBefore(endDate)).toList()
+          ? securityEvents
+                .where((event) => event.timestamp.isBefore(endDate))
+                .toList()
           : securityEvents;
 
       return Result.success(filteredEvents);
     } catch (e) {
-      AppLogger.error('SecurityEventRepository: Failed to get security events', e);
-      return Result.failure(Failure.securityFailure(
-        message: 'Failed to get security events: ${e.toString()}',
-      ));
+      AppLogger.error(
+        'SecurityEventRepository: Failed to get security events',
+        e,
+      );
+      return Result.failure(
+        Failure.securityFailure(
+          message: 'Failed to get security events: ${e.toString()}',
+        ),
+      );
     }
   }
 
@@ -130,9 +143,9 @@ class SecurityEventRepositoryImpl implements ISecurityRepository {
 
       // Simple suspicious activity detection
       final suspiciousEvents = eventModels.where((model) {
-        return model.eventType == 'loginFailure' || 
-               model.eventType == 'multipleFailedAttempts' ||
-               model.severity == 'critical';
+        return model.eventType == 'loginFailure' ||
+            model.eventType == 'multipleFailedAttempts' ||
+            model.severity == 'critical';
       }).toList();
 
       // Convert to domain entities
@@ -145,7 +158,7 @@ class SecurityEventRepositoryImpl implements ISecurityRepository {
           (sev) => sev.toString().split('.').last == model.severity,
           orElse: () => SecurityEventSeverity.medium,
         );
-        
+
         return SecurityEventEntity(
           id: model.eventId,
           userId: model.userId,
@@ -161,38 +174,53 @@ class SecurityEventRepositoryImpl implements ISecurityRepository {
 
       return Result.success(securityEvents);
     } catch (e) {
-      AppLogger.error('SecurityEventRepository: Failed to detect suspicious activity', e);
-      return Result.failure(Failure.securityFailure(
-        message: 'Failed to detect suspicious activity: ${e.toString()}',
-      ));
+      AppLogger.error(
+        'SecurityEventRepository: Failed to detect suspicious activity',
+        e,
+      );
+      return Result.failure(
+        Failure.securityFailure(
+          message: 'Failed to detect suspicious activity: ${e.toString()}',
+        ),
+      );
     }
   }
 
   // Implement remaining ISecurityRepository methods
   @override
-  Future<Result<List<SecurityEventEntity>>> getRecentEvents(String userId) async {
+  Future<Result<List<SecurityEventEntity>>> getRecentEvents(
+    String userId,
+  ) async {
     final since = DateTime.now().subtract(const Duration(hours: 24));
     return getUserEvents(userId: userId, startDate: since, limit: 50);
   }
 
   @override
-  Future<Result<List<SecurityEventEntity>>> getCriticalEvents(String userId) async {
+  Future<Result<List<SecurityEventEntity>>> getCriticalEvents(
+    String userId,
+  ) async {
     try {
       final result = await getUserEvents(userId: userId, limit: 100);
       return result.when(
         success: (events) {
-          final criticalEvents = events.where((e) => e.severity == SecurityEventSeverity.critical).toList();
+          final criticalEvents = events
+              .where((e) => e.severity == SecurityEventSeverity.critical)
+              .toList();
           return Result.success(criticalEvents);
         },
         failure: (failure) => Result.failure(failure),
       );
     } catch (e) {
-      return Result.failure(Failure.securityFailure(message: 'Failed to get critical events: $e'));
+      return Result.failure(
+        Failure.securityFailure(message: 'Failed to get critical events: $e'),
+      );
     }
   }
 
   @override
-  Future<Result<List<SecurityEventEntity>>> getUnresolvedEvents(String userId) async {
+  Future<Result<List<SecurityEventEntity>>> getUnresolvedEvents(
+    String userId,
+  ) async {
     try {
       final result = await getUserEvents(userId: userId, limit: 100);
       return result.when(
@@ -203,7 +231,9 @@ class SecurityEventRepositoryImpl implements ISecurityRepository {
         failure: (failure) => Result.failure(failure),
       );
     } catch (e) {
-      return Result.failure(Failure.securityFailure(message: 'Failed to get unresolved events: $e'));
+      return Result.failure(
+        Failure.securityFailure(message: 'Failed to get unresolved events: $e'),
+      );
     }
   }
 
@@ -213,9 +243,11 @@ class SecurityEventRepositoryImpl implements ISecurityRepository {
     required String resolvedBy,
   }) async {
     // For now, return unimplemented - would need to update the data source
-    return Result.failure(Failure.securityFailure(
-      message: 'Event resolution not implemented in data source yet',
-    ));
+    return Result.failure(
+      Failure.securityFailure(
+        message: 'Event resolution not implemented in data source yet',
+      ),
+    );
   }
 
   @override
@@ -228,13 +260,17 @@ class SecurityEventRepositoryImpl implements ISecurityRepository {
       final result = await getUserEvents(userId: userId, limit: limit ?? 50);
       return result.when(
         success: (events) {
-          final filteredEvents = events.where((e) => e.type == eventType).toList();
+          final filteredEvents = events
+              .where((e) => e.type == eventType)
+              .toList();
           return Result.success(filteredEvents);
         },
         failure: (failure) => Result.failure(failure),
       );
     } catch (e) {
-      return Result.failure(Failure.securityFailure(message: 'Failed to get events by type: $e'));
+      return Result.failure(
+        Failure.securityFailure(message: 'Failed to get events by type: $e'),
+      );
     }
   }
 
@@ -248,13 +284,17 @@ class SecurityEventRepositoryImpl implements ISecurityRepository {
       final result = await getUserEvents(userId: userId, limit: limit ?? 50);
       return result.when(
         success: (events) {
-          final filteredEvents = events.where((e) => e.deviceId == deviceId).toList();
+          final filteredEvents = events
+              .where((e) => e.deviceId == deviceId)
+              .toList();
           return Result.success(filteredEvents);
         },
         failure: (failure) => Result.failure(failure),
       );
     } catch (e) {
-      return Result.failure(Failure.securityFailure(message: 'Failed to get events by device: $e'));
+      return Result.failure(
+        Failure.securityFailure(message: 'Failed to get events by device: $e'),
+      );
     }
   }
 
@@ -268,13 +308,17 @@ class SecurityEventRepositoryImpl implements ISecurityRepository {
       final result = await getUserEvents(userId: userId, limit: limit ?? 50);
       return result.when(
         success: (events) {
-          final filteredEvents = events.where((e) => e.sessionId == sessionId).toList();
+          final filteredEvents = events
+              .where((e) => e.sessionId == sessionId)
+              .toList();
           return Result.success(filteredEvents);
         },
         failure: (failure) => Result.failure(failure),
       );
     } catch (e) {
-      return Result.failure(Failure.securityFailure(message: 'Failed to get events by session: $e'));
+      return Result.failure(
+        Failure.securityFailure(message: 'Failed to get events by session: $e'),
+      );
     }
   }
 
@@ -285,16 +329,26 @@ class SecurityEventRepositoryImpl implements ISecurityRepository {
   }) async {
     try {
       final since = DateTime.now().subtract(timeWindow);
-      final result = await getUserEvents(userId: userId, startDate: since, limit: 100);
+      final result = await getUserEvents(
+        userId: userId,
+        startDate: since,
+        limit: 100,
+      );
       return result.when(
         success: (events) {
-          final failureCount = events.where((e) => e.type == SecurityEventType.loginFailure).length;
+          final failureCount = events
+              .where((e) => e.type == SecurityEventType.loginFailure)
+              .length;
           return Result.success(failureCount);
         },
         failure: (failure) => Result.failure(failure),
       );
     } catch (e) {
-      return Result.failure(Failure.securityFailure(message: 'Failed to get auth failure count: $e'));
+      return Result.failure(
+        Failure.securityFailure(
+          message: 'Failed to get auth failure count: $e',
+        ),
+      );
     }
   }
 
@@ -304,13 +358,20 @@ class SecurityEventRepositoryImpl implements ISecurityRepository {
     required Duration timeWindow,
   }) async {
     try {
-      final result = await getAuthFailureCount(userId: userId, timeWindow: timeWindow);
+      final result = await getAuthFailureCount(
+        userId: userId,
+        timeWindow: timeWindow,
+      );
       return result.when(
         success: (count) => Result.success(count > 0),
         failure: (failure) => Result.failure(failure),
       );
     } catch (e) {
-      return Result.failure(Failure.securityFailure(message: 'Failed to check recent failed logins: $e'));
+      return Result.failure(
+        Failure.securityFailure(
+          message: 'Failed to check recent failed logins: $e',
+        ),
+      );
     }
   }
 
@@ -324,23 +385,33 @@ class SecurityEventRepositoryImpl implements ISecurityRepository {
         success: (events) {
           final countMap = <SecurityEventSeverity, int>{};
           for (final severity in SecurityEventSeverity.values) {
-            countMap[severity] = events.where((e) => e.severity == severity).length;
+            countMap[severity] = events
+                .where((e) => e.severity == severity)
+                .length;
           }
           return Result.success(countMap);
         },
         failure: (failure) => Result.failure(failure),
       );
     } catch (e) {
-      return Result.failure(Failure.securityFailure(message: 'Failed to count events by severity: $e'));
+      return Result.failure(
+        Failure.securityFailure(
+          message: 'Failed to count events by severity: $e',
+        ),
+      );
     }
   }
 
   @override
-  Future<Result<int>> cleanupOldEvents({required Duration retentionPeriod}) async {
+  Future<Result<int>> cleanupOldEvents({
+    required Duration retentionPeriod,
+  }) async {
     // Not implemented in data source - would require batch operations
-    return Result.failure(Failure.securityFailure(
-      message: 'Event cleanup not implemented in data source yet',
-    ));
+    return Result.failure(
+      Failure.securityFailure(
+        message: 'Event cleanup not implemented in data source yet',
+      ),
+    );
   }
 
   @override
@@ -351,11 +422,15 @@ class SecurityEventRepositoryImpl implements ISecurityRepository {
         success: (events) {
           final summary = SecuritySummary(
             totalEvents: events.length,
-            criticalEvents: events.where((e) => e.severity == SecurityEventSeverity.critical).length,
+            criticalEvents: events
+                .where((e) => e.severity == SecurityEventSeverity.critical)
+                .length,
             unresolvedEvents: events.where((e) => !e.resolved).length,
             recentEvents: events.where((e) => e.isRecent).length,
             lastLoginAt: events.isNotEmpty ? events.first.timestamp : null,
-            failedLoginAttempts: events.where((e) => e.type == SecurityEventType.loginFailure).length,
+            failedLoginAttempts: events
+                .where((e) => e.type == SecurityEventType.loginFailure)
+                .length,
             trustedDevices: 0, // Would need device repository
             activeSessions: 0, // Would need session repository
           );
@@ -364,37 +439,60 @@ class SecurityEventRepositoryImpl implements ISecurityRepository {
         failure: (failure) => Result.failure(failure),
       );
     } catch (e) {
-      return Result.failure(Failure.securityFailure(message: 'Failed to get security summary: $e'));
+      return Result.failure(
+        Failure.securityFailure(message: 'Failed to get security summary: $e'),
+      );
     }
   }
 
   @override
   Stream<Result<SecurityEventEntity>> watchCriticalEvents(String userId) {
     // Not implemented in data source yet - would need Firestore streams
-    return Stream.value(Result.failure(Failure.securityFailure(
-      message: 'Critical event watching not implemented in data source yet',
-    )));
+    return Stream.value(
+      Result.failure(
+        Failure.securityFailure(
+          message: 'Critical event watching not implemented in data source yet',
+        ),
+      ),
+    );
   }
 
   @override
   Future<Result<List<SecurityEventEntity>>> bulkLogEvents(
     List<SecurityEventEntity> events,
   ) async {
-    // Not implemented in data source yet - would need batch operations  
-    return Result.failure(Failure.securityFailure(
-      message: 'Bulk event logging not implemented in data source yet',
-    ));
+    // Not implemented in data source yet - would need batch operations
+    return Result.failure(
+      Failure.securityFailure(
+        message: 'Bulk event logging not implemented in data source yet',
+      ),
+    );
   }
 
   @override
   Future<Result<SecuritySettings?>> getSecuritySettings(String userId) async {
     try {
-      final settings = await _dataSource.getSecuritySettings(userId);
+      final settingsModel = await _dataSource.getSecuritySettings(userId);
+      if (settingsModel == null) {
+        return Result.success(null);
+      }
+      // Convert SecuritySettingsModel to SecuritySettings
+      final settings = SecuritySettings(
+        userId: settingsModel.userId,
+        twoFactorEnabled: settingsModel.twoFactorEnabled,
+        sessionTimeoutEnabled: settingsModel.sessionTimeoutEnabled,
+        sessionTimeoutMinutes: settingsModel.sessionTimeoutMinutes,
+        maxActiveSessions: settingsModel.maxActiveSessions,
+        suspiciousActivityAlerts: settingsModel.suspiciousActivityAlerts,
+        newDeviceAlerts: settingsModel.newDeviceAlerts,
+        trustedDevices: settingsModel.trustedDevices,
+        lastUpdated: settingsModel.lastUpdated,
+      );
       return Result.success(settings);
     } catch (e) {
-      return Result.failure(Failure.securityFailure(
-        message: 'Failed to get security settings: $e',
-      ));
+      return Result.failure(
+        Failure.securityFailure(message: 'Failed to get security settings: $e'),
+      );
     }
   }
 
@@ -403,24 +501,54 @@ class SecurityEventRepositoryImpl implements ISecurityRepository {
     SecuritySettings settings,
   ) async {
     try {
-      await _dataSource.updateSecuritySettings(settings);
+      // Convert SecuritySettings to SecuritySettingsModel
+      final settingsModel = SecuritySettingsModel(
+        userId: settings.userId,
+        twoFactorEnabled: settings.twoFactorEnabled,
+        sessionTimeoutEnabled: settings.sessionTimeoutEnabled,
+        sessionTimeoutMinutes: settings.sessionTimeoutMinutes,
+        maxActiveSessions: settings.maxActiveSessions,
+        suspiciousActivityAlerts: settings.suspiciousActivityAlerts,
+        newDeviceAlerts: settings.newDeviceAlerts,
+        trustedDevices: settings.trustedDevices,
+        lastUpdated: settings.lastUpdated ?? DateTime.now(),
+      );
+      
+      await _dataSource.updateSecuritySettings(settingsModel);
       return Result.success(settings);
     } catch (e) {
-      return Result.failure(Failure.securityFailure(
-        message: 'Failed to update security settings: $e',
-      ));
+      return Result.failure(
+        Failure.securityFailure(
+          message: 'Failed to update security settings: $e',
+        ),
+      );
     }
   }
 
   @override
   Future<Result<SecuritySettings>> createDefaultSettings(String userId) async {
     try {
-      final settings = await _dataSource.createDefaultSecuritySettings(userId);
-      return Result.success(settings);
+      // Create default settings
+      final defaultSettings = SecuritySettings(
+        userId: userId,
+        twoFactorEnabled: false,
+        sessionTimeoutEnabled: true,
+        sessionTimeoutMinutes: 30,
+        maxActiveSessions: 5,
+        suspiciousActivityAlerts: true,
+        newDeviceAlerts: true,
+        trustedDevices: [],
+        lastUpdated: DateTime.now(),
+      );
+      
+      // Use updateSecuritySettings to save the default settings
+      return await updateSecuritySettings(defaultSettings);
     } catch (e) {
-      return Result.failure(Failure.securityFailure(
-        message: 'Failed to create default security settings: $e',
-      ));
+      return Result.failure(
+        Failure.securityFailure(
+          message: 'Failed to create default security settings: $e',
+        ),
+      );
     }
   }
 }

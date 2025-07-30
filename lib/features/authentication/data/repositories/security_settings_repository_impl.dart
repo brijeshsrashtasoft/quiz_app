@@ -10,14 +10,17 @@ import '../models/session_models.dart';
 class SecuritySettingsRepositoryImpl implements SecuritySettingsRepository {
   final SessionFirestoreDataSource _dataSource;
 
-  SecuritySettingsRepositoryImpl({required SessionFirestoreDataSource dataSource})
-    : _dataSource = dataSource;
+  SecuritySettingsRepositoryImpl({
+    required SessionFirestoreDataSource dataSource,
+  }) : _dataSource = dataSource;
 
   @override
-  Future<Result<domain_entities.SecuritySettings?>> getSecuritySettings(String userId) async {
+  Future<Result<domain_entities.SecuritySettings?>> getSecuritySettings(
+    String userId,
+  ) async {
     try {
       final settingsModel = await _dataSource.getSecuritySettings(userId);
-      
+
       if (settingsModel == null) {
         return Result.success(null);
       }
@@ -34,10 +37,15 @@ class SecuritySettingsRepositoryImpl implements SecuritySettingsRepository {
 
       return Result.success(securitySettings);
     } catch (e) {
-      AppLogger.error('SecuritySettingsRepository: Failed to get security settings', e);
-      return Result.failure(Failure.securityFailure(
-        message: 'Failed to get security settings: ${e.toString()}',
-      ));
+      AppLogger.error(
+        'SecuritySettingsRepository: Failed to get security settings',
+        e,
+      );
+      return Result.failure(
+        Failure.securityFailure(
+          message: 'Failed to get security settings: ${e.toString()}',
+        ),
+      );
     }
   }
 
@@ -59,7 +67,9 @@ class SecuritySettingsRepositoryImpl implements SecuritySettingsRepository {
         lastUpdated: DateTime.now(),
       );
 
-      final updatedModel = await _dataSource.updateSecuritySettings(settingsModel);
+      final updatedModel = await _dataSource.updateSecuritySettings(
+        settingsModel,
+      );
 
       // Convert back to domain entity
       final updatedSettings = domain_entities.SecuritySettings(
@@ -75,26 +85,34 @@ class SecuritySettingsRepositoryImpl implements SecuritySettingsRepository {
 
       return Result.success(updatedSettings);
     } catch (e) {
-      AppLogger.error('SecuritySettingsRepository: Failed to update security settings', e);
-      return Result.failure(Failure.securityFailure(
-        message: 'Failed to update security settings: ${e.toString()}',
-      ));
+      AppLogger.error(
+        'SecuritySettingsRepository: Failed to update security settings',
+        e,
+      );
+      return Result.failure(
+        Failure.securityFailure(
+          message: 'Failed to update security settings: ${e.toString()}',
+        ),
+      );
     }
   }
 
   @override
-  Future<Result<domain_entities.SecuritySettings>> createDefaultSettings(String userId) async {
+  Future<Result<domain_entities.SecuritySettings>> createDefaultSettings(
+    String userId,
+  ) async {
     return createDefaultSecuritySettings(userId);
   }
 
-  Future<Result<domain_entities.SecuritySettings>> createDefaultSecuritySettings(String userId) async {
+  Future<Result<domain_entities.SecuritySettings>>
+  createDefaultSecuritySettings(String userId) async {
     try {
       // Create default settings
       final defaultSettings = domain_entities.SecuritySettings(
         userId: userId,
         sessionTimeoutMinutes: 30,
         maxActiveSessions: 5,
-        twoFactorEnabled: false, // Default to false for better UX  
+        twoFactorEnabled: false, // Default to false for better UX
         suspiciousActivityAlerts: true,
         newDeviceAlerts: true,
         trustedDevices: [],
@@ -103,15 +121,23 @@ class SecuritySettingsRepositoryImpl implements SecuritySettingsRepository {
 
       return await updateSecuritySettings(defaultSettings);
     } catch (e) {
-      AppLogger.error('SecuritySettingsRepository: Failed to create default settings', e);
-      return Result.failure(Failure.securityFailure(
-        message: 'Failed to create default security settings: ${e.toString()}',
-      ));
+      AppLogger.error(
+        'SecuritySettingsRepository: Failed to create default settings',
+        e,
+      );
+      return Result.failure(
+        Failure.securityFailure(
+          message:
+              'Failed to create default security settings: ${e.toString()}',
+        ),
+      );
     }
   }
 
   @override
-  Stream<Result<domain_entities.SecuritySettings?>> watchSecuritySettings(String userId) {
+  Stream<Result<domain_entities.SecuritySettings?>> watchSecuritySettings(
+    String userId,
+  ) {
     try {
       // This would require implementation in the data source
       throw UnimplementedError(
@@ -119,11 +145,16 @@ class SecuritySettingsRepositoryImpl implements SecuritySettingsRepository {
         'This would require Firestore streams implementation.',
       );
     } catch (e) {
-      AppLogger.error('SecuritySettingsRepository: Failed to setup settings stream', e);
+      AppLogger.error(
+        'SecuritySettingsRepository: Failed to setup settings stream',
+        e,
+      );
       return Stream.value(
-        Result.failure(Failure.securityFailure(
-          message: 'Failed to watch security settings: ${e.toString()}',
-        )),
+        Result.failure(
+          Failure.securityFailure(
+            message: 'Failed to watch security settings: ${e.toString()}',
+          ),
+        ),
       );
     }
   }
@@ -164,8 +195,16 @@ class SecuritySettings {
 
 /// Temporary SecuritySettingsRepository interface until proper one is created
 abstract class SecuritySettingsRepository {
-  Future<Result<domain_entities.SecuritySettings?>> getSecuritySettings(String userId);
-  Future<Result<domain_entities.SecuritySettings>> updateSecuritySettings(domain_entities.SecuritySettings settings);
-  Future<Result<domain_entities.SecuritySettings>> createDefaultSettings(String userId);
-  Stream<Result<domain_entities.SecuritySettings?>> watchSecuritySettings(String userId);
+  Future<Result<domain_entities.SecuritySettings?>> getSecuritySettings(
+    String userId,
+  );
+  Future<Result<domain_entities.SecuritySettings>> updateSecuritySettings(
+    domain_entities.SecuritySettings settings,
+  );
+  Future<Result<domain_entities.SecuritySettings>> createDefaultSettings(
+    String userId,
+  );
+  Stream<Result<domain_entities.SecuritySettings?>> watchSecuritySettings(
+    String userId,
+  );
 }

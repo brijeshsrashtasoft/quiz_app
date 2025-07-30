@@ -300,8 +300,10 @@ extension UserProfileModelX on UserProfileModel {
       if (bio != null) 'bio': bio,
       if (stats != null) 'stats': stats!.toFirestore(),
       if (preferences != null) 'preferences': preferences!.toFirestore(),
-      if (privacySettings != null) 'privacySettings': privacySettings!.toFirestore(),
-      if (onboardingStatus != null) 'onboardingStatus': onboardingStatus!.toFirestore(),
+      if (privacySettings != null)
+        'privacySettings': privacySettings!.toFirestore(),
+      if (onboardingStatus != null)
+        'onboardingStatus': onboardingStatus!.toFirestore(),
     };
   }
 }

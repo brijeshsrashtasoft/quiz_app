@@ -56,15 +56,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
       ),
     );
 
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0.0, 0.2),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: AppAnimations.easeOut,
-      ),
-    );
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0.0, 0.2), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _animationController,
+            curve: AppAnimations.easeOut,
+          ),
+        );
 
     _animationController.forward();
   }
@@ -260,18 +258,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
       icon: Icons.manage_accounts,
       iconColor: AppColors.coralRed,
       children: [
-        ExportDataActionWidget(
-          onExportData: _exportData,
-        ),
-        ClearDataActionWidget(
-          onClearData: _clearData,
-        ),
-        DeactivateAccountActionWidget(
-          onDeactivateAccount: _deactivateAccount,
-        ),
-        DeleteAccountActionWidget(
-          onDeleteAccount: _deleteAccount,
-        ),
+        ExportDataActionWidget(onExportData: _exportData),
+        ClearDataActionWidget(onClearData: _clearData),
+        DeactivateAccountActionWidget(onDeactivateAccount: _deactivateAccount),
+        DeleteAccountActionWidget(onDeleteAccount: _deleteAccount),
       ],
     );
   }
@@ -287,9 +277,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
         ),
         backgroundColor: AppColors.turquoise,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }
@@ -304,9 +292,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
         ),
         backgroundColor: AppColors.success,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }
@@ -321,12 +307,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
         ),
         backgroundColor: AppColors.warning,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
-    
+
     // Navigate to login after deactivation
     context.go(RouteConstants.login);
   }
@@ -341,12 +325,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
         ),
         backgroundColor: AppColors.error,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
-    
+
     // Navigate to login after deletion
     context.go(RouteConstants.login);
   }
@@ -403,11 +385,7 @@ class _SettingsSection extends StatelessWidget {
                     color: iconColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Icon(
-                    icon,
-                    color: iconColor,
-                    size: 20,
-                  ),
+                  child: Icon(icon, color: iconColor, size: 20),
                 ),
                 const SizedBox(width: AppSpacing.spacingM),
                 Expanded(
@@ -426,9 +404,7 @@ class _SettingsSection extends StatelessWidget {
           // Section Content
           Padding(
             padding: const EdgeInsets.all(AppSpacing.spacingM),
-            child: Column(
-              children: children,
-            ),
+            child: Column(children: children),
           ),
         ],
       ),

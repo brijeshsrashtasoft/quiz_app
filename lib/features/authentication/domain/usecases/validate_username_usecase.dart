@@ -6,7 +6,8 @@ import '../repositories/user_repository.dart';
 
 /// Use case for validating username and checking uniqueness
 /// Following CLAUDE.md Clean Architecture patterns
-class ValidateUsernameUseCase extends BaseUseCase<bool, ValidateUsernameParams> {
+class ValidateUsernameUseCase
+    extends BaseUseCase<bool, ValidateUsernameParams> {
   final UserRepository userRepository;
 
   ValidateUsernameUseCase({required this.userRepository});
@@ -29,8 +30,10 @@ class ValidateUsernameUseCase extends BaseUseCase<bool, ValidateUsernameParams> 
       // Step 2: Check uniqueness by searching for users with this name
       // Note: This is a simplified implementation. In production,
       // consider using a dedicated username field with unique constraints
-      final searchResult = await userRepository.searchUsersByName(params.username);
-      
+      final searchResult = await userRepository.searchUsersByName(
+        params.username,
+      );
+
       if (searchResult.isFailure) {
         AppLogger.error(
           'Failed to search for existing usernames',
@@ -40,7 +43,7 @@ class ValidateUsernameUseCase extends BaseUseCase<bool, ValidateUsernameParams> 
       }
 
       final existingUsers = searchResult.dataOrNull!;
-      
+
       // Check if any user has exactly this username (case-insensitive)
       final isUnique = !existingUsers.any(
         (user) => user.name.toLowerCase() == params.username.toLowerCase(),
@@ -53,10 +56,9 @@ class ValidateUsernameUseCase extends BaseUseCase<bool, ValidateUsernameParams> 
         );
         return Result.failure(
           Failure.validationFailure(
-            message: 'This username is already taken. Please choose a different one.',
-            fieldErrors: {
-              'username': 'Username already exists',
-            },
+            message:
+                'This username is already taken. Please choose a different one.',
+            fieldErrors: {'username': 'Username already exists'},
           ),
         );
       }
@@ -88,9 +90,7 @@ class ValidateUsernameUseCase extends BaseUseCase<bool, ValidateUsernameParams> 
       return Result.failure(
         Failure.validationFailure(
           message: 'Username cannot be empty',
-          fieldErrors: {
-            'username': 'Please enter a username',
-          },
+          fieldErrors: {'username': 'Please enter a username'},
         ),
       );
     }
@@ -124,52 +124,73 @@ class ValidateUsernameUseCase extends BaseUseCase<bool, ValidateUsernameParams> 
     if (!validUsernameRegex.hasMatch(trimmedUsername)) {
       return Result.failure(
         Failure.validationFailure(
-          message: 'Username can only contain letters, numbers, underscores, and hyphens',
-          fieldErrors: {
-            'username': 'Invalid characters in username',
-          },
+          message:
+              'Username can only contain letters, numbers, underscores, and hyphens',
+          fieldErrors: {'username': 'Invalid characters in username'},
         ),
       );
     }
 
     // Check that username doesn't start or end with special characters
-    if (trimmedUsername.startsWith('_') || 
-        trimmedUsername.startsWith('-') || 
-        trimmedUsername.endsWith('_') || 
+    if (trimmedUsername.startsWith('_') ||
+        trimmedUsername.startsWith('-') ||
+        trimmedUsername.endsWith('_') ||
         trimmedUsername.endsWith('-')) {
       return Result.failure(
         Failure.validationFailure(
           message: 'Username cannot start or end with underscore or hyphen',
-          fieldErrors: {
-            'username': 'Username format is invalid',
-          },
+          fieldErrors: {'username': 'Username format is invalid'},
         ),
       );
     }
 
     // Check for reserved usernames
     const reservedUsernames = [
-      'admin', 'administrator', 'root', 'system', 'user', 'guest',
-      'test', 'null', 'undefined', 'api', 'www', 'ftp', 'mail',
-      'support', 'help', 'info', 'contact', 'about', 'privacy',
-      'terms', 'service', 'security', 'moderator', 'mod',
+      'admin',
+      'administrator',
+      'root',
+      'system',
+      'user',
+      'guest',
+      'test',
+      'null',
+      'undefined',
+      'api',
+      'www',
+      'ftp',
+      'mail',
+      'support',
+      'help',
+      'info',
+      'contact',
+      'about',
+      'privacy',
+      'terms',
+      'service',
+      'security',
+      'moderator',
+      'mod',
     ];
 
     if (reservedUsernames.contains(trimmedUsername.toLowerCase())) {
       return Result.failure(
         Failure.validationFailure(
           message: 'This username is reserved. Please choose a different one.',
-          fieldErrors: {
-            'username': 'Username is reserved',
-          },
+          fieldErrors: {'username': 'Username is reserved'},
         ),
       );
     }
 
     // Check for inappropriate patterns
     final inappropriatePatterns = [
-      'admin', 'administrator', 'moderator', 'support',
-      'official', 'verified', 'staff', 'employee',
+      'admin',
+      'administrator',
+      'moderator',
+      'support',
+      'official',
+      'verified',
+      'staff',
+      'employee',
     ];
 
     for (final pattern in inappropriatePatterns) {
@@ -177,9 +198,7 @@ class ValidateUsernameUseCase extends BaseUseCase<bool, ValidateUsernameParams> 
         return Result.failure(
           Failure.validationFailure(
             message: 'Username cannot contain reserved words',
-            fieldErrors: {
-              'username': 'Contains restricted terms',
-            },
+            fieldErrors: {'username': 'Contains restricted terms'},
           ),
         );
       }

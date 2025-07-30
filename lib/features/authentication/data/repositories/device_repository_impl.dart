@@ -12,9 +12,11 @@ class DeviceRepositoryImpl implements IDeviceRepository {
   final SessionFirestoreDataSource _dataSource;
   final Uuid _uuid;
 
-  DeviceRepositoryImpl({required SessionFirestoreDataSource dataSource, Uuid? uuid})
-    : _dataSource = dataSource,
-      _uuid = uuid ?? const Uuid();
+  DeviceRepositoryImpl({
+    required SessionFirestoreDataSource dataSource,
+    Uuid? uuid,
+  }) : _dataSource = dataSource,
+       _uuid = uuid ?? const Uuid();
 
   @override
   Future<Result<DeviceEntity>> registerDevice({
@@ -35,7 +37,7 @@ class DeviceRepositoryImpl implements IDeviceRepository {
         platform: platform,
         fcmToken: null,
       );
-      
+
       // Convert UserDevice to DeviceEntity
       final deviceEntity = DeviceEntity(
         id: userDevice.deviceId,
@@ -43,8 +45,8 @@ class DeviceRepositoryImpl implements IDeviceRepository {
         deviceName: userDevice.deviceName,
         platform: userDevice.platform,
         osVersion: osVersion,
-        trustLevel: userDevice.trustLevel == 'trusted' 
-            ? DeviceTrustLevel.trusted 
+        trustLevel: userDevice.trustLevel == 'trusted'
+            ? DeviceTrustLevel.trusted
             : DeviceTrustLevel.untrusted,
         registeredAt: userDevice.firstSeenAt,
         lastSeenAt: userDevice.lastSeenAt,
@@ -53,7 +55,7 @@ class DeviceRepositoryImpl implements IDeviceRepository {
         isCurrentDevice: !userDevice.isRevoked,
         metadata: metadata,
       );
-      
+
       return Result.success(deviceEntity);
     } catch (e) {
       AppLogger.error('DeviceRepository: Failed to register device', e);
@@ -86,25 +88,29 @@ class DeviceRepositoryImpl implements IDeviceRepository {
   Future<Result<List<DeviceEntity>>> getUserDevices(String userId) async {
     try {
       final userDevices = await _dataSource.getUserDevices(userId);
-      
+
       // Convert UserDevice list to DeviceEntity list
-      final deviceEntities = userDevices.map((userDevice) => DeviceEntity(
-        id: userDevice.deviceId,
-        userId: userDevice.userId,
-        deviceName: userDevice.deviceName,
-        platform: userDevice.platform,
-        osVersion: '1.0.0', // UserDevice doesn't have osVersion
-        trustLevel: userDevice.trustLevel == 'trusted' 
-            ? DeviceTrustLevel.trusted 
-            : DeviceTrustLevel.untrusted,
-        registeredAt: userDevice.firstSeenAt,
-        lastSeenAt: userDevice.lastSeenAt,
-        deviceModel: userDevice.deviceType,
-        fingerprint: userDevice.deviceId,
-        isCurrentDevice: !userDevice.isRevoked,
-        metadata: userDevice.deviceFingerprint,
-      )).toList();
-      
+      final deviceEntities = userDevices
+          .map(
+            (userDevice) => DeviceEntity(
+              id: userDevice.deviceId,
+              userId: userDevice.userId,
+              deviceName: userDevice.deviceName,
+              platform: userDevice.platform,
+              osVersion: '1.0.0', // UserDevice doesn't have osVersion
+              trustLevel: userDevice.trustLevel == 'trusted'
+                  ? DeviceTrustLevel.trusted
+                  : DeviceTrustLevel.untrusted,
+              registeredAt: userDevice.firstSeenAt,
+              lastSeenAt: userDevice.lastSeenAt,
+              deviceModel: userDevice.deviceType,
+              fingerprint: userDevice.deviceId,
+              isCurrentDevice: !userDevice.isRevoked,
+              metadata: userDevice.deviceFingerprint,
+            ),
+          )
+          .toList();
+
       return Result.success(deviceEntities);
     } catch (e) {
       AppLogger.error('DeviceRepository: Failed to get user devices', e);

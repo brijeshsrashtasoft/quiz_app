@@ -52,7 +52,8 @@ class CreateSessionParams {
 }
 
 /// Use case for getting active sessions for a user
-class GetActiveSessionsUseCase extends BaseUseCase<List<SessionEntity>, String> {
+class GetActiveSessionsUseCase
+    extends BaseUseCase<List<SessionEntity>, String> {
   final ISessionRepository repository;
 
   GetActiveSessionsUseCase({required this.repository});
@@ -213,7 +214,9 @@ class LogSecurityEventEntityUseCase
   LogSecurityEventEntityUseCase({required this.repository});
 
   @override
-  Future<Result<SecurityEventEntity>> call(LogSecurityEventEntityParams params) async {
+  Future<Result<SecurityEventEntity>> call(
+    LogSecurityEventEntityParams params,
+  ) async {
     return await repository.logEvent(
       userId: params.userId,
       eventType: params.eventType,
@@ -229,8 +232,8 @@ class LogSecurityEventEntityUseCase
 
 class LogSecurityEventEntityParams {
   final String userId;
-  final String eventType;
-  final String severity;
+  final SecurityEventType eventType;
+  final SecurityEventSeverity severity;
   final String description;
   final String? deviceId;
   final String? ipAddress;
@@ -251,7 +254,8 @@ class LogSecurityEventEntityParams {
 
 /// Use case for getting user security events
 class GetUserSecurityEventEntitysUseCase
-    extends BaseUseCase<List<SecurityEventEntity>, GetSecurityEventEntitysParams> {
+    extends
+        BaseUseCase<List<SecurityEventEntity>, GetSecurityEventEntitysParams> {
   final ISecurityRepository repository;
 
   GetUserSecurityEventEntitysUseCase({required this.repository});
@@ -285,7 +289,9 @@ class DetectSuspiciousActivityUseCase
 
   @override
   Future<Result<bool>> call(DetectSuspiciousActivityParams params) async {
-    final eventsResult = await repository.detectSuspiciousActivity(params.userId);
+    final eventsResult = await repository.detectSuspiciousActivity(
+      params.userId,
+    );
     return eventsResult.when(
       success: (events) => Result.success(events.isNotEmpty),
       failure: (failure) => Result.failure(failure),

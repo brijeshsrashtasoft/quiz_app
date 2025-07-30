@@ -43,7 +43,7 @@ class _AccountActionWidgetState extends State<AccountActionWidget>
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
   late Animation<double> _shakeAnimation;
-  
+
   bool _isPressed = false;
 
   @override
@@ -84,10 +84,10 @@ class _AccountActionWidgetState extends State<AccountActionWidget>
     setState(() {
       _isPressed = true;
     });
-    
+
     await _animationController.forward();
     await _animationController.reverse();
-    
+
     if (mounted) {
       setState(() {
         _isPressed = false;
@@ -114,56 +114,60 @@ class _AccountActionWidgetState extends State<AccountActionWidget>
 
   Future<bool> _showStandardConfirmationDialog() async {
     return await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        title: Text(
-          widget.confirmationTitle ?? 'Confirm Action',
-          style: AppTextStyles.sectionHeader,
-        ),
-        content: Text(
-          widget.confirmationMessage ?? 'Are you sure you want to continue?',
-          style: AppTextStyles.bodyText,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(
-              'Cancel',
-              style: AppTextStyles.buttonText.copyWith(
-                color: AppColors.coolGray,
-              ),
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
             ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(
-              widget.confirmationButtonText ?? 'Confirm',
-              style: AppTextStyles.buttonText.copyWith(
-                color: widget.actionColor,
-              ),
+            title: Text(
+              widget.confirmationTitle ?? 'Confirm Action',
+              style: AppTextStyles.sectionHeader,
             ),
+            content: Text(
+              widget.confirmationMessage ??
+                  'Are you sure you want to continue?',
+              style: AppTextStyles.bodyText,
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: Text(
+                  'Cancel',
+                  style: AppTextStyles.buttonText.copyWith(
+                    color: AppColors.coolGray,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: Text(
+                  widget.confirmationButtonText ?? 'Confirm',
+                  style: AppTextStyles.buttonText.copyWith(
+                    color: widget.actionColor,
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-    ) ?? false;
+        ) ??
+        false;
   }
 
   Future<bool> _showDestructiveConfirmationDialog() async {
     return await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => _DestructiveActionDialog(
-        title: widget.confirmationTitle ?? 'Delete Account',
-        message: widget.confirmationMessage ??
-            'This action cannot be undone. All your data will be permanently deleted.',
-        actionText: widget.confirmationButtonText ?? 'Delete Account',
-        actionColor: widget.actionColor,
-      ),
-    ) ?? false;
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => _DestructiveActionDialog(
+            title: widget.confirmationTitle ?? 'Delete Account',
+            message:
+                widget.confirmationMessage ??
+                'This action cannot be undone. All your data will be permanently deleted.',
+            actionText: widget.confirmationButtonText ?? 'Delete Account',
+            actionColor: widget.actionColor,
+          ),
+        ) ??
+        false;
   }
 
   @override
@@ -175,8 +179,10 @@ class _AccountActionWidgetState extends State<AccountActionWidget>
           scale: _scaleAnimation.value,
           child: Transform.translate(
             offset: Offset(
-              widget.isDestructive 
-                  ? _shakeAnimation.value * 2 * (1 - 2 * (_animationController.value % 1))
+              widget.isDestructive
+                  ? _shakeAnimation.value *
+                        2 *
+                        (1 - 2 * (_animationController.value % 1))
                   : 0,
               0,
             ),
@@ -237,9 +243,9 @@ class _AccountActionWidgetState extends State<AccountActionWidget>
                         size: 24,
                       ),
                     ),
-                    
+
                     const SizedBox(width: AppSpacing.spacingM),
-                    
+
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -261,7 +267,7 @@ class _AccountActionWidgetState extends State<AccountActionWidget>
                         ],
                       ),
                     ),
-                    
+
                     Icon(
                       Icons.arrow_forward_ios,
                       size: 16,
@@ -269,7 +275,7 @@ class _AccountActionWidgetState extends State<AccountActionWidget>
                     ),
                   ],
                 ),
-                
+
                 if (widget.warningText != null) ...[
                   const SizedBox(height: AppSpacing.spacingM),
                   Container(
@@ -327,14 +333,15 @@ class _DestructiveActionDialog extends StatefulWidget {
   });
 
   @override
-  State<_DestructiveActionDialog> createState() => _DestructiveActionDialogState();
+  State<_DestructiveActionDialog> createState() =>
+      _DestructiveActionDialogState();
 }
 
 class _DestructiveActionDialogState extends State<_DestructiveActionDialog>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
-  
+
   final TextEditingController _confirmationController = TextEditingController();
   bool _isConfirmationValid = false;
   static const String _confirmationText = 'DELETE';
@@ -371,7 +378,8 @@ class _DestructiveActionDialogState extends State<_DestructiveActionDialog>
 
   void _validateConfirmation() {
     setState(() {
-      _isConfirmationValid = _confirmationController.text.trim() == _confirmationText;
+      _isConfirmationValid =
+          _confirmationController.text.trim() == _confirmationText;
     });
   }
 
@@ -423,22 +431,19 @@ class _DestructiveActionDialogState extends State<_DestructiveActionDialog>
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    widget.message,
-                    style: AppTextStyles.bodyText,
-                  ),
-                  
+                  Text(widget.message, style: AppTextStyles.bodyText),
+
                   const SizedBox(height: AppSpacing.spacingL),
-                  
+
                   Text(
                     'Type "$_confirmationText" to confirm:',
                     style: AppTextStyles.bodyText.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  
+
                   const SizedBox(height: AppSpacing.spacingM),
-                  
+
                   TextField(
                     controller: _confirmationController,
                     decoration: InputDecoration(
@@ -449,7 +454,10 @@ class _DestructiveActionDialogState extends State<_DestructiveActionDialog>
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: widget.actionColor, width: 2),
+                        borderSide: BorderSide(
+                          color: widget.actionColor,
+                          width: 2,
+                        ),
                       ),
                       contentPadding: AppSpacing.allM,
                     ),
@@ -468,7 +476,9 @@ class _DestructiveActionDialogState extends State<_DestructiveActionDialog>
                       child: TextButton(
                         onPressed: () => Navigator.of(context).pop(false),
                         style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: AppSpacing.spacingM),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: AppSpacing.spacingM,
+                          ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -481,9 +491,9 @@ class _DestructiveActionDialogState extends State<_DestructiveActionDialog>
                         ),
                       ),
                     ),
-                    
+
                     const SizedBox(width: AppSpacing.spacingM),
-                    
+
                     Expanded(
                       child: ElevatedButton(
                         onPressed: _isConfirmationValid
@@ -492,7 +502,9 @@ class _DestructiveActionDialogState extends State<_DestructiveActionDialog>
                         style: ElevatedButton.styleFrom(
                           backgroundColor: widget.actionColor,
                           foregroundColor: AppColors.pureWhite,
-                          padding: const EdgeInsets.symmetric(vertical: AppSpacing.spacingM),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: AppSpacing.spacingM,
+                          ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -521,23 +533,22 @@ class _DestructiveActionDialogState extends State<_DestructiveActionDialog>
 class DeleteAccountActionWidget extends StatelessWidget {
   final VoidCallback onDeleteAccount;
 
-  const DeleteAccountActionWidget({
-    super.key,
-    required this.onDeleteAccount,
-  });
+  const DeleteAccountActionWidget({super.key, required this.onDeleteAccount});
 
   @override
   Widget build(BuildContext context) {
     return AccountActionWidget(
       title: 'Delete Account',
       description: 'Permanently delete your account and all associated data',
-      warningText: 'This action cannot be undone. All your quizzes, scores, and profile data will be lost forever.',
+      warningText:
+          'This action cannot be undone. All your quizzes, scores, and profile data will be lost forever.',
       icon: Icons.delete_forever,
       actionColor: AppColors.coralRed,
       onAction: onDeleteAccount,
       isDestructive: true,
       confirmationTitle: 'Delete Account',
-      confirmationMessage: 'Are you absolutely sure you want to delete your account? This will permanently remove all your data, including:\n\n• Your profile and statistics\n• All created quizzes\n• Game history and scores\n• Account settings and preferences\n\nThis action cannot be undone.',
+      confirmationMessage:
+          'Are you absolutely sure you want to delete your account? This will permanently remove all your data, including:\n\n• Your profile and statistics\n• All created quizzes\n• Game history and scores\n• Account settings and preferences\n\nThis action cannot be undone.',
       confirmationButtonText: 'Delete Account',
     );
   }
@@ -547,10 +558,7 @@ class DeleteAccountActionWidget extends StatelessWidget {
 class ExportDataActionWidget extends StatelessWidget {
   final VoidCallback onExportData;
 
-  const ExportDataActionWidget({
-    super.key,
-    required this.onExportData,
-  });
+  const ExportDataActionWidget({super.key, required this.onExportData});
 
   @override
   Widget build(BuildContext context) {
@@ -579,12 +587,14 @@ class DeactivateAccountActionWidget extends StatelessWidget {
     return AccountActionWidget(
       title: 'Deactivate Account',
       description: 'Temporarily disable your account',
-      warningText: 'Your account will be hidden from other users until you reactivate it.',
+      warningText:
+          'Your account will be hidden from other users until you reactivate it.',
       icon: Icons.pause_circle,
       actionColor: AppColors.warning,
       onAction: onDeactivateAccount,
       confirmationTitle: 'Deactivate Account',
-      confirmationMessage: 'Your account will be temporarily disabled. You can reactivate it by signing in again.',
+      confirmationMessage:
+          'Your account will be temporarily disabled. You can reactivate it by signing in again.',
       confirmationButtonText: 'Deactivate',
     );
   }
@@ -594,23 +604,22 @@ class DeactivateAccountActionWidget extends StatelessWidget {
 class ClearDataActionWidget extends StatelessWidget {
   final VoidCallback onClearData;
 
-  const ClearDataActionWidget({
-    super.key,
-    required this.onClearData,
-  });
+  const ClearDataActionWidget({super.key, required this.onClearData});
 
   @override
   Widget build(BuildContext context) {
     return AccountActionWidget(
       title: 'Clear Game Data',
       description: 'Reset your game statistics and history',
-      warningText: 'This will permanently delete your game history, scores, and statistics.',
+      warningText:
+          'This will permanently delete your game history, scores, and statistics.',
       icon: Icons.refresh,
       actionColor: AppColors.warning,
       onAction: onClearData,
       isDestructive: true,
       confirmationTitle: 'Clear Game Data',
-      confirmationMessage: 'Are you sure you want to clear all your game data? This includes:\n\n• Game history\n• Scores and statistics\n• Achievements and streaks\n\nYour profile and created quizzes will not be affected.',
+      confirmationMessage:
+          'Are you sure you want to clear all your game data? This includes:\n\n• Game history\n• Scores and statistics\n• Achievements and streaks\n\nYour profile and created quizzes will not be affected.',
       confirmationButtonText: 'Clear Data',
     );
   }

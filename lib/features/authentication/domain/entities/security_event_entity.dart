@@ -37,6 +37,7 @@ enum SecurityEventType {
   deviceRegistration,
   deviceTrustChange,
   sessionTimeout,
+  sessionRevoked,
   biometricFailure,
   multipleFailedAttempts,
   unknownDevice,
@@ -70,6 +71,8 @@ enum SecurityEventType {
         return 'Device Trust Change';
       case SecurityEventType.sessionTimeout:
         return 'Session Timeout';
+      case SecurityEventType.sessionRevoked:
+        return 'Session Revoked';
       case SecurityEventType.biometricFailure:
         return 'Biometric Failure';
       case SecurityEventType.multipleFailedAttempts:
@@ -86,6 +89,7 @@ enum SecurityEventType {
 enum SecurityEventSeverity {
   info,
   low,
+  warning,
   medium,
   high,
   critical;
@@ -96,6 +100,8 @@ enum SecurityEventSeverity {
         return 'Info';
       case SecurityEventSeverity.low:
         return 'Low';
+      case SecurityEventSeverity.warning:
+        return 'Warning';
       case SecurityEventSeverity.medium:
         return 'Medium';
       case SecurityEventSeverity.high:

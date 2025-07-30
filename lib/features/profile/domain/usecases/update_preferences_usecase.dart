@@ -64,9 +64,7 @@ class UpdatePreferencesUseCase
     const validThemes = ['light', 'dark', 'system'];
     if (!validThemes.contains(preferences.theme)) {
       return Result.failure(
-        Failure.serverFailure(
-          message: 'Invalid theme selection',
-        ),
+        Failure.serverFailure(message: 'Invalid theme selection'),
       );
     }
 
@@ -85,9 +83,7 @@ class UpdatePreferencesUseCase
     ];
     if (!validLanguages.contains(preferences.language)) {
       return Result.failure(
-        Failure.serverFailure(
-          message: 'Invalid language selection',
-        ),
+        Failure.serverFailure(message: 'Invalid language selection'),
       );
     }
 
@@ -95,9 +91,7 @@ class UpdatePreferencesUseCase
     const validDifficulties = ['easy', 'medium', 'hard', 'mixed'];
     if (!validDifficulties.contains(preferences.difficultyPreference)) {
       return Result.failure(
-        Failure.serverFailure(
-          message: 'Invalid difficulty preference',
-        ),
+        Failure.serverFailure(message: 'Invalid difficulty preference'),
       );
     }
 

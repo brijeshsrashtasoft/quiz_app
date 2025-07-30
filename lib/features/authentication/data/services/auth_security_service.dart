@@ -9,7 +9,8 @@ import '../../../../core/errors/failures.dart';
 import '../repositories/session_repository_impl.dart';
 import '../repositories/device_repository_impl.dart';
 import '../repositories/security_event_repository_impl.dart';
-import '../repositories/security_settings_repository_impl.dart' hide SecuritySettings;
+import '../repositories/security_settings_repository_impl.dart'
+    hide SecuritySettings;
 import '../datasources/session_firestore_datasource.dart';
 import '../../domain/entities/user_session.dart';
 import '../../domain/entities/device_entity.dart';
@@ -102,9 +103,7 @@ class AuthSecurityService {
         expiresAt: sessionEntity.expiresAt,
         isActive: sessionEntity.isActive,
         trustLevel: sessionEntity.isTrusted ? 'trusted' : 'unknown',
-        metadata: {
-          'location': sessionEntity.location ?? '',
-        },
+        metadata: {'location': sessionEntity.location ?? ''},
       );
 
       // Log successful login event
@@ -156,9 +155,7 @@ class AuthSecurityService {
     } catch (e) {
       AppLogger.error('Failed to refresh token', e);
       return Result.failure(
-        Failure.authFailure(
-          message: 'Token refresh failed: ${e.toString()}',
-        ),
+        Failure.authFailure(message: 'Token refresh failed: ${e.toString()}'),
       );
     }
   }
@@ -247,25 +244,29 @@ class AuthSecurityService {
       // await _sessionRepository.cleanupExpiredSessions();
 
       final result = await _sessionRepository.getActiveSessions(userId);
-      
+
       // Convert SessionEntity list to UserSession list
       return result.when(
         success: (sessionEntities) {
-          final userSessions = sessionEntities.map((entity) => UserSession(
-            sessionId: entity.id,
-            userId: entity.userId,
-            createdAt: entity.createdAt,
-            lastActiveAt: entity.lastActivityAt,
-            deviceId: entity.deviceId,
-            deviceName: entity.deviceName,
-            deviceType: entity.deviceType,
-            ipAddress: entity.ipAddress,
-            userAgent: entity.userAgent ?? 'unknown',
-            expiresAt: entity.expiresAt,
-            isActive: entity.isActive,
-            trustLevel: entity.isTrusted ? 'trusted' : 'unknown',
-            metadata: entity.metadata ?? {},
-          )).toList();
+          final userSessions = sessionEntities
+              .map(
+                (entity) => UserSession(
+                  sessionId: entity.id,
+                  userId: entity.userId,
+                  createdAt: entity.createdAt,
+                  lastActiveAt: entity.lastActivityAt,
+                  deviceId: entity.deviceId,
+                  deviceName: entity.deviceName,
+                  deviceType: entity.deviceType,
+                  ipAddress: entity.ipAddress,
+                  userAgent: entity.userAgent ?? 'unknown',
+                  expiresAt: entity.expiresAt,
+                  isActive: entity.isActive,
+                  trustLevel: entity.isTrusted ? 'trusted' : 'unknown',
+                  metadata: entity.metadata ?? {},
+                ),
+              )
+              .toList();
           return Result.success(userSessions);
         },
         failure: (failure) => Result.failure(failure),
@@ -316,7 +317,7 @@ class AuthSecurityService {
     String? userAgent,
   }) async {
     try {
-      // For failed logins, we don't have userId, so we'll log with email 
+      // For failed logins, we don't have userId, so we'll log with email
       await _securityEventRepository.logEvent(
         userId: 'unknown', // We don't have userId for failed logins
         eventType: SecurityEventType.loginFailure,
@@ -400,7 +401,7 @@ class AuthSecurityService {
         if (device != null) {
           // Update existing device last seen (not implemented yet)
           // return await _deviceRepository.updateLastSeen(device.id);
-          
+
           // For now, return the existing device
           final userDevice = UserDevice(
             deviceId: device.id,
@@ -437,7 +438,7 @@ class AuthSecurityService {
           deviceId: deviceInfo['deviceId'],
           metadata: deviceInfo,
         );
-        
+
         // Convert DeviceEntity to UserDevice
         final device = result.data!;
         final userDevice = UserDevice(
@@ -495,7 +496,9 @@ class AuthSecurityService {
   /// Check for suspicious activity patterns
   Future<void> _checkSuspiciousActivity(String userId) async {
     try {
-      final result = await _securityEventRepository.detectSuspiciousActivity(userId);
+      final result = await _securityEventRepository.detectSuspiciousActivity(
+        userId,
+      );
 
       if (result.isSuccess && result.data!.isNotEmpty) {
         await _logSecurityEvent(
@@ -592,7 +595,7 @@ class AuthSecurityService {
         return SecurityEventType.loginAttempt;
     }
   }
-  
+
   SecurityEventSeverity _parseSeverity(String severity) {
     switch (severity) {
       case 'low':
