@@ -45,5 +45,33 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<!-- Deep Linking Support for Quiz App -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<!-- HTTPS URLs -->
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.quizapp.https</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>https</string>
+			</array>
+		</dict>
+		<!-- Custom URL Scheme -->
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.quizapp.custom</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>quizapp</string>
+			</array>
+		</dict>
+	</array>
+	<!-- Associated Domains for Universal Links -->
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:quizapp.com</string>
+		<string>applinks:www.quizapp.com</string>
+	</array>
 </dict>
 </plist>

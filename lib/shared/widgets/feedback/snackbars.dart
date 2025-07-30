@@ -274,9 +274,7 @@ class _LoadingSnackBarContent extends StatelessWidget {
           Expanded(
             child: Text(
               message,
-              style: AppTextStyles.bodyText.copyWith(
-                color: AppColors.charcoal,
-              ),
+              style: AppTextStyles.bodyText.copyWith(color: AppColors.charcoal),
             ),
           ),
         ],

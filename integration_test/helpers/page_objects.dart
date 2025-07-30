@@ -5,7 +5,7 @@ import 'test_data.dart';
 /// Page Objects pattern for E2E testing
 class PageObjects {
   final WidgetTester tester;
-  
+
   PageObjects(this.tester);
 
   /// Authentication Page Objects
@@ -75,7 +75,7 @@ class PageObjects {
 
     final pinDisplay = find.byKey(const Key('game_pin_display'));
     expect(pinDisplay, findsOneWidget);
-    
+
     final pinText = tester.widget<Text>(pinDisplay).data ?? '';
     return pinText;
   }
@@ -143,4 +143,3 @@ class PageObjects {
     expect(homeButton, findsOneWidget);
   }
 }
-EOF < /dev/null

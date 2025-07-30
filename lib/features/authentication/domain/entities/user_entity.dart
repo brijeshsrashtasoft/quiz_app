@@ -64,4 +64,18 @@ extension UserEntityX on UserEntity {
     final daysDifference = now.difference(createdAt).inDays;
     return daysDifference <= 7;
   }
+
+  /// Check if user can host games (basic host permission check)
+  bool get canHostGames {
+    return isProfileComplete && !isNewUser;
+  }
+
+  /// Check if user has admin privileges (basic implementation)
+  bool get isAdmin {
+    // This is a simple implementation - in production, use proper role-based access
+    const adminEmails = ['admin@quizapp.com', 'support@quizapp.com'];
+
+    return adminEmails.contains(email.toLowerCase()) ||
+        email.toLowerCase().endsWith('@quizapp.com');
+  }
 }

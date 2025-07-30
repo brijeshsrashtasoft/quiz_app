@@ -3,8 +3,17 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'route_constants.dart';
-import 'route_guards.dart';
+import 'auth_guard.dart';
 import 'pages/placeholder_pages.dart';
+import 'navigation_utils.dart';
+import '../../features/authentication/presentation/pages/login_page.dart';
+import '../../features/authentication/presentation/pages/register_page.dart';
+import '../../features/authentication/presentation/pages/forgot_password_page.dart';
+import '../../features/authentication/presentation/pages/profile_page.dart'
+    as auth_pages;
+import '../../features/home/presentation/pages/home_page.dart' as home_pages;
+import '../../shared/widgets/error/error_page_widget.dart';
+import '../../shared/widgets/deep_link/game_join_widget.dart';
 
 /// Global router configuration for the entire app
 /// Implements type-safe navigation with route guards and transitions
@@ -28,18 +37,29 @@ class AppRouter {
     debugLogDiagnostics: true,
     initialLocation: RouteConstants.splash,
 
-    // Global redirect logic
+    // Global redirect logic with authentication guards
     redirect: (BuildContext context, GoRouterState state) async {
-      // Check route guards
-      final redirectRoute = await GuardRegistry.checkRouteAccess(
-        context,
-        state,
-      );
-      return redirectRoute;
+      try {
+        // Check route guards
+        final redirectRoute = await AuthGuardRegistry.checkRouteAccess(
+          context,
+          state,
+        );
+        return redirectRoute;
+      } catch (e) {
+        // In case of guard error, allow navigation but log the error
+        debugPrint('Router redirect error: $e');
+        return null;
+      }
     },
 
     // Error handling
-    errorBuilder: (context, state) => ErrorPage(error: state.error.toString()),
+    errorBuilder: (context, state) => ErrorPageWidget(
+      title: 'Navigation Error',
+      message:
+          state.error?.toString() ?? 'An unexpected navigation error occurred',
+      errorCode: 'NAVIGATION_ERROR',
+    ),
 
     // Route definitions
     routes: [
@@ -69,7 +89,7 @@ class AppRouter {
       GoRoute(
         path: RouteConstants.profile,
         name: 'profile',
-        builder: (context, state) => const ProfilePage(),
+        builder: (context, state) => const auth_pages.ProfilePage(),
       ),
 
       // Home and dashboard routes
@@ -81,7 +101,7 @@ class AppRouter {
       GoRoute(
         path: RouteConstants.home,
         name: 'home',
-        builder: (context, state) => const HomePage(),
+        builder: (context, state) => const home_pages.HomePage(),
       ),
       GoRoute(
         path: RouteConstants.dashboard,
@@ -113,12 +133,22 @@ class AppRouter {
         ],
       ),
 
-      // Quiz details and editing
+      // Quiz details and editing with validation
       GoRoute(
         path: '/quiz/:quizId',
         name: 'quiz-details',
         builder: (context, state) {
-          final quizId = state.pathParameters['quizId']!;
+          final quizId = state.pathParameters['quizId'];
+
+          // Validate quiz ID parameter
+          if (quizId == null || !NavigationUtils.isValidQuizId(quizId)) {
+            return const ErrorPageWidget(
+              title: 'Invalid Quiz',
+              message: 'The quiz ID provided is not valid',
+              errorCode: 'INVALID_QUIZ_ID',
+            );
+          }
+
           return QuizDetailsPage(quizId: quizId);
         },
         routes: [
@@ -126,18 +156,41 @@ class AppRouter {
             path: 'edit',
             name: 'quiz-edit',
             builder: (context, state) {
-              final quizId = state.pathParameters['quizId']!;
+              final quizId = state.pathParameters['quizId'];
+
+              // Validate quiz ID parameter
+              if (quizId == null || !NavigationUtils.isValidQuizId(quizId)) {
+                return const ErrorPageWidget(
+                  title: 'Invalid Quiz',
+                  message: 'The quiz ID provided for editing is not valid',
+                  errorCode: 'INVALID_QUIZ_EDIT_ID',
+                );
+              }
+
               return QuizEditPage(quizId: quizId);
             },
           ),
         ],
       ),
 
-      // Game session routes
+      // Game session routes with deep linking support
       GoRoute(
         path: RouteConstants.gameJoin,
         name: 'game-join',
-        builder: (context, state) => const GameJoinPage(),
+        builder: (context, state) {
+          // Check for game PIN in query parameters for deep linking
+          final queryParams = NavigationUtils.getQueryParameters(state);
+          final gamePin = queryParams['pin'];
+
+          if (gamePin != null &&
+              NavigationUtils.extractGamePinFromUrl(state.uri.toString()) !=
+                  null) {
+            // Deep link with game PIN - use GameJoinWidget
+            return GameJoinWidget(initialPin: gamePin, isDeepLink: true);
+          }
+
+          return const GameJoinWidget();
+        },
       ),
       GoRoute(
         path: RouteConstants.gameHost,
@@ -155,7 +208,18 @@ class AppRouter {
         path: '/game/:sessionId',
         name: 'game-session',
         builder: (context, state) {
-          final sessionId = state.pathParameters['sessionId']!;
+          final sessionId = state.pathParameters['sessionId'];
+
+          // Validate session ID parameter
+          if (sessionId == null ||
+              !NavigationUtils.isValidSessionId(sessionId)) {
+            return const ErrorPageWidget(
+              title: 'Invalid Game Session',
+              message: 'The game session ID provided is not valid',
+              errorCode: 'INVALID_SESSION_ID',
+            );
+          }
+
           return GameSessionPage(sessionId: sessionId);
         },
         routes: [
@@ -163,7 +227,16 @@ class AppRouter {
             path: 'waiting',
             name: 'game-waiting',
             builder: (context, state) {
-              final sessionId = state.pathParameters['sessionId']!;
+              final sessionId = state.pathParameters['sessionId'];
+
+              // Validate session ID parameter
+              if (sessionId == null ||
+                  !NavigationUtils.isValidSessionId(sessionId)) {
+                return const ErrorPage(
+                  error: 'Invalid session ID for waiting room',
+                );
+              }
+
               return GameWaitingPage(sessionId: sessionId);
             },
           ),
@@ -171,11 +244,28 @@ class AppRouter {
             path: 'question/:questionIndex',
             name: 'game-question',
             builder: (context, state) {
-              final sessionId = state.pathParameters['sessionId']!;
-              final questionIndex = state.pathParameters['questionIndex']!;
+              final sessionId = state.pathParameters['sessionId'];
+              final questionIndexStr = state.pathParameters['questionIndex'];
+
+              // Validate session ID and question index
+              if (sessionId == null ||
+                  !NavigationUtils.isValidSessionId(sessionId)) {
+                return const ErrorPage(
+                  error: 'Invalid session ID for question',
+                );
+              }
+
+              final questionIndex = NavigationUtils.getQuestionIndexFromState(
+                state,
+              );
+              if (questionIndex == null ||
+                  !NavigationUtils.isValidQuestionIndex(questionIndex)) {
+                return const ErrorPage(error: 'Invalid question index');
+              }
+
               return GameQuestionPage(
                 sessionId: sessionId,
-                questionIndex: questionIndex,
+                questionIndex: questionIndexStr!,
               );
             },
           ),
@@ -183,7 +273,14 @@ class AppRouter {
             path: 'results',
             name: 'game-results',
             builder: (context, state) {
-              final sessionId = state.pathParameters['sessionId']!;
+              final sessionId = state.pathParameters['sessionId'];
+
+              // Validate session ID parameter
+              if (sessionId == null ||
+                  !NavigationUtils.isValidSessionId(sessionId)) {
+                return const ErrorPage(error: 'Invalid session ID for results');
+              }
+
               return GameResultsPage(sessionId: sessionId);
             },
           ),
@@ -205,7 +302,16 @@ class AppRouter {
             path: 'session/:sessionId',
             name: 'leaderboard-session',
             builder: (context, state) {
-              final sessionId = state.pathParameters['sessionId']!;
+              final sessionId = state.pathParameters['sessionId'];
+
+              // Validate session ID parameter
+              if (sessionId == null ||
+                  !NavigationUtils.isValidSessionId(sessionId)) {
+                return const ErrorPage(
+                  error: 'Invalid session ID for leaderboard',
+                );
+              }
+
               return SessionLeaderboardPage(sessionId: sessionId);
             },
           ),
@@ -233,12 +339,15 @@ class AppRouter {
       GoRoute(
         path: RouteConstants.notFound,
         name: 'not-found',
-        builder: (context, state) => const NotFoundPage(),
+        builder: (context, state) => const NotFoundErrorWidget(),
       ),
       GoRoute(
         path: RouteConstants.error,
         name: 'error',
-        builder: (context, state) => const ErrorPage(),
+        builder: (context, state) => const ErrorPageWidget(
+          title: 'Application Error',
+          message: 'An unexpected error occurred in the application',
+        ),
       ),
     ],
   );
@@ -289,19 +398,110 @@ final currentRouteProvider = Provider<String?>((ref) {
   return AppRouter.currentRoute;
 });
 
-/// Custom page transitions
+/// Enhanced router utilities and navigation helpers
+class AppRouterHelper {
+  AppRouterHelper._();
+
+  /// Deep link handling for game joining
+  static Future<bool> handleGameJoinDeepLink(String url) async {
+    try {
+      final gamePin = NavigationUtils.extractGamePinFromUrl(url);
+      if (gamePin != null) {
+        final joinUrl = NavigationUtils.generateGameJoinUrl(gamePin);
+        AppRouter.go(joinUrl);
+        return true;
+      }
+      return false;
+    } catch (e) {
+      debugPrint('Deep link handling error: $e');
+      return false;
+    }
+  }
+
+  /// Generate shareable quiz URL
+  static String generateQuizShareLink(String quizId) {
+    return NavigationUtils.generateQuizShareUrl(quizId);
+  }
+
+  /// Generate shareable game join URL
+  static String generateGameJoinLink(String gamePin) {
+    return NavigationUtils.generateGameJoinUrl(gamePin);
+  }
+
+  /// Safe navigation with error recovery
+  static void safeNavigateTo(String route, {Object? extra}) {
+    try {
+      AppRouter.go(route);
+    } catch (e) {
+      debugPrint('Navigation error to $route: $e');
+      // Fallback to home if navigation fails
+      AppRouter.go(RouteConstants.home);
+    }
+  }
+
+  /// Navigate to game join with PIN
+  static void navigateToGameJoinWithPin(String gamePin) {
+    final url = NavigationUtils.buildUrlWithQuery(RouteConstants.gameJoin, {
+      'pin': gamePin,
+    });
+    AppRouter.go(url);
+  }
+
+  /// Navigate to quiz details with sharing context
+  static void navigateToQuizDetailsFromShare(String quizId) {
+    final url = NavigationUtils.buildUrlWithQuery(
+      RouteConstants.quizDetailsPath(quizId),
+      {'shared': 'true'},
+    );
+    AppRouter.go(url);
+  }
+
+  /// Get current navigation context
+  static NavigationContext getCurrentContext() {
+    final currentRoute = AppRouter.currentRoute ?? RouteConstants.home;
+    return NavigationContext(
+      route: currentRoute,
+      isGameRoute: NavigationUtils.isGameRoute(currentRoute),
+      isAuthRoute: NavigationUtils.isAuthRoute(currentRoute),
+      isQuizRoute: NavigationUtils.isQuizRoute(currentRoute),
+      breadcrumbs: NavigationUtils.generateBreadcrumbs(currentRoute),
+    );
+  }
+}
+
+/// Navigation context information
+class NavigationContext {
+  final String route;
+  final bool isGameRoute;
+  final bool isAuthRoute;
+  final bool isQuizRoute;
+  final List<String> breadcrumbs;
+
+  const NavigationContext({
+    required this.route,
+    required this.isGameRoute,
+    required this.isAuthRoute,
+    required this.isQuizRoute,
+    required this.breadcrumbs,
+  });
+}
+
+/// Custom page transitions with enhanced animation support
 class CustomPageTransition {
+  /// Slide transition for sequential flows (quiz creation, game flow)
   static Page<T> slideTransition<T extends Object?>(
     BuildContext context,
     GoRouterState state,
     Widget child, {
     Offset begin = const Offset(1.0, 0.0),
     Offset end = Offset.zero,
-    Curve curve = Curves.easeInOut,
+    Curve curve = Curves.easeInOutCubic,
+    Duration duration = const Duration(milliseconds: 300),
   }) {
     return CustomTransitionPage<T>(
       key: state.pageKey,
       child: child,
+      transitionDuration: duration,
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         return SlideTransition(
           position: animation.drive(
@@ -313,15 +513,18 @@ class CustomPageTransition {
     );
   }
 
+  /// Fade transition for general navigation
   static Page<T> fadeTransition<T extends Object?>(
     BuildContext context,
     GoRouterState state,
     Widget child, {
     Curve curve = Curves.easeInOut,
+    Duration duration = const Duration(milliseconds: 250),
   }) {
     return CustomTransitionPage<T>(
       key: state.pageKey,
       child: child,
+      transitionDuration: duration,
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         return FadeTransition(
           opacity: animation.drive(CurveTween(curve: curve)),
@@ -331,25 +534,127 @@ class CustomPageTransition {
     );
   }
 
+  /// Scale transition for modal-like navigation
   static Page<T> scaleTransition<T extends Object?>(
     BuildContext context,
     GoRouterState state,
     Widget child, {
-    double begin = 0.0,
+    double begin = 0.8,
     double end = 1.0,
-    Curve curve = Curves.easeInOut,
+    Curve curve = Curves.easeOutBack,
+    Duration duration = const Duration(milliseconds: 400),
   }) {
     return CustomTransitionPage<T>(
       key: state.pageKey,
       child: child,
+      transitionDuration: duration,
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         return ScaleTransition(
           scale: animation.drive(
             Tween(begin: begin, end: end).chain(CurveTween(curve: curve)),
           ),
-          child: child,
+          child: FadeTransition(
+            opacity: animation.drive(CurveTween(curve: Curves.easeIn)),
+            child: child,
+          ),
         );
       },
     );
+  }
+
+  /// Rotation transition for fun navigation (game results, celebrations)
+  static Page<T> rotationTransition<T extends Object?>(
+    BuildContext context,
+    GoRouterState state,
+    Widget child, {
+    double begin = 0.0,
+    double end = 1.0,
+    Curve curve = Curves.elasticOut,
+    Duration duration = const Duration(milliseconds: 600),
+  }) {
+    return CustomTransitionPage<T>(
+      key: state.pageKey,
+      child: child,
+      transitionDuration: duration,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return RotationTransition(
+          turns: animation.drive(
+            Tween(begin: begin, end: end).chain(CurveTween(curve: curve)),
+          ),
+          child: ScaleTransition(
+            scale: animation.drive(
+              Tween(begin: 0.8, end: 1.0).chain(CurveTween(curve: curve)),
+            ),
+            child: child,
+          ),
+        );
+      },
+    );
+  }
+
+  /// Get appropriate transition based on route context
+  static Page<T> getContextualTransition<T extends Object?>(
+    BuildContext context,
+    GoRouterState state,
+    Widget child,
+  ) {
+    final fromRoute = AppRouter.currentRoute ?? '';
+    final toRoute = state.matchedLocation;
+    final transitionType = NavigationUtils.getRouteTransitionType(
+      fromRoute,
+      toRoute,
+    );
+
+    switch (transitionType) {
+      case 'slide':
+        return slideTransition(context, state, child);
+      case 'scale':
+        return scaleTransition(context, state, child);
+      case 'rotation':
+        return rotationTransition(context, state, child);
+      case 'fade':
+      default:
+        return fadeTransition(context, state, child);
+    }
+  }
+}
+
+/// Router analytics and monitoring
+class RouterAnalytics {
+  static final List<String> _navigationHistory = [];
+  static final Map<String, int> _routeVisitCount = {};
+  static final Map<String, DateTime> _routeLastVisited = {};
+
+  /// Track navigation events
+  static void trackNavigation(String route) {
+    try {
+      _navigationHistory.add(route);
+      _routeVisitCount[route] = (_routeVisitCount[route] ?? 0) + 1;
+      _routeLastVisited[route] = DateTime.now();
+
+      // Keep only last 50 navigation events
+      if (_navigationHistory.length > 50) {
+        _navigationHistory.removeAt(0);
+      }
+    } catch (e) {
+      debugPrint('Router analytics error: $e');
+    }
+  }
+
+  /// Get navigation history
+  static List<String> get navigationHistory => List.from(_navigationHistory);
+
+  /// Get most visited routes
+  static Map<String, int> get routeVisitCounts => Map.from(_routeVisitCount);
+
+  /// Get recently visited routes
+  static Map<String, DateTime> get recentlyVisited =>
+      Map.from(_routeLastVisited);
+
+  /// Clear analytics data
+  static void clearAnalytics() {
+    _navigationHistory.clear();
+    _routeVisitCount.clear();
+    _routeLastVisited.clear();
   }
 }

@@ -56,7 +56,9 @@ void main() {
       expect(find.text('Server error: Test server error'), findsOneWidget);
     });
 
-    testWidgets('should handle recoverable errors with retry action', (tester) async {
+    testWidgets('should handle recoverable errors with retry action', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Builder(
@@ -97,10 +99,18 @@ void main() {
 
     test('should convert exceptions to failures correctly', () {
       // Test different exception types
-      final serverException = ServerException(message: 'Server error', code: '500');
+      final serverException = ServerException(
+        message: 'Server error',
+        code: '500',
+      );
       final networkException = NetworkException(message: 'Network error');
-      final authException = AuthException(message: 'Auth error', code: 'auth/invalid');
-      final validationException = ValidationException(message: 'Validation error');
+      final authException = AuthException(
+        message: 'Auth error',
+        code: 'auth/invalid',
+      );
+      final validationException = ValidationException(
+        message: 'Validation error',
+      );
 
       // Convert to failures using extension method
       final serverFailure = serverException.toFailure();
@@ -116,16 +126,27 @@ void main() {
 
       // Verify user messages
       expect(serverFailure.userMessage, equals('Server error: Server error'));
-      expect(networkFailure.userMessage, equals('Network error: Network error'));
-      expect(authFailure.userMessage, equals('Authentication error: Auth error'));
-      expect(validationFailure.userMessage, equals('Validation error: Validation error'));
+      expect(
+        networkFailure.userMessage,
+        equals('Network error: Network error'),
+      );
+      expect(
+        authFailure.userMessage,
+        equals('Authentication error: Auth error'),
+      );
+      expect(
+        validationFailure.userMessage,
+        equals('Validation error: Validation error'),
+      );
     });
 
     test('should categorize errors by recoverability correctly', () {
       const serverFailure = Failure.serverFailure(message: 'Server error');
       const networkFailure = Failure.networkFailure(message: 'Network error');
       const authFailure = Failure.authFailure(message: 'Auth error');
-      const validationFailure = Failure.validationFailure(message: 'Validation error');
+      const validationFailure = Failure.validationFailure(
+        message: 'Validation error',
+      );
       const unknownFailure = Failure.unknownFailure(message: 'Unknown error');
 
       // Test recoverability
@@ -140,17 +161,37 @@ void main() {
       const serverFailure = Failure.serverFailure(message: 'Server error');
       const networkFailure = Failure.networkFailure(message: 'Network error');
       const authFailure = Failure.authFailure(message: 'Auth error');
-      const validationFailure = Failure.validationFailure(message: 'Validation error');
+      const validationFailure = Failure.validationFailure(
+        message: 'Validation error',
+      );
       const cacheFailure = Failure.cacheFailure(message: 'Cache error');
       const unknownFailure = Failure.unknownFailure(message: 'Unknown error');
 
       // Test log levels
-      expect(errorService.getLogLevel(serverFailure), equals(ErrorLogLevel.error));
-      expect(errorService.getLogLevel(networkFailure), equals(ErrorLogLevel.warning));
-      expect(errorService.getLogLevel(authFailure), equals(ErrorLogLevel.error));
-      expect(errorService.getLogLevel(validationFailure), equals(ErrorLogLevel.info));
-      expect(errorService.getLogLevel(cacheFailure), equals(ErrorLogLevel.warning));
-      expect(errorService.getLogLevel(unknownFailure), equals(ErrorLogLevel.fatal));
+      expect(
+        errorService.getLogLevel(serverFailure),
+        equals(ErrorLogLevel.error),
+      );
+      expect(
+        errorService.getLogLevel(networkFailure),
+        equals(ErrorLogLevel.warning),
+      );
+      expect(
+        errorService.getLogLevel(authFailure),
+        equals(ErrorLogLevel.error),
+      );
+      expect(
+        errorService.getLogLevel(validationFailure),
+        equals(ErrorLogLevel.info),
+      );
+      expect(
+        errorService.getLogLevel(cacheFailure),
+        equals(ErrorLogLevel.warning),
+      );
+      expect(
+        errorService.getLogLevel(unknownFailure),
+        equals(ErrorLogLevel.fatal),
+      );
     });
 
     test('should build error context with additional info', () {

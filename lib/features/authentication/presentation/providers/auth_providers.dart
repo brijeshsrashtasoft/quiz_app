@@ -1,0 +1,367 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/firebase/auth_config.dart';
+import '../../../../core/utils/result.dart';
+import '../../../../core/utils/logger.dart';
+import '../../../../core/errors/failures.dart';
+import '../../domain/entities/user_entity.dart';
+import '../../data/repositories/user_repository_impl.dart';
+import '../../data/datasources/user_firestore_datasource.dart';
+import '../../domain/usecases/get_user_by_id_usecase.dart';
+import '../../domain/usecases/create_user_usecase.dart';
+import '../../domain/usecases/watch_user_usecase.dart';
+
+/// Firebase Auth state provider - core authentication state
+final firebaseAuthProvider = StreamProvider<User?>((ref) {
+  AppLogger.firebase('AuthProvider', 'Setting up Firebase Auth state stream');
+  return AuthConfig.idTokenChanges;
+});
+
+/// Authentication state provider - enhanced auth state with user data
+final authStateProvider = StreamProvider<AuthState>((ref) async* {
+  await for (final firebaseUser in ref.watch(firebaseAuthProvider.stream)) {
+    if (firebaseUser == null) {
+      AppLogger.firebase('AuthProvider', 'User not authenticated');
+      yield const AuthState.unauthenticated();
+      continue;
+    }
+
+    AppLogger.firebase(
+      'AuthProvider',
+      'User authenticated: ${firebaseUser.email}',
+    );
+
+    // Get user data from Firestore
+    try {
+      final getUserUseCase = ref.read(getUserByIdUseCaseProvider);
+      final userResult = await getUserUseCase(
+        GetUserByIdParams(userId: firebaseUser.uid),
+      );
+
+      if (userResult.isSuccess) {
+        final userEntity = userResult.dataOrNull!;
+        AppLogger.firebase(
+          'AuthProvider',
+          'User data loaded: ${userEntity.email}',
+        );
+        yield AuthState.authenticated(
+          firebaseUser: firebaseUser,
+          user: userEntity,
+        );
+      } else {
+        final failure = userResult.failureOrNull!;
+        AppLogger.warning(
+          'User data not found, creating new user profile',
+          failure,
+        );
+
+        // Create user profile if doesn't exist
+        try {
+          final createUserUseCase = ref.read(createUserUseCaseProvider);
+          final newUser = UserEntity(
+            id: firebaseUser.uid,
+            name:
+                firebaseUser.displayName ??
+                firebaseUser.email?.split('@').first ??
+                'User',
+            email: firebaseUser.email ?? '',
+            createdAt: DateTime.now(),
+          );
+
+          final createResult = await createUserUseCase(
+            CreateUserParams(user: newUser),
+          );
+
+          if (createResult.isSuccess) {
+            final createdUser = createResult.dataOrNull!;
+            AppLogger.firebase(
+              'AuthProvider',
+              'New user profile created: ${createdUser.email}',
+            );
+            yield AuthState.authenticated(
+              firebaseUser: firebaseUser,
+              user: createdUser,
+            );
+          } else {
+            final createFailure = createResult.failureOrNull!;
+            AppLogger.error('Failed to create user profile', createFailure);
+            yield AuthState.error(
+              firebaseUser: firebaseUser,
+              message:
+                  'Failed to create user profile: ${createFailure.userMessage}',
+            );
+          }
+        } catch (e) {
+          AppLogger.error('Error creating user profile', e);
+          yield AuthState.error(
+            firebaseUser: firebaseUser,
+            message: 'Failed to create user profile: ${e.toString()}',
+          );
+        }
+      }
+    } catch (e) {
+      AppLogger.error('Error loading user data', e);
+      yield AuthState.error(
+        firebaseUser: firebaseUser,
+        message: 'Failed to load user data: ${e.toString()}',
+      );
+    }
+  }
+});
+
+/// Current user provider - quick access to current user entity
+final currentUserProvider = Provider<UserEntity?>((ref) {
+  final authState = ref.watch(authStateProvider).value;
+  return authState?.user;
+});
+
+/// Current Firebase user provider - quick access to Firebase user
+final currentFirebaseUserProvider = Provider<User?>((ref) {
+  final authState = ref.watch(authStateProvider).value;
+  return authState?.firebaseUser;
+});
+
+/// Authentication status provider - simple boolean for auth status
+final isAuthenticatedProvider = Provider<bool>((ref) {
+  final authState = ref.watch(authStateProvider).value;
+  return authState?.isAuthenticated ?? false;
+});
+
+/// User ID provider - quick access to current user ID
+final currentUserIdProvider = Provider<String?>((ref) {
+  final user = ref.watch(currentUserProvider);
+  return user?.id;
+});
+
+/// Watch user provider - real-time user data updates
+final watchUserProvider = StreamProvider.family<UserEntity?, String>((
+  ref,
+  userId,
+) {
+  final watchUserUseCase = ref.read(watchUserUseCaseProvider);
+  return watchUserUseCase(WatchUserParams(userId: userId)).asyncMap(
+    (result) => result.when(success: (user) => user, failure: (error) => null),
+  );
+});
+
+/// Authentication service provider
+final authServiceProvider = Provider<AuthService>((ref) {
+  return AuthService();
+});
+
+/// Authentication use case providers
+final getUserByIdUseCaseProvider = Provider<GetUserByIdUseCase>((ref) {
+  final repository = UserRepositoryImpl(dataSource: UserFirestoreDataSource());
+  return GetUserByIdUseCase(repository: repository);
+});
+
+final createUserUseCaseProvider = Provider<CreateUserUseCase>((ref) {
+  final repository = UserRepositoryImpl(dataSource: UserFirestoreDataSource());
+  return CreateUserUseCase(repository: repository);
+});
+
+final watchUserUseCaseProvider = Provider<WatchUserUseCase>((ref) {
+  final repository = UserRepositoryImpl(dataSource: UserFirestoreDataSource());
+  return WatchUserUseCase(repository: repository);
+});
+
+/// Authentication state model
+class AuthState {
+  final User? firebaseUser;
+  final UserEntity? user;
+  final String? errorMessage;
+  final bool isLoading;
+
+  const AuthState._({
+    this.firebaseUser,
+    this.user,
+    this.errorMessage,
+    this.isLoading = false,
+  });
+
+  const AuthState.loading() : this._(isLoading: true);
+
+  const AuthState.unauthenticated() : this._();
+
+  const AuthState.authenticated({
+    required User firebaseUser,
+    required UserEntity user,
+  }) : this._(firebaseUser: firebaseUser, user: user);
+
+  const AuthState.error({User? firebaseUser, required String message})
+    : this._(firebaseUser: firebaseUser, errorMessage: message);
+
+  bool get isAuthenticated =>
+      firebaseUser != null && user != null && errorMessage == null;
+  bool get hasError => errorMessage != null;
+  bool get isUnauthenticated =>
+      firebaseUser == null && user == null && errorMessage == null;
+}
+
+/// Authentication service for handling auth operations
+class AuthService {
+  /// Sign in with email and password
+  Future<Result<UserCredential>> signInWithEmailAndPassword({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      AppLogger.firebase('AuthService', 'Attempting sign in for: $email');
+      final credential = await AuthConfig.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      AppLogger.firebase('AuthService', 'Sign in successful for: $email');
+      return Result.success(credential);
+    } catch (e) {
+      AppLogger.error('Sign in failed for: $email', e);
+      return Result.failure(
+        Failure.authFailure(
+          message: 'Sign in failed: ${e.toString()}',
+          code: 'AUTH_SIGNIN_ERROR',
+        ),
+      );
+    }
+  }
+
+  /// Create user with email and password
+  Future<Result<UserCredential>> createUserWithEmailAndPassword({
+    required String email,
+    required String password,
+    String? displayName,
+  }) async {
+    try {
+      AppLogger.firebase('AuthService', 'Attempting user creation for: $email');
+      final credential = await AuthConfig.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      // Update display name if provided
+      if (displayName != null && credential.user != null) {
+        await AuthConfig.updateUserProfile(displayName: displayName);
+      }
+
+      AppLogger.firebase('AuthService', 'User creation successful for: $email');
+      return Result.success(credential);
+    } catch (e) {
+      AppLogger.error('User creation failed for: $email', e);
+      return Result.failure(
+        Failure.authFailure(
+          message: 'User creation failed: ${e.toString()}',
+          code: 'AUTH_CREATE_USER_ERROR',
+        ),
+      );
+    }
+  }
+
+  /// Sign out current user
+  Future<Result<void>> signOut() async {
+    try {
+      final currentUser = AuthConfig.currentUser;
+      AppLogger.firebase(
+        'AuthService',
+        'Attempting sign out for: ${currentUser?.email}',
+      );
+
+      await AuthConfig.signOut();
+
+      AppLogger.firebase('AuthService', 'Sign out successful');
+      return const Result.success(null);
+    } catch (e) {
+      AppLogger.error('Sign out failed', e);
+      return Result.failure(
+        Failure.authFailure(
+          message: 'Sign out failed: ${e.toString()}',
+          code: 'AUTH_SIGNOUT_ERROR',
+        ),
+      );
+    }
+  }
+
+  /// Send password reset email
+  Future<Result<void>> sendPasswordResetEmail({required String email}) async {
+    try {
+      AppLogger.firebase(
+        'AuthService',
+        'Sending password reset email to: $email',
+      );
+      await AuthConfig.sendPasswordResetEmail(email: email);
+
+      AppLogger.firebase('AuthService', 'Password reset email sent to: $email');
+      return const Result.success(null);
+    } catch (e) {
+      AppLogger.error('Password reset failed for: $email', e);
+      return Result.failure(
+        Failure.authFailure(
+          message: 'Password reset failed: ${e.toString()}',
+          code: 'AUTH_PASSWORD_RESET_ERROR',
+        ),
+      );
+    }
+  }
+
+  /// Update user profile
+  Future<Result<void>> updateUserProfile({
+    String? displayName,
+    String? photoURL,
+  }) async {
+    try {
+      final currentUser = AuthConfig.currentUser;
+      AppLogger.firebase(
+        'AuthService',
+        'Updating profile for: ${currentUser?.email}',
+      );
+
+      await AuthConfig.updateUserProfile(
+        displayName: displayName,
+        photoURL: photoURL,
+      );
+
+      AppLogger.firebase('AuthService', 'Profile update successful');
+      return const Result.success(null);
+    } catch (e) {
+      AppLogger.error('Profile update failed', e);
+      return Result.failure(
+        Failure.authFailure(
+          message: 'Profile update failed: ${e.toString()}',
+          code: 'AUTH_PROFILE_UPDATE_ERROR',
+        ),
+      );
+    }
+  }
+
+  /// Delete current user account
+  Future<Result<void>> deleteUserAccount() async {
+    try {
+      final currentUser = AuthConfig.currentUser;
+      AppLogger.firebase(
+        'AuthService',
+        'Deleting account for: ${currentUser?.email}',
+      );
+
+      await AuthConfig.deleteUser();
+
+      AppLogger.firebase('AuthService', 'Account deletion successful');
+      return const Result.success(null);
+    } catch (e) {
+      AppLogger.error('Account deletion failed', e);
+      return Result.failure(
+        Failure.authFailure(
+          message: 'Account deletion failed: ${e.toString()}',
+          code: 'AUTH_DELETE_ACCOUNT_ERROR',
+        ),
+      );
+    }
+  }
+
+  /// Get current user
+  User? get currentUser => AuthConfig.currentUser;
+
+  /// Check if user is authenticated
+  bool get isAuthenticated => AuthConfig.isAuthenticated;
+
+  /// Get current user ID
+  String? get currentUserId => AuthConfig.currentUserId;
+}

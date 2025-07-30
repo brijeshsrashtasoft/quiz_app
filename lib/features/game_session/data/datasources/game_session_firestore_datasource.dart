@@ -1116,7 +1116,9 @@ class GameSessionFirestoreDataSource extends BaseFirebaseDataSource {
   }
 
   /// Get session analytics
-  Future<Result<Map<String, dynamic>>> getSessionAnalytics(String sessionId) async {
+  Future<Result<Map<String, dynamic>>> getSessionAnalytics(
+    String sessionId,
+  ) async {
     try {
       final sessionResult = await getGameSessionById(sessionId);
       return sessionResult.when(
@@ -1124,10 +1126,20 @@ class GameSessionFirestoreDataSource extends BaseFirebaseDataSource {
           // Calculate analytics based on session data
           final analytics = {
             'totalPlayers': session.players.length,
-            'averageScore': session.players.isEmpty ? 0.0 : 
-              session.players.values.map((p) => p.score).reduce((a, b) => a + b) / session.players.length,
-            'completionRate': session.status == GameSessionStatus.completed ? 1.0 : 0.0,
-            'sessionDuration': session.completedAt?.difference(session.startedAt ?? session.createdAt)?.inMinutes ?? 0,
+            'averageScore': session.players.isEmpty
+                ? 0.0
+                : session.players.values
+                          .map((p) => p.score)
+                          .reduce((a, b) => a + b) /
+                      session.players.length,
+            'completionRate': session.status == GameSessionStatus.completed
+                ? 1.0
+                : 0.0,
+            'sessionDuration':
+                session.completedAt
+                    ?.difference(session.startedAt ?? session.createdAt)
+                    ?.inMinutes ??
+                0,
           };
 
           return Result.success(analytics);
@@ -1153,10 +1165,20 @@ class GameSessionFirestoreDataSource extends BaseFirebaseDataSource {
           // Calculate host analytics
           final analytics = {
             'totalSessions': sessions.length,
-            'totalPlayers': sessions.fold(0, (total, session) => total + session.players.length),
-            'averagePlayersPerSession': sessions.isEmpty ? 0.0 :
-              sessions.fold(0, (total, session) => total + session.players.length) / sessions.length,
-            'completedSessions': sessions.where((s) => s.status == GameSessionStatus.completed).length,
+            'totalPlayers': sessions.fold(
+              0,
+              (total, session) => total + session.players.length,
+            ),
+            'averagePlayersPerSession': sessions.isEmpty
+                ? 0.0
+                : sessions.fold(
+                        0,
+                        (total, session) => total + session.players.length,
+                      ) /
+                      sessions.length,
+            'completedSessions': sessions
+                .where((s) => s.status == GameSessionStatus.completed)
+                .length,
           };
 
           return Result.success(analytics);

@@ -638,17 +638,17 @@ class LeaderboardFirestoreDataSource extends BaseFirebaseDataSource {
   ) async {
     try {
       final leaderboardResult = await getLeaderboardBySessionId(sessionId);
-      
+
       return leaderboardResult.when(
         success: (leaderboard) async {
           final updatedScores = List<ScoreModel>.from(leaderboard.scores ?? []);
           updatedScores.add(score);
-          
+
           final updatedLeaderboard = leaderboard.copyWith(
             scores: updatedScores,
             updatedAt: DateTime.now(),
           );
-          
+
           final updateResult = await updateLeaderboard(updatedLeaderboard);
           return updateResult;
         },
@@ -666,23 +666,25 @@ class LeaderboardFirestoreDataSource extends BaseFirebaseDataSource {
   ) async {
     try {
       final leaderboardResult = await getLeaderboardBySessionId(sessionId);
-      
+
       return leaderboardResult.when(
         success: (leaderboard) async {
           final updatedScores = List<ScoreModel>.from(leaderboard.scores ?? []);
-          final existingIndex = updatedScores.indexWhere((s) => s.playerId == score.playerId);
-          
+          final existingIndex = updatedScores.indexWhere(
+            (s) => s.playerId == score.playerId,
+          );
+
           if (existingIndex >= 0) {
             updatedScores[existingIndex] = score;
           } else {
             updatedScores.add(score);
           }
-          
+
           final updatedLeaderboard = leaderboard.copyWith(
             scores: updatedScores,
             updatedAt: DateTime.now(),
           );
-          
+
           final updateResult = await updateLeaderboard(updatedLeaderboard);
           return updateResult;
         },
@@ -700,17 +702,17 @@ class LeaderboardFirestoreDataSource extends BaseFirebaseDataSource {
   ) async {
     try {
       final leaderboardResult = await getLeaderboardBySessionId(sessionId);
-      
+
       return leaderboardResult.when(
         success: (leaderboard) async {
           final updatedScores = List<ScoreModel>.from(leaderboard.scores ?? []);
           updatedScores.removeWhere((s) => s.playerId == playerId);
-          
+
           final updatedLeaderboard = leaderboard.copyWith(
             scores: updatedScores,
             updatedAt: DateTime.now(),
           );
-          
+
           final updateResult = await updateLeaderboard(updatedLeaderboard);
           return updateResult;
         },

@@ -13,9 +13,9 @@ enum ErrorLogLevel { info, warning, error, fatal }
 class ErrorService {
   static ErrorService? _instance;
   static ErrorService get instance => _instance ??= ErrorService._();
-  
+
   ErrorService._();
-  
+
   factory ErrorService() => instance;
 
   /// Handle any error object with proper logging and user feedback
@@ -29,13 +29,17 @@ class ErrorService {
     try {
       // Convert error to Failure for consistent handling
       final failure = _convertToFailure(error);
-      
+
       // Build error context for logging
-      final errorContext = buildErrorContext(context, stackTrace, additionalInfo);
-      
+      final errorContext = buildErrorContext(
+        context,
+        stackTrace,
+        additionalInfo,
+      );
+
       // Log the error with appropriate level
       _logError(failure, stackTrace, errorContext);
-      
+
       // Show user feedback if context is available
       if (buildContext != null && buildContext.mounted) {
         _showUserFeedback(buildContext, failure);
@@ -95,11 +99,11 @@ class ErrorService {
     Map<String, dynamic>? additionalInfo,
   ) {
     final buffer = StringBuffer();
-    
+
     if (context != null) {
       buffer.write(context);
     }
-    
+
     if (additionalInfo != null && additionalInfo.isNotEmpty) {
       if (buffer.isNotEmpty) buffer.write(' - ');
       final infoStrings = additionalInfo.entries
@@ -107,15 +111,16 @@ class ErrorService {
           .join(', ');
       buffer.write(infoStrings);
     }
-    
+
     return buffer.toString();
   }
 
   /// Log error with appropriate level
   void _logError(Failure failure, StackTrace stackTrace, String context) {
     final level = getLogLevel(failure);
-    final message = '${failure.userMessage}${context.isNotEmpty ? ' - $context' : ''}';
-    
+    final message =
+        '${failure.userMessage}${context.isNotEmpty ? ' - $context' : ''}';
+
     switch (level) {
       case ErrorLogLevel.info:
         AppLogger.info(message, failure, stackTrace);
@@ -136,7 +141,7 @@ class ErrorService {
   void _showUserFeedback(BuildContext context, Failure failure) {
     final message = getUserFriendlyMessage(failure);
     final isRecoverable = isRecoverableError(failure);
-    
+
     if (isRecoverable) {
       CustomSnackBar.showWarning(
         context,

@@ -64,45 +64,8 @@ class PlaceholderPage extends StatelessWidget {
   }
 }
 
-// Authentication Pages
-class LoginPage extends StatelessWidget {
-  const LoginPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const PlaceholderPage(
-      title: 'Login',
-      subtitle: 'Sign in to your account',
-      icon: Icons.login,
-    );
-  }
-}
-
-class RegisterPage extends StatelessWidget {
-  const RegisterPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const PlaceholderPage(
-      title: 'Register',
-      subtitle: 'Create a new account',
-      icon: Icons.person_add,
-    );
-  }
-}
-
-class ForgotPasswordPage extends StatelessWidget {
-  const ForgotPasswordPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const PlaceholderPage(
-      title: 'Forgot Password',
-      subtitle: 'Reset your password',
-      icon: Icons.lock_reset,
-    );
-  }
-}
+// Authentication Pages - Re-exports from feature modules
+// Actual implementations are in /features/authentication/presentation/pages/
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -233,6 +196,7 @@ class GameJoinPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Use the comprehensive GameJoinWidget
     return const PlaceholderPage(
       title: 'Join Game',
       subtitle: 'Enter game PIN to join',
@@ -420,6 +384,7 @@ class NotFoundPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Use the comprehensive NotFoundErrorWidget
     return const PlaceholderPage(
       title: '404 - Not Found',
       subtitle: 'The page you are looking for does not exist',
@@ -435,6 +400,7 @@ class ErrorPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Use the comprehensive ErrorPageWidget
     return PlaceholderPage(
       title: 'Error',
       subtitle: error ?? 'An unexpected error occurred',

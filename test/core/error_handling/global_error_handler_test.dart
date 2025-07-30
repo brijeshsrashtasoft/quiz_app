@@ -36,14 +36,21 @@ void main() {
       test('should preserve existing error handlers when initializing', () {
         // Arrange
         final originalFlutterErrorHandler = FlutterError.onError;
-        final originalPlatformErrorHandler = PlatformDispatcher.instance.onError;
+        final originalPlatformErrorHandler =
+            PlatformDispatcher.instance.onError;
 
         // Act
         globalErrorHandler.initialize();
 
         // Assert
-        expect(FlutterError.onError, isNot(equals(originalFlutterErrorHandler)));
-        expect(PlatformDispatcher.instance.onError, isNot(equals(originalPlatformErrorHandler)));
+        expect(
+          FlutterError.onError,
+          isNot(equals(originalFlutterErrorHandler)),
+        );
+        expect(
+          PlatformDispatcher.instance.onError,
+          isNot(equals(originalPlatformErrorHandler)),
+        );
       });
     });
 
@@ -64,11 +71,13 @@ void main() {
         FlutterError.onError!(flutterErrorDetails);
 
         // Assert
-        verify(mockErrorService.handleError(
-          error,
-          stackTrace,
-          context: 'Flutter Error - test_library: Test context',
-        )).called(1);
+        verify(
+          mockErrorService.handleError(
+            error,
+            stackTrace,
+            context: 'Flutter Error - test_library: Test context',
+          ),
+        ).called(1);
       });
 
       test('should handle FlutterErrorDetails without context', () async {
@@ -85,11 +94,13 @@ void main() {
         FlutterError.onError!(flutterErrorDetails);
 
         // Assert
-        verify(mockErrorService.handleError(
-          error,
-          stackTrace,
-          context: 'Flutter Error',
-        )).called(1);
+        verify(
+          mockErrorService.handleError(
+            error,
+            stackTrace,
+            context: 'Flutter Error',
+          ),
+        ).called(1);
       });
     });
 
@@ -105,11 +116,13 @@ void main() {
 
         // Assert
         expect(result, isTrue);
-        verify(mockErrorService.handleError(
-          error,
-          stackTrace,
-          context: 'Platform Error',
-        )).called(1);
+        verify(
+          mockErrorService.handleError(
+            error,
+            stackTrace,
+            context: 'Platform Error',
+          ),
+        ).called(1);
       });
 
       test('should always return true for platform errors', () {
@@ -137,11 +150,9 @@ void main() {
         globalErrorHandler.reportError(error, stackTrace, context: context);
 
         // Assert
-        verify(mockErrorService.handleError(
-          error,
-          stackTrace,
-          context: context,
-        )).called(1);
+        verify(
+          mockErrorService.handleError(error, stackTrace, context: context),
+        ).called(1);
       });
 
       test('should report errors without context', () {
@@ -153,11 +164,9 @@ void main() {
         globalErrorHandler.reportError(error, stackTrace);
 
         // Assert
-        verify(mockErrorService.handleError(
-          error,
-          stackTrace,
-          context: null,
-        )).called(1);
+        verify(
+          mockErrorService.handleError(error, stackTrace, context: null),
+        ).called(1);
       });
     });
 
@@ -176,26 +185,33 @@ void main() {
         await Future.delayed(const Duration(milliseconds: 10));
 
         // Assert
-        verify(mockErrorService.handleError(
-          error,
-          any,
-          context: 'Zone Error',
-        )).called(1);
+        verify(
+          mockErrorService.handleError(error, any, context: 'Zone Error'),
+        ).called(1);
       });
 
-      test('should execute function successfully when no errors occur', () async {
-        // Arrange
-        var functionExecuted = false;
+      test(
+        'should execute function successfully when no errors occur',
+        () async {
+          // Arrange
+          var functionExecuted = false;
 
-        // Act
-        await globalErrorHandler.runInErrorZone(() async {
-          functionExecuted = true;
-        });
+          // Act
+          await globalErrorHandler.runInErrorZone(() async {
+            functionExecuted = true;
+          });
 
-        // Assert
-        expect(functionExecuted, isTrue);
-        verifyNever(mockErrorService.handleError(any, any, context: anyNamed('context')));
-      });
+          // Assert
+          expect(functionExecuted, isTrue);
+          verifyNever(
+            mockErrorService.handleError(
+              any,
+              any,
+              context: anyNamed('context'),
+            ),
+          );
+        },
+      );
     });
   });
 }
