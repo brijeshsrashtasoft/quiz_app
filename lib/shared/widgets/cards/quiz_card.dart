@@ -49,14 +49,14 @@ class _QuizCardState extends State<QuizCard>
       end: 0.98,
     ).animate(CurvedAnimation(
       parent: _animationController,
-      curve: AppAnimations.bounceInOut,
+      curve: AppAnimations.bounce,
     ));
     _elevationAnimation = Tween<double>(
       begin: 4.0,
       end: 8.0,
     ).animate(CurvedAnimation(
       parent: _animationController,
-      curve: AppAnimations.slideInOut,
+      curve: AppAnimations.easeInOut,
     ));
   }
 

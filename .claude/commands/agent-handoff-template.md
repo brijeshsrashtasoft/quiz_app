@@ -50,6 +50,31 @@ Next Agent Should Work On:
 - [Integration points to test]
 - [Performance or quality requirements]
 
+### 🚨 **MANDATORY COMPLETION REQUIREMENTS:**
+- [ ] ✅ **100% Task Completion**: All assigned tasks MUST be 100% complete
+- [ ] ✅ **Platform Verification**: Code MUST build successfully on Web, Android, iOS
+- [ ] ✅ **Test Coverage**: All code MUST have appropriate tests (unit/widget/integration)
+- [ ] ✅ **Documentation Updates**: All relevant documentation MUST be updated
+- [ ] ✅ **Custom Commands**: New procedures MUST be documented in commands
+- [ ] ✅ **Integration Validation**: Work MUST integrate seamlessly with other agents
+
+### 📋 **COMPLETION VERIFICATION:**
+```bash
+# MANDATORY: Each agent must run these before handoff
+flutter build web --release        # ✅ Web build success required
+flutter build apk --release        # ✅ Android build success required  
+flutter build ios --release --no-codesign # ✅ iOS build success required
+flutter test --coverage           # ✅ All tests must pass
+flutter analyze                   # ✅ No critical errors allowed
+dart format --set-exit-if-changed . # ✅ Code formatting compliance
+```
+
+### 🚫 **NO HANDOFF UNTIL:**
+- ALL completion requirements are verified ✅
+- ALL platform builds are successful ✅
+- ALL tests are passing with adequate coverage ✅
+- ALL documentation updates are completed ✅
+
 ---
 
-**Next Agent**: Please acknowledge this handoff and confirm your understanding before proceeding.
+**Next Agent**: You MUST acknowledge this handoff AND confirm that ALL completion requirements have been met before proceeding. Verify that the previous agent completed 100% of their assigned tasks.

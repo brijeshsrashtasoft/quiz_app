@@ -52,7 +52,7 @@ class _PrimaryButtonState extends State<PrimaryButton>
       end: 0.95,
     ).animate(CurvedAnimation(
       parent: _animationController,
-      curve: AppAnimations.bounceInOut,
+      curve: AppAnimations.bounce,
     ));
   }
 
