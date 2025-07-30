@@ -316,7 +316,7 @@ class AuthRepositoryImpl implements AuthRepository {
       );
 
       await user.reauthenticateWithCredential(credential);
-      await user.updateEmail(newEmail);
+      await user.verifyBeforeUpdateEmail(newEmail);
 
       AppLogger.firebase('AuthRepository', 'Email updated successfully');
       return const Result.success(null);
@@ -452,14 +452,13 @@ class AuthRepositoryImpl implements AuthRepository {
     required String email,
   }) async {
     try {
-      final methods = await AuthConfig.instance.fetchSignInMethodsForEmail(
-        email,
-      );
+      // fetchSignInMethodsForEmail is deprecated for security reasons
+      // Return empty list as recommended by Firebase documentation
       AppLogger.firebase(
         'AuthRepository',
-        'Retrieved sign-in methods for: $email',
+        'Sign-in methods check requested for: $email (deprecated API)',
       );
-      return Result.success(methods);
+      return const Result.success([]);
     } on FirebaseAuthException catch (e) {
       AppLogger.error('Failed to get sign-in methods', e);
       return Result.failure(

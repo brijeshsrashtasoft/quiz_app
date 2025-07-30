@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:quiz_app/features/authentication/domain/entities/user_session.dart';
+import 'package:quiz_app/features/authentication/domain/entities/user_entity.dart';
 import '../../../../../test_config.dart';
 
 /// Comprehensive unit tests for UserSession domain entities
@@ -8,18 +9,25 @@ import '../../../../../test_config.dart';
 void main() {
   testGroup('UserSession Entities', TestCategory.unit, () {
     late DateTime testDate;
+    late UserEntity testUser;
     late UserSession testSession;
 
     setUpAll(() {
       testDate = DateTime.parse('2024-01-01T12:00:00.000Z');
+      testUser = UserEntity(
+        id: 'user-123',
+        name: 'Test User',
+        email: 'test@example.com',
+        createdAt: testDate,
+      );
       testSession = UserSession(
         sessionId: 'session-123',
-        userId: 'user-123',
+        user: testUser,
         createdAt: testDate,
         lastAccessedAt: testDate.add(Duration(minutes: 30)),
         expiresAt: testDate.add(Duration(hours: 24)),
-        isActive: true,
-        deviceInfo: 'iPhone 15 Pro',
+        status: SessionStatus.active,
+        deviceInfo: 'iPhone 15 Pro iOS',
         ipAddress: '192.168.1.1',
         userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)',
         metadata: {'app_version': '1.0.0', 'build': '123'},
@@ -31,21 +39,29 @@ void main() {
         'should create UserSession with required fields only',
         TestCategory.unit,
         () {
+          // Arrange
+          final user = UserEntity(
+            id: 'user-456',
+            name: 'Test User 2',
+            email: 'test2@example.com',
+            createdAt: testDate,
+          );
+
           // Act
           final session = UserSession(
             sessionId: 'session-456',
-            userId: 'user-456',
+            user: user,
             createdAt: testDate,
             lastAccessedAt: testDate,
-            isActive: true,
+            status: SessionStatus.active,
           );
 
           // Assert
           expect(session.sessionId, equals('session-456'));
-          expect(session.userId, equals('user-456'));
+          expect(session.user.id, equals('user-456'));
           expect(session.createdAt, equals(testDate));
           expect(session.lastAccessedAt, equals(testDate));
-          expect(session.isActive, isTrue);
+          expect(session.status, equals(SessionStatus.active));
           expect(session.expiresAt, isNull);
           expect(session.deviceInfo, isNull);
           expect(session.ipAddress, isNull);
@@ -60,7 +76,7 @@ void main() {
         () {
           // Assert
           expect(testSession.sessionId, equals('session-123'));
-          expect(testSession.userId, equals('user-123'));
+          expect(testSession.user.id, equals('user-123'));
           expect(testSession.createdAt, equals(testDate));
           expect(
             testSession.lastAccessedAt,
@@ -70,8 +86,8 @@ void main() {
             testSession.expiresAt,
             equals(testDate.add(Duration(hours: 24))),
           );
-          expect(testSession.isActive, isTrue);
-          expect(testSession.deviceInfo, equals('iPhone 15 Pro'));
+          expect(testSession.status, equals(SessionStatus.active));
+          expect(testSession.deviceInfo, equals('iPhone 15 Pro iOS'));
           expect(testSession.ipAddress, equals('192.168.1.1'));
           expect(testSession.userAgent, contains('iPhone'));
           expect(testSession.metadata?['app_version'], equals('1.0.0'));
@@ -87,18 +103,18 @@ void main() {
           // Arrange
           final session1 = UserSession(
             sessionId: 'session-123',
-            userId: 'user-123',
+            user: testUser,
             createdAt: testDate,
             lastAccessedAt: testDate,
-            isActive: true,
+            status: SessionStatus.active,
           );
 
           final session2 = UserSession(
             sessionId: 'session-123',
-            userId: 'user-123',
+            user: testUser,
             createdAt: testDate,
             lastAccessedAt: testDate,
-            isActive: true,
+            status: SessionStatus.active,
           );
 
           // Assert
@@ -114,18 +130,18 @@ void main() {
           // Arrange
           final session1 = UserSession(
             sessionId: 'session-123',
-            userId: 'user-123',
+            user: testUser,
             createdAt: testDate,
             lastAccessedAt: testDate,
-            isActive: true,
+            status: SessionStatus.active,
           );
 
           final session2 = UserSession(
             sessionId: 'session-456',
-            userId: 'user-123',
+            user: testUser,
             createdAt: testDate,
             lastAccessedAt: testDate,
-            isActive: true,
+            status: SessionStatus.active,
           );
 
           // Assert
@@ -144,10 +160,10 @@ void main() {
             // Arrange
             final sessionWithoutExpiry = UserSession(
               sessionId: 'session-123',
-              userId: 'user-123',
+              user: testUser,
               createdAt: testDate,
               lastAccessedAt: testDate,
-              isActive: true,
+              status: SessionStatus.active,
             );
 
             // Assert
@@ -163,10 +179,10 @@ void main() {
             final futureExpiry = DateTime.now().add(Duration(hours: 1));
             final session = UserSession(
               sessionId: 'session-123',
-              userId: 'user-123',
+              user: testUser,
               createdAt: testDate,
               lastAccessedAt: testDate,
-              isActive: true,
+              status: SessionStatus.active,
               expiresAt: futureExpiry,
             );
 
@@ -183,10 +199,10 @@ void main() {
             final pastExpiry = DateTime.now().subtract(Duration(hours: 1));
             final session = UserSession(
               sessionId: 'session-123',
-              userId: 'user-123',
+              user: testUser,
               createdAt: testDate,
               lastAccessedAt: testDate,
-              isActive: true,
+              status: SessionStatus.active,
               expiresAt: pastExpiry,
             );
 
@@ -205,10 +221,10 @@ void main() {
             final createdAt = DateTime.now().subtract(Duration(hours: 2));
             final session = UserSession(
               sessionId: 'session-123',
-              userId: 'user-123',
+              user: testUser,
               createdAt: createdAt,
               lastAccessedAt: DateTime.now(),
-              isActive: true,
+              status: SessionStatus.active,
             );
 
             // Act
@@ -226,10 +242,10 @@ void main() {
           final lastAccessed = DateTime.now().subtract(Duration(minutes: 30));
           final session = UserSession(
             sessionId: 'session-123',
-            userId: 'user-123',
+            user: testUser,
             createdAt: testDate,
             lastAccessedAt: lastAccessed,
-            isActive: true,
+            status: SessionStatus.active,
           );
 
           // Act
@@ -248,10 +264,10 @@ void main() {
           () {
             // Arrange
             final mobileDevices = [
-              'iPhone 15 Pro',
-              'Samsung Galaxy S23',
-              'Google Pixel 7',
-              'iPad Pro',
+              'iPhone 15 Pro iOS',
+              'Samsung Galaxy S23 Android',
+              'Google Pixel 7 Android',
+              'iPad Pro iOS',
               'Android Tablet',
               'iOS Device',
             ];
@@ -259,10 +275,10 @@ void main() {
             for (final device in mobileDevices) {
               final session = UserSession(
                 sessionId: 'session-123',
-                userId: 'user-123',
+                user: testUser,
                 createdAt: testDate,
                 lastAccessedAt: testDate,
-                isActive: true,
+                status: SessionStatus.active,
                 deviceInfo: device,
               );
 
@@ -291,10 +307,10 @@ void main() {
             for (final device in nonMobileDevices) {
               final session = UserSession(
                 sessionId: 'session-123',
-                userId: 'user-123',
+                user: testUser,
                 createdAt: testDate,
                 lastAccessedAt: testDate,
-                isActive: true,
+                status: SessionStatus.active,
                 deviceInfo: device,
               );
 
@@ -315,10 +331,10 @@ void main() {
             // Arrange
             final session = UserSession(
               sessionId: 'session-123',
-              userId: 'user-123',
+              user: testUser,
               createdAt: testDate,
               lastAccessedAt: testDate,
-              isActive: true,
+              status: SessionStatus.active,
             );
 
             // Assert
@@ -339,10 +355,10 @@ void main() {
           for (final userAgent in webUserAgents) {
             final session = UserSession(
               sessionId: 'session-123',
-              userId: 'user-123',
+              user: testUser,
               createdAt: testDate,
               lastAccessedAt: testDate,
-              isActive: true,
+              status: SessionStatus.active,
               userAgent: userAgent,
             );
 
@@ -369,10 +385,10 @@ void main() {
             for (final userAgent in nonWebUserAgents) {
               final session = UserSession(
                 sessionId: 'session-123',
-                userId: 'user-123',
+                user: testUser,
                 createdAt: testDate,
                 lastAccessedAt: testDate,
-                isActive: true,
+                status: SessionStatus.active,
                 userAgent: userAgent,
               );
 
@@ -393,10 +409,10 @@ void main() {
             // Arrange
             final session = UserSession(
               sessionId: 'session-123',
-              userId: 'user-123',
+              user: testUser,
               createdAt: testDate,
               lastAccessedAt: testDate,
-              isActive: true,
+              status: SessionStatus.active,
             );
 
             // Assert
@@ -413,10 +429,10 @@ void main() {
             // Arrange
             final longIdleSession = UserSession(
               sessionId: 'session-123',
-              userId: 'user-123',
+              user: testUser,
               createdAt: testDate,
               lastAccessedAt: DateTime.now().subtract(Duration(hours: 7)),
-              isActive: true,
+              status: SessionStatus.active,
             );
 
             // Assert
@@ -431,10 +447,10 @@ void main() {
             // Arrange
             final oldSession = UserSession(
               sessionId: 'session-123',
-              userId: 'user-123',
+              user: testUser,
               createdAt: DateTime.now().subtract(Duration(hours: 25)),
               lastAccessedAt: DateTime.now(),
-              isActive: true,
+              status: SessionStatus.active,
             );
 
             // Assert
@@ -449,10 +465,10 @@ void main() {
             // Arrange
             final freshSession = UserSession(
               sessionId: 'session-123',
-              userId: 'user-123',
+              user: testUser,
               createdAt: DateTime.now().subtract(Duration(hours: 1)),
               lastAccessedAt: DateTime.now().subtract(Duration(minutes: 30)),
-              isActive: true,
+              status: SessionStatus.active,
             );
 
             // Assert
@@ -677,10 +693,11 @@ void main() {
           () {
             // Arrange
             final mobileSession = testSession.copyWith(
-              deviceInfo: 'iPhone 15 Pro',
+              deviceInfo: 'iPhone 15 Pro iOS',
               userAgent: 'MobileApp/1.0.0',
             );
             final webSession = testSession.copyWith(
+              deviceInfo: null,
               userAgent:
                   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/91.0',
             );
@@ -829,10 +846,10 @@ void main() {
           expect(
             () => UserSession(
               sessionId: 'session-123',
-              userId: 'user-123',
+              user: testUser,
               createdAt: testDate,
               lastAccessedAt: testDate,
-              isActive: true,
+              status: SessionStatus.active,
               metadata: null,
             ),
             returnsNormally,
@@ -866,18 +883,24 @@ void main() {
         () {
           // This tests that session objects are immutable and thread-safe
           // Arrange
+          final testSecureSession = SecureUserSession(
+            session: testSession,
+            securityLevel: SecurityLevel.basic,
+            permissions: ['read', 'write', 'admin'],
+            lastAuthenticationAt: testDate,
+          );
           final originalPermissions = List<String>.from(
-            secureSession.permissions,
+            testSecureSession.permissions,
           );
 
           // Act - Simulate concurrent modifications
           final futures = List.generate(10, (index) {
-            return Future.value(secureSession.addPermission('perm$index'));
+            return Future.value(testSecureSession.addPermission('perm$index'));
           });
 
           // Assert
           expect(
-            secureSession.permissions,
+            testSecureSession.permissions,
             equals(originalPermissions),
           ); // Original unchanged
           expect(futures, hasLength(10));
@@ -896,12 +919,18 @@ void main() {
 
           // Act
           final sessions = List.generate(sessionsToCreate, (index) {
+            final user = UserEntity(
+              id: 'user-$index',
+              name: 'User $index',
+              email: 'user$index@example.com',
+              createdAt: testDate,
+            );
             return UserSession(
               sessionId: 'session-$index',
-              userId: 'user-$index',
+              user: user,
               createdAt: testDate,
               lastAccessedAt: testDate,
-              isActive: true,
+              status: SessionStatus.active,
             );
           });
 
@@ -918,7 +947,12 @@ void main() {
         TestCategory.unit,
         () {
           // Arrange
-          var currentSession = secureSession;
+          var currentSession = SecureUserSession(
+            session: testSession,
+            securityLevel: SecurityLevel.basic,
+            permissions: ['read', 'write', 'admin'],
+            lastAuthenticationAt: testDate,
+          );
           final stopwatch = Stopwatch()..start();
 
           // Act - Add and remove many permissions

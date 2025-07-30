@@ -15,7 +15,7 @@ import 'package:quiz_app/features/authentication/domain/usecases/update_user_pro
 import 'package:quiz_app/features/authentication/domain/usecases/delete_account_usecase.dart';
 
 import '../../../../../test_config.dart';
-import '../../../../../helpers/authentication_test_helper.dart';
+import '../helpers/auth_domain_test_helpers.dart';
 
 import 'comprehensive_auth_usecases_test.mocks.dart';
 
@@ -29,7 +29,7 @@ void main() {
     late UserEntity testUser;
 
     setUpAll(() {
-      testUser = AuthTestHelper.createTestUser(
+      testUser = AuthDomainTestHelpers.createTestUserEntity(
         id: 'test-user-123',
         name: 'Test User',
         email: 'test@example.com',
@@ -59,8 +59,8 @@ void main() {
 
           when(
             mockAuthRepository.signInWithEmailPassword(
-              email: anyNamed('email'),
-              password: anyNamed('password'),
+              email: any,
+              password: any,
             ),
           ).thenAnswer((_) async => Result.success(testUser));
 
@@ -91,8 +91,8 @@ void main() {
 
           when(
             mockAuthRepository.signInWithEmailPassword(
-              email: anyNamed('email'),
-              password: anyNamed('password'),
+              email: any,
+              password: any,
             ),
           ).thenAnswer((_) async => Result.success(testUser));
 
@@ -130,8 +130,8 @@ void main() {
           );
           verifyNever(
             mockAuthRepository.signInWithEmailPassword(
-              email: anyNamed('email'),
-              password: anyNamed('password'),
+              email: any,
+              password: any,
             ),
           );
         },
@@ -200,8 +200,8 @@ void main() {
 
           when(
             mockAuthRepository.signInWithEmailPassword(
-              email: anyNamed('email'),
-              password: anyNamed('password'),
+              email: any,
+              password: any,
             ),
           ).thenAnswer((_) async => Result.failure(authFailure));
 
@@ -226,8 +226,8 @@ void main() {
 
           when(
             mockAuthRepository.signInWithEmailPassword(
-              email: anyNamed('email'),
-              password: anyNamed('password'),
+              email: any,
+              password: any,
             ),
           ).thenThrow(Exception('Unexpected error'));
 
@@ -254,8 +254,8 @@ void main() {
           );
           when(
             mockAuthRepository.signInWithEmailPassword(
-              email: anyNamed('email'),
-              password: anyNamed('password'),
+              email: any,
+              password: any,
             ),
           ).thenAnswer((_) async => Result.success(testUser));
 
@@ -287,9 +287,9 @@ void main() {
 
           when(
             mockAuthRepository.createUserWithEmailPassword(
-              email: anyNamed('email'),
-              password: anyNamed('password'),
-              name: anyNamed('name'),
+              email: any,
+              password: any,
+              name: any,
             ),
           ).thenAnswer((_) async => Result.success(testUser));
 
@@ -322,9 +322,9 @@ void main() {
 
           when(
             mockAuthRepository.createUserWithEmailPassword(
-              email: anyNamed('email'),
-              password: anyNamed('password'),
-              name: anyNamed('name'),
+              email: any,
+              password: any,
+              name: any,
             ),
           ).thenAnswer((_) async => Result.success(testUser));
 
@@ -576,7 +576,7 @@ void main() {
           // Arrange
           const params = ResetPasswordParams(email: 'test@example.com');
           when(
-            mockAuthRepository.sendPasswordResetEmail(email: anyNamed('email')),
+            mockAuthRepository.sendPasswordResetEmail(email: any),
           ).thenAnswer((_) async => Result.success(null));
 
           // Act
@@ -599,7 +599,7 @@ void main() {
           // Arrange
           const params = ResetPasswordParams(email: '  test@example.com  ');
           when(
-            mockAuthRepository.sendPasswordResetEmail(email: anyNamed('email')),
+            mockAuthRepository.sendPasswordResetEmail(email: any),
           ).thenAnswer((_) async => Result.success(null));
 
           // Act
@@ -669,7 +669,7 @@ void main() {
             code: 'AUTH_USER_NOT_FOUND',
           );
           when(
-            mockAuthRepository.sendPasswordResetEmail(email: anyNamed('email')),
+            mockAuthRepository.sendPasswordResetEmail(email: any),
           ).thenAnswer((_) async => Result.failure(authFailure));
 
           // Act
@@ -776,8 +776,8 @@ void main() {
 
           when(
             mockAuthRepository.updateEmail(
-              newEmail: anyNamed('newEmail'),
-              password: anyNamed('password'),
+              newEmail: any,
+              password: any,
             ),
           ).thenAnswer((_) async => Result.success(null));
 
@@ -914,8 +914,8 @@ void main() {
 
           when(
             mockAuthRepository.signInWithEmailPassword(
-              email: anyNamed('email'),
-              password: anyNamed('password'),
+              email: any,
+              password: any,
             ),
           ).thenAnswer((_) async => Result.success(testUser));
 
@@ -947,8 +947,8 @@ void main() {
           );
           when(
             mockAuthRepository.signInWithEmailPassword(
-              email: anyNamed('email'),
-              password: anyNamed('password'),
+              email: any,
+              password: any,
             ),
           ).thenAnswer((_) async {
             await Future.delayed(Duration(seconds: 10)); // Simulate timeout
@@ -977,8 +977,8 @@ void main() {
           );
           when(
             mockAuthRepository.signInWithEmailPassword(
-              email: anyNamed('email'),
-              password: anyNamed('password'),
+              email: any,
+              password: any,
             ),
           ).thenAnswer((_) async => Result.success(testUser));
 

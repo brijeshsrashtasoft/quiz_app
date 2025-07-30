@@ -4,7 +4,6 @@ import '../../constants/app_colors.dart';
 import '../../constants/app_text_styles.dart';
 import '../../constants/app_spacing.dart';
 import '../../constants/app_dimensions.dart';
-import '../layout/responsive_layout.dart';
 import 'app_navigation_bar.dart';
 import '../../../core/navigation/route_constants.dart';
 

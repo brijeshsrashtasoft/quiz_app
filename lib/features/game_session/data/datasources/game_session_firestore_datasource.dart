@@ -1138,7 +1138,7 @@ class GameSessionFirestoreDataSource extends BaseFirebaseDataSource {
             'sessionDuration':
                 session.completedAt
                     ?.difference(session.startedAt ?? session.createdAt)
-                    ?.inMinutes ??
+                    .inMinutes ??
                 0,
           };
 

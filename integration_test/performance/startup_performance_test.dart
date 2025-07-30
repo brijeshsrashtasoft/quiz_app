@@ -1,5 +1,5 @@
 import 'dart:math' as math;
-import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:quiz_app/main.dart' as app;
@@ -55,10 +55,10 @@ void main() {
       );
 
       // Log performance metrics
-      print('📊 Cold Startup Performance:');
-      print('  - Startup Time: ${startupTime.inMilliseconds}ms');
-      print('  - Target: <3000ms');
-      print(
+      debugPrint('📊 Cold Startup Performance:');
+      debugPrint('  - Startup Time: ${startupTime.inMilliseconds}ms');
+      debugPrint('  - Target: <3000ms');
+      debugPrint(
         '  - Status: ${startupTime.inMilliseconds < 3000 ? "✅ PASS" : "❌ FAIL"}',
       );
 
@@ -118,12 +118,12 @@ void main() {
         reason: 'Startup time should be consistent (std dev < 500ms)',
       );
 
-      print('📊 Startup Performance Regression Analysis:');
-      print('  - Average: ${averageStartupTime.toStringAsFixed(0)}ms');
-      print('  - Min: ${minStartupTime}ms');
-      print('  - Max: ${maxStartupTime}ms');
-      print('  - Std Dev: ${standardDeviation.toStringAsFixed(0)}ms');
-      print(
+      debugPrint('📊 Startup Performance Regression Analysis:');
+      debugPrint('  - Average: ${averageStartupTime.toStringAsFixed(0)}ms');
+      debugPrint('  - Min: ${minStartupTime}ms');
+      debugPrint('  - Max: ${maxStartupTime}ms');
+      debugPrint('  - Std Dev: ${standardDeviation.toStringAsFixed(0)}ms');
+      debugPrint(
         '  - Consistency: ${standardDeviation < 500 ? "✅ CONSISTENT" : "⚠️ VARIABLE"}',
       );
 

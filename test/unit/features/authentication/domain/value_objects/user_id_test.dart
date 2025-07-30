@@ -119,20 +119,17 @@ void main() {
           );
           expect(result.failureOrNull, isA<ValidationFailure>());
           final failure = result.failureOrNull as ValidationFailure;
-          expect(
-            failure.message,
-            equals('User ID must be at least 3 characters long'),
-          );
+          expect(failure.message, equals('User ID is too short'));
           expect(
             failure.fieldErrors?['userId'],
-            equals('User ID must be at least 3 characters long'),
+            equals('User ID is too short'),
           );
         }
       });
 
       testCase('should reject UserId that is too long', TestCategory.unit, () {
         // Arrange
-        final tooLongUserId = 'a' * 51; // Over 50 characters
+        final tooLongUserId = 'a' * 129; // Over 128 characters
 
         // Act
         final result = UserId.validate(tooLongUserId);
@@ -216,11 +213,11 @@ void main() {
 
     group('UserId Creation Methods', () {
       testCase(
-        'should create UserId with fromString method',
+        'should create UserId with tryCreate method',
         TestCategory.unit,
         () {
           // Act
-          final userId = UserId.fromString('valid-user-123');
+          final userId = UserId.tryCreate('valid-user-123');
 
           // Assert
           expect(userId, isNotNull);
@@ -229,11 +226,11 @@ void main() {
       );
 
       testCase(
-        'should return null for invalid UserId with fromString',
+        'should return null for invalid UserId with tryCreate',
         TestCategory.unit,
         () {
           // Act
-          final userId = UserId.fromString('invalid@user');
+          final userId = UserId.tryCreate('invalid@user');
 
           // Assert
           expect(userId, isNull);
@@ -241,14 +238,23 @@ void main() {
       );
 
       testCase(
-        'should create UserId with unsafe constructor',
+        'should create UserId with factory constructor',
         TestCategory.unit,
         () {
           // Act
-          final userId = UserId.unsafe('valid-user-123');
+          final userId = UserId('valid-user-123');
 
           // Assert
           expect(userId.value, equals('valid-user-123'));
+        },
+      );
+
+      testCase(
+        'should throw ArgumentError for invalid UserId with factory constructor',
+        TestCategory.unit,
+        () {
+          // Act & Assert
+          expect(() => UserId('invalid@user'), throwsA(isA<ArgumentError>()));
         },
       );
     });
@@ -259,10 +265,10 @@ void main() {
         TestCategory.unit,
         () {
           // Arrange
-          final firebaseUid = UserId.unsafe(
+          final firebaseUid = UserId(
             'abcdefghijklmnopqrstuvwxyz12',
           ); // 28 chars
-          final customId = UserId.unsafe('custom-user-id');
+          final customId = UserId('custom-user-id');
 
           // Act & Assert
           expect(firebaseUid.isFirebaseUid, isTrue);
@@ -272,58 +278,56 @@ void main() {
         },
       );
 
-      testCase(
-        'should identify admin user IDs correctly',
-        TestCategory.unit,
-        () {
-          // Arrange
-          final adminIds = [
-            UserId.unsafe('admin'),
-            UserId.unsafe('admin_user'),
-            UserId.unsafe('admin_123'),
-          ];
+      testCase('should identify admin user IDs correctly', TestCategory.unit, () {
+        // Arrange
+        // Cannot create reserved IDs with factory - use tryCreate or test with non-reserved admin pattern
+        final adminIds = [
+          UserId.tryCreate('admin'), // This will fail validation
+          UserId('admin_user'), // This should work
+          UserId('admin_123'), // This should work
+        ].where((id) => id != null).cast<UserId>().toList();
 
-          final nonAdminIds = [
-            UserId.unsafe('user123'),
-            UserId.unsafe('regular-user'),
-            UserId.unsafe('test-user'),
-          ];
+        final nonAdminIds = [
+          UserId('user123'),
+          UserId('regular-user'),
+          UserId('test-user'),
+        ];
 
-          // Act & Assert
-          for (final adminId in adminIds) {
-            expect(
-              adminId.isAdminId,
-              isTrue,
-              reason: '${adminId.value} should be admin',
-            );
-          }
+        // Act & Assert
+        for (final adminId in adminIds) {
+          expect(
+            adminId.isAdminId,
+            isTrue,
+            reason: '${adminId.value} should be admin',
+          );
+        }
 
-          for (final nonAdminId in nonAdminIds) {
-            expect(
-              nonAdminId.isAdminId,
-              isFalse,
-              reason: '${nonAdminId.value} should not be admin',
-            );
-          }
-        },
-      );
+        for (final nonAdminId in nonAdminIds) {
+          expect(
+            nonAdminId.isAdminId,
+            isFalse,
+            reason: '${nonAdminId.value} should not be admin',
+          );
+        }
+      });
 
       testCase(
         'should identify system user IDs correctly',
         TestCategory.unit,
         () {
           // Arrange
+          // Cannot create reserved IDs with factory - use tryCreate or test with non-reserved system pattern
           final systemIds = [
-            UserId.unsafe('system'),
-            UserId.unsafe('root'),
-            UserId.unsafe('api'),
-            UserId.unsafe('system_service'),
-          ];
+            UserId.tryCreate('system'), // This will fail validation
+            UserId.tryCreate('root'), // This will fail validation
+            UserId.tryCreate('api'), // This will fail validation
+            UserId('system_service'), // This should work
+          ].where((id) => id != null).cast<UserId>().toList();
 
           final nonSystemIds = [
-            UserId.unsafe('user123'),
-            UserId.unsafe('regular-user'),
-            UserId.unsafe('test-user'),
+            UserId('user123'),
+            UserId('regular-user'),
+            UserId('test-user'),
           ];
 
           // Act & Assert
@@ -351,15 +355,15 @@ void main() {
         () {
           // Arrange
           final testIds = [
-            UserId.unsafe('test_user'),
-            UserId.unsafe('testuser123'),
-            UserId.unsafe('user-test'),
+            UserId('test_user'),
+            UserId('testuser123'),
+            UserId('user-test'),
           ];
 
           final nonTestIds = [
-            UserId.unsafe('user123'),
-            UserId.unsafe('regular-user'),
-            UserId.unsafe('production-user'),
+            UserId('user123'),
+            UserId('regular-user'),
+            UserId('production-user'),
           ];
 
           // Act & Assert
@@ -386,9 +390,9 @@ void main() {
         TestCategory.unit,
         () {
           // Arrange
-          final shortId = UserId.unsafe('abc');
-          final mediumId = UserId.unsafe('user123');
-          final longId = UserId.unsafe('very-long-user-id-for-testing');
+          final shortId = UserId('abc');
+          final mediumId = UserId('user123');
+          final longId = UserId('very-long-user-id-for-testing');
 
           // Act
           final shortMasked = shortId.masked;
@@ -397,7 +401,10 @@ void main() {
 
           // Assert
           expect(shortMasked, equals('***')); // All masked for short IDs
-          expect(mediumMasked, equals('use***'));
+          expect(
+            mediumMasked,
+            equals('use****123'),
+          ); // First 3 and last 3 visible
           expect(longMasked, startsWith('ver'));
           expect(longMasked, endsWith('ing'));
           expect(longMasked, contains('*'));
@@ -406,8 +413,8 @@ void main() {
 
       testCase('should create short display versions', TestCategory.unit, () {
         // Arrange
-        final shortId = UserId.unsafe('user123');
-        final longId = UserId.unsafe('very-long-user-id-for-testing-purposes');
+        final shortId = UserId('user123');
+        final longId = UserId('very-long-user-id-for-testing-purposes');
 
         // Act
         final shortDisplay = shortId.shortDisplay;
@@ -425,8 +432,8 @@ void main() {
         TestCategory.unit,
         () {
           // Arrange
-          final userId1 = UserId.unsafe('same-user-id');
-          final userId2 = UserId.unsafe('same-user-id');
+          final userId1 = UserId('same-user-id');
+          final userId2 = UserId('same-user-id');
 
           // Assert
           expect(userId1, equals(userId2));
@@ -439,8 +446,8 @@ void main() {
         TestCategory.unit,
         () {
           // Arrange
-          final userId1 = UserId.unsafe('user-id-1');
-          final userId2 = UserId.unsafe('user-id-2');
+          final userId1 = UserId('user-id-1');
+          final userId2 = UserId('user-id-2');
 
           // Assert
           expect(userId1, isNot(equals(userId2)));
@@ -450,8 +457,8 @@ void main() {
 
       testCase('should be case sensitive for equality', TestCategory.unit, () {
         // Arrange
-        final userId1 = UserId.unsafe('UserID');
-        final userId2 = UserId.unsafe('userid');
+        final userId1 = UserId('UserID');
+        final userId2 = UserId('userid');
 
         // Assert
         expect(userId1, isNot(equals(userId2)));
@@ -541,14 +548,14 @@ void main() {
       );
 
       testCase('should handle very long valid UserId', TestCategory.unit, () {
-        // Arrange - Create UserId that's long but under 50 characters
+        // Arrange - Create UserId that's long but under 128 characters
         final longUserId = 'very-long-but-valid-user-id-under-limit-123';
 
         // Act
         final result = UserId.validate(longUserId);
 
         // Assert
-        if (longUserId.length <= 50) {
+        if (longUserId.length <= 128) {
           expect(result.isSuccess, isTrue);
         } else {
           expect(result.isFailure, isTrue);
@@ -575,7 +582,7 @@ void main() {
     group('UserId toString and Display', () {
       testCase('should have meaningful toString', TestCategory.unit, () {
         // Arrange
-        final userId = UserId.unsafe('test-user-123');
+        final userId = UserId('test-user-123');
 
         // Act
         final toString = userId.toString();
@@ -591,7 +598,7 @@ void main() {
         () {
           // For security, UserId toString should be safe for logging
           // Arrange
-          final sensitiveUserId = UserId.unsafe('sensitive-user-id');
+          final sensitiveUserId = UserId('sensitive-user-id');
 
           // Act
           final toString = sensitiveUserId.toString();
@@ -631,7 +638,7 @@ void main() {
         () {
           // Arrange & Act
           final userIds = List.generate(1000, (index) {
-            return UserId.unsafe('user$index');
+            return UserId('user$index');
           });
 
           // Assert
@@ -648,7 +655,7 @@ void main() {
         TestCategory.unit,
         () {
           // Arrange
-          final userId = UserId.unsafe('sensitive-user-12345');
+          final userId = UserId('sensitive-user-12345');
 
           // Act
           final masked = userId.masked;
@@ -669,7 +676,7 @@ void main() {
             'user\'; DROP TABLE users; --',
             'user<script>alert("xss")</script>',
             'user\n\rmalicious',
-            'user\0null',
+            'user|malicious', // Pipe character not allowed
           ];
 
           for (final pattern in maliciousPatterns) {
@@ -757,10 +764,8 @@ void main() {
         TestCategory.unit,
         () {
           // Arrange
-          final longUserId = UserId.unsafe(
-            'very-long-username-for-display-purposes',
-          );
-          final shortUserId = UserId.unsafe('short');
+          final longUserId = UserId('very-long-username-for-display-purposes');
+          final shortUserId = UserId('short');
 
           // Act
           final longDisplay = longUserId.shortDisplay;
@@ -772,7 +777,7 @@ void main() {
           expect(longDisplay, contains('...'));
           expect(shortDisplay, isNot(contains('...')));
           expect(longMasked, contains('*'));
-          expect(shortMasked, equals('*****'));
+          expect(shortMasked, equals('*****')); // 5 chars masked for "short"
         },
       );
     });

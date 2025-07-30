@@ -5,7 +5,6 @@ import '../../../../core/utils/result.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../../core/errors/failures.dart';
 import '../../domain/entities/user_entity.dart';
-import '../../domain/entities/auth_state.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../../data/repositories/auth_repository_impl.dart';
 import '../../data/repositories/user_repository_impl.dart';
@@ -32,7 +31,7 @@ final firebaseAuthProvider = StreamProvider<User?>((ref) {
 
 /// Authentication state provider - enhanced auth state with user data
 final authStateProvider = StreamProvider<AuthState>((ref) async* {
-  await for (final firebaseUser in ref.watch(firebaseAuthProvider.stream)) {
+  await for (final firebaseUser in ref.watch(firebaseAuthProvider.future).asStream()) {
     if (firebaseUser == null) {
       AppLogger.firebase('AuthProvider', 'User not authenticated');
       yield const AuthState.unauthenticated();

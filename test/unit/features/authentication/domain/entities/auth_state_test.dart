@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:quiz_app/features/authentication/domain/entities/auth_state.dart';
 import 'package:quiz_app/features/authentication/domain/entities/user_entity.dart';
 import '../../../../../test_config.dart';
-import '../../../../../helpers/authentication_test_helper.dart';
+import '../helpers/auth_domain_test_helpers.dart';
 
 /// Comprehensive unit tests for AuthState domain entity
 /// Following TDD principles and CLAUDE.md testing patterns
@@ -12,7 +12,7 @@ void main() {
     late UserEntity testUser;
 
     setUpAll(() {
-      testUser = AuthTestHelper.createTestUser(
+      testUser = AuthDomainTestHelpers.createTestUserEntity(
         id: 'test-user-123',
         name: 'Test User',
         email: 'test@example.com',
@@ -195,7 +195,7 @@ void main() {
         TestCategory.unit,
         () {
           // Arrange
-          final otherUser = AuthTestHelper.createTestUser(
+          final otherUser = AuthDomainTestHelpers.createTestUserEntity(
             id: 'other-user-456',
             name: 'Other User',
             email: 'other@example.com',
@@ -504,8 +504,8 @@ void main() {
         TestCategory.unit,
         () {
           // Arrange
-          final originalState = AuthState.authenticated(user: testUser);
-          final newUser = AuthTestHelper.createTestUser(
+          final originalState = AuthState.authenticated(user: testUser) as AuthenticatedState;
+          final newUser = AuthDomainTestHelpers.createTestUserEntity(
             id: 'new-user-456',
             name: 'New User',
             email: 'new@example.com',
@@ -529,7 +529,7 @@ void main() {
           final originalState = AuthState.error(
             message: 'Original error',
             code: 'ORIG_CODE',
-          );
+          ) as ErrorAuthState;
 
           // Act
           final copiedState = originalState.copyWith(
@@ -677,7 +677,7 @@ void main() {
           final toString = state.toString();
 
           // Assert
-          expect(toString, contains('AuthenticatedState'));
+          expect(toString, contains('AuthState.authenticated'));
           expect(toString, contains('user'));
         },
       );
@@ -693,7 +693,7 @@ void main() {
           final toString = state.toString();
 
           // Assert
-          expect(toString, contains('UnauthenticatedState'));
+          expect(toString, contains('AuthState.unauthenticated'));
         },
       );
 
@@ -708,7 +708,7 @@ void main() {
           final toString = state.toString();
 
           // Assert
-          expect(toString, contains('LoadingAuthState'));
+          expect(toString, contains('AuthState.loading'));
         },
       );
 
@@ -726,7 +726,7 @@ void main() {
           final toString = state.toString();
 
           // Assert
-          expect(toString, contains('ErrorAuthState'));
+          expect(toString, contains('AuthState.error'));
           expect(toString, contains('message'));
           expect(toString, contains('code'));
         },

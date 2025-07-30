@@ -1,3 +1,5 @@
+library auth_value_objects;
+
 /// Authentication value objects exports
 /// Following CLAUDE.md Clean Architecture patterns
 ///

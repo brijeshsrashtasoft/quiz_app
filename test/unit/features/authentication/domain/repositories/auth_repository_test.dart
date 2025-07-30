@@ -8,7 +8,7 @@ import 'package:quiz_app/features/authentication/domain/entities/user_entity.dar
 import 'package:quiz_app/features/authentication/domain/repositories/auth_repository.dart';
 
 import '../../../../../test_config.dart';
-import '../../../../../helpers/authentication_test_helper.dart';
+import '../helpers/auth_domain_test_helpers.dart';
 
 import 'auth_repository_test.mocks.dart';
 
@@ -22,7 +22,7 @@ void main() {
     late UserEntity testUser;
 
     setUpAll(() {
-      testUser = AuthTestHelper.createTestUser(
+      testUser = AuthDomainTestHelpers.createTestUserEntity(
         id: 'test-user-123',
         name: 'Test User',
         email: 'test@example.com',
@@ -90,7 +90,7 @@ void main() {
         TestCategory.unit,
         () async {
           // Arrange
-          final authFailure = AuthTestHelper.createAuthFailure(
+          final authFailure = AuthDomainTestHelpers.createAuthFailure(
             message: 'Invalid credentials',
             code: 'AUTH_INVALID_CREDENTIALS',
           );
@@ -119,7 +119,7 @@ void main() {
         TestCategory.unit,
         () async {
           // Arrange
-          final authFailure = AuthTestHelper.createAuthFailure(
+          final authFailure = AuthDomainTestHelpers.createAuthFailure(
             message: 'Google sign in cancelled',
             code: 'AUTH_GOOGLE_CANCELLED',
           );
@@ -148,7 +148,7 @@ void main() {
             mockAuthRepository.createUserWithEmailPassword(
               email: anyNamed('email'),
               password: anyNamed('password'),
-              name: anyNamed('name'),
+              name: any,
             ),
           ).thenAnswer((_) async => Result.success(testUser));
 
@@ -178,7 +178,7 @@ void main() {
         TestCategory.unit,
         () async {
           // Arrange
-          final authFailure = AuthTestHelper.createAuthFailure(
+          final authFailure = AuthDomainTestHelpers.createAuthFailure(
             message: 'Email already in use',
             code: 'AUTH_EMAIL_ALREADY_IN_USE',
           );
@@ -186,7 +186,7 @@ void main() {
             mockAuthRepository.createUserWithEmailPassword(
               email: anyNamed('email'),
               password: anyNamed('password'),
-              name: anyNamed('name'),
+              name: any,
             ),
           ).thenAnswer((_) async => Result.failure(authFailure));
 
@@ -230,7 +230,7 @@ void main() {
         TestCategory.unit,
         () async {
           // Arrange
-          final authFailure = AuthTestHelper.createAuthFailure(
+          final authFailure = AuthDomainTestHelpers.createAuthFailure(
             message: 'Sign out failed',
             code: 'AUTH_SIGNOUT_ERROR',
           );
@@ -256,7 +256,7 @@ void main() {
         () async {
           // Arrange
           when(
-            mockAuthRepository.sendPasswordResetEmail(email: anyNamed('email')),
+            mockAuthRepository.sendPasswordResetEmail(email: any),
           ).thenAnswer((_) async => Result.success(null));
 
           // Act
@@ -310,12 +310,12 @@ void main() {
         TestCategory.unit,
         () async {
           // Arrange
-          final authFailure = AuthTestHelper.createAuthFailure(
+          final authFailure = AuthDomainTestHelpers.createAuthFailure(
             message: 'User not found',
             code: 'AUTH_USER_NOT_FOUND',
           );
           when(
-            mockAuthRepository.sendPasswordResetEmail(email: anyNamed('email')),
+            mockAuthRepository.sendPasswordResetEmail(email: any),
           ).thenAnswer((_) async => Result.failure(authFailure));
 
           // Act
@@ -376,7 +376,7 @@ void main() {
         TestCategory.unit,
         () {
           // Arrange
-          final authFailure = AuthTestHelper.createAuthFailure(
+          final authFailure = AuthDomainTestHelpers.createAuthFailure(
             message: 'Failed to get current user',
             code: 'AUTH_GET_USER_ERROR',
           );
@@ -450,7 +450,7 @@ void main() {
         TestCategory.unit,
         () {
           // Arrange
-          final authStream = Stream.value(Result.success(testUser));
+          final authStream = Stream.value(Result<UserEntity?>.success(testUser));
           when(
             mockAuthRepository.watchAuthState(),
           ).thenAnswer((_) => authStream);
@@ -470,9 +470,9 @@ void main() {
         () async {
           // Arrange
           final authStream = Stream.fromIterable([
-            Result.success(null), // Unauthenticated
-            Result.success(testUser), // Authenticated
-            Result.success(null), // Signed out
+            Result<UserEntity?>.success(null), // Unauthenticated
+            Result<UserEntity?>.success(testUser), // Authenticated
+            Result<UserEntity?>.success(null), // Signed out
           ]);
           when(
             mockAuthRepository.watchAuthState(),
@@ -494,11 +494,11 @@ void main() {
         TestCategory.unit,
         () async {
           // Arrange
-          final authFailure = AuthTestHelper.createAuthFailure(
+          final authFailure = AuthDomainTestHelpers.createAuthFailure(
             message: 'Auth stream error',
             code: 'AUTH_STREAM_ERROR',
           );
-          final authStream = Stream.value(Result.failure(authFailure));
+          final authStream = Stream.value(Result<UserEntity?>.failure(authFailure));
           when(
             mockAuthRepository.watchAuthState(),
           ).thenAnswer((_) => authStream);
@@ -538,7 +538,7 @@ void main() {
         TestCategory.unit,
         () async {
           // Arrange
-          final authFailure = AuthTestHelper.createAuthFailure(
+          final authFailure = AuthDomainTestHelpers.createAuthFailure(
             message: 'Account deletion failed',
             code: 'AUTH_DELETE_ACCOUNT_ERROR',
           );
@@ -649,7 +649,7 @@ void main() {
         () async {
           // Arrange
           when(
-            mockAuthRepository.reauthenticate(password: anyNamed('password')),
+            mockAuthRepository.reauthenticate(password: any),
           ).thenAnswer((_) async => Result.success(null));
 
           // Act
@@ -741,7 +741,7 @@ void main() {
         TestCategory.unit,
         () async {
           // Arrange
-          final authFailure = AuthTestHelper.createAuthFailure(
+          final authFailure = AuthDomainTestHelpers.createAuthFailure(
             message: 'Google account linking failed',
             code: 'AUTH_GOOGLE_LINK_ERROR',
           );
@@ -849,9 +849,8 @@ void main() {
         TestCategory.unit,
         () async {
           // Arrange
-          final networkFailure = AuthTestHelper.createNetworkFailure(
+          final networkFailure = AuthDomainTestHelpers.createNetworkFailure(
             message: 'Network error',
-            code: 'NETWORK_ERROR',
           );
 
           // Set up multiple methods to return network failure
@@ -867,7 +866,7 @@ void main() {
           ).thenAnswer((_) async => Result.failure(networkFailure));
 
           when(
-            mockAuthRepository.sendPasswordResetEmail(email: anyNamed('email')),
+            mockAuthRepository.sendPasswordResetEmail(email: any),
           ).thenAnswer((_) async => Result.failure(networkFailure));
 
           // Act & Assert
@@ -895,9 +894,9 @@ void main() {
         TestCategory.unit,
         () async {
           // Arrange
-          final validationFailure = AuthTestHelper.createValidationFailure(
+          final validationFailure = AuthDomainTestHelpers.createValidationFailure(
             message: 'Validation error',
-            code: 'VALIDATION_ERROR',
+            fieldErrors: {'field': 'VALIDATION_ERROR'},
           );
 
           // Set up methods to return validation failure
@@ -905,7 +904,7 @@ void main() {
             mockAuthRepository.createUserWithEmailPassword(
               email: anyNamed('email'),
               password: anyNamed('password'),
-              name: anyNamed('name'),
+              name: any,
             ),
           ).thenAnswer((_) async => Result.failure(validationFailure));
 
@@ -950,7 +949,7 @@ void main() {
           ).thenAnswer((_) async => Result.success(testUser));
 
           // Act & Assert
-          await AuthTestHelper.expectAuthPerformant(() async {
+          await TestExpectations.expectPerformant(() async {
             await mockAuthRepository.signInWithEmailPassword(
               email: 'test@example.com',
               password: 'password123',

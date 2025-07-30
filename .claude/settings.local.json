@@ -101,7 +101,8 @@
       "Bash(flutter build:*)",
       "Bash(timeout:*)",
       "Bash(/Users/brijeshsakariya/AndroidStudioProjects/quiz_app/scripts/quality-check.sh:*)",
-      "Bash(scripts/quality-check.sh:*)"
+      "Bash(scripts/quality-check.sh:*)",
+      "Bash(awk:*)"
     ],
     "deny": [
       "Bash(sudo:*)",

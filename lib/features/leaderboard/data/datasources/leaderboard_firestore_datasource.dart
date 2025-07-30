@@ -154,7 +154,7 @@ class LeaderboardFirestoreDataSource extends BaseFirebaseDataSource {
           leaderboard = LeaderboardModel.fromFirestore(data);
 
           // Find and update existing score or add new one
-          final updatedScores = List<ScoreModel>.from(leaderboard.scores ?? []);
+          final updatedScores = List<ScoreModel>.from(leaderboard.scores);
           final existingIndex = updatedScores.indexWhere(
             (s) => s.playerId == score.playerId,
           );
@@ -477,7 +477,7 @@ class LeaderboardFirestoreDataSource extends BaseFirebaseDataSource {
           final data = doc.data()!;
           leaderboard = LeaderboardModel.fromFirestore(data);
 
-          final updatedScores = List<ScoreModel>.from(leaderboard.scores ?? []);
+          final updatedScores = List<ScoreModel>.from(leaderboard.scores);
 
           // Update or add each score
           for (final score in scores) {
@@ -541,7 +541,7 @@ class LeaderboardFirestoreDataSource extends BaseFirebaseDataSource {
       }
 
       final leaderboard = leaderboardResult.data;
-      final scores = leaderboard.scores ?? [];
+      final scores = leaderboard.scores;
 
       if (scores.isEmpty) {
         return Result.success(<String, dynamic>{
@@ -641,7 +641,7 @@ class LeaderboardFirestoreDataSource extends BaseFirebaseDataSource {
 
       return leaderboardResult.when(
         success: (leaderboard) async {
-          final updatedScores = List<ScoreModel>.from(leaderboard.scores ?? []);
+          final updatedScores = List<ScoreModel>.from(leaderboard.scores);
           updatedScores.add(score);
 
           final updatedLeaderboard = leaderboard.copyWith(
@@ -669,7 +669,7 @@ class LeaderboardFirestoreDataSource extends BaseFirebaseDataSource {
 
       return leaderboardResult.when(
         success: (leaderboard) async {
-          final updatedScores = List<ScoreModel>.from(leaderboard.scores ?? []);
+          final updatedScores = List<ScoreModel>.from(leaderboard.scores);
           final existingIndex = updatedScores.indexWhere(
             (s) => s.playerId == score.playerId,
           );
@@ -705,7 +705,7 @@ class LeaderboardFirestoreDataSource extends BaseFirebaseDataSource {
 
       return leaderboardResult.when(
         success: (leaderboard) async {
-          final updatedScores = List<ScoreModel>.from(leaderboard.scores ?? []);
+          final updatedScores = List<ScoreModel>.from(leaderboard.scores);
           updatedScores.removeWhere((s) => s.playerId == playerId);
 
           final updatedLeaderboard = leaderboard.copyWith(
