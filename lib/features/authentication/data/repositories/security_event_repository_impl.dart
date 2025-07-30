@@ -513,7 +513,7 @@ class SecurityEventRepositoryImpl implements ISecurityRepository {
         trustedDevices: settings.trustedDevices,
         lastUpdated: settings.lastUpdated ?? DateTime.now(),
       );
-      
+
       await _dataSource.updateSecuritySettings(settingsModel);
       return Result.success(settings);
     } catch (e) {
@@ -540,7 +540,7 @@ class SecurityEventRepositoryImpl implements ISecurityRepository {
         trustedDevices: [],
         lastUpdated: DateTime.now(),
       );
-      
+
       // Use updateSecuritySettings to save the default settings
       return await updateSecuritySettings(defaultSettings);
     } catch (e) {
