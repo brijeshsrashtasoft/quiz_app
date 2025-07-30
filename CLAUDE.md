@@ -16,6 +16,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Ticket Documentation:**
 - **docs/tickets/ui-constants-implementation.md** - UI constants implementation specifications
+- **docs/tickets/issue-{number}-{branch}.md** - Session continuity tracking files (created per issue)
 
 **Sub-Agent Documentation:**
 - **.claude/agents/flutter-architect.md** - Clean Architecture and code structure specialist
@@ -63,6 +64,39 @@ This is a Kahoot-style interactive quiz application built with Flutter, Firestor
 - Be specific in instructions and file references
 - Course correct early and often during development
 - Use visual references and screenshots when helpful
+
+### Session Continuity & Ticket Tracking
+- **MANDATORY**: All agents create ticket tracking files in `docs/tickets/issue-{number}-{branch}.md`
+- **UPDATE FREQUENCY**: Update on EVERY todo status change (pending/in_progress/completed/blocked)
+- **FORMAT**: Concise one-line todos with status, no lengthy descriptions
+- **CONTINUATION**: New sessions check for existing ticket files to resume work
+- **HANDOFF**: Include ticket file location in all agent handoffs
+
+## 🆓 FREE SERVICES ONLY POLICY
+
+**CRITICAL**: This project uses ONLY free tier services. NO paid APIs or cloud services allowed.
+
+### Allowed Services (Free Tier Only)
+- **Firebase Free Tier**: Authentication, Firestore (10GB/month), Hosting, Storage (5GB)
+- **GitHub**: Free tier with Actions (2000 minutes/month)
+- **Flutter**: Open source framework
+- **Dart Packages**: Only free/open source packages from pub.dev
+
+### Prohibited Services
+- ❌ **Cloud Functions**: Firebase paid feature - implement logic in Flutter app instead
+- ❌ **Firebase ML/AI**: Paid services - use local processing
+- ❌ **Third-party APIs**: No paid APIs (OpenAI, Google Maps Premium, etc.)
+- ❌ **Premium Storage**: Stay within free tier limits
+- ❌ **Paid CI/CD**: Use only GitHub Actions free tier
+- ❌ **Subscription Services**: No monthly/yearly paid services
+
+### Implementation Guidelines
+- **Business Logic**: Implement in Flutter app, NOT Cloud Functions
+- **Data Storage**: Use Firestore free tier (10GB storage, 20K writes/day)
+- **File Storage**: Use Firebase Storage free tier (5GB storage, 1GB/day download)
+- **Authentication**: Use Firebase Auth free tier (unlimited users)
+- **Hosting**: Use Firebase Hosting free tier (10GB/month)
+- **Real-time**: Use Firestore listeners (free within limits)
 
 ## Architecture & Design Principles
 

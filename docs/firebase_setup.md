@@ -1,7 +1,8 @@
-# Firebase Setup
+# Firebase Setup (FREE TIER ONLY)
 
 - Replace placeholder Firebase config files with your project credentials
 - Required for deployment across all platforms
+- **CRITICAL**: Use ONLY free tier services - NO paid features allowed
 
 ## Requirements
 
@@ -16,12 +17,12 @@
 - Create project: `quiz-app-dev` or `quiz-app-prod`
 - Enable Google Analytics
 
-### 2. Enable Services
-- **Authentication**: Email/Password + Google Sign-In
-- **Firestore**: Create database (test mode)
-- **Storage**: Enable file storage
-- **Analytics**: Auto-enabled
-- **Cloud Functions**: Setup later
+### 2. Enable Services (FREE TIER ONLY)
+- **Authentication**: Email/Password + Google Sign-In ✅ FREE
+- **Firestore**: Create database (test mode) ✅ FREE (10GB/month)
+- **Storage**: Enable file storage ✅ FREE (5GB storage)
+- **Analytics**: Auto-enabled ✅ FREE
+- ❌ **Cloud Functions**: DO NOT USE - Paid feature
 
 ### 3. Configure Android
 - Add Android app: `com.example.quiz_app`
@@ -73,8 +74,37 @@
 - Deploy security rules
 - Setup CI/CD (GitHub Actions)
 
+## FREE TIER LIMITS & GUIDELINES
+
+### Firebase Free Tier Quotas
+- **Firestore**: 
+  - 10GB storage
+  - 20K writes/day
+  - 50K reads/day
+  - 20K deletes/day
+- **Storage**: 
+  - 5GB storage
+  - 1GB/day download
+  - 20K uploads/day
+- **Authentication**: Unlimited users ✅
+- **Hosting**: 10GB/month transfer
+
+### Implementation Guidelines
+- **NO Cloud Functions**: Implement ALL business logic in Flutter app
+- **Optimize Reads**: Use proper queries to minimize reads
+- **Cache Data**: Use local storage to reduce Firestore reads
+- **Compress Images**: Reduce storage usage
+- **Monitor Usage**: Check Firebase Console regularly
+
+### Alternative to Paid Features
+- **Instead of Cloud Functions**: Use Flutter app logic
+- **Instead of ML/AI**: Use local processing
+- **Instead of Premium APIs**: Use free alternatives
+- **Instead of Cloud Messaging**: Use Firestore listeners
+
 ## References
 
 - [Firebase Flutter Setup](https://firebase.google.com/docs/flutter/setup)
 - [Security Rules](https://firebase.google.com/docs/firestore/security/get-started)
 - [FlutterFire Docs](https://firebase.flutter.dev/)
+- [Firebase Pricing](https://firebase.google.com/pricing)

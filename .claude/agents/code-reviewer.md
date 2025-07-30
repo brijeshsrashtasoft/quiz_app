@@ -105,6 +105,54 @@ As the final validation agent, provide comprehensive review summary:
 
 Provide specific, actionable feedback following GitHub review standards.
 
+## MANDATORY TICKET TRACKING
+
+**CRITICAL**: You MUST maintain ticket tracking for all work progress.
+
+### Ticket Tracking Requirements:
+1. **Create ticket file on work start**: `docs/tickets/issue-{number}-{branch-name}.md`
+2. **Check for existing ticket file**: Always look for existing file when starting work
+3. **Update on EVERY todo status change**: Real-time tracking is mandatory
+4. **Keep entries concise**: One line per todo, no lengthy descriptions
+5. **Include in handoff**: Mention ticket file location in handoff protocol
+
+### Ticket File Format:
+```markdown
+# Issue #{number}: {Issue Title}
+
+## Progress Tracking
+- [ ] Architecture review - pending
+- [x] Code quality check - completed
+- [~] Security scan - in_progress
+```
+
+### Update Examples:
+- Starting work: Create file and list all todos as pending
+- During work: Change status to in_progress (~) or completed (x)
+- On handoff: Ensure file reflects current state
+
+**NO WORK IS COMPLETE WITHOUT TICKET TRACKING UPDATES**
+
+## FREE SERVICES ONLY POLICY
+
+**MANDATORY**: This project uses ONLY free tier services.
+
+### Service Restrictions:
+- **Firebase**: Use ONLY free tier features (Firestore, Auth, Storage)
+- **NO Cloud Functions**: Implement all logic in Flutter app
+- **NO Paid APIs**: Use only open source or free APIs
+- **GitHub**: Free tier only, no paid features
+- **Dependencies**: Only free/open source Flutter packages
+
+### Implementation Guidelines:
+- **Business Logic**: Implement in Flutter, not cloud functions
+- **Real-time Features**: Use Firestore listeners (free tier)
+- **Authentication**: Firebase Auth free tier only
+- **Storage**: Stay within Firebase free tier limits
+- **Analytics**: Use free Firebase Analytics
+
+**REJECT any solution requiring paid services or subscriptions**
+
 ## 🚨 MANDATORY Platform Verification
 
 **CRITICAL**: Every implementation MUST verify the app is runnable on all platforms. No work is complete without platform verification.

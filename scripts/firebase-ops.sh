@@ -15,8 +15,9 @@ case $1 in
     firebase deploy --only firestore:rules
     ;;
   "functions")
-    echo "⚡ Deploying Cloud Functions..."
-    firebase deploy --only functions
+    echo "❌ Cloud Functions are NOT supported - Using FREE tier only"
+    echo "💡 Implement all business logic in Flutter app instead"
+    echo "📚 See CLAUDE.md for free tier implementation guidelines"
     ;;
   "hosting")
     echo "🌐 Deploying to Firebase Hosting..."
@@ -51,7 +52,7 @@ case $1 in
     echo "  start     - Start Firebase emulators"
     echo "  deploy    - Deploy everything to Firebase"
     echo "  rules     - Deploy Firestore security rules only"
-    echo "  functions - Deploy Cloud Functions only"
+    echo "  functions - NOT SUPPORTED (Free tier only - use Flutter app logic)"
     echo "  hosting   - Deploy to Firebase Hosting only"
     echo "  init      - Initialize Firebase project"
     echo "  login     - Login to Firebase"

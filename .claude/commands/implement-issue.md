@@ -538,3 +538,93 @@ Each agent leaves detailed handoff notes for the next!
 ```
 
 **Quality Gate**: No work is considered complete until documentation is updated for other agents to have full context.
+
+## 📋 MANDATORY TICKET TRACKING SYSTEM
+
+**CRITICAL**: ALL agents and sub-agents MUST create and maintain a ticket tracking file for session continuity.
+
+**Ticket Tracking File Structure:**
+```
+docs/tickets/issue-{number}-{branch-name}.md
+```
+
+**File Creation (MANDATORY at start of work):**
+```bash
+# Create ticket tracking file immediately after branch creation
+mkdir -p docs/tickets
+touch docs/tickets/issue-$ARGUMENTS-$(git branch --show-current).md
+```
+
+**Ticket File Format (CONCISE - NO DESCRIPTIONS):**
+```markdown
+# Issue #$ARGUMENTS - {Branch Name}
+
+## Todos
+- [ ] [Task 1] - pending
+- [x] [Task 2] - completed
+- [ ] [Task 3] - in_progress
+- [ ] [Task 4] - blocked: [reason]
+
+## Status Summary
+Current: [in_progress/blocked/testing/completed]
+Blockers: [None/specific blocker]
+Next: [Immediate next task]
+
+## Files Modified
+- path/to/file1.dart
+- path/to/file2.dart
+
+## Last Update
+Agent: [agent-name]
+Time: [timestamp]
+```
+
+**Update Requirements:**
+1. **CREATE IMMEDIATELY**: When starting work on issue
+2. **UPDATE ON EVERY TODO CHANGE**: Mark status (pending/in_progress/completed/blocked)
+3. **KEEP CONCISE**: One line per todo, no explanations
+4. **SESSION CONTINUITY**: New sessions read this file to continue work
+
+**Continuation Workflow:**
+```bash
+# When resuming work in new session
+TICKET_FILE=$(ls docs/tickets/issue-$ARGUMENTS-*.md 2>/dev/null | head -1)
+if [[ -f "$TICKET_FILE" ]]; then
+    echo "📋 Found existing ticket tracking file: $TICKET_FILE"
+    cat "$TICKET_FILE"
+    echo "🔄 Continuing from previous session..."
+fi
+```
+
+**Agent Handoff with Ticket Tracking:**
+```
+HANDOFF TO [NEXT-AGENT]:
+- Ticket File: docs/tickets/issue-{number}-{branch}.md
+- Current Status: [Check ticket file for todos]
+- Continue From: [Specific todo marked as in_progress]
+```
+
+## 🆓 FREE SERVICES ONLY POLICY
+
+**MANDATORY**: ALL implementations MUST use ONLY free tier services. NO paid APIs or cloud services allowed.
+
+**Allowed Free Services:**
+- **Firebase Free Tier**: Authentication, Firestore (limited), Hosting
+- **GitHub**: Free tier with Actions (2000 minutes/month)
+- **Flutter**: Open source framework
+- **Dart packages**: Only free/open source packages
+
+**Prohibited (NO PAID SERVICES):**
+- ❌ Cloud Functions (Firebase paid feature)
+- ❌ Firebase ML/AI services
+- ❌ Third-party paid APIs
+- ❌ Premium cloud storage
+- ❌ Paid CI/CD services
+- ❌ Any subscription-based services
+
+**Implementation Guidelines:**
+- Use Firestore for all data storage (free tier limits apply)
+- Implement business logic in Flutter app (not Cloud Functions)
+- Use GitHub Actions for CI/CD (free tier)
+- Host web app on Firebase Hosting (free tier)
+- Store media in Firebase Storage (free tier limits)

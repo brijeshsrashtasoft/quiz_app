@@ -430,8 +430,8 @@ case $1 in
     firebase deploy --only firestore:rules
     ;;
   "functions")
-    echo "⚡ Deploying Cloud Functions..."
-    firebase deploy --only functions
+    echo "❌ Cloud Functions are NOT supported - Using FREE tier only"
+    echo "💡 Implement business logic in Flutter app instead"
     ;;
   *)
     echo "Usage: ./firebase-ops.sh [start|deploy|rules|functions]"
