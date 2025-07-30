@@ -9,7 +9,7 @@ import 'package:quiz_app/features/authentication/domain/repositories/user_reposi
 import 'package:quiz_app/features/authentication/domain/usecases/create_user_usecase.dart';
 import 'package:quiz_app/features/authentication/domain/usecases/get_user_by_id_usecase.dart';
 import 'package:quiz_app/features/authentication/domain/usecases/watch_user_usecase.dart';
-import '../../../../../../test_config.dart';
+import '../../../../../test_config.dart';
 
 import 'auth_usecases_comprehensive_test.mocks.dart';
 
@@ -32,7 +32,7 @@ void main() {
         watchUserUseCase = WatchUserUseCase(repository: mockRepository);
       });
 
-      testGroup('CreateUserUseCase', () {
+      testGroup('CreateUserUseCase', TestCategory.unit, () {
         final testUser = UserEntity(
           id: 'test-user-id',
           name: 'Test User',
@@ -140,7 +140,6 @@ void main() {
             // Arrange
             final networkFailure = Failure.networkFailure(
               message: 'Network connection failed',
-              code: 'NETWORK_ERROR',
             );
             when(
               mockRepository.createUser(testUser),
@@ -175,7 +174,7 @@ void main() {
         );
       });
 
-      testGroup('GetUserByIdUseCase', () {
+      testGroup('GetUserByIdUseCase', TestCategory.unit, () {
         const userId = 'test-user-id';
         final testUser = UserEntity(
           id: userId,
@@ -249,7 +248,7 @@ void main() {
           TestCategory.unit,
           () async {
             // Arrange
-            final failure = Failure.serializationFailure(
+            final failure = Failure.firestoreFailure(
               message: 'Failed to parse user data',
               code: 'SERIALIZATION_ERROR',
             );
@@ -288,7 +287,7 @@ void main() {
         );
       });
 
-      testGroup('WatchUserUseCase', () {
+      testGroup('WatchUserUseCase', TestCategory.unit, () {
         const userId = 'test-user-id';
         final testUser = UserEntity(
           id: userId,

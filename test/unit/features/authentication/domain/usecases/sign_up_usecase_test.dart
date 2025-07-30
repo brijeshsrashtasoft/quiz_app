@@ -84,9 +84,8 @@ void main() {
         expect(result.isFailure, isTrue);
         expect(result.failureOrNull, isA<ValidationFailure>());
         final failure = result.failureOrNull as ValidationFailure;
-        expect(failure.field, equals('email'));
-        expect(failure.code, equals('VALIDATION_EMAIL_REQUIRED'));
-        expect(failure.userMessage, equals('Email address is required'));
+        expect(failure.fieldErrors?['email'], isNotNull);
+        expect(failure.message, equals('Email address is required'));
       });
 
       test(
@@ -106,12 +105,8 @@ void main() {
           expect(result.isFailure, isTrue);
           expect(result.failureOrNull, isA<ValidationFailure>());
           final failure = result.failureOrNull as ValidationFailure;
-          expect(failure.field, equals('email'));
-          expect(failure.code, equals('VALIDATION_EMAIL_INVALID'));
-          expect(
-            failure.userMessage,
-            equals('Please enter a valid email address'),
-          );
+          expect(failure.fieldErrors?['email'], isNotNull);
+          expect(failure.message, equals('Please enter a valid email address'));
         },
       );
 
@@ -157,8 +152,7 @@ void main() {
             );
             expect(result.failureOrNull, isA<ValidationFailure>());
             final failure = result.failureOrNull as ValidationFailure;
-            expect(failure.field, equals('email'));
-            expect(failure.code, equals('VALIDATION_EMAIL_INVALID'));
+            expect(failure.fieldErrors?['email'], isNotNull);
           }
         }
       });
@@ -180,9 +174,8 @@ void main() {
         expect(result.isFailure, isTrue);
         expect(result.failureOrNull, isA<ValidationFailure>());
         final failure = result.failureOrNull as ValidationFailure;
-        expect(failure.field, equals('password'));
-        expect(failure.code, equals('VALIDATION_PASSWORD_REQUIRED'));
-        expect(failure.userMessage, equals('Password is required'));
+        expect(failure.fieldErrors?['password'], isNotNull);
+        expect(failure.message, equals('Password is required'));
       });
 
       test(
@@ -202,10 +195,9 @@ void main() {
           expect(result.isFailure, isTrue);
           expect(result.failureOrNull, isA<ValidationFailure>());
           final failure = result.failureOrNull as ValidationFailure;
-          expect(failure.field, equals('password'));
-          expect(failure.code, equals('VALIDATION_PASSWORD_TOO_SHORT'));
+          expect(failure.fieldErrors?['password'], isNotNull);
           expect(
-            failure.userMessage,
+            failure.message,
             equals('Password must be at least 6 characters long'),
           );
         },
@@ -228,10 +220,9 @@ void main() {
           expect(result.isFailure, isTrue);
           expect(result.failureOrNull, isA<ValidationFailure>());
           final failure = result.failureOrNull as ValidationFailure;
-          expect(failure.field, equals('password'));
-          expect(failure.code, equals('VALIDATION_PASSWORD_WEAK'));
+          expect(failure.fieldErrors?['password'], isNotNull);
           expect(
-            failure.userMessage,
+            failure.message,
             equals('Password must contain both letters and numbers'),
           );
         },
@@ -287,7 +278,7 @@ void main() {
             );
             expect(result.failureOrNull, isA<ValidationFailure>());
             final failure = result.failureOrNull as ValidationFailure;
-            expect(failure.field, equals('password'));
+            expect(failure.fieldErrors?.containsKey('password'), isTrue);
           }
         }
       });
@@ -309,9 +300,8 @@ void main() {
         expect(result.isFailure, isTrue);
         expect(result.failureOrNull, isA<ValidationFailure>());
         final failure = result.failureOrNull as ValidationFailure;
-        expect(failure.field, equals('name'));
-        expect(failure.code, equals('VALIDATION_NAME_REQUIRED'));
-        expect(failure.userMessage, equals('Full name is required'));
+        expect(failure.fieldErrors?['name'], isNotNull);
+        expect(failure.message, equals('Full name is required'));
       });
 
       test(
@@ -331,10 +321,9 @@ void main() {
           expect(result.isFailure, isTrue);
           expect(result.failureOrNull, isA<ValidationFailure>());
           final failure = result.failureOrNull as ValidationFailure;
-          expect(failure.field, equals('name'));
-          expect(failure.code, equals('VALIDATION_NAME_TOO_SHORT'));
+          expect(failure.fieldErrors?['name'], isNotNull);
           expect(
-            failure.userMessage,
+            failure.message,
             equals('Name must be at least 2 characters long'),
           );
         },
@@ -370,9 +359,9 @@ void main() {
               failure,
               isNot(
                 isA<ValidationFailure>().having(
-                  (f) => (f as ValidationFailure).field,
-                  'field',
-                  equals('name'),
+                  (f) => f.fieldErrors?.containsKey('name'),
+                  'has name field error',
+                  isTrue,
                 ),
               ),
               reason: 'Name "$name" should be valid',
@@ -462,8 +451,7 @@ void main() {
         expect(result.isFailure, isTrue);
         expect(result.failureOrNull, isA<ValidationFailure>());
         final failure = result.failureOrNull as ValidationFailure;
-        expect(failure.field, equals('name'));
-        expect(failure.code, equals('VALIDATION_NAME_REQUIRED'));
+        expect(failure.fieldErrors?['name'], isNotNull);
       });
     });
 

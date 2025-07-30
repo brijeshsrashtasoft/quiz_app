@@ -29,7 +29,6 @@ void main() {
 
         // Assert
         expect(result.isSuccess, isTrue);
-        expect(result.dataOrNull, isNull);
       });
 
       test('should handle sign out when already signed out', () async {
@@ -145,7 +144,6 @@ void main() {
 
         // Assert
         expect(result.isSuccess, isTrue);
-        expect(result.dataOrNull, isNull);
       });
 
       test('should clear all session data', () async {

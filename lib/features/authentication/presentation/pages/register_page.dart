@@ -14,6 +14,7 @@ import '../../../../core/errors/failures.dart';
 import '../providers/auth_providers.dart';
 import '../widgets/auth_header.dart';
 import '../widgets/social_auth_buttons.dart';
+import '../widgets/form_validation_feedback.dart';
 
 /// Register page with Firebase Authentication integration
 /// Following Kahoot-style engaging UI design
@@ -25,7 +26,7 @@ class RegisterPage extends ConsumerStatefulWidget {
 }
 
 class _RegisterPageState extends ConsumerState<RegisterPage>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, FormValidationMixin {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -46,6 +47,11 @@ class _RegisterPageState extends ConsumerState<RegisterPage>
   void initState() {
     super.initState();
     _setupAnimations();
+
+    // Listen for password changes to update strength indicator
+    _passwordController.addListener(() {
+      setState(() {});
+    });
   }
 
   void _setupAnimations() {
@@ -123,7 +129,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage>
 
   @override
   Widget build(BuildContext context) {
-    return AppScaffold(
+    return Scaffold(
       backgroundColor: AppColors.offWhite,
       body: SafeArea(
         child: AnimatedBuilder(
@@ -172,6 +178,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage>
                 color: AppColors.coolGray,
               ),
               textInputAction: TextInputAction.next,
+              validator: (value) => validateName(value, minLength: 2),
             ),
 
             const SizedBox(height: AppSpacing.spacingL),
@@ -184,6 +191,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage>
               keyboardType: TextInputType.emailAddress,
               prefixIcon: Icon(Icons.email_outlined, color: AppColors.coolGray),
               textInputAction: TextInputAction.next,
+              validator: validateEmail,
             ),
 
             const SizedBox(height: AppSpacing.spacingL),
@@ -204,6 +212,15 @@ class _RegisterPageState extends ConsumerState<RegisterPage>
                     setState(() => _obscurePassword = !_obscurePassword),
               ),
               textInputAction: TextInputAction.next,
+              validator: validateStrongPassword,
+            ),
+
+            const SizedBox(height: AppSpacing.spacingM),
+
+            // Password Strength Indicator
+            PasswordStrengthIndicator(
+              password: _passwordController.text,
+              isVisible: _passwordController.text.isNotEmpty,
             ),
 
             const SizedBox(height: AppSpacing.spacingL),
@@ -228,6 +245,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage>
               ),
               textInputAction: TextInputAction.done,
               onSubmitted: (_) => _handleRegister(),
+              validator: (value) =>
+                  validatePasswordConfirmation(value, _passwordController.text),
             ),
 
             const SizedBox(height: AppSpacing.spacingL),
@@ -368,48 +387,5 @@ class _RegisterPageState extends ConsumerState<RegisterPage>
         ),
       ),
     );
-  }
-
-  String? _validateName(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Name is required';
-    }
-    if (value.trim().length < 2) {
-      return 'Name must be at least 2 characters';
-    }
-    return null;
-  }
-
-  String? _validateEmail(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Email is required';
-    }
-    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-      return 'Please enter a valid email address';
-    }
-    return null;
-  }
-
-  String? _validatePassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Password is required';
-    }
-    if (value.length < 8) {
-      return 'Password must be at least 8 characters';
-    }
-    if (!RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)').hasMatch(value)) {
-      return 'Password must contain uppercase, lowercase, and number';
-    }
-    return null;
-  }
-
-  String? _validateConfirmPassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please confirm your password';
-    }
-    if (value != _passwordController.text) {
-      return 'Passwords do not match';
-    }
-    return null;
   }
 }

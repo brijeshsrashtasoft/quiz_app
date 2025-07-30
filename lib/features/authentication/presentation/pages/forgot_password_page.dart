@@ -13,6 +13,7 @@ import '../../../../core/navigation/route_constants.dart';
 import '../../../../core/errors/failures.dart';
 import '../providers/auth_providers.dart';
 import '../widgets/auth_header.dart';
+import '../widgets/form_validation_feedback.dart';
 
 /// Forgot password page with Firebase Authentication integration
 /// Following Kahoot-style engaging UI design
@@ -24,7 +25,7 @@ class ForgotPasswordPage extends ConsumerStatefulWidget {
 }
 
 class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, FormValidationMixin {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
 
@@ -114,7 +115,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage>
 
   @override
   Widget build(BuildContext context) {
-    return AppScaffold(
+    return Scaffold(
       backgroundColor: AppColors.offWhite,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -206,6 +207,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage>
               prefixIcon: Icon(Icons.email_outlined, color: AppColors.coolGray),
               textInputAction: TextInputAction.done,
               onSubmitted: (_) => _handleSendResetEmail(),
+              validator: validateEmail,
             ),
 
             const SizedBox(height: AppSpacing.spacingL),
@@ -393,15 +395,5 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage>
         ],
       ),
     );
-  }
-
-  String? _validateEmail(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Email is required';
-    }
-    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-      return 'Please enter a valid email address';
-    }
-    return null;
   }
 }

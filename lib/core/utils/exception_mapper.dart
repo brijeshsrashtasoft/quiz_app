@@ -7,34 +7,34 @@ class ExceptionMapper {
   /// Map any exception to appropriate failure
   static Failure mapExceptionToFailure(Exception exception) {
     switch (exception.runtimeType) {
-      case ServerException:
+      case ServerException _:
         final serverException = exception as ServerException;
         return Failure.serverFailure(
           message: serverException.message,
           code: serverException.code,
         );
-      case NetworkException:
+      case NetworkException _:
         final networkException = exception as NetworkException;
         return Failure.networkFailure(message: networkException.message);
-      case AuthException:
+      case AuthException _:
         final authException = exception as AuthException;
         return Failure.authFailure(
           message: authException.message,
           code: authException.code,
         );
-      case FirestoreException:
+      case FirestoreException _:
         final firestoreException = exception as FirestoreException;
         return Failure.firestoreFailure(
           message: firestoreException.message,
           code: firestoreException.code,
         );
-      case ValidationException:
+      case ValidationException _:
         final validationException = exception as ValidationException;
         return Failure.validationFailure(
           message: validationException.message,
           fieldErrors: validationException.fieldErrors,
         );
-      case CacheException:
+      case CacheException _:
         final cacheException = exception as CacheException;
         return Failure.cacheFailure(message: cacheException.message);
       default:

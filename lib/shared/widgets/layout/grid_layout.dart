@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../constants/app_spacing.dart';
 import 'responsive_layout.dart';
 
 /// Responsive grid layout component

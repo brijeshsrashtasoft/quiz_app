@@ -5,7 +5,6 @@ import '../../../../core/utils/result.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../../core/errors/failures.dart';
 import '../../domain/entities/user_entity.dart';
-import '../../domain/entities/auth_state.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../../data/repositories/auth_repository_impl.dart';
 import '../../data/repositories/user_repository_impl.dart';
@@ -24,6 +23,10 @@ import '../../domain/usecases/get_current_user_usecase.dart';
 import '../../domain/usecases/update_user_profile_usecase.dart';
 import '../../domain/usecases/delete_account_usecase.dart';
 
+// Import form and navigation providers
+import 'auth_form_providers.dart';
+import 'auth_navigation_providers.dart';
+
 /// Firebase Auth state provider - core authentication state
 final firebaseAuthProvider = StreamProvider<User?>((ref) {
   AppLogger.firebase('AuthProvider', 'Setting up Firebase Auth state stream');
@@ -32,7 +35,8 @@ final firebaseAuthProvider = StreamProvider<User?>((ref) {
 
 /// Authentication state provider - enhanced auth state with user data
 final authStateProvider = StreamProvider<AuthState>((ref) async* {
-  await for (final firebaseUser in ref.watch(firebaseAuthProvider.stream)) {
+  await for (final firebaseUser
+      in ref.watch(firebaseAuthProvider.future).asStream()) {
     if (firebaseUser == null) {
       AppLogger.firebase('AuthProvider', 'User not authenticated');
       yield const AuthState.unauthenticated();
@@ -282,6 +286,41 @@ class AuthState {
   bool get isUnauthenticated =>
       firebaseUser == null && user == null && errorMessage == null;
 }
+
+/// Form state management providers for authentication forms
+/// Following MVVM pattern with Riverpod state management
+
+/// Login form state provider
+final loginFormProvider =
+    StateNotifierProvider<LoginFormNotifier, LoginFormState>((ref) {
+      return LoginFormNotifier(ref);
+    });
+
+/// Register form state provider
+final registerFormProvider =
+    StateNotifierProvider<RegisterFormNotifier, RegisterFormState>((ref) {
+      return RegisterFormNotifier(ref);
+    });
+
+/// Forgot password form state provider
+final forgotPasswordFormProvider =
+    StateNotifierProvider<ForgotPasswordFormNotifier, ForgotPasswordFormState>((
+      ref,
+    ) {
+      return ForgotPasswordFormNotifier(ref);
+    });
+
+/// Profile form state provider
+final profileFormProvider =
+    StateNotifierProvider<ProfileFormNotifier, ProfileFormState>((ref) {
+      return ProfileFormNotifier(ref);
+    });
+
+/// Authentication navigation state provider
+final authNavigationProvider =
+    StateNotifierProvider<AuthNavigationNotifier, AuthNavigationState>((ref) {
+      return AuthNavigationNotifier(ref);
+    });
 
 /// Authentication service for handling auth operations
 class AuthService {

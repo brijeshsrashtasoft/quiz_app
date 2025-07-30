@@ -1,7 +1,20 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../firebase/firebase_core_config.dart';
 import '../utils/logger.dart';
-import '../utils/result.dart';
+
+/// SharedPreferences provider
+final sharedPreferencesProvider = FutureProvider<SharedPreferences>((ref) async {
+  try {
+    AppLogger.info('Initializing SharedPreferences...');
+    final prefs = await SharedPreferences.getInstance();
+    AppLogger.info('SharedPreferences initialization completed successfully');
+    return prefs;
+  } catch (e, stackTrace) {
+    AppLogger.error('SharedPreferences initialization failed', e, stackTrace);
+    throw Exception('Failed to initialize SharedPreferences: ${e.toString()}');
+  }
+});
 
 /// Firebase initialization provider
 final firebaseInitializationProvider = FutureProvider<bool>((ref) async {
