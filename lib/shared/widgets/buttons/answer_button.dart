@@ -13,22 +13,28 @@ class AnswerButton extends StatefulWidget {
   final String text;
   final VoidCallback? onPressed;
   final AnswerShape shape;
+  final Color? color;
   final bool isSelected;
   final bool isCorrect;
   final bool isIncorrect;
+  final bool isWrong;
   final bool showResult;
   final bool isDisabled;
+  final double? height;
 
   const AnswerButton({
     super.key,
     required this.text,
     required this.shape,
     this.onPressed,
+    this.color,
     this.isSelected = false,
     this.isCorrect = false,
     this.isIncorrect = false,
+    this.isWrong = false,
     this.showResult = false,
     this.isDisabled = false,
+    this.height,
   });
 
   @override
@@ -82,16 +88,16 @@ class _AnswerButtonState extends State<AnswerButton>
   }
 
   Color get _backgroundColor {
-    if (widget.showResult) {
+    if (widget.showResult || widget.isCorrect || widget.isWrong) {
       if (widget.isCorrect) return AppColors.correctAnswer;
-      if (widget.isIncorrect) return AppColors.incorrectAnswer;
+      if (widget.isIncorrect || widget.isWrong) return AppColors.incorrectAnswer;
     }
 
     if (widget.isSelected && !widget.showResult) {
-      return _getShapeColor().withOpacity(0.8);
+      return (widget.color ?? _getShapeColor()).withOpacity(0.8);
     }
 
-    return _getShapeColor();
+    return widget.color ?? _getShapeColor();
   }
 
   Color _getShapeColor() {
@@ -159,7 +165,7 @@ class _AnswerButtonState extends State<AnswerButton>
               onTap: !widget.isDisabled ? widget.onPressed : null,
               child: Container(
                 width: double.infinity,
-                height: AppDimensions.answerButtonHeight,
+                height: widget.height ?? AppDimensions.answerButtonHeight,
                 margin: EdgeInsets.symmetric(
                   vertical: AppSpacing.spacingXS,
                   horizontal: AppSpacing.spacingS,

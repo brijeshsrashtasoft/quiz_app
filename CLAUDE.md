@@ -629,6 +629,7 @@ echo "================================================="
 - `firebase_storage` - File and media storage
 - `cloud_functions` - Serverless functions for complex logic
 - `firebase_analytics` - User analytics and behavior tracking
+- `connectivity_plus` - Network connectivity monitoring for real-time features
 
 ### UI/UX & Animations
 - `flutter_animate` - Easy animations
