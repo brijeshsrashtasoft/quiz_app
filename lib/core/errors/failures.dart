@@ -44,4 +44,17 @@ extension FailureX on Failure {
       unknownFailure: (message) => 'Unknown error: $message',
     );
   }
+
+  /// Get error code if available
+  String? get code {
+    return when(
+      serverFailure: (message, code) => code,
+      networkFailure: (message) => null,
+      authFailure: (message, code) => code,
+      firestoreFailure: (message, code) => code,
+      validationFailure: (message, fieldErrors) => null,
+      cacheFailure: (message) => null,
+      unknownFailure: (message) => null,
+    );
+  }
 }
