@@ -35,7 +35,8 @@ final firebaseAuthProvider = StreamProvider<User?>((ref) {
 
 /// Authentication state provider - enhanced auth state with user data
 final authStateProvider = StreamProvider<AuthState>((ref) async* {
-  await for (final firebaseUser in ref.watch(firebaseAuthProvider.future).asStream()) {
+  await for (final firebaseUser
+      in ref.watch(firebaseAuthProvider.future).asStream()) {
     if (firebaseUser == null) {
       AppLogger.firebase('AuthProvider', 'User not authenticated');
       yield const AuthState.unauthenticated();
@@ -290,29 +291,36 @@ class AuthState {
 /// Following MVVM pattern with Riverpod state management
 
 /// Login form state provider
-final loginFormProvider = StateNotifierProvider<LoginFormNotifier, LoginFormState>((ref) {
-  return LoginFormNotifier(ref);
-});
+final loginFormProvider =
+    StateNotifierProvider<LoginFormNotifier, LoginFormState>((ref) {
+      return LoginFormNotifier(ref);
+    });
 
 /// Register form state provider
-final registerFormProvider = StateNotifierProvider<RegisterFormNotifier, RegisterFormState>((ref) {
-  return RegisterFormNotifier(ref);
-});
+final registerFormProvider =
+    StateNotifierProvider<RegisterFormNotifier, RegisterFormState>((ref) {
+      return RegisterFormNotifier(ref);
+    });
 
 /// Forgot password form state provider
-final forgotPasswordFormProvider = StateNotifierProvider<ForgotPasswordFormNotifier, ForgotPasswordFormState>((ref) {
-  return ForgotPasswordFormNotifier(ref);
-});
+final forgotPasswordFormProvider =
+    StateNotifierProvider<ForgotPasswordFormNotifier, ForgotPasswordFormState>((
+      ref,
+    ) {
+      return ForgotPasswordFormNotifier(ref);
+    });
 
 /// Profile form state provider
-final profileFormProvider = StateNotifierProvider<ProfileFormNotifier, ProfileFormState>((ref) {
-  return ProfileFormNotifier(ref);
-});
+final profileFormProvider =
+    StateNotifierProvider<ProfileFormNotifier, ProfileFormState>((ref) {
+      return ProfileFormNotifier(ref);
+    });
 
 /// Authentication navigation state provider
-final authNavigationProvider = StateNotifierProvider<AuthNavigationNotifier, AuthNavigationState>((ref) {
-  return AuthNavigationNotifier(ref);
-});
+final authNavigationProvider =
+    StateNotifierProvider<AuthNavigationNotifier, AuthNavigationState>((ref) {
+      return AuthNavigationNotifier(ref);
+    });
 
 /// Authentication service for handling auth operations
 class AuthService {

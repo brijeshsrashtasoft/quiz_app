@@ -15,9 +15,7 @@ class SendPasswordResetUseCase
     try {
       if (!_isValidEmail(params.email)) {
         return Result.failure(
-          ValidationFailure(
-            message: 'Please enter a valid email address',
-          ),
+          ValidationFailure(message: 'Please enter a valid email address'),
         );
       }
       return await repository.sendPasswordResetEmail(email: params.email);

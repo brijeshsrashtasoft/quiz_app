@@ -504,7 +504,8 @@ void main() {
         TestCategory.unit,
         () {
           // Arrange
-          final originalState = AuthState.authenticated(user: testUser) as AuthenticatedState;
+          final originalState =
+              AuthState.authenticated(user: testUser) as AuthenticatedState;
           final newUser = AuthDomainTestHelpers.createTestUserEntity(
             id: 'new-user-456',
             name: 'New User',
@@ -526,10 +527,9 @@ void main() {
         TestCategory.unit,
         () {
           // Arrange
-          final originalState = AuthState.error(
-            message: 'Original error',
-            code: 'ORIG_CODE',
-          ) as ErrorAuthState;
+          final originalState =
+              AuthState.error(message: 'Original error', code: 'ORIG_CODE')
+                  as ErrorAuthState;
 
           // Act
           final copiedState = originalState.copyWith(

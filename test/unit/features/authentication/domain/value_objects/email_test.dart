@@ -160,7 +160,10 @@ void main() {
             );
             expect(result.failureOrNull, isA<ValidationFailure>());
             final failure = result.failureOrNull as ValidationFailure;
-            expect(failure.message, equals('Please enter a valid email address'));
+            expect(
+              failure.message,
+              equals('Please enter a valid email address'),
+            );
           }
         },
       );

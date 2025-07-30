@@ -82,12 +82,7 @@ class AuthNavigationState with _$AuthNavigationState {
 }
 
 /// Authentication flow steps
-enum AuthFlowStep {
-  login,
-  register,
-  forgotPassword,
-  profile,
-}
+enum AuthFlowStep { login, register, forgotPassword, profile }
 
 /// Authentication Navigation Notifier
 class AuthNavigationNotifier extends StateNotifier<AuthNavigationState> {
@@ -112,8 +107,11 @@ class AuthNavigationNotifier extends StateNotifier<AuthNavigationState> {
 
   /// Navigate to login step
   void navigateToLogin({String? fromRoute}) {
-    AppLogger.info('AuthNavigation', 'Navigating to login from: ${fromRoute ?? 'unknown'}');
-    
+    AppLogger.info(
+      'AuthNavigation',
+      'Navigating to login from: ${fromRoute ?? 'unknown'}',
+    );
+
     state = state.copyWith(
       currentStep: AuthFlowStep.login,
       previousRoute: fromRoute,
@@ -122,14 +120,17 @@ class AuthNavigationNotifier extends StateNotifier<AuthNavigationState> {
     );
 
     AppRouter.go(RouteConstants.login);
-    
+
     state = state.copyWith(isNavigating: false);
   }
 
   /// Navigate to register step
   void navigateToRegister({String? fromRoute}) {
-    AppLogger.info('AuthNavigation', 'Navigating to register from: ${fromRoute ?? 'login'}');
-    
+    AppLogger.info(
+      'AuthNavigation',
+      'Navigating to register from: ${fromRoute ?? 'login'}',
+    );
+
     state = state.copyWith(
       currentStep: AuthFlowStep.register,
       previousRoute: fromRoute ?? RouteConstants.login,
@@ -138,14 +139,17 @@ class AuthNavigationNotifier extends StateNotifier<AuthNavigationState> {
     );
 
     AppRouter.go(RouteConstants.register);
-    
+
     state = state.copyWith(isNavigating: false);
   }
 
   /// Navigate to forgot password step
   void navigateToForgotPassword({String? fromRoute}) {
-    AppLogger.info('AuthNavigation', 'Navigating to forgot password from: ${fromRoute ?? 'login'}');
-    
+    AppLogger.info(
+      'AuthNavigation',
+      'Navigating to forgot password from: ${fromRoute ?? 'login'}',
+    );
+
     state = state.copyWith(
       currentStep: AuthFlowStep.forgotPassword,
       previousRoute: fromRoute ?? RouteConstants.login,
@@ -154,14 +158,17 @@ class AuthNavigationNotifier extends StateNotifier<AuthNavigationState> {
     );
 
     AppRouter.go(RouteConstants.forgotPassword);
-    
+
     state = state.copyWith(isNavigating: false);
   }
 
   /// Navigate to profile step
   void navigateToProfile({String? fromRoute}) {
-    AppLogger.info('AuthNavigation', 'Navigating to profile from: ${fromRoute ?? 'home'}');
-    
+    AppLogger.info(
+      'AuthNavigation',
+      'Navigating to profile from: ${fromRoute ?? 'home'}',
+    );
+
     state = state.copyWith(
       currentStep: AuthFlowStep.profile,
       previousRoute: fromRoute ?? RouteConstants.home,
@@ -170,15 +177,18 @@ class AuthNavigationNotifier extends StateNotifier<AuthNavigationState> {
     );
 
     AppRouter.go(RouteConstants.profile);
-    
+
     state = state.copyWith(isNavigating: false);
   }
 
   /// Navigate back to previous route
   void navigateBack() {
     if (state.previousRoute != null) {
-      AppLogger.info('AuthNavigation', 'Navigating back to: ${state.previousRoute}');
-      
+      AppLogger.info(
+        'AuthNavigation',
+        'Navigating back to: ${state.previousRoute}',
+      );
+
       state = state.copyWith(isNavigating: true);
       AppRouter.go(state.previousRoute!);
       state = state.copyWith(isNavigating: false);
@@ -195,19 +205,19 @@ class AuthNavigationNotifier extends StateNotifier<AuthNavigationState> {
   /// Set target route for post-authentication navigation
   void setTargetRoute(String route, {Map<String, dynamic>? params}) {
     AppLogger.info('AuthNavigation', 'Setting target route: $route');
-    
-    state = state.copyWith(
-      targetRoute: route,
-      navigationParams: params,
-    );
+
+    state = state.copyWith(targetRoute: route, navigationParams: params);
   }
 
   /// Handle successful authentication
   void _handleAuthenticationSuccess() {
-    AppLogger.info('AuthNavigation', 'Authentication successful, navigating to target or home');
-    
+    AppLogger.info(
+      'AuthNavigation',
+      'Authentication successful, navigating to target or home',
+    );
+
     final targetRoute = state.targetRoute ?? RouteConstants.home;
-    
+
     state = state.copyWith(
       isNavigating: true,
       targetRoute: null,
@@ -216,14 +226,14 @@ class AuthNavigationNotifier extends StateNotifier<AuthNavigationState> {
 
     // Navigate to target route or home
     AppRouter.clearAndGoTo(targetRoute);
-    
+
     state = state.copyWith(isNavigating: false);
   }
 
   /// Handle authentication error
   void _handleAuthenticationError(String? errorMessage) {
     AppLogger.warning('AuthNavigation', 'Authentication error: $errorMessage');
-    
+
     // Stay on current auth page and let form handle error display
     state = state.copyWith(isNavigating: false);
   }
@@ -231,7 +241,7 @@ class AuthNavigationNotifier extends StateNotifier<AuthNavigationState> {
   /// Handle logout navigation
   void handleLogout() {
     AppLogger.info('AuthNavigation', 'User logged out, navigating to login');
-    
+
     state = state.copyWith(
       currentStep: AuthFlowStep.login,
       previousRoute: null,
@@ -242,14 +252,14 @@ class AuthNavigationNotifier extends StateNotifier<AuthNavigationState> {
     );
 
     AppRouter.clearAndGoTo(RouteConstants.login);
-    
+
     state = state.copyWith(isNavigating: false);
   }
 
   /// Navigate to main app after authentication
   void navigateToMainApp() {
     AppLogger.info('AuthNavigation', 'Navigating to main app');
-    
+
     state = state.copyWith(isNavigating: true);
     AppRouter.clearAndGoTo(RouteConstants.home);
     state = state.copyWith(isNavigating: false);
@@ -308,9 +318,10 @@ extension AuthNavigationHelper on AuthNavigationNotifier {
 
 /// Global authentication flow controller
 /// Manages authentication state across the entire app
-final authFlowControllerProvider = StateNotifierProvider<AuthFlowController, AuthFlowState>((ref) {
-  return AuthFlowController(ref);
-});
+final authFlowControllerProvider =
+    StateNotifierProvider<AuthFlowController, AuthFlowState>((ref) {
+      return AuthFlowController(ref);
+    });
 
 @freezed
 class AuthFlowState with _$AuthFlowState {
@@ -337,11 +348,7 @@ class AuthFlowState with _$AuthFlowState {
   bool get hasError => errorMessage != null;
 }
 
-enum AuthenticationStatus {
-  unknown,
-  authenticated,
-  unauthenticated,
-}
+enum AuthenticationStatus { unknown, authenticated, unauthenticated }
 
 /// Authentication Flow Controller
 /// Handles global authentication state and navigation decisions
@@ -376,15 +383,14 @@ class AuthFlowController extends StateNotifier<AuthFlowState> {
             state = state.copyWith(isLoading: true);
           },
           error: (error, stackTrace) {
-            _updateAuthenticationError('Authentication error: ${error.toString()}');
+            _updateAuthenticationError(
+              'Authentication error: ${error.toString()}',
+            );
           },
         );
       });
 
-      state = state.copyWith(
-        isInitialized: true,
-        isLoading: false,
-      );
+      state = state.copyWith(isInitialized: true, isLoading: false);
 
       AppLogger.info('AuthFlowController', 'Authentication flow initialized');
     } catch (e) {
@@ -416,10 +422,7 @@ class AuthFlowController extends StateNotifier<AuthFlowState> {
 
   /// Update authentication error
   void _updateAuthenticationError(String? errorMessage) {
-    state = state.copyWith(
-      errorMessage: errorMessage,
-      isLoading: false,
-    );
+    state = state.copyWith(errorMessage: errorMessage, isLoading: false);
 
     AppLogger.error('AuthFlowController', errorMessage ?? 'Unknown auth error');
   }
@@ -435,7 +438,7 @@ class AuthFlowController extends StateNotifier<AuthFlowState> {
       result.when(
         success: (_) {
           _updateAuthenticationStatus(AuthenticationStatus.unauthenticated);
-          
+
           // Navigate to login
           final authNavigation = ref.read(authNavigationProvider.notifier);
           authNavigation.handleLogout();

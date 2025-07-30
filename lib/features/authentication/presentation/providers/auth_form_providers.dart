@@ -7,7 +7,8 @@ import '../../domain/entities/user_entity.dart';
 import '../../domain/value_objects/email.dart';
 import '../../domain/value_objects/password.dart';
 import 'auth_providers.dart';
-import '../../domain/usecases/update_user_profile_usecase.dart' show UpdateUserProfileParams;
+import '../../domain/usecases/update_user_profile_usecase.dart'
+    show UpdateUserProfileParams;
 
 part 'auth_form_providers.freezed.dart';
 
@@ -32,17 +33,15 @@ class LoginFormState with _$LoginFormState {
   const LoginFormState._();
 
   /// Check if form is valid for submission
-  bool get isValid => 
-    email.isNotEmpty && 
-    password.isNotEmpty && 
-    emailError == null && 
-    passwordError == null;
+  bool get isValid =>
+      email.isNotEmpty &&
+      password.isNotEmpty &&
+      emailError == null &&
+      passwordError == null;
 
   /// Check if form has any errors
-  bool get hasErrors => 
-    emailError != null || 
-    passwordError != null || 
-    generalError != null;
+  bool get hasErrors =>
+      emailError != null || passwordError != null || generalError != null;
 }
 
 /// Login Form Notifier
@@ -56,7 +55,9 @@ class LoginFormNotifier extends StateNotifier<LoginFormState> {
     final emailResult = Email.validate(email);
     state = state.copyWith(
       email: email,
-      emailError: emailResult.isSuccess ? null : emailResult.failureOrNull?.userMessage,
+      emailError: emailResult.isSuccess
+          ? null
+          : emailResult.failureOrNull?.userMessage,
       generalError: null,
     );
   }
@@ -66,7 +67,9 @@ class LoginFormNotifier extends StateNotifier<LoginFormState> {
     final passwordResult = Password.validate(password);
     state = state.copyWith(
       password: password,
-      passwordError: passwordResult.isSuccess ? null : passwordResult.failureOrNull?.userMessage,
+      passwordError: passwordResult.isSuccess
+          ? null
+          : passwordResult.failureOrNull?.userMessage,
       generalError: null,
     );
   }
@@ -89,10 +92,10 @@ class LoginFormNotifier extends StateNotifier<LoginFormState> {
     }
 
     state = state.copyWith(isLoading: true, generalError: null);
-    
+
     try {
       AppLogger.firebase('LoginForm', 'Attempting login for: ${state.email}');
-      
+
       final authService = ref.read(authServiceProvider);
       final result = await authService.signInWithEmailAndPassword(
         email: state.email,
@@ -101,13 +104,16 @@ class LoginFormNotifier extends StateNotifier<LoginFormState> {
 
       result.when(
         success: (userCredential) {
-          AppLogger.firebase('LoginForm', 'Login successful for: ${state.email}');
+          AppLogger.firebase(
+            'LoginForm',
+            'Login successful for: ${state.email}',
+          );
           state = state.copyWith(
             isLoading: false,
             successMessage: 'Login successful! Welcome back.',
             generalError: null,
           );
-          
+
           // Clear form after successful login
           _clearForm();
         },
@@ -171,37 +177,37 @@ class RegisterFormState with _$RegisterFormState {
   const RegisterFormState._();
 
   /// Check if form is valid for submission
-  bool get isValid => 
-    name.isNotEmpty && 
-    email.isNotEmpty && 
-    password.isNotEmpty && 
-    confirmPassword.isNotEmpty &&
-    password == confirmPassword &&
-    agreeToTerms &&
-    nameError == null && 
-    emailError == null && 
-    passwordError == null &&
-    confirmPasswordError == null;
+  bool get isValid =>
+      name.isNotEmpty &&
+      email.isNotEmpty &&
+      password.isNotEmpty &&
+      confirmPassword.isNotEmpty &&
+      password == confirmPassword &&
+      agreeToTerms &&
+      nameError == null &&
+      emailError == null &&
+      passwordError == null &&
+      confirmPasswordError == null;
 
   /// Check if form has any errors
-  bool get hasErrors => 
-    nameError != null || 
-    emailError != null || 
-    passwordError != null || 
-    confirmPasswordError != null ||
-    generalError != null;
+  bool get hasErrors =>
+      nameError != null ||
+      emailError != null ||
+      passwordError != null ||
+      confirmPasswordError != null ||
+      generalError != null;
 
   /// Get password strength (0-4)
   int get passwordStrength {
     if (password.isEmpty) return 0;
-    
+
     int strength = 0;
     if (password.length >= 8) strength++;
     if (password.contains(RegExp(r'[a-z]'))) strength++;
     if (password.contains(RegExp(r'[A-Z]'))) strength++;
     if (password.contains(RegExp(r'[0-9]'))) strength++;
     if (password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) strength++;
-    
+
     return strength > 4 ? 4 : strength;
   }
 }
@@ -221,11 +227,7 @@ class RegisterFormNotifier extends StateNotifier<RegisterFormState> {
       error = 'Name must be at least 2 characters';
     }
 
-    state = state.copyWith(
-      name: name,
-      nameError: error,
-      generalError: null,
-    );
+    state = state.copyWith(name: name, nameError: error, generalError: null);
   }
 
   /// Update email field with validation
@@ -233,7 +235,9 @@ class RegisterFormNotifier extends StateNotifier<RegisterFormState> {
     final emailResult = Email.validate(email);
     state = state.copyWith(
       email: email,
-      emailError: emailResult.isSuccess ? null : emailResult.failureOrNull?.userMessage,
+      emailError: emailResult.isSuccess
+          ? null
+          : emailResult.failureOrNull?.userMessage,
       generalError: null,
     );
   }
@@ -243,7 +247,9 @@ class RegisterFormNotifier extends StateNotifier<RegisterFormState> {
     final passwordResult = Password.validate(password);
     state = state.copyWith(
       password: password,
-      passwordError: passwordResult.isSuccess ? null : passwordResult.failureOrNull?.userMessage,
+      passwordError: passwordResult.isSuccess
+          ? null
+          : passwordResult.failureOrNull?.userMessage,
       generalError: null,
     );
 
@@ -280,7 +286,9 @@ class RegisterFormNotifier extends StateNotifier<RegisterFormState> {
 
   /// Toggle confirm password visibility
   void toggleConfirmPasswordVisibility() {
-    state = state.copyWith(isConfirmPasswordVisible: !state.isConfirmPasswordVisible);
+    state = state.copyWith(
+      isConfirmPasswordVisible: !state.isConfirmPasswordVisible,
+    );
   }
 
   /// Toggle terms agreement
@@ -291,15 +299,20 @@ class RegisterFormNotifier extends StateNotifier<RegisterFormState> {
   /// Submit registration form
   Future<void> submitRegistration() async {
     if (!state.isValid) {
-      AppLogger.warning('Registration form submission attempted with invalid data');
+      AppLogger.warning(
+        'Registration form submission attempted with invalid data',
+      );
       return;
     }
 
     state = state.copyWith(isLoading: true, generalError: null);
-    
+
     try {
-      AppLogger.firebase('RegisterForm', 'Attempting registration for: ${state.email}');
-      
+      AppLogger.firebase(
+        'RegisterForm',
+        'Attempting registration for: ${state.email}',
+      );
+
       final authService = ref.read(authServiceProvider);
       final result = await authService.createUserWithEmailAndPassword(
         email: state.email,
@@ -309,13 +322,16 @@ class RegisterFormNotifier extends StateNotifier<RegisterFormState> {
 
       result.when(
         success: (userCredential) {
-          AppLogger.firebase('RegisterForm', 'Registration successful for: ${state.email}');
+          AppLogger.firebase(
+            'RegisterForm',
+            'Registration successful for: ${state.email}',
+          );
           state = state.copyWith(
             isLoading: false,
             successMessage: 'Registration successful! Welcome to Quiz App.',
             generalError: null,
           );
-          
+
           // Clear form after successful registration
           _clearForm();
         },
@@ -379,7 +395,8 @@ class ForgotPasswordFormState with _$ForgotPasswordFormState {
 }
 
 /// Forgot Password Form Notifier
-class ForgotPasswordFormNotifier extends StateNotifier<ForgotPasswordFormState> {
+class ForgotPasswordFormNotifier
+    extends StateNotifier<ForgotPasswordFormState> {
   final Ref ref;
 
   ForgotPasswordFormNotifier(this.ref) : super(const ForgotPasswordFormState());
@@ -389,7 +406,9 @@ class ForgotPasswordFormNotifier extends StateNotifier<ForgotPasswordFormState> 
     final emailResult = Email.validate(email);
     state = state.copyWith(
       email: email,
-      emailError: emailResult.isSuccess ? null : emailResult.failureOrNull?.userMessage,
+      emailError: emailResult.isSuccess
+          ? null
+          : emailResult.failureOrNull?.userMessage,
       generalError: null,
       successMessage: null,
     );
@@ -398,21 +417,35 @@ class ForgotPasswordFormNotifier extends StateNotifier<ForgotPasswordFormState> 
   /// Submit forgot password form
   Future<void> submitForgotPassword() async {
     if (!state.isValid) {
-      AppLogger.warning('Forgot password form submission attempted with invalid data');
+      AppLogger.warning(
+        'Forgot password form submission attempted with invalid data',
+      );
       return;
     }
 
-    state = state.copyWith(isLoading: true, generalError: null, successMessage: null);
-    
+    state = state.copyWith(
+      isLoading: true,
+      generalError: null,
+      successMessage: null,
+    );
+
     try {
-      AppLogger.firebase('ForgotPasswordForm', 'Sending password reset email to: ${state.email}');
-      
+      AppLogger.firebase(
+        'ForgotPasswordForm',
+        'Sending password reset email to: ${state.email}',
+      );
+
       final authService = ref.read(authServiceProvider);
-      final result = await authService.sendPasswordResetEmail(email: state.email);
+      final result = await authService.sendPasswordResetEmail(
+        email: state.email,
+      );
 
       result.when(
         success: (_) {
-          AppLogger.firebase('ForgotPasswordForm', 'Password reset email sent to: ${state.email}');
+          AppLogger.firebase(
+            'ForgotPasswordForm',
+            'Password reset email sent to: ${state.email}',
+          );
           state = state.copyWith(
             isLoading: false,
             successMessage: 'Password reset email sent! Check your inbox.',
@@ -467,17 +500,15 @@ class ProfileFormState with _$ProfileFormState {
   const ProfileFormState._();
 
   /// Check if form is valid for submission
-  bool get isValid => 
-    name.isNotEmpty && 
-    email.isNotEmpty && 
-    nameError == null && 
-    emailError == null;
+  bool get isValid =>
+      name.isNotEmpty &&
+      email.isNotEmpty &&
+      nameError == null &&
+      emailError == null;
 
   /// Check if form has any errors
-  bool get hasErrors => 
-    nameError != null || 
-    emailError != null || 
-    generalError != null;
+  bool get hasErrors =>
+      nameError != null || emailError != null || generalError != null;
 }
 
 /// Profile Form Notifier
@@ -492,10 +523,7 @@ class ProfileFormNotifier extends StateNotifier<ProfileFormState> {
   void _loadCurrentUserData() {
     final currentUser = ref.read(currentUserProvider);
     if (currentUser != null) {
-      state = state.copyWith(
-        name: currentUser.name,
-        email: currentUser.email,
-      );
+      state = state.copyWith(name: currentUser.name, email: currentUser.email);
     }
   }
 
@@ -521,7 +549,9 @@ class ProfileFormNotifier extends StateNotifier<ProfileFormState> {
     final emailResult = Email.validate(email);
     state = state.copyWith(
       email: email,
-      emailError: emailResult.isSuccess ? null : emailResult.failureOrNull?.userMessage,
+      emailError: emailResult.isSuccess
+          ? null
+          : emailResult.failureOrNull?.userMessage,
       generalError: null,
       successMessage: null,
     );
@@ -530,18 +560,26 @@ class ProfileFormNotifier extends StateNotifier<ProfileFormState> {
   /// Submit profile update form
   Future<void> submitProfileUpdate() async {
     if (!state.isValid) {
-      AppLogger.warning('Profile update form submission attempted with invalid data');
+      AppLogger.warning(
+        'Profile update form submission attempted with invalid data',
+      );
       return;
     }
 
-    state = state.copyWith(isLoading: true, generalError: null, successMessage: null);
-    
+    state = state.copyWith(
+      isLoading: true,
+      generalError: null,
+      successMessage: null,
+    );
+
     try {
       AppLogger.firebase('ProfileForm', 'Updating profile for: ${state.email}');
-      
-      final updateUserProfileUseCase = ref.read(updateUserProfileUseCaseProvider);
+
+      final updateUserProfileUseCase = ref.read(
+        updateUserProfileUseCaseProvider,
+      );
       final currentUser = ref.read(currentUserProvider);
-      
+
       if (currentUser == null) {
         state = state.copyWith(
           isLoading: false,
@@ -551,14 +589,15 @@ class ProfileFormNotifier extends StateNotifier<ProfileFormState> {
       }
 
       final result = await updateUserProfileUseCase(
-        UpdateUserProfileParams(
-          displayName: state.name,
-        ),
+        UpdateUserProfileParams(displayName: state.name),
       );
 
       result.when(
         success: (user) {
-          AppLogger.firebase('ProfileForm', 'Profile updated successfully for: ${state.email}');
+          AppLogger.firebase(
+            'ProfileForm',
+            'Profile updated successfully for: ${state.email}',
+          );
           state = state.copyWith(
             isLoading: false,
             successMessage: 'Profile updated successfully!',
@@ -608,4 +647,3 @@ class ProfileFormNotifier extends StateNotifier<ProfileFormState> {
     );
   }
 }
-

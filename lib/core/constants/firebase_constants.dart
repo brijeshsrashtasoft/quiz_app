@@ -7,6 +7,23 @@ class FirebaseConstants {
   static const String gameSessionsCollection = 'game_sessions';
   static const String leaderboardsCollection = 'leaderboards';
 
+  // Firebase Storage Paths
+  static const String userAvatarsPath = 'users';
+  static const String quizImagesPath = 'quizzes';
+  static const String gameAttachmentsPath = 'game_sessions';
+
+  // Storage Configuration (Free Tier Limits)
+  static const int maxFileSizeBytes = 5 * 1024 * 1024; // 5MB per file
+  static const int maxUserStorageMB = 100; // 100MB per user recommended
+  static const int totalStorageWarningGB =
+      4; // Warning at 4GB (5GB free tier limit)
+  static const List<String> allowedImageExtensions = [
+    'jpg',
+    'jpeg',
+    'png',
+    'webp',
+  ];
+
   // Auth Configuration
   static const int sessionTimeoutMinutes = 30;
   static const int maxLoginAttempts = 3;

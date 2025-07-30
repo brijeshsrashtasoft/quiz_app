@@ -17,7 +17,8 @@ class EmailVerificationPage extends ConsumerStatefulWidget {
   const EmailVerificationPage({super.key});
 
   @override
-  ConsumerState<EmailVerificationPage> createState() => _EmailVerificationPageState();
+  ConsumerState<EmailVerificationPage> createState() =>
+      _EmailVerificationPageState();
 }
 
 class _EmailVerificationPageState extends ConsumerState<EmailVerificationPage>
@@ -61,10 +62,7 @@ class _EmailVerificationPageState extends ConsumerState<EmailVerificationPage>
         );
 
     _pulseAnimation = Tween<double>(begin: 1.0, end: 1.1).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeInOut,
-      ),
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
 
     _animationController.forward();
@@ -102,7 +100,9 @@ class _EmailVerificationPageState extends ConsumerState<EmailVerificationPage>
 
       result.when(
         success: (_) {
-          setState(() => _successMessage = 'Verification email sent successfully!');
+          setState(
+            () => _successMessage = 'Verification email sent successfully!',
+          );
         },
         failure: (failure) {
           setState(() => _errorMessage = failure.userMessage);
@@ -117,7 +117,7 @@ class _EmailVerificationPageState extends ConsumerState<EmailVerificationPage>
     setState(() => _isCheckingVerification = true);
 
     final authService = ref.read(authServiceProvider);
-    
+
     // First reload user data to get latest verification status
     final reloadResult = await authService.reloadUser();
 
@@ -128,12 +128,15 @@ class _EmailVerificationPageState extends ConsumerState<EmailVerificationPage>
         success: (_) {
           // Check if email is now verified
           final isVerified = authService.isEmailVerified;
-          
+
           if (isVerified) {
             setState(() => _successMessage = 'Email verified successfully!');
             context.go(RouteConstants.home);
           } else {
-            setState(() => _errorMessage = 'Email not yet verified. Please check your email.');
+            setState(
+              () => _errorMessage =
+                  'Email not yet verified. Please check your email.',
+            );
           }
         },
         failure: (failure) {
@@ -230,9 +233,7 @@ class _EmailVerificationPageState extends ConsumerState<EmailVerificationPage>
           // Title
           Text(
             'Verify Your Email',
-            style: AppTextStyles.gameTitle.copyWith(
-              color: AppColors.charcoal,
-            ),
+            style: AppTextStyles.gameTitle.copyWith(color: AppColors.charcoal),
             textAlign: TextAlign.center,
           ),
 
@@ -269,7 +270,9 @@ class _EmailVerificationPageState extends ConsumerState<EmailVerificationPage>
                     height: 20,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.vibrantPurple),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        AppColors.vibrantPurple,
+                      ),
                     ),
                   )
                 else
@@ -285,7 +288,9 @@ class _EmailVerificationPageState extends ConsumerState<EmailVerificationPage>
                         ? 'Checking verification status...'
                         : 'We\'re automatically checking your verification status.',
                     style: AppTextStyles.caption.copyWith(
-                      color: _isCheckingVerification ? AppColors.vibrantPurple : AppColors.coolGray,
+                      color: _isCheckingVerification
+                          ? AppColors.vibrantPurple
+                          : AppColors.coolGray,
                     ),
                   ),
                 ),
@@ -361,7 +366,8 @@ class _EmailVerificationPageState extends ConsumerState<EmailVerificationPage>
                 _buildInstructionStep(
                   icon: Icons.email_outlined,
                   title: 'Check your email',
-                  description: 'Look for an email from Quiz Master in your inbox',
+                  description:
+                      'Look for an email from Quiz Master in your inbox',
                 ),
                 const SizedBox(height: AppSpacing.spacingM),
                 _buildInstructionStep(
@@ -379,7 +385,8 @@ class _EmailVerificationPageState extends ConsumerState<EmailVerificationPage>
                 _buildInstructionStep(
                   icon: Icons.check_circle_outline,
                   title: 'You\'re all set!',
-                  description: 'Return here and you\'ll be automatically signed in',
+                  description:
+                      'Return here and you\'ll be automatically signed in',
                 ),
               ],
             ),
@@ -450,11 +457,7 @@ class _EmailVerificationPageState extends ConsumerState<EmailVerificationPage>
             color: AppColors.vibrantPurple.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(
-            icon,
-            size: 18,
-            color: AppColors.vibrantPurple,
-          ),
+          child: Icon(icon, size: 18, color: AppColors.vibrantPurple),
         ),
         const SizedBox(width: AppSpacing.spacingM),
         Expanded(

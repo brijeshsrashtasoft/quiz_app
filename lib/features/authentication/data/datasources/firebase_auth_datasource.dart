@@ -52,7 +52,7 @@ class FirebaseAuthDataSource {
           code: 'unknown_error',
         ),
       );
-    }  
+    }
   }
 
   /// Create user with email and password
@@ -227,7 +227,7 @@ class FirebaseAuthDataSource {
         return Result.failure(
           Failure.authFailure(
             message: 'No user is currently signed in',
-          code: 'no_current_user',
+            code: 'no_current_user',
           ),
         );
       }
@@ -274,7 +274,7 @@ class FirebaseAuthDataSource {
         return Result.failure(
           Failure.authFailure(
             message: 'No user is currently signed in',
-          code: 'no_current_user',
+            code: 'no_current_user',
           ),
         );
       }
@@ -352,7 +352,7 @@ class FirebaseAuthDataSource {
         try {
           if (user == null) {
             AppLogger.firebase(
-              'FirebaseAuthDataSource', 
+              'FirebaseAuthDataSource',
               'Auth state: User signed out',
             );
             return null;
@@ -361,12 +361,12 @@ class FirebaseAuthDataSource {
           // Reload user to get fresh authentication state
           await user.reload();
           final refreshedUser = _firebaseAuth.currentUser;
-          
+
           AppLogger.firebase(
             'FirebaseAuthDataSource',
             'Auth state: User authenticated - ${refreshedUser?.email}',
           );
-          
+
           return refreshedUser;
         } catch (e) {
           AppLogger.error('Error refreshing user state', e);
@@ -375,7 +375,11 @@ class FirebaseAuthDataSource {
         }
       });
     } catch (e, stackTrace) {
-      AppLogger.error('Failed to setup enhanced auth state stream', e, stackTrace);
+      AppLogger.error(
+        'Failed to setup enhanced auth state stream',
+        e,
+        stackTrace,
+      );
       // Fallback to standard auth state changes
       return _firebaseAuth.authStateChanges();
     }
@@ -391,7 +395,7 @@ class FirebaseAuthDataSource {
   List<String> get userProviders {
     final user = _firebaseAuth.currentUser;
     if (user == null) return [];
-    
+
     return user.providerData.map((info) => info.providerId).toList();
   }
 
@@ -413,7 +417,7 @@ class FirebaseAuthDataSource {
         return Result.failure(
           Failure.authFailure(
             message: 'No user is currently signed in',
-          code: 'no_current_user',
+            code: 'no_current_user',
           ),
         );
       }
@@ -424,7 +428,7 @@ class FirebaseAuthDataSource {
       );
 
       final idToken = await user.getIdToken(true); // Force refresh
-      
+
       AppLogger.firebase(
         'FirebaseAuthDataSource',
         'Auth token refreshed successfully',
@@ -453,7 +457,7 @@ class FirebaseAuthDataSource {
         return Result.failure(
           Failure.authFailure(
             message: 'No user is currently signed in',
-          code: 'no_current_user',
+            code: 'no_current_user',
           ),
         );
       }
@@ -476,7 +480,8 @@ class FirebaseAuthDataSource {
       }
 
       // Get Google auth details
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
 
       // Create Firebase credential
       final credential = GoogleAuthProvider.credential(
@@ -515,7 +520,7 @@ class FirebaseAuthDataSource {
         return Result.failure(
           Failure.authFailure(
             message: 'No user is currently signed in',
-          code: 'no_current_user',
+            code: 'no_current_user',
           ),
         );
       }
@@ -555,7 +560,7 @@ class FirebaseAuthDataSource {
         return Result.failure(
           Failure.authFailure(
             message: 'No user is currently signed in',
-          code: 'no_current_user',
+            code: 'no_current_user',
           ),
         );
       }
@@ -564,7 +569,7 @@ class FirebaseAuthDataSource {
         return Result.failure(
           Failure.authFailure(
             message: 'Email is already verified',
-          code: 'email_already_verified',
+            code: 'email_already_verified',
           ),
         );
       }
@@ -602,7 +607,7 @@ class FirebaseAuthDataSource {
         return Result.failure(
           Failure.authFailure(
             message: 'No user is currently signed in',
-          code: 'no_current_user',
+            code: 'no_current_user',
           ),
         );
       }

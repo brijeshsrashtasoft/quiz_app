@@ -775,10 +775,7 @@ void main() {
           );
 
           when(
-            mockAuthRepository.updateEmail(
-              newEmail: any,
-              password: any,
-            ),
+            mockAuthRepository.updateEmail(newEmail: any, password: any),
           ).thenAnswer((_) async => Result.success(null));
 
           when(

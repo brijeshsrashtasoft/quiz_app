@@ -47,7 +47,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage>
   void initState() {
     super.initState();
     _setupAnimations();
-    
+
     // Listen for password changes to update strength indicator
     _passwordController.addListener(() {
       setState(() {});
@@ -245,7 +245,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage>
               ),
               textInputAction: TextInputAction.done,
               onSubmitted: (_) => _handleRegister(),
-              validator: (value) => validatePasswordConfirmation(value, _passwordController.text),
+              validator: (value) =>
+                  validatePasswordConfirmation(value, _passwordController.text),
             ),
 
             const SizedBox(height: AppSpacing.spacingL),

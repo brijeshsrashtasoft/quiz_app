@@ -450,7 +450,9 @@ void main() {
         TestCategory.unit,
         () {
           // Arrange
-          final authStream = Stream.value(Result<UserEntity?>.success(testUser));
+          final authStream = Stream.value(
+            Result<UserEntity?>.success(testUser),
+          );
           when(
             mockAuthRepository.watchAuthState(),
           ).thenAnswer((_) => authStream);
@@ -498,7 +500,9 @@ void main() {
             message: 'Auth stream error',
             code: 'AUTH_STREAM_ERROR',
           );
-          final authStream = Stream.value(Result<UserEntity?>.failure(authFailure));
+          final authStream = Stream.value(
+            Result<UserEntity?>.failure(authFailure),
+          );
           when(
             mockAuthRepository.watchAuthState(),
           ).thenAnswer((_) => authStream);
@@ -894,10 +898,11 @@ void main() {
         TestCategory.unit,
         () async {
           // Arrange
-          final validationFailure = AuthDomainTestHelpers.createValidationFailure(
-            message: 'Validation error',
-            fieldErrors: {'field': 'VALIDATION_ERROR'},
-          );
+          final validationFailure =
+              AuthDomainTestHelpers.createValidationFailure(
+                message: 'Validation error',
+                fieldErrors: {'field': 'VALIDATION_ERROR'},
+              );
 
           // Set up methods to return validation failure
           when(

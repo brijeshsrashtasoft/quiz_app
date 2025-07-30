@@ -65,9 +65,7 @@ class SignInWithEmailUseCase
     // Validate email format
     if (!_isValidEmail(params.email)) {
       return Result.failure(
-        ValidationFailure(
-          message: 'Please enter a valid email address',
-        ),
+        ValidationFailure(message: 'Please enter a valid email address'),
       );
     }
 
@@ -81,12 +79,14 @@ class SignInWithEmailUseCase
     }
 
     // Return success with dummy result for validation only
-    return Result.success(UserEntity(
-      id: '',
-      email: params.email,
-      name: '',
-      createdAt: DateTime.now(),
-    ));
+    return Result.success(
+      UserEntity(
+        id: '',
+        email: params.email,
+        name: '',
+        createdAt: DateTime.now(),
+      ),
+    );
   }
 
   /// Email validation helper
