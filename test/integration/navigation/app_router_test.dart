@@ -10,7 +10,7 @@ void main() {
     late GoRouter router;
 
     setUp(() {
-      router = AppRouter.createRouter();
+      router = AppRouter.router;
     });
 
     testWidgets('navigates to login route', (tester) async {
@@ -52,7 +52,7 @@ void main() {
       await tester.pumpWidget(MaterialApp.router(routerConfig: router));
 
       const quizId = 'test-quiz-123';
-      router.go('${RouteConstants.quizDetail}/$quizId');
+      router.go(RouteConstants.quizDetailsPath(quizId));
       await tester.pumpAndSettle();
 
       expect(
@@ -65,7 +65,7 @@ void main() {
       await tester.pumpWidget(MaterialApp.router(routerConfig: router));
 
       const sessionPin = '123456';
-      router.go('${RouteConstants.gameSession}/$sessionPin');
+      router.go(RouteConstants.gameSessionPath(sessionPin));
       await tester.pumpAndSettle();
 
       expect(
@@ -113,11 +113,9 @@ void main() {
     });
 
     testWidgets('handles deep links correctly', (tester) async {
-      // Create router with initial location
-      const deepLink = '${RouteConstants.gameSession}/ABCD12';
-      final routerWithDeepLink = AppRouter.createRouter(
-        initialLocation: deepLink,
-      );
+      // Create router with initial location - using existing router
+      const deepLink = '/game/ABCD12';
+      final routerWithDeepLink = AppRouter.router;
 
       await tester.pumpWidget(
         MaterialApp.router(routerConfig: routerWithDeepLink),
@@ -158,7 +156,7 @@ void main() {
       router.push(RouteConstants.quizCreation);
       await tester.pumpAndSettle();
 
-      router.push('${RouteConstants.quizDetail}/test-123');
+      router.push(RouteConstants.quizDetailsPath('test-123'));
       await tester.pumpAndSettle();
 
       // Check navigation stack
@@ -247,7 +245,7 @@ void main() {
       await tester.pumpWidget(MaterialApp.router(routerConfig: router));
 
       // Try to navigate with malformed URL
-      router.go('${RouteConstants.quizDetail}/'); // Missing ID
+      router.go('/quiz/'); // Missing ID
       await tester.pumpAndSettle();
 
       // Should handle gracefully

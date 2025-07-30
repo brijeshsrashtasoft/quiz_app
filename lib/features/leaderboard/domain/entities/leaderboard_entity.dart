@@ -12,6 +12,18 @@ class LeaderboardEntity with _$LeaderboardEntity {
     required DateTime updatedAt,
     @Default(false) bool finalResults,
   }) = _LeaderboardEntity;
+
+  /// Create from Firestore map
+  factory LeaderboardEntity.fromMap(Map<String, dynamic> map) {
+    return LeaderboardEntity(
+      sessionId: map['sessionId'] ?? '',
+      scores: (map['scores'] as List<dynamic>? ?? [])
+          .map((score) => ScoreEntity.fromMap(score as Map<String, dynamic>))
+          .toList(),
+      updatedAt: DateTime.fromMillisecondsSinceEpoch(map['updatedAt'] ?? 0),
+      finalResults: map['finalResults'] ?? false,
+    );
+  }
 }
 
 /// Individual score entry entity
@@ -26,6 +38,19 @@ class ScoreEntity with _$ScoreEntity {
     int? rank,
     int? timeTaken,
   }) = _ScoreEntity;
+
+  /// Create from Firestore map
+  factory ScoreEntity.fromMap(Map<String, dynamic> map) {
+    return ScoreEntity(
+      playerId: map['playerId'] ?? '',
+      playerName: map['playerName'] ?? '',
+      score: map['score'] ?? 0,
+      correctAnswers: map['correctAnswers'] ?? 0,
+      totalAnswers: map['totalAnswers'] ?? 0,
+      rank: map['rank'],
+      timeTaken: map['timeTaken'],
+    );
+  }
 }
 
 /// Leaderboard entity extensions for business logic
