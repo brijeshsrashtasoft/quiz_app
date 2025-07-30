@@ -15,7 +15,7 @@ void main() {
 
       // Verify app launched successfully
       expect(find.byType(MaterialApp), findsOneWidget);
-      
+
       // Should show some form of navigation or home content
       // This is a basic smoke test to ensure the app starts
     });

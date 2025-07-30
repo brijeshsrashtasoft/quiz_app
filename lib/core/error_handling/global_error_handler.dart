@@ -8,14 +8,15 @@ import '../utils/logger.dart';
 /// Following CLAUDE.md Clean Architecture patterns
 class GlobalErrorHandler {
   static GlobalErrorHandler? _instance;
-  static GlobalErrorHandler get instance => _instance ??= GlobalErrorHandler._();
-  
+  static GlobalErrorHandler get instance =>
+      _instance ??= GlobalErrorHandler._();
+
   late final ErrorService _errorService;
-  
+
   GlobalErrorHandler._() {
     _errorService = ErrorService.instance;
   }
-  
+
   factory GlobalErrorHandler({ErrorService? errorService}) {
     if (_instance == null) {
       _instance = GlobalErrorHandler._();
@@ -30,10 +31,10 @@ class GlobalErrorHandler {
   void initialize() {
     // Set up Flutter framework error handler
     FlutterError.onError = _handleFlutterError;
-    
+
     // Set up platform dispatcher error handler for errors outside Flutter
     PlatformDispatcher.instance.onError = _handlePlatformError;
-    
+
     AppLogger.info('Global error handler initialized');
   }
 
@@ -41,14 +42,14 @@ class GlobalErrorHandler {
   void _handleFlutterError(FlutterErrorDetails details) {
     // Extract context information
     final context = _buildFlutterErrorContext(details);
-    
+
     // Log the error with full context
     AppLogger.error(
       'Flutter Error: ${details.exception}',
       details.exception,
       details.stack,
     );
-    
+
     // Handle through error service
     _errorService.handleError(
       details.exception,
@@ -64,13 +65,9 @@ class GlobalErrorHandler {
   /// Handle platform-level errors
   bool _handlePlatformError(Object error, StackTrace stackTrace) {
     AppLogger.error('Platform Error: $error', error, stackTrace);
-    
-    _errorService.handleError(
-      error,
-      stackTrace,
-      context: 'Platform Error',
-    );
-    
+
+    _errorService.handleError(error, stackTrace, context: 'Platform Error');
+
     // Return true to indicate error was handled
     return true;
   }
@@ -78,48 +75,40 @@ class GlobalErrorHandler {
   /// Build context string from FlutterErrorDetails
   String _buildFlutterErrorContext(FlutterErrorDetails details) {
     final buffer = StringBuffer('Flutter Error');
-    
+
     if (details.library != null) {
       buffer.write(' - ${details.library}');
     }
-    
+
     if (details.context != null) {
       buffer.write(': ${details.context}');
     }
-    
+
     return buffer.toString();
   }
 
   /// Run code in a guarded zone that catches errors
   Future<T?> runInErrorZone<T>(Future<T> Function() computation) async {
     final completer = Completer<T?>();
-    
+
     runZonedGuarded<void>(
       () async {
         try {
           final result = await computation();
           completer.complete(result);
         } catch (error, stackTrace) {
-          _errorService.handleError(
-            error,
-            stackTrace,
-            context: 'Zone Error',
-          );
+          _errorService.handleError(error, stackTrace, context: 'Zone Error');
           completer.complete(null);
         }
       },
       (error, stackTrace) {
-        _errorService.handleError(
-          error,
-          stackTrace,
-          context: 'Zone Error',
-        );
+        _errorService.handleError(error, stackTrace, context: 'Zone Error');
         if (!completer.isCompleted) {
           completer.complete(null);
         }
       },
     );
-    
+
     return completer.future;
   }
 
@@ -148,7 +137,7 @@ class GlobalErrorHandler {
     Map<String, dynamic>? additionalInfo,
   }) {
     String? contextInfo;
-    
+
     if (context != null) {
       // Try to extract route information for context
       final route = ModalRoute.of(context);
@@ -156,7 +145,7 @@ class GlobalErrorHandler {
         contextInfo = 'Route: ${route.settings.name}';
       }
     }
-    
+
     reportError(
       error,
       stackTrace,

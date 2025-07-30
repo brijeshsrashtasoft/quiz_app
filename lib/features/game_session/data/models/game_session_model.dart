@@ -163,6 +163,31 @@ extension GameSessionModelX on GameSessionModel {
 
     return data;
   }
+
+  /// Check if session is valid (delegates to entity logic)
+  bool get isValid {
+    return toEntity().isValid;
+  }
+
+  /// Check if session has expired (delegates to entity logic)
+  bool get hasExpired {
+    return toEntity().hasExpired;
+  }
+
+  /// Check if user is host (delegates to entity logic)
+  bool isHost(String userId) {
+    return toEntity().isHost(userId);
+  }
+
+  /// Check if user is player (delegates to entity logic)
+  bool isPlayer(String userId) {
+    return toEntity().isPlayer(userId);
+  }
+
+  /// Check if user can join (delegates to entity logic)
+  bool canUserJoin(String userId) {
+    return toEntity().canUserJoin(userId);
+  }
 }
 
 extension PlayerModelX on PlayerModel {

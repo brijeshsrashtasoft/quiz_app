@@ -726,14 +726,16 @@ class GameSessionRepositoryImpl extends BaseRepository
 
       final result = await dataSource.getSessionAnalytics(sessionId);
       return result.when(
-        success: (data) => Result.success(GameSessionAnalytics(
-          totalPlayers: data['totalPlayers'] as int,
-          averageScore: data['averageScore'] as double,
-          completionRate: data['completionRate'] as double,
-          sessionDuration: Duration(minutes: data['sessionDuration'] as int),
-          questionAccuracy: 0.0, // TODO: Calculate from session data
-          sessionDate: DateTime.now(), // TODO: Get from session data
-        )),
+        success: (data) => Result.success(
+          GameSessionAnalytics(
+            totalPlayers: data['totalPlayers'] as int,
+            averageScore: data['averageScore'] as double,
+            completionRate: data['completionRate'] as double,
+            sessionDuration: Duration(minutes: data['sessionDuration'] as int),
+            questionAccuracy: 0.0, // TODO: Calculate from session data
+            sessionDate: DateTime.now(), // TODO: Get from session data
+          ),
+        ),
         failure: (error) => Result.failure(error),
       );
     } catch (e) {
@@ -761,12 +763,15 @@ class GameSessionRepositoryImpl extends BaseRepository
 
       final result = await dataSource.getHostAnalytics(hostId);
       return result.when(
-        success: (data) => Result.success(HostAnalytics(
-          totalSessions: data['totalSessions'] as int,
-          totalPlayers: data['totalPlayers'] as int,
-          averagePlayersPerSession: data['averagePlayersPerSession'] as double,
-          completedSessions: data['completedSessions'] as int,
-        )),
+        success: (data) => Result.success(
+          HostAnalytics(
+            totalSessions: data['totalSessions'] as int,
+            totalPlayers: data['totalPlayers'] as int,
+            averagePlayersPerSession:
+                data['averagePlayersPerSession'] as double,
+            completedSessions: data['completedSessions'] as int,
+          ),
+        ),
         failure: (error) => Result.failure(error),
       );
     } catch (e) {

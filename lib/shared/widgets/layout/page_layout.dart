@@ -40,7 +40,7 @@ class PageLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: backgroundColor ?? AppColors.backgroundLight,
+      backgroundColor: backgroundColor ?? AppColors.offWhite,
       appBar: showAppBar ? (appBar ?? _buildDefaultAppBar(context)) : null,
       body: ResponsiveSafeArea(child: body),
       floatingActionButton: floatingActionButton,
@@ -62,12 +62,15 @@ class PageLayout extends StatelessWidget {
       title: title != null ? Text(title!) : null,
       actions: actions,
       backgroundColor: AppColors.pureWhite,
-      foregroundColor: AppColors.textPrimary,
+      foregroundColor: AppColors.charcoal,
       elevation: 0,
       centerTitle: true,
     );
   }
 }
+
+/// AppScaffold alias for consistent usage across the app
+typedef AppScaffold = Scaffold;
 
 /// Loading page layout with spinner and optional message
 class LoadingPageLayout extends StatelessWidget {
@@ -86,7 +89,7 @@ class LoadingPageLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     return PageLayout(
       showAppBar: false,
-      backgroundColor: backgroundColor ?? AppColors.backgroundLight,
+      backgroundColor: backgroundColor ?? AppColors.offWhite,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -102,7 +105,7 @@ class LoadingPageLayout extends StatelessWidget {
                 message!,
                 style: Theme.of(
                   context,
-                ).textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary),
+                ).textTheme.bodyLarge?.copyWith(color: AppColors.coolGray),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -143,14 +146,14 @@ class ErrorPageLayout extends StatelessWidget {
               Icon(
                 icon ?? Icons.error_outline,
                 size: 64,
-                color: AppColors.textSecondary,
+                color: AppColors.coolGray,
               ),
               SizedBox(height: AppSpacing.spacingL),
               Text(
                 title,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: AppColors.textPrimary,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.headlineSmall?.copyWith(color: AppColors.charcoal),
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: AppSpacing.spacingM),
@@ -158,7 +161,7 @@ class ErrorPageLayout extends StatelessWidget {
                 message,
                 style: Theme.of(
                   context,
-                ).textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary),
+                ).textTheme.bodyLarge?.copyWith(color: AppColors.coolGray),
                 textAlign: TextAlign.center,
               ),
               if (onRetry != null) ...[
@@ -207,14 +210,14 @@ class EmptyStateLayout extends StatelessWidget {
               Icon(
                 icon ?? Icons.inbox_outlined,
                 size: 64,
-                color: AppColors.textSecondary,
+                color: AppColors.coolGray,
               ),
             SizedBox(height: AppSpacing.spacingL),
             Text(
               title,
               style: Theme.of(
                 context,
-              ).textTheme.headlineSmall?.copyWith(color: AppColors.textPrimary),
+              ).textTheme.headlineSmall?.copyWith(color: AppColors.charcoal),
               textAlign: TextAlign.center,
             ),
             SizedBox(height: AppSpacing.spacingM),

@@ -11,7 +11,7 @@ class TestDataGenerator {
     String? description,
   }) {
     final count = questionCount ?? _random.nextInt(5) + 3;
-    
+
     return TestQuiz(
       id: _generateId(),
       title: title ?? 'Test Quiz ${_random.nextInt(1000)}',
@@ -28,7 +28,8 @@ class TestDataGenerator {
     return TestQuestion(
       id: _generateId(),
       type: QuestionType.multipleChoice,
-      text: 'Question $questionNumber: What is ${_random.nextInt(100)} + ${_random.nextInt(100)}?',
+      text:
+          'Question $questionNumber: What is ${_random.nextInt(100)} + ${_random.nextInt(100)}?',
       options: _generateMultipleChoiceOptions(),
       correctAnswer: 0,
       timeLimit: 30,
@@ -40,32 +41,52 @@ class TestDataGenerator {
   static List<String> _generateMultipleChoiceOptions() {
     final correctAnswer = _random.nextInt(200);
     final options = <String>[correctAnswer.toString()];
-    
+
     for (int i = 0; i < 3; i++) {
       int wrongAnswer;
       do {
         wrongAnswer = _random.nextInt(200);
-      } while (wrongAnswer == correctAnswer || 
-               options.contains(wrongAnswer.toString()));
-      
+      } while (wrongAnswer == correctAnswer ||
+          options.contains(wrongAnswer.toString()));
+
       options.add(wrongAnswer.toString());
     }
-    
+
     return options;
   }
 
   /// Generate a test user
-  static TestUser generateUser({
-    String? name,
-    String? email,
-    String? id,
-  }) {
+  static TestUser generateUser({String? name, String? email, String? id}) {
     return TestUser(
       id: id ?? _generateId(),
       name: name ?? 'TestUser${_random.nextInt(10000)}',
       email: email ?? 'testuser${_random.nextInt(10000)}@example.com',
       createdAt: DateTime.now(),
     );
+  }
+
+  /// Generate a test game session
+  static TestGameSession generateTestGameSession({
+    String? id,
+    String? quizId,
+    String? hostId,
+    String? pin,
+  }) {
+    return TestGameSession(
+      id: id ?? _generateId(),
+      quizId: quizId ?? _generateId(),
+      hostId: hostId ?? _generateId(),
+      pin: pin ?? _generatePin(),
+      status: GameSessionStatus.waiting,
+      players: {},
+      currentQuestionIndex: 0,
+      createdAt: DateTime.now(),
+    );
+  }
+
+  /// Generate a 6-digit PIN
+  static String _generatePin() {
+    return List.generate(6, (_) => _random.nextInt(10)).join();
   }
 
   /// Generate a unique ID
@@ -129,5 +150,43 @@ class TestUser {
   });
 }
 
+class TestGameSession {
+  final String id;
+  final String quizId;
+  final String hostId;
+  final String pin;
+  final GameSessionStatus status;
+  final Map<String, TestPlayer> players;
+  final int currentQuestionIndex;
+  final DateTime createdAt;
+
+  TestGameSession({
+    required this.id,
+    required this.quizId,
+    required this.hostId,
+    required this.pin,
+    required this.status,
+    required this.players,
+    required this.currentQuestionIndex,
+    required this.createdAt,
+  });
+}
+
+class TestPlayer {
+  final String id;
+  final String name;
+  final int score;
+  final bool isReady;
+
+  TestPlayer({
+    required this.id,
+    required this.name,
+    required this.score,
+    required this.isReady,
+  });
+}
+
 // Enums
 enum QuestionType { multipleChoice, trueFalse, typeAnswer }
+
+enum GameSessionStatus { waiting, active, paused, completed }

@@ -58,6 +58,16 @@ class AppColors {
   static const Color info = vibrantPurple;
   static const Color disabled = Color(0xFF95A5A6);
 
+  // Text Colors (aliases for consistency)
+  static const Color textPrimary = charcoal;
+  static const Color textSecondary = coolGray;
+  static const Color textTertiary = Color(0xFF95A5A6);
+
+  // Background Colors (aliases for consistency)
+  static const Color backgroundPrimary = offWhite;
+  static const Color backgroundLight = Color(0xFFFAFAFA);
+  static const Color backgroundSecondary = pureWhite;
+
   // Gradient Colors for special effects
   static const LinearGradient purpleGradient = LinearGradient(
     colors: [vibrantPurple, Color(0xFF9B59B6)],

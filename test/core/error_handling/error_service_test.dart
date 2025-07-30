@@ -32,7 +32,11 @@ void main() {
         final stackTrace = StackTrace.current;
 
         // Act
-        errorService.handleError(exception, stackTrace, context: 'Test context');
+        errorService.handleError(
+          exception,
+          stackTrace,
+          context: 'Test context',
+        );
 
         // Assert - Since we can't easily mock static methods,
         // we'll verify behavior through integration tests
@@ -57,7 +61,11 @@ void main() {
         final stackTrace = StackTrace.current;
 
         // Act
-        errorService.handleError(error, stackTrace, context: 'Argument validation');
+        errorService.handleError(
+          error,
+          stackTrace,
+          context: 'Argument validation',
+        );
 
         // Assert
         expect(error.message, equals('Invalid argument'));
@@ -81,9 +89,7 @@ void main() {
 
       test('should convert NetworkFailure to user-friendly message', () {
         // Arrange
-        const failure = Failure.networkFailure(
-          message: 'Connection timeout',
-        );
+        const failure = Failure.networkFailure(message: 'Connection timeout');
 
         // Act
         final userMessage = errorService.getUserFriendlyMessage(failure);
@@ -103,7 +109,10 @@ void main() {
         final userMessage = errorService.getUserFriendlyMessage(failure);
 
         // Assert
-        expect(userMessage, equals('Authentication error: Invalid credentials'));
+        expect(
+          userMessage,
+          equals('Authentication error: Invalid credentials'),
+        );
       });
 
       test('should convert ValidationFailure to user-friendly message', () {
@@ -171,27 +180,37 @@ void main() {
       test('should determine correct log level for different failures', () {
         // Arrange & Act & Assert
         expect(
-          errorService.getLogLevel(const Failure.networkFailure(message: 'Network issue')),
+          errorService.getLogLevel(
+            const Failure.networkFailure(message: 'Network issue'),
+          ),
           equals(ErrorLogLevel.warning),
         );
 
         expect(
-          errorService.getLogLevel(const Failure.validationFailure(message: 'Validation issue')),
+          errorService.getLogLevel(
+            const Failure.validationFailure(message: 'Validation issue'),
+          ),
           equals(ErrorLogLevel.info),
         );
 
         expect(
-          errorService.getLogLevel(const Failure.serverFailure(message: 'Server issue')),
+          errorService.getLogLevel(
+            const Failure.serverFailure(message: 'Server issue'),
+          ),
           equals(ErrorLogLevel.error),
         );
 
         expect(
-          errorService.getLogLevel(const Failure.unknownFailure(message: 'Unknown issue')),
+          errorService.getLogLevel(
+            const Failure.unknownFailure(message: 'Unknown issue'),
+          ),
           equals(ErrorLogLevel.fatal),
         );
 
         expect(
-          errorService.getLogLevel(const Failure.authFailure(message: 'Auth issue')),
+          errorService.getLogLevel(
+            const Failure.authFailure(message: 'Auth issue'),
+          ),
           equals(ErrorLogLevel.error),
         );
       });
@@ -222,7 +241,11 @@ void main() {
         final stackTrace = StackTrace.current;
 
         // Act
-        final context = errorService.buildErrorContext(contextInfo, stackTrace, null);
+        final context = errorService.buildErrorContext(
+          contextInfo,
+          stackTrace,
+          null,
+        );
 
         // Assert
         expect(context, equals('Basic context'));
@@ -233,7 +256,9 @@ void main() {
         final stackTrace = StackTrace.current;
 
         // Act
-        final context = errorService.buildErrorContext(null, stackTrace, {'key': 'value'});
+        final context = errorService.buildErrorContext(null, stackTrace, {
+          'key': 'value',
+        });
 
         // Assert
         expect(context, contains('key: value'));
