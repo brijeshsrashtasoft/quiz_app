@@ -1,28 +1,21 @@
-// Authentication Use Cases Export Index
-// Following CLAUDE.md Clean Architecture patterns
+/// Authentication use cases exports
+/// Following CLAUDE.md Clean Architecture patterns
+///
+/// This file provides centralized access to all authentication use cases
+/// for easier imports and better maintainability.
 
-// Sign In/Up/Out Use Cases
-export 'sign_in_with_email_usecase.dart';
-export 'sign_up_with_email_usecase.dart';
-export 'sign_in_with_google_usecase.dart';
+// Core authentication use cases
+export 'sign_in_usecase.dart';
+export 'sign_up_usecase.dart';
 export 'sign_out_usecase.dart';
+export 'reset_password_usecase.dart';
 
-// Password Management Use Cases
-export 'send_password_reset_usecase.dart';
-
-// Email Verification Use Cases
-export 'verify_email_usecase.dart';
-
-// Profile Management Use Cases
-export 'update_user_profile_usecase.dart';
-
-// Account Management Use Cases
-export 'delete_user_account_usecase.dart';
-
-// User Data Use Cases
+// User profile management use cases
 export 'get_current_user_usecase.dart';
+export 'update_user_profile_usecase.dart';
+export 'delete_account_usecase.dart';
 
-// Existing User Repository Use Cases
+// User data management use cases
 export 'create_user_usecase.dart';
 export 'get_user_by_id_usecase.dart';
 export 'watch_user_usecase.dart';

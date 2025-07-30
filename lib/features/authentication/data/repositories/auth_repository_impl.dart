@@ -1,159 +1,82 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../../../core/errors/failures.dart';
 import '../../../../core/utils/result.dart';
 import '../../../../core/utils/logger.dart';
-import '../../domain/entities/auth_entity.dart';
+import '../../../../core/errors/exceptions.dart';
+import '../../../../core/utils/exception_mapper.dart';
+import '../../../../core/firebase/auth_config.dart';
+import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
-import '../datasources/firebase_auth_datasource.dart';
+import '../datasources/auth_firebase_datasource.dart';
+import '../models/user_model.dart';
 
 /// Authentication repository implementation
-/// Implements Clean Architecture patterns with Firebase Auth data source
+/// Following CLAUDE.md Clean Architecture patterns
 class AuthRepositoryImpl implements AuthRepository {
-  final FirebaseAuthDataSource _dataSource;
+  final AuthFirebaseDataSource _authDataSource;
 
-  AuthRepositoryImpl({required FirebaseAuthDataSource dataSource})
-    : _dataSource = dataSource;
+  const AuthRepositoryImpl({required AuthFirebaseDataSource authDataSource})
+    : _authDataSource = authDataSource;
 
   @override
-  Future<Result<AuthEntity>> signInWithEmailAndPassword({
+  Future<Result<UserEntity>> signInWithEmailPassword({
     required String email,
     required String password,
   }) async {
     try {
-      AppLogger.info('AuthRepository: Attempting sign in for $email');
-
-      final result = await _dataSource.signInWithEmailAndPassword(
+      final result = await _authDataSource.signInWithEmailPassword(
         email: email,
         password: password,
       );
 
-      return result.when(
-        success: (userCredential) {
-          if (userCredential.user == null) {
-            AppLogger.error(
-              'AuthRepository: UserCredential contains null user',
-            );
-            return Result.failure(
-              Failure.authFailure(
-                message: 'Authentication failed: User data is null',
-                code: 'null-user-error',
-              ),
-            );
-          }
-
-          final authEntity = _mapUserCredentialToAuthEntity(userCredential);
-          AppLogger.info('AuthRepository: Sign in successful for $email');
-          return Result.success(authEntity);
-        },
-        failure: (failure) {
-          AppLogger.error('AuthRepository: Sign in failed for $email', failure);
-          return Result.failure(failure);
-        },
-      );
-    } catch (e) {
-      AppLogger.error('AuthRepository: Unexpected error during sign in', e);
+      return result.transform((userModel) => userModel.toEntity());
+    } catch (e, stackTrace) {
+      AppLogger.error('Auth repository sign in failed', e, stackTrace);
       return Result.failure(
-        Failure.authFailure(
-          message: 'An unexpected error occurred during sign in',
-          code: 'unknown_error',
-        ),
+        const AuthException(
+          message: 'Authentication failed',
+          code: 'auth_repository_signin_error',
+        ).toFailure(),
       );
     }
   }
 
   @override
-  Future<Result<AuthEntity>> createUserWithEmailAndPassword({
+  Future<Result<UserEntity>> createUserWithEmailPassword({
     required String email,
     required String password,
+    required String name,
   }) async {
     try {
-      AppLogger.info('AuthRepository: Attempting user creation for $email');
-
-      final result = await _dataSource.createUserWithEmailAndPassword(
+      final result = await _authDataSource.createUserWithEmailPassword(
         email: email,
         password: password,
+        name: name,
       );
 
-      return result.when(
-        success: (userCredential) {
-          if (userCredential.user == null) {
-            AppLogger.error(
-              'AuthRepository: UserCredential contains null user',
-            );
-            return Result.failure(
-              Failure.authFailure(
-                message: 'User creation failed: User data is null',
-                code: 'null-user-error',
-              ),
-            );
-          }
-
-          final authEntity = _mapUserCredentialToAuthEntity(userCredential);
-          AppLogger.info('AuthRepository: User creation successful for $email');
-          return Result.success(authEntity);
-        },
-        failure: (failure) {
-          AppLogger.error(
-            'AuthRepository: User creation failed for $email',
-            failure,
-          );
-          return Result.failure(failure);
-        },
-      );
-    } catch (e) {
-      AppLogger.error(
-        'AuthRepository: Unexpected error during user creation',
-        e,
-      );
+      return result.transform((userModel) => userModel.toEntity());
+    } catch (e, stackTrace) {
+      AppLogger.error('Auth repository user creation failed', e, stackTrace);
       return Result.failure(
-        Failure.authFailure(
-          message: 'An unexpected error occurred during user creation',
-          code: 'unknown_error',
-        ),
+        const AuthException(
+          message: 'User creation failed',
+          code: 'auth_repository_creation_error',
+        ).toFailure(),
       );
     }
   }
 
   @override
-  Future<Result<AuthEntity>> signInWithGoogle() async {
+  Future<Result<UserEntity>> signInWithGoogle() async {
     try {
-      AppLogger.info('AuthRepository: Attempting Google sign in');
-
-      final result = await _dataSource.signInWithGoogle();
-
-      return result.when(
-        success: (userCredential) {
-          if (userCredential.user == null) {
-            AppLogger.error(
-              'AuthRepository: Google UserCredential contains null user',
-            );
-            return Result.failure(
-              Failure.authFailure(
-                message: 'Google sign in failed: User data is null',
-                code: 'null-user-error',
-              ),
-            );
-          }
-
-          final authEntity = _mapUserCredentialToAuthEntity(userCredential);
-          AppLogger.info('AuthRepository: Google sign in successful');
-          return Result.success(authEntity);
-        },
-        failure: (failure) {
-          AppLogger.error('AuthRepository: Google sign in failed', failure);
-          return Result.failure(failure);
-        },
-      );
-    } catch (e) {
-      AppLogger.error(
-        'AuthRepository: Unexpected error during Google sign in',
-        e,
-      );
+      final result = await _authDataSource.signInWithGoogle();
+      return result.transform((userModel) => userModel.toEntity());
+    } catch (e, stackTrace) {
+      AppLogger.error('Auth repository Google sign in failed', e, stackTrace);
       return Result.failure(
-        Failure.authFailure(
-          message: 'An unexpected error occurred during Google sign in',
-          code: 'unknown_error',
-        ),
+        const AuthException(
+          message: 'Google authentication failed',
+          code: 'auth_repository_google_error',
+        ).toFailure(),
       );
     }
   }
@@ -161,30 +84,14 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Result<void>> signOut() async {
     try {
-      final currentUser = _dataSource.getCurrentUser();
-      AppLogger.info(
-        'AuthRepository: Attempting sign out for ${currentUser?.email}',
-      );
-
-      final result = await _dataSource.signOut();
-
-      return result.when(
-        success: (_) {
-          AppLogger.info('AuthRepository: Sign out successful');
-          return const Result.success(null);
-        },
-        failure: (failure) {
-          AppLogger.error('AuthRepository: Sign out failed', failure);
-          return Result.failure(failure);
-        },
-      );
-    } catch (e) {
-      AppLogger.error('AuthRepository: Unexpected error during sign out', e);
+      return await _authDataSource.signOut();
+    } catch (e, stackTrace) {
+      AppLogger.error('Auth repository sign out failed', e, stackTrace);
       return Result.failure(
-        Failure.authFailure(
-          message: 'An unexpected error occurred during sign out',
-          code: 'unknown_error',
-        ),
+        const AuthException(
+          message: 'Sign out failed',
+          code: 'auth_repository_signout_error',
+        ).toFailure(),
       );
     }
   }
@@ -192,107 +99,70 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Result<void>> sendPasswordResetEmail({required String email}) async {
     try {
-      AppLogger.info('AuthRepository: Sending password reset email to $email');
-
-      final result = await _dataSource.sendPasswordResetEmail(email: email);
-
-      return result.when(
-        success: (_) {
-          AppLogger.info('AuthRepository: Password reset email sent to $email');
-          return const Result.success(null);
-        },
-        failure: (failure) {
-          AppLogger.error(
-            'AuthRepository: Password reset failed for $email',
-            failure,
-          );
-          return Result.failure(failure);
-        },
-      );
-    } catch (e) {
-      AppLogger.error(
-        'AuthRepository: Unexpected error during password reset',
-        e,
-      );
+      return await _authDataSource.sendPasswordResetEmail(email: email);
+    } catch (e, stackTrace) {
+      AppLogger.error('Auth repository password reset failed', e, stackTrace);
       return Result.failure(
-        Failure.authFailure(
-          message: 'An unexpected error occurred during password reset',
-          code: 'unknown_error',
+        const AuthException(
+          message: 'Password reset failed',
+          code: 'auth_repository_reset_error',
+        ).toFailure(),
+      );
+    }
+  }
+
+  @override
+  Result<UserEntity?> getCurrentUser() {
+    try {
+      final result = _authDataSource.getCurrentUser();
+      return result.transform((userModel) => userModel?.toEntity());
+    } catch (e, stackTrace) {
+      AppLogger.error('Auth repository get current user failed', e, stackTrace);
+      return Result.failure(
+        const AuthException(
+          message: 'Failed to get current user',
+          code: 'auth_repository_get_user_error',
+        ).toFailure(),
+      );
+    }
+  }
+
+  @override
+  Stream<Result<UserEntity?>> watchAuthState() {
+    try {
+      return _authDataSource.watchAuthState().map(
+        (result) => result.transform((userModel) => userModel?.toEntity()),
+      );
+    } catch (e, stackTrace) {
+      AppLogger.error('Auth repository watch auth state failed', e, stackTrace);
+      return Stream.value(
+        Result.failure(
+          const AuthException(
+            message: 'Failed to watch authentication state',
+            code: 'auth_repository_watch_error',
+          ).toFailure(),
         ),
       );
     }
   }
 
   @override
-  Future<Result<void>> updateUserProfile({
-    String? displayName,
-    String? photoURL,
-  }) async {
-    try {
-      final currentUser = _dataSource.getCurrentUser();
-      AppLogger.info(
-        'AuthRepository: Updating profile for ${currentUser?.email}',
-      );
-
-      final result = await _dataSource.updateUserProfile(
-        displayName: displayName,
-        photoURL: photoURL,
-      );
-
-      return result.when(
-        success: (_) {
-          AppLogger.info('AuthRepository: Profile update successful');
-          return const Result.success(null);
-        },
-        failure: (failure) {
-          AppLogger.error('AuthRepository: Profile update failed', failure);
-          return Result.failure(failure);
-        },
-      );
-    } catch (e) {
-      AppLogger.error(
-        'AuthRepository: Unexpected error during profile update',
-        e,
-      );
-      return Result.failure(
-        Failure.authFailure(
-          message: 'An unexpected error occurred during profile update',
-          code: 'unknown_error',
-        ),
-      );
-    }
-  }
+  bool get isAuthenticated => _authDataSource.isAuthenticated;
 
   @override
-  Future<Result<void>> deleteUserAccount() async {
+  String? get currentUserId => _authDataSource.currentUserId;
+
+  @override
+  Future<Result<void>> deleteCurrentUser() async {
     try {
-      final currentUser = _dataSource.getCurrentUser();
-      AppLogger.info(
-        'AuthRepository: Deleting account for ${currentUser?.email}',
-      );
-
-      final result = await _dataSource.deleteUserAccount();
-
-      return result.when(
-        success: (_) {
-          AppLogger.info('AuthRepository: Account deletion successful');
-          return const Result.success(null);
-        },
-        failure: (failure) {
-          AppLogger.error('AuthRepository: Account deletion failed', failure);
-          return Result.failure(failure);
-        },
-      );
-    } catch (e) {
-      AppLogger.error(
-        'AuthRepository: Unexpected error during account deletion',
-        e,
-      );
+      return await _authDataSource.deleteCurrentUser();
+    } catch (e, stackTrace) {
+      AppLogger.error('Auth repository delete user failed', e, stackTrace);
       return Result.failure(
-        Failure.authFailure(
-          message: 'An unexpected error occurred during account deletion',
-          code: 'unknown_error',
-        ),
+        const AuthException(
+          message: 'User deletion failed',
+          code: 'auth_repository_delete_error',
+        ).toFailure(),
       );
     }
   }
@@ -300,110 +170,316 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Result<void>> sendEmailVerification() async {
     try {
-      final currentUser = _dataSource.getCurrentUser();
-      AppLogger.info(
-        'AuthRepository: Sending email verification to ${currentUser?.email}',
-      );
+      final user = AuthConfig.currentUser;
+      if (user == null) {
+        return Result.failure(
+          const AuthException(
+            message: 'No user is currently signed in',
+            code: 'no_current_user',
+          ).toFailure(),
+        );
+      }
 
-      final result = await _dataSource.sendEmailVerification();
-
-      return result.when(
-        success: (_) {
-          AppLogger.info('AuthRepository: Email verification sent');
-          return const Result.success(null);
-        },
-        failure: (failure) {
-          AppLogger.error('AuthRepository: Email verification failed', failure);
-          return Result.failure(failure);
-        },
+      await user.sendEmailVerification();
+      AppLogger.firebase('AuthRepository', 'Email verification sent');
+      return const Result.success(null);
+    } on FirebaseAuthException catch (e) {
+      AppLogger.error('Email verification failed', e);
+      return Result.failure(
+        AuthException(
+          message: 'Failed to send email verification: ${e.message}',
+          code: e.code,
+        ).toFailure(),
       );
-    } catch (e) {
+    } catch (e, stackTrace) {
       AppLogger.error(
-        'AuthRepository: Unexpected error during email verification',
+        'Unexpected error during email verification',
         e,
+        stackTrace,
       );
       return Result.failure(
-        Failure.authFailure(
+        const AuthException(
           message: 'An unexpected error occurred during email verification',
-          code: 'unknown_error',
-        ),
+          code: 'email_verification_error',
+        ).toFailure(),
       );
     }
+  }
+
+  @override
+  bool get isEmailVerified {
+    final user = AuthConfig.currentUser;
+    return user?.emailVerified ?? false;
   }
 
   @override
   Future<Result<void>> reloadUser() async {
     try {
-      final currentUser = _dataSource.getCurrentUser();
-      AppLogger.info('AuthRepository: Reloading user ${currentUser?.email}');
+      final user = AuthConfig.currentUser;
+      if (user == null) {
+        return Result.failure(
+          const AuthException(
+            message: 'No user is currently signed in',
+            code: 'no_current_user',
+          ).toFailure(),
+        );
+      }
 
-      final result = await _dataSource.reloadUser();
-
-      return result.when(
-        success: (_) {
-          AppLogger.info('AuthRepository: User reload successful');
-          return const Result.success(null);
-        },
-        failure: (failure) {
-          AppLogger.error('AuthRepository: User reload failed', failure);
-          return Result.failure(failure);
-        },
-      );
-    } catch (e) {
-      AppLogger.error('AuthRepository: Unexpected error during user reload', e);
+      await user.reload();
+      AppLogger.firebase('AuthRepository', 'User data reloaded');
+      return const Result.success(null);
+    } on FirebaseAuthException catch (e) {
+      AppLogger.error('User reload failed', e);
       return Result.failure(
-        Failure.authFailure(
+        AuthException(
+          message: 'Failed to reload user data: ${e.message}',
+          code: e.code,
+        ).toFailure(),
+      );
+    } catch (e, stackTrace) {
+      AppLogger.error('Unexpected error during user reload', e, stackTrace);
+      return Result.failure(
+        const AuthException(
           message: 'An unexpected error occurred during user reload',
-          code: 'unknown_error',
-        ),
+          code: 'user_reload_error',
+        ).toFailure(),
       );
     }
   }
 
   @override
-  User? getCurrentUser() {
-    return _dataSource.getCurrentUser();
+  Future<Result<void>> updatePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    try {
+      final user = AuthConfig.currentUser;
+      if (user == null || user.email == null) {
+        return Result.failure(
+          const AuthException(
+            message: 'No user is currently signed in',
+            code: 'no_current_user',
+          ).toFailure(),
+        );
+      }
+
+      // Re-authenticate user first
+      final credential = EmailAuthProvider.credential(
+        email: user.email!,
+        password: currentPassword,
+      );
+
+      await user.reauthenticateWithCredential(credential);
+      await user.updatePassword(newPassword);
+
+      AppLogger.firebase('AuthRepository', 'Password updated successfully');
+      return const Result.success(null);
+    } on FirebaseAuthException catch (e) {
+      AppLogger.error('Password update failed', e);
+      return Result.failure(
+        AuthException(
+          message: 'Failed to update password: ${e.message}',
+          code: e.code,
+        ).toFailure(),
+      );
+    } catch (e, stackTrace) {
+      AppLogger.error('Unexpected error during password update', e, stackTrace);
+      return Result.failure(
+        const AuthException(
+          message: 'An unexpected error occurred during password update',
+          code: 'password_update_error',
+        ).toFailure(),
+      );
+    }
   }
 
   @override
-  bool get isAuthenticated {
-    return _dataSource.isAuthenticated;
+  Future<Result<void>> updateEmail({
+    required String newEmail,
+    required String password,
+  }) async {
+    try {
+      final user = AuthConfig.currentUser;
+      if (user == null || user.email == null) {
+        return Result.failure(
+          const AuthException(
+            message: 'No user is currently signed in',
+            code: 'no_current_user',
+          ).toFailure(),
+        );
+      }
+
+      // Re-authenticate user first
+      final credential = EmailAuthProvider.credential(
+        email: user.email!,
+        password: password,
+      );
+
+      await user.reauthenticateWithCredential(credential);
+      await user.updateEmail(newEmail);
+
+      AppLogger.firebase('AuthRepository', 'Email updated successfully');
+      return const Result.success(null);
+    } on FirebaseAuthException catch (e) {
+      AppLogger.error('Email update failed', e);
+      return Result.failure(
+        AuthException(
+          message: 'Failed to update email: ${e.message}',
+          code: e.code,
+        ).toFailure(),
+      );
+    } catch (e, stackTrace) {
+      AppLogger.error('Unexpected error during email update', e, stackTrace);
+      return Result.failure(
+        const AuthException(
+          message: 'An unexpected error occurred during email update',
+          code: 'email_update_error',
+        ).toFailure(),
+      );
+    }
   }
 
   @override
-  String? get currentUserId {
-    return _dataSource.currentUserId;
+  Future<Result<void>> reauthenticate({required String password}) async {
+    try {
+      final user = AuthConfig.currentUser;
+      if (user == null || user.email == null) {
+        return Result.failure(
+          const AuthException(
+            message: 'No user is currently signed in',
+            code: 'no_current_user',
+          ).toFailure(),
+        );
+      }
+
+      final credential = EmailAuthProvider.credential(
+        email: user.email!,
+        password: password,
+      );
+
+      await user.reauthenticateWithCredential(credential);
+      AppLogger.firebase(
+        'AuthRepository',
+        'User re-authenticated successfully',
+      );
+      return const Result.success(null);
+    } on FirebaseAuthException catch (e) {
+      AppLogger.error('Re-authentication failed', e);
+      return Result.failure(
+        AuthException(
+          message: 'Re-authentication failed: ${e.message}',
+          code: e.code,
+        ).toFailure(),
+      );
+    } catch (e, stackTrace) {
+      AppLogger.error(
+        'Unexpected error during re-authentication',
+        e,
+        stackTrace,
+      );
+      return Result.failure(
+        const AuthException(
+          message: 'An unexpected error occurred during re-authentication',
+          code: 'reauthenticate_error',
+        ).toFailure(),
+      );
+    }
   }
 
   @override
-  Stream<User?> authStateChanges() {
-    return _dataSource.authStateChanges();
+  Future<Result<UserEntity>> linkGoogleAccount() async {
+    try {
+      // This would implement linking Google account to existing user
+      // For now, return error as this requires more complex implementation
+      return Result.failure(
+        const AuthException(
+          message: 'Account linking not yet implemented',
+          code: 'link_not_implemented',
+        ).toFailure(),
+      );
+    } catch (e, stackTrace) {
+      AppLogger.error('Account linking failed', e, stackTrace);
+      return Result.failure(
+        const AuthException(
+          message: 'Account linking failed',
+          code: 'link_account_error',
+        ).toFailure(),
+      );
+    }
   }
 
   @override
-  Stream<User?> idTokenChanges() {
-    return _dataSource.idTokenChanges();
+  Future<Result<void>> unlinkGoogleAccount() async {
+    try {
+      final user = AuthConfig.currentUser;
+      if (user == null) {
+        return Result.failure(
+          const AuthException(
+            message: 'No user is currently signed in',
+            code: 'no_current_user',
+          ).toFailure(),
+        );
+      }
+
+      await user.unlink(GoogleAuthProvider.PROVIDER_ID);
+      AppLogger.firebase('AuthRepository', 'Google account unlinked');
+      return const Result.success(null);
+    } on FirebaseAuthException catch (e) {
+      AppLogger.error('Account unlinking failed', e);
+      return Result.failure(
+        AuthException(
+          message: 'Failed to unlink Google account: ${e.message}',
+          code: e.code,
+        ).toFailure(),
+      );
+    } catch (e, stackTrace) {
+      AppLogger.error(
+        'Unexpected error during account unlinking',
+        e,
+        stackTrace,
+      );
+      return Result.failure(
+        const AuthException(
+          message: 'An unexpected error occurred during account unlinking',
+          code: 'unlink_account_error',
+        ).toFailure(),
+      );
+    }
   }
 
   @override
-  Stream<User?> userChanges() {
-    return _dataSource.userChanges();
-  }
-
-  /// Maps Firebase UserCredential to domain AuthEntity
-  AuthEntity _mapUserCredentialToAuthEntity(UserCredential userCredential) {
-    final user = userCredential.user!;
-
-    return AuthEntity(
-      user: AuthUser(
-        id: user.uid,
-        email: user.email ?? '',
-        displayName: user.displayName,
-        photoURL: user.photoURL,
-      ),
-      isEmailVerified: user.emailVerified,
-      lastSignInTime: user.metadata.lastSignInTime,
-      creationTime: user.metadata.creationTime,
-    );
+  Future<Result<List<String>>> getSignInMethodsForEmail({
+    required String email,
+  }) async {
+    try {
+      final methods = await AuthConfig.instance.fetchSignInMethodsForEmail(
+        email,
+      );
+      AppLogger.firebase(
+        'AuthRepository',
+        'Retrieved sign-in methods for: $email',
+      );
+      return Result.success(methods);
+    } on FirebaseAuthException catch (e) {
+      AppLogger.error('Failed to get sign-in methods', e);
+      return Result.failure(
+        AuthException(
+          message: 'Failed to get sign-in methods: ${e.message}',
+          code: e.code,
+        ).toFailure(),
+      );
+    } catch (e, stackTrace) {
+      AppLogger.error(
+        'Unexpected error getting sign-in methods',
+        e,
+        stackTrace,
+      );
+      return Result.failure(
+        const AuthException(
+          message: 'An unexpected error occurred getting sign-in methods',
+          code: 'get_signin_methods_error',
+        ).toFailure(),
+      );
+    }
   }
 }

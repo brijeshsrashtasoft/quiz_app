@@ -81,19 +81,26 @@ This index provides a comprehensive overview of all project documentation with c
 - **Key Responsibilities**: <200ms latency, <100MB memory, 60fps animations
 - **Handoff Partners**: firebase-specialist, flutter-architect
 
+#### **pr-review-agent.md** - **EXCLUSIVE** PR Review & Merge Authority (NEW)
+- **Expertise**: Comprehensive PR review, quality assurance, merge authority
+- **Primary Assignments**: PR validation, final approval, merge decisions
+- **Key Responsibilities**: **ONLY** agent authorized to merge PRs, enforce quality gates
+- **Authority Level**: **EXCLUSIVE** - No other agent can merge PRs
+
 ---
 
 ## ⚡ Custom Commands (`.claude/commands/`)
 
-#### **implement-issue.md** - Intelligent Issue Implementation
-- **Purpose**: Automated agent assignment and coordinated GitHub issue implementation
-- **Usage**: `/project:implement-issue <number>`
-- **Features**: 
-  - Automatic agent assignment based on issue type
-  - Structured handoff protocols
-  - Quality validation workflow
-  - GitHub integration with branch creation
-- **Dependencies**: All sub-agent files, GitHub workflow standards
+#### **implement-issue.md** - Enhanced Issue Implementation (UPDATED)
+- **Purpose**: Automated agent assignment with unified ticket tracking and test validation
+- **Usage**: `/implement-issue <number>`
+- **NEW FEATURES**: 
+  - **UNIFIED TICKET SYSTEM**: ONE ticket file per issue using branch name format
+  - **NESTED CHECKBOX STRUCTURE**: All agents work in same file with hierarchical todos
+  - **MANDATORY TEST VALIDATION**: All test categories must pass before PR creation
+  - **PR REVIEW INTEGRATION**: Only pr-review-agent can merge PRs
+  - **CROSS-REFERENCE TRACKING**: Documentation update requirements built-in
+- **Dependencies**: All sub-agent files, pr-review-agent.md, unified ticket format
 
 #### **brainstorm-feature.md** - Comprehensive Feature Planning
 - **Purpose**: 8-step feature analysis and implementation planning
@@ -134,21 +141,73 @@ This index provides a comprehensive overview of all project documentation with c
 
 ---
 
-## 🔄 Cross-Reference Matrix
+## 📋 UNIFIED TICKET TRACKING SYSTEM (NEW)
+
+### **Current Unified System**
+| Format | Purpose | Used By | Example |
+|--------|---------|---------|---------|
+| **docs/tickets/{branch-name}.md** | ONE ticket per issue with nested checkboxes | ALL agents | `docs/tickets/feature-issue-15-quiz-creation.md` |
+
+### **Legacy Ticket Files (DEPRECATED)**
+| Format | Status | Migration Notes |
+|--------|--------|-----------------|
+| **docs/tickets/issue-{number}-{branch}.md** | LEGACY | Use unified branch-name format instead |
+
+### **Unified Ticket Structure**
+All agents work in the SAME file with nested checkbox hierarchies:
+```markdown
+# Issue #{number} - {Issue Title}
+
+## Implementation Progress
+### 🔥 Main Implementation Tasks
+- [ ] **Core Feature Implementation**
+  - [ ] Architecture setup (flutter-architect)
+  - [ ] Firebase integration (firebase-specialist)
+  - [ ] UI components (ui-designer)
+  - [ ] Testing framework (testing-specialist)
+
+#### flutter-architect Agent
+- [ ] Clean Architecture implementation
+  - [ ] Domain layer entities
+  - [ ] Repository contracts
+
+## Test Execution Status  
+- [ ] **ALL tests passing**: Required before PR creation
+- [ ] **Coverage threshold met**: >80% coverage achieved
+```
+
+## 🔒 PR REVIEW & MERGE AUTHORITY WORKFLOW (NEW)
+
+### **EXCLUSIVE PR Merge Authority**
+| Step | Actor | Documentation | Authority Level |
+|------|-------|---------------|-----------------|
+| **Implementation** | Specialized agents | implement-issue.md | Can create PRs |
+| **PR Review** | pr-review-agent ONLY | pr-review-agent.md | **EXCLUSIVE** review authority |
+| **Change Requests** | Original agents | pr-review-agent.md | Must complete changes |
+| **PR Merge** | pr-review-agent ONLY | pr-review-agent.md | **EXCLUSIVE** merge authority |
+
+### **Mandatory PR Approval Criteria**
+- ✅ **Unified Ticket Complete**: All nested checkboxes marked [x]
+- ✅ **Test Validation**: >80% coverage, all test categories pass
+- ✅ **Platform Verification**: Web, Android, iOS builds successful
+- ✅ **Documentation Updates**: Cross-references updated in all relevant files
+
+## 🔄 Cross-Reference Matrix (UPDATED)
 
 | **Document** | **References** | **Referenced By** |
 |--------------|----------------|-------------------|
-| **CLAUDE.md** | None (Master) | All docs, agents, commands, scripts |
-| **DEVELOPMENT_GUIDE.md** | CLAUDE.md, github_instaruction.md, agents/, commands/ | Scripts, developers |
-| **github_instaruction.md** | CLAUDE.md, DEVELOPMENT_GUIDE.md | All agents, commands, scripts |
-| **flutter-architect.md** | CLAUDE.md, github_instaruction.md, DEVELOPMENT_GUIDE.md | implement-issue.md |
-| **firebase-specialist.md** | CLAUDE.md, DEVELOPMENT_GUIDE.md, scripts/firebase-ops.sh | implement-issue.md |
-| **ui-designer.md** | CLAUDE.md, flutter-architect.md | implement-issue.md |
-| **testing-specialist.md** | CLAUDE.md, DEVELOPMENT_GUIDE.md, scripts/quality-check.sh | implement-issue.md |
-| **code-reviewer.md** | CLAUDE.md, github_instaruction.md | implement-issue.md |
-| **performance-optimizer.md** | CLAUDE.md, firebase-specialist.md | implement-issue.md |
-| **implement-issue.md** | All agent files, CLAUDE.md, github_instaruction.md | DEVELOPMENT_GUIDE.md |
-| **brainstorm-feature.md** | CLAUDE.md, implement-issue.md, github_instaruction.md | DEVELOPMENT_GUIDE.md |
+| **CLAUDE.md** | DOCUMENTATION_INDEX.md, pr-review-agent.md (Master) | All docs, agents, commands, scripts |
+| **DOCUMENTATION_INDEX.md** | CLAUDE.md, ALL project files | CLAUDE.md, all agents |
+| **pr-review-agent.md** | CLAUDE.md, implement-issue.md, ALL agent files | CLAUDE.md, implement-issue.md |
+| **implement-issue.md** | All agent files, pr-review-agent.md, CLAUDE.md | DEVELOPMENT_GUIDE.md, CLAUDE.md |
+| **github_instaruction.md** | CLAUDE.md, pr-review-agent.md | All agents, commands, scripts |
+| **flutter-architect.md** | CLAUDE.md, implement-issue.md, DOCUMENTATION_INDEX.md | implement-issue.md, pr-review-agent.md |
+| **firebase-specialist.md** | CLAUDE.md, DOCUMENTATION_INDEX.md | implement-issue.md, pr-review-agent.md |
+| **ui-designer.md** | CLAUDE.md, DOCUMENTATION_INDEX.md | implement-issue.md, pr-review-agent.md |
+| **testing-specialist.md** | CLAUDE.md, DOCUMENTATION_INDEX.md | implement-issue.md, pr-review-agent.md |
+| **code-reviewer.md** | CLAUDE.md, pr-review-agent.md | implement-issue.md, pr-review-agent.md |
+| **performance-optimizer.md** | CLAUDE.md, DOCUMENTATION_INDEX.md | implement-issue.md, pr-review-agent.md |
+| **brainstorm-feature.md** | CLAUDE.md, implement-issue.md | DEVELOPMENT_GUIDE.md |
 
 ---
 
@@ -158,19 +217,23 @@ This index provides a comprehensive overview of all project documentation with c
 1. **Start Here**: Read CLAUDE.md for project overview and standards
 2. **Daily Workflow**: Use DEVELOPMENT_GUIDE.md for command reference
 3. **GitHub Process**: Follow docs/github_instaruction.md for issues and PRs
-4. **Implementation**: Use `/project:implement-issue <number>` for development
+4. **Implementation**: Use `/implement-issue <number>` for development (UPDATED COMMAND)
+5. **PR Process**: Only pr-review-agent can merge PRs (NEW REQUIREMENT)
 
-### **For Sub-Agents**
+### **For Sub-Agents (UPDATED WORKFLOW)**
 1. **Role Understanding**: Read your specific agent file in `.claude/agents/`
 2. **Project Context**: Reference CLAUDE.md for architecture and design standards
-3. **Communication**: Follow handoff protocols and GitHub standards
-4. **Quality Assurance**: Validate against all referenced documentation
+3. **Unified Tickets**: ALL agents work in SAME ticket file using nested checkboxes
+4. **Test Validation**: ALL tests must pass before marking tasks complete
+5. **Cross-Reference Updates**: Update documentation references when creating/modifying .md files
+6. **PR Authority**: ONLY pr-review-agent can merge PRs - others can only create
 
 ### **For Feature Planning**
 1. **Brainstorming**: Use `/project:brainstorm-feature "description"`
 2. **Implementation**: Follow recommendations to create GitHub issues
-3. **Development**: Use `/project:implement-issue <number>` for execution
+3. **Development**: Use `/implement-issue <number>` for execution (UPDATED)
 4. **Quality**: Run `scripts/quality-check.sh` before PR creation
+5. **PR Review**: Wait for pr-review-agent approval before merge (NEW)
 
 ---
 
@@ -199,17 +262,22 @@ This index provides a comprehensive overview of all project documentation with c
 - Role responsibility changes
 - Handoff protocol updates
 - Quality standard modifications
+- NEW: pr-review-agent authority updates
 
 **Command Files**:
 - Implementation logic changes
 - Workflow step modifications
 - Integration updates
+- NEW: Unified ticket format changes
+- NEW: Test validation requirement updates
 
-### **Cross-Reference Validation**
+### **Cross-Reference Validation (ENHANCED)**
 - When updating any document, verify all cross-references remain accurate
 - Update the cross-reference matrix in this index
 - Test all referenced commands and scripts
 - Validate agent coordination still works correctly
+- **NEW: pr-review-agent validation** - All documentation updates reviewed during PR process
+- **NEW: Unified ticket integration** - Ensure ticket format consistency
 
 ---
 
@@ -219,9 +287,11 @@ This index provides a comprehensive overview of all project documentation with c
 **Need workflow help?** → `DEVELOPMENT_GUIDE.md`
 **Need GitHub standards?** → `docs/github_instaruction.md`
 **Need agent-specific help?** → `.claude/agents/[agent-name].md`
-**Need to implement an issue?** → Use `/project:implement-issue <number>`
+**Need to implement an issue?** → Use `/implement-issue <number>` (UPDATED)
 **Need to brainstorm a feature?** → Use `/project:brainstorm-feature "description"`
 **Need automation help?** → `scripts/[script-name].sh`
+**Need PR review/merge?** → Only `pr-review-agent` has authority (NEW)
+**Need unified ticket help?** → Check `docs/tickets/{branch-name}.md` format (NEW)
 
 ---
 
@@ -263,6 +333,11 @@ This index provides a comprehensive overview of all project documentation with c
 - Modify DEVELOPMENT_GUIDE.md with performance procedures
 - Document optimization strategies for future reference
 
+**pr-review-agent:** (NEW)
+- Update CLAUDE.md PR review standards based on review insights
+- Modify implement-issue.md workflow requirements
+- Update DOCUMENTATION_INDEX.md cross-reference matrix
+
 ### **Documentation Update Format**
 
 All agents must use this format when updating documentation:
@@ -287,6 +362,32 @@ When updating any document:
 
 ---
 
-**Last Updated**: 2025-07-29
-**Version**: 1.1 (Added agent documentation update requirements)
-**Maintainer**: Project Team
+---
+
+## 🆕 RECENT UPDATES & NEW FEATURES
+
+### **Version 2.0 Updates (Latest)**
+- ✅ **NEW: pr-review-agent** - Exclusive PR merge authority agent added
+- ✅ **UPDATED: implement-issue.md** - Enhanced with unified ticket tracking and test validation
+- ✅ **NEW: Unified Ticket System** - ONE ticket file per issue using branch name format
+- ✅ **NEW: Mandatory Test Validation** - All test categories must pass before PR creation
+- ✅ **UPDATED: Cross-Reference Matrix** - Complete matrix with new agent relationships
+- ✅ **NEW: PR Review Workflow** - Only pr-review-agent can merge PRs
+
+### **Breaking Changes**
+- **Command Update**: `/project:implement-issue` → `/implement-issue` 
+- **Ticket Format**: `issue-{number}-{branch}.md` → `{branch-name}.md`
+- **PR Authority**: Any agent could merge → ONLY pr-review-agent can merge
+- **Test Requirements**: Optional testing → MANDATORY >80% coverage
+
+### **Migration Guide**
+1. **Existing Tickets**: Convert to unified format during next implementation
+2. **Agent Workflows**: All agents must use nested checkbox structure
+3. **PR Process**: Wait for pr-review-agent approval before merge
+4. **Documentation**: Update cross-references when creating/modifying .md files
+
+---
+
+**Last Updated**: $(date)
+**Version**: 2.0 (Added unified ticket system, pr-review-agent, and enhanced test validation)
+**Maintainer**: Project Team with pr-review-agent quality assurance

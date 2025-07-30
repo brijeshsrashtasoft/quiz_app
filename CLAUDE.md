@@ -14,9 +14,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **docs/parallel-execution-guide.md** - Mandatory parallel sub-agent execution patterns and workflows
 - **docs/firebase_setup.md** - Firebase configuration and environment setup (CONCISE FORMAT)
 
-**Ticket Documentation:**
-- **docs/tickets/ui-constants-implementation.md** - UI constants implementation specifications
-- **docs/tickets/issue-{number}-{branch}.md** - Session continuity tracking files (created per issue)
+**Ticket Documentation (UNIFIED SYSTEM):**
+- **docs/tickets/{branch-name}.md** - UNIFIED ticket tracking files using branch name format (ONE file per issue)
+- **docs/tickets/issue-12-authentication-system.md** - Completed authentication system ticket (legacy format)
+- **docs/tickets/ui-constants-implementation.md** - UI constants implementation specifications (legacy format)
+
+**NOTE**: All new tickets are managed automatically by implement-issue.md command - no manual ticket file creation needed.
 
 **Sub-Agent Documentation:**
 - **.claude/agents/flutter-architect.md** - Clean Architecture and code structure specialist
@@ -25,9 +28,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **.claude/agents/testing-specialist.md** - TDD implementation and comprehensive test coverage
 - **.claude/agents/code-reviewer.md** - Quality assurance and architecture compliance validation
 - **.claude/agents/performance-optimizer.md** - Performance optimization and memory management
+- **.claude/agents/pr-review-agent.md** - **EXCLUSIVE** PR review and merge authority agent
 
 **Custom Commands:**
-- **.claude/commands/implement-issue.md** - Intelligent agent assignment for GitHub issues
+- **.claude/commands/implement-issue.md** - Enhanced intelligent agent assignment with unified ticket tracking and test validation
 - **.claude/commands/brainstorm-feature.md** - Comprehensive feature planning and analysis
 
 **Automation Scripts:**
@@ -41,6 +45,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Overview
 
 This is a Kahoot-style interactive quiz application built with Flutter, Firestore, and Clean Architecture following Claude Code best practices. The app supports real-time multiplayer quiz sessions across Android, iOS, and web platforms with engaging UI/UX and robust performance.
+
+**🎯 CURRENT PROJECT STATUS** *(Updated: 2025-01-30)*:
+- ✅ **Foundation Complete**: All core infrastructure, architecture, navigation, and basic authentication implemented
+- 🔥 **Ready for Parallel Development**: 8 issues ready to start immediately with no blocking dependencies
+- ⚡ **Maximum Efficiency Phase**: Multiple specialized agents can work simultaneously on different features
 
 ## Claude Code Best Practices Implementation
 
@@ -62,12 +71,48 @@ This is a Kahoot-style interactive quiz application built with Flutter, Firestor
 - Course correct early and often during development
 - Use visual references and screenshots when helpful
 
-### Session Continuity & Ticket Tracking
-- **MANDATORY**: All agents create ticket tracking files in `docs/tickets/issue-{number}-{branch}.md`
-- **UPDATE FREQUENCY**: Update on EVERY todo status change (pending/in_progress/completed/blocked)
-- **FORMAT**: Concise one-line todos with status, no lengthy descriptions
-- **CONTINUATION**: New sessions check for existing ticket files to resume work
-- **HANDOFF**: Include ticket file location in all agent handoffs
+### Session Continuity & Unified Ticket Tracking System
+
+**NEW UNIFIED SYSTEM**: ONE ticket file per issue using branch name format.
+
+**Unified Ticket Requirements**:
+- **FILE FORMAT**: `docs/tickets/{branch-name}.md` (ONE file per issue)
+- **NESTED STRUCTURE**: All agents work in SAME file with nested checkbox hierarchies
+- **AGENT COORDINATION**: Each agent updates their specific section in unified file
+- **TEST INTEGRATION**: Comprehensive test validation tracking included
+- **CROSS-REFERENCE TRACKING**: Documentation update requirements built-in
+
+**Unified Ticket Structure**:
+```markdown
+# Issue #{number} - {Issue Title}
+
+## Implementation Progress
+### 🔥 Main Implementation Tasks
+- [ ] **Core Feature Implementation**
+  - [ ] Architecture setup (flutter-architect)
+  - [ ] Firebase integration (firebase-specialist)
+  - [ ] UI components (ui-designer)
+  - [ ] Testing framework (testing-specialist)
+### 📊 Agent-Specific Progress
+#### flutter-architect Agent
+- [ ] Clean Architecture implementation
+  - [ ] Domain layer entities
+  - [ ] Repository contracts
+#### testing-specialist Agent
+- [ ] Comprehensive test suite
+  - [ ] Unit test coverage >80%
+  - [ ] Widget test implementations
+## Test Execution Status
+- [ ] **ALL tests passing**: Required before PR creation
+- [ ] **Coverage threshold met**: >80% coverage achieved
+```
+
+**Session Continuity**:
+- **MANDATORY**: All agents update the SAME unified ticket file
+- **UPDATE FREQUENCY**: Update on EVERY nested checkbox status change
+- **CONTINUATION**: New sessions read unified file to understand complete progress
+- **HANDOFF**: Include unified ticket file location in all agent handoffs
+- **TEST VALIDATION**: All test categories tracked in unified structure
 
 ## 🆓 FREE SERVICES ONLY POLICY
 
@@ -197,6 +242,7 @@ Our project uses specialized Claude Code sub-agents for focused expertise:
 - **testing-specialist**: TDD implementation and comprehensive test coverage
 - **code-reviewer**: Quality assurance and architecture compliance validation
 - **performance-optimizer**: Performance optimization and memory management
+- **pr-review-agent**: **EXCLUSIVE** pull request review and merge authority (NEW)
 
 #### Sub-Agent Usage (MANDATORY):
 - **ALWAYS USE SUB-AGENTS**: Never work directly - ALWAYS delegate to specialized sub-agents for maximum speed and parallel execution
@@ -240,6 +286,54 @@ Our project uses specialized Claude Code sub-agents for focused expertise:
 - All sub-agents use centralized UI components and approved colors
 - Sub-agents communicate through structured handoff templates
 - Clear documentation of work completed and next steps required
+
+## 🔒 PR REVIEW & MERGE AUTHORITY WORKFLOW
+
+**CRITICAL NEW REQUIREMENT**: Only the pr-review-agent has authority to merge pull requests.
+
+### PR Merge Authority Protocol
+- **PR Creation**: Any agent can create PR following implement-issue.md workflow
+- **PR Review**: ONLY pr-review-agent reviews and approves/requests changes
+- **Change Requests**: Original implementing agents must complete requested changes
+- **Final Approval**: pr-review-agent provides final approval and merge authorization
+- **PR Merge**: ONLY pr-review-agent can merge approved PRs
+
+### Mandatory PR Review Criteria
+All PRs must meet these criteria before pr-review-agent approval:
+- ✅ **Unified Ticket Complete**: All nested checkboxes marked [x] in docs/tickets/{branch-name}.md
+- ✅ **Test Validation**: All test categories passing with >80% coverage
+- ✅ **Platform Verification**: Web, Android, iOS builds successful
+- ✅ **Code Quality**: Clean Architecture compliance and quality standards met
+- ✅ **Documentation Updates**: Cross-references updated in relevant files
+- ✅ **Security Audit**: No security vulnerabilities or hardcoded secrets
+
+### Test Validation Requirements (MANDATORY)
+**NEW CRITICAL REQUIREMENT**: All test cases MUST be updated and passing before PR creation.
+
+**Test Categories That MUST Pass**:
+1. **Unit Tests**: All business logic and use cases (>80% coverage)
+2. **Widget Tests**: All UI components and interactions
+3. **Integration Tests**: Complete feature workflows
+4. **E2E Tests**: End-to-end user scenarios
+5. **Performance Tests**: All benchmarks and thresholds met
+
+**Test Execution Commands (Required before PR)**:
+```bash
+# MANDATORY: All tests must pass
+flutter test --coverage                         # >80% coverage required
+dart run build_runner build --delete-conflicting-outputs  # Update mocks
+flutter analyze                                 # No critical issues
+dart format --set-exit-if-changed .           # Code formatting
+flutter build web && flutter build apk && flutter build ios  # Platform builds
+```
+
+### Cross-Reference Update Requirements
+**MANDATORY**: When any agent creates or modifies .md files, they MUST update cross-references in:
+- **CLAUDE.md** (this file) - Master documentation index
+- **DOCUMENTATION_INDEX.md** - Complete navigation hub  
+- **DEVELOPMENT_GUIDE.md** - Development workflow references
+- **Related agent files** - Agent documentation updates
+- **README.md** - Project overview updates (if applicable)
 
 ### Agent Coordination & Unblocking Protocols (CRITICAL)
 

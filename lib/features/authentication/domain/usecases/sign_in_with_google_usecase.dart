@@ -1,43 +1,52 @@
 import '../../../../core/base/base_usecase.dart';
-import '../../../../core/errors/failures.dart';
 import '../../../../core/utils/result.dart';
+import '../../../../core/errors/failures.dart';
 import '../../../../core/utils/logger.dart';
-import '../entities/auth_entity.dart';
+import '../entities/user_entity.dart';
 import '../repositories/auth_repository.dart';
 
-/// Sign in with Google use case
-/// Implements Clean Architecture use case pattern
-class SignInWithGoogleUseCase extends BaseUseCase<AuthEntity, NoParams> {
-  final AuthRepository repository;
+/// Use case for signing in with Google
+/// Following CLAUDE.md authentication patterns and free tier services
+class SignInWithGoogleUseCase extends BaseUseCase<UserEntity, NoParams> {
+  final AuthRepository _authRepository;
 
-  SignInWithGoogleUseCase({required this.repository});
+  SignInWithGoogleUseCase({required AuthRepository authRepository})
+    : _authRepository = authRepository;
 
   @override
-  Future<Result<AuthEntity>> call(NoParams params) async {
+  Future<Result<UserEntity>> call(NoParams params) async {
     try {
-      AppLogger.info('SignInWithGoogleUseCase: Attempting Google sign in');
+      AppLogger.firebase(
+        'SignInWithGoogleUseCase',
+        'Attempting Google sign in',
+      );
 
-      final result = await repository.signInWithGoogle();
+      final startTime = DateTime.now();
+
+      final result = await _authRepository.signInWithGoogle();
+
+      final duration = DateTime.now().difference(startTime);
+      AppLogger.performance('Google Sign In Use Case', duration);
 
       return result.when(
-        success: (authEntity) {
-          AppLogger.info('SignInWithGoogleUseCase: Google sign in successful');
-          return Result.success(authEntity);
+        success: (user) {
+          AppLogger.firebase(
+            'SignInWithGoogleUseCase',
+            'Google sign in successful: ${user.email}',
+          );
+          return Result.success(user);
         },
         failure: (failure) {
-          AppLogger.error(
-            'SignInWithGoogleUseCase: Google sign in failed',
-            failure,
-          );
+          AppLogger.error('Google sign in failed', failure);
           return Result.failure(failure);
         },
       );
-    } catch (e) {
-      AppLogger.error('SignInWithGoogleUseCase: Unexpected error', e);
+    } catch (e, stackTrace) {
+      AppLogger.error('Unexpected error during Google sign in', e, stackTrace);
       return Result.failure(
-        AuthFailure(
-          message: 'An unexpected error occurred during Google sign in',
-          code: 'unexpected-error',
+        Failure.authFailure(
+          message: 'Google sign in failed. Please try again',
+          code: 'AUTH_GOOGLE_SIGNIN_ERROR',
         ),
       );
     }

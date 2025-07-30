@@ -1,74 +1,78 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../core/utils/result.dart';
-import '../entities/auth_entity.dart';
+import '../entities/user_entity.dart';
 
-/// Authentication repository interface for Clean Architecture
-/// Defines all authentication operations for the domain layer
+/// Authentication repository interface for Clean Architecture domain layer
+/// Following CLAUDE.md patterns and Firebase Auth integration
 abstract class AuthRepository {
   /// Sign in with email and password
-  /// Returns [AuthEntity] on success or [Failure] on error
-  Future<Result<AuthEntity>> signInWithEmailAndPassword({
+  Future<Result<UserEntity>> signInWithEmailPassword({
     required String email,
     required String password,
   });
 
-  /// Create user account with email and password
-  /// Returns [AuthEntity] on success or [Failure] on error
-  Future<Result<AuthEntity>> createUserWithEmailAndPassword({
+  /// Create user with email and password
+  Future<Result<UserEntity>> createUserWithEmailPassword({
     required String email,
     required String password,
+    required String name,
   });
 
-  /// Sign in with Google account
-  /// Returns [AuthEntity] on success or [Failure] on error
-  Future<Result<AuthEntity>> signInWithGoogle();
+  /// Sign in with Google (free tier)
+  Future<Result<UserEntity>> signInWithGoogle();
 
   /// Sign out current user
-  /// Returns success result or [Failure] on error
   Future<Result<void>> signOut();
 
   /// Send password reset email
-  /// Returns success result or [Failure] on error
   Future<Result<void>> sendPasswordResetEmail({required String email});
 
-  /// Update user profile information
-  /// Returns success result or [Failure] on error
-  Future<Result<void>> updateUserProfile({
-    String? displayName,
-    String? photoURL,
-  });
-
-  /// Delete current user account
-  /// Returns success result or [Failure] on error
-  Future<Result<void>> deleteUserAccount();
-
-  /// Send email verification to current user
-  /// Returns success result or [Failure] on error
-  Future<Result<void>> sendEmailVerification();
-
-  /// Reload current user data
-  /// Returns success result or [Failure] on error
-  Future<Result<void>> reloadUser();
-
-  /// Get current Firebase user (for compatibility)
-  /// Returns [User] if authenticated, null otherwise
-  User? getCurrentUser();
-
-  /// Check if user is currently authenticated
-  bool get isAuthenticated;
-
-  /// Get current authenticated user's ID
-  String? get currentUserId;
+  /// Get current authenticated user
+  Result<UserEntity?> getCurrentUser();
 
   /// Stream of authentication state changes
-  /// Emits [User] when authenticated, null when not
-  Stream<User?> authStateChanges();
+  Stream<Result<UserEntity?>> watchAuthState();
 
-  /// Stream of ID token changes (more reliable for auth state)
-  /// Emits [User] when token changes, null when signed out
-  Stream<User?> idTokenChanges();
+  /// Check if user is authenticated
+  bool get isAuthenticated;
 
-  /// Stream of user profile changes
-  /// Emits [User] when user data changes
-  Stream<User?> userChanges();
+  /// Get current user ID
+  String? get currentUserId;
+
+  /// Delete current user account
+  Future<Result<void>> deleteCurrentUser();
+
+  /// Verify email address
+  Future<Result<void>> sendEmailVerification();
+
+  /// Check if current user's email is verified
+  bool get isEmailVerified;
+
+  /// Reload current user data
+  Future<Result<void>> reloadUser();
+
+  /// Update user password
+  Future<Result<void>> updatePassword({
+    required String currentPassword,
+    required String newPassword,
+  });
+
+  /// Update user email
+  Future<Result<void>> updateEmail({
+    required String newEmail,
+    required String password,
+  });
+
+  /// Re-authenticate user before sensitive operations
+  Future<Result<void>> reauthenticate({required String password});
+
+  /// Link Google account to current user
+  Future<Result<UserEntity>> linkGoogleAccount();
+
+  /// Unlink Google account from current user
+  Future<Result<void>> unlinkGoogleAccount();
+
+  /// Get available sign-in methods for email
+  Future<Result<List<String>>> getSignInMethodsForEmail({
+    required String email,
+  });
 }

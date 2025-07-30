@@ -21,7 +21,117 @@ This includes permission to:
 - **NEVER** analyze, checkout, or work on any branch other than your feature branch
 - **IGNORE** all other branches (main, other features) - focus ONLY on `development` → feature branch workflow
 
-**Command Documentation**: This command provides intelligent agent assignment and coordinated implementation of GitHub issues with strict PR conflict management.
+**Command Documentation**: This command provides intelligent agent assignment and coordinated implementation of GitHub issues with strict PR conflict management and comprehensive test validation.
+
+## 📋 UNIFIED TICKET TRACKING SYSTEM
+
+**NEW REQUIREMENT**: ONE ticket documentation file per issue using branch name format. ALL agents work in the SAME file with nested checkbox structure.
+
+**Ticket File Name Format:**
+```
+docs/tickets/{branch-name}.md
+```
+
+**Example**: For issue #15 on branch `feature/issue-15-quiz-creation`:
+```
+docs/tickets/feature-issue-15-quiz-creation.md
+```
+
+**MANDATORY Nested Checkbox Structure:**
+```markdown
+# Issue #$ARGUMENTS - {Issue Title}
+
+## Implementation Progress
+
+### 🔥 Main Implementation Tasks
+- [ ] **Core Feature Implementation**
+  - [ ] Architecture setup (flutter-architect)
+  - [ ] Firebase integration (firebase-specialist) 
+  - [ ] UI components (ui-designer)
+  - [ ] Testing framework (testing-specialist)
+- [ ] **Test Coverage & Validation** 
+  - [ ] Unit tests passing (testing-specialist)
+  - [ ] Widget tests passing (testing-specialist)
+  - [ ] Integration tests passing (testing-specialist)
+  - [ ] E2E test scenarios complete (testing-specialist)
+- [ ] **Platform Verification**
+  - [ ] Web build successful
+  - [ ] Android build successful  
+  - [ ] iOS build successful
+  - [ ] All platforms tested and verified
+- [ ] **Quality Assurance**
+  - [ ] Code review completed (code-reviewer)
+  - [ ] Performance benchmarks met (performance-optimizer)
+  - [ ] Documentation updated (all agents)
+  - [ ] Cross-references updated (all agents)
+
+### 📊 Agent-Specific Progress
+
+#### flutter-architect Agent
+- [ ] Clean Architecture implementation
+  - [ ] Domain layer entities
+  - [ ] Repository contracts
+  - [ ] Use cases implementation
+  - [ ] Data layer integration
+- [ ] Platform integration verified
+- [ ] Documentation updates completed
+
+#### firebase-specialist Agent  
+- [ ] Firebase service setup
+  - [ ] Authentication configuration
+  - [ ] Firestore database design
+  - [ ] Security rules implementation
+  - [ ] Real-time listeners setup
+- [ ] Free tier compliance verified
+- [ ] Integration testing completed
+
+#### ui-designer Agent
+- [ ] UI component implementation
+  - [ ] Kahoot-style design compliance
+  - [ ] Responsive layouts
+  - [ ] Animation implementations
+  - [ ] Accessibility features
+- [ ] Design system updates
+- [ ] Cross-platform compatibility verified
+
+#### testing-specialist Agent
+- [ ] Comprehensive test suite
+  - [ ] Unit test coverage >80%
+  - [ ] Widget test implementations  
+  - [ ] Integration test scenarios
+  - [ ] Performance test benchmarks
+- [ ] Test framework enhancements
+- [ ] CI/CD integration verified
+
+#### code-reviewer Agent
+- [ ] Architecture review completed
+- [ ] Code quality validation
+- [ ] Security audit performed
+- [ ] Performance analysis completed
+- [ ] Documentation review finished
+
+## Test Execution Status
+- [ ] **ALL tests passing**: Required before PR creation
+- [ ] **Coverage threshold met**: >80% coverage achieved
+- [ ] **Performance benchmarks**: All thresholds satisfied
+- [ ] **Platform compatibility**: All builds successful
+
+## Files Modified
+[Updated by each agent as they complete work]
+
+## Agent Handoff Log
+[Each agent documents their completion and handoff notes]
+
+## Status Summary
+Current: [pending/in_progress/testing/review/completed]
+Blockers: [None/specific issues]
+Next Agent: [Who should work next]
+
+## Last Update
+Agent: [agent-name]
+Time: [timestamp]
+Action: [what was completed]
+```
 
 ## 🚨 CRITICAL PR CONFLICT PREVENTION WORKFLOW
 
@@ -43,14 +153,51 @@ This includes permission to:
 - **Avoids blocking situations** where multiple PRs conflict with each other
 - **Maintains code quality** by resolving conflicts before PR creation
 
-**Related Documentation**:
-- **CLAUDE.md** - Agent coordination protocols, Clean Architecture patterns, and UI guidelines
+**Related Documentation** (Cross-referenced in CLAUDE.md):
+- **CLAUDE.md** - Master project documentation and agent coordination protocols
 - **DEVELOPMENT_GUIDE.md** - Complete development workflow and quality standards
-- **docs/github_instaruction.md** - GitHub workflow standards and commit message formats
+- **docs/github_instruction.md** - GitHub workflow standards and commit message formats
 - **.claude/agents/** - Individual sub-agent roles and responsibilities
+- **.claude/agents/pr-review-agent.md** - Pull request review and merge authority
 - **scripts/develop-feature.sh** - Automated branch creation for issues
 
-**STEP 0: MANDATORY BRANCH VERIFICATION & CONTINUATION CHECK**
+## 🧪 MANDATORY TEST VALIDATION REQUIREMENTS
+
+**NEW CRITICAL REQUIREMENT**: All test cases MUST be updated and passing before PR creation.
+
+**Test Categories That MUST Pass:**
+1. **Unit Tests**: All business logic and use cases
+2. **Widget Tests**: All UI components and interactions
+3. **Integration Tests**: Complete feature workflows
+4. **E2E Tests**: End-to-end user scenarios
+5. **Performance Tests**: All benchmarks and thresholds
+
+**Test Execution Commands (MANDATORY before PR):**
+```bash
+# STEP 1: Run all test suites
+flutter test                                    # All tests must pass
+flutter test --coverage                         # Coverage >80% required
+flutter test test/integration/                  # Integration tests
+flutter test test/e2e/                         # E2E scenarios
+
+# STEP 2: Verify test updates are current
+dart run build_runner build --delete-conflicting-outputs  # Update mocks
+flutter analyze                                 # No critical issues
+dart format --set-exit-if-changed .           # Code formatting
+
+# STEP 3: Platform-specific test validation
+flutter test test/unit/ --platform vm          # Unit tests on VM
+flutter test test/widget/ --platform vm        # Widget tests  
+flutter test test/integration/ --platform vm   # Integration tests
+```
+
+**Test Documentation Updates Required:**
+- Update test documentation in `test/README.md`
+- Add new test scenarios to relevant test suites
+- Update test helper utilities if needed
+- Verify test mocks are current and accurate
+
+## STEP 0: MANDATORY BRANCH VERIFICATION & CONTINUATION CHECK
 
 **CRITICAL**: Before any work begins, verify current branch status and check for existing work:
 
@@ -60,10 +207,26 @@ current_branch=$(git branch --show-current)
 target_branch="feature/issue-$ARGUMENTS"
 issue_branch_pattern="^feature/issue-$ARGUMENTS"
 
+# Create unified ticket file name from branch
+if [[ "$current_branch" =~ $issue_branch_pattern ]]; then
+    TICKET_FILE="docs/tickets/${current_branch}.md"
+else
+    TICKET_FILE="docs/tickets/feature-issue-$ARGUMENTS-[description].md"
+fi
+
 # CASE 1: Already on the correct issue branch - CONTINUE EXISTING WORK
 if [[ "$current_branch" =~ $issue_branch_pattern ]]; then
     echo "✅ CONTINUATION MODE: Already on issue #$ARGUMENTS branch ($current_branch)"
     echo "🔍 Checking existing work status..."
+    
+    # Check for existing ticket file
+    if [[ -f "$TICKET_FILE" ]]; then
+        echo "📋 Found existing ticket file: $TICKET_FILE"
+        echo "🔄 CONTINUING from existing progress..."
+        cat "$TICKET_FILE"
+    else
+        echo "⚠️ NO TICKET FILE FOUND - will create new one"
+    fi
     
     # Check git status for uncommitted changes
     if [[ -n $(git status --porcelain) ]]; then
@@ -85,11 +248,14 @@ if [[ "$current_branch" =~ $issue_branch_pattern ]]; then
     git diff --name-only $(git merge-base HEAD development)..HEAD | head -10
     echo ""
     
-    # Check if tests exist for this issue
-    if ls test/**/*$ARGUMENTS* 2>/dev/null || ls test/**/*error*handling* 2>/dev/null; then
-        echo "🧪 EXISTING TESTS FOUND - will continue TDD approach"
+    # Check test status
+    echo "🧪 CHECKING TEST STATUS:"
+    if flutter test --dry-run 2>/dev/null; then
+        echo "✅ Test framework operational"
+        echo "🔍 Running quick test validation..."
+        flutter test --reporter compact | head -10
     else
-        echo "⚠️ NO TESTS FOUND - will implement TDD from current state"
+        echo "⚠️ Test issues detected - will need to fix during implementation"
     fi
     
     echo "⏭️ SKIPPING branch creation - continuing with existing work..."
@@ -113,7 +279,7 @@ else
 fi
 ```
 
-**STEP 1: ISSUE ANALYSIS & AGENT ASSIGNMENT**
+## STEP 1: ISSUE ANALYSIS & AGENT ASSIGNMENT
 
 First, analyze the issue and assign to appropriate specialized agents:
 
@@ -133,7 +299,7 @@ Based on issue content, determine required agents:
 
 **Agent Documentation**: Each agent's specific role is documented in `.claude/agents/[agent-name].md`
 
-**STEP 2: MANDATORY PR CONFLICT CHECK**
+## STEP 2: MANDATORY PR CONFLICT CHECK
 
 **🚨 CRITICAL: Before creating ANY new branch or starting work, check for existing open PRs**
 
@@ -153,7 +319,129 @@ echo "Current agent cannot proceed until conflicts are resolved."
 3. **Wait for Resolution**: User must merge open PR before proceeding
 4. **Pull Latest**: Only after PR is merged, pull latest changes
 
-**STEP 3: SEQUENTIAL DEVELOPMENT WORKFLOW** 
+## STEP 3: UNIFIED TICKET FILE CREATION
+
+**MANDATORY**: Create or update the single ticket tracking file for this issue.
+
+```bash
+# Create ticket file based on branch name
+current_branch=$(git branch --show-current)
+TICKET_FILE="docs/tickets/${current_branch}.md"
+
+# Create tickets directory if it doesn't exist
+mkdir -p docs/tickets
+
+# Create or update ticket file with unified structure
+if [[ ! -f "$TICKET_FILE" ]]; then
+    echo "📋 Creating new unified ticket file: $TICKET_FILE"
+    
+    # Get issue details for ticket creation
+    ISSUE_TITLE=$(gh issue view $ARGUMENTS --json title -q '.title')
+    
+    # Create unified ticket file with nested structure
+    cat > "$TICKET_FILE" << EOF
+# Issue #$ARGUMENTS - ${ISSUE_TITLE}
+
+## Implementation Progress
+
+### 🔥 Main Implementation Tasks
+- [ ] **Core Feature Implementation**
+  - [ ] Architecture setup (flutter-architect)
+  - [ ] Firebase integration (firebase-specialist) 
+  - [ ] UI components (ui-designer)
+  - [ ] Testing framework (testing-specialist)
+- [ ] **Test Coverage & Validation** 
+  - [ ] Unit tests passing (testing-specialist)
+  - [ ] Widget tests passing (testing-specialist)
+  - [ ] Integration tests passing (testing-specialist)
+  - [ ] E2E test scenarios complete (testing-specialist)
+- [ ] **Platform Verification**
+  - [ ] Web build successful
+  - [ ] Android build successful  
+  - [ ] iOS build successful
+  - [ ] All platforms tested and verified
+- [ ] **Quality Assurance**
+  - [ ] Code review completed (code-reviewer)
+  - [ ] Performance benchmarks met (performance-optimizer)
+  - [ ] Documentation updated (all agents)
+  - [ ] Cross-references updated (all agents)
+
+### 📊 Agent-Specific Progress
+
+#### flutter-architect Agent
+- [ ] Clean Architecture implementation
+  - [ ] Domain layer entities
+  - [ ] Repository contracts
+  - [ ] Use cases implementation
+  - [ ] Data layer integration
+- [ ] Platform integration verified
+- [ ] Documentation updates completed
+
+#### firebase-specialist Agent  
+- [ ] Firebase service setup
+  - [ ] Authentication configuration
+  - [ ] Firestore database design
+  - [ ] Security rules implementation
+  - [ ] Real-time listeners setup
+- [ ] Free tier compliance verified
+- [ ] Integration testing completed
+
+#### ui-designer Agent
+- [ ] UI component implementation
+  - [ ] Kahoot-style design compliance
+  - [ ] Responsive layouts
+  - [ ] Animation implementations
+  - [ ] Accessibility features
+- [ ] Design system updates
+- [ ] Cross-platform compatibility verified
+
+#### testing-specialist Agent
+- [ ] Comprehensive test suite
+  - [ ] Unit test coverage >80%
+  - [ ] Widget test implementations  
+  - [ ] Integration test scenarios
+  - [ ] Performance test benchmarks
+- [ ] Test framework enhancements
+- [ ] CI/CD integration verified
+
+#### code-reviewer Agent
+- [ ] Architecture review completed
+- [ ] Code quality validation
+- [ ] Security audit performed
+- [ ] Performance analysis completed
+- [ ] Documentation review finished
+
+## Test Execution Status
+- [ ] **ALL tests passing**: Required before PR creation
+- [ ] **Coverage threshold met**: >80% coverage achieved
+- [ ] **Performance benchmarks**: All thresholds satisfied
+- [ ] **Platform compatibility**: All builds successful
+
+## Files Modified
+[Updated by each agent as they complete work]
+
+## Agent Handoff Log
+[Each agent documents their completion and handoff notes]
+
+## Status Summary
+Current: pending
+Blockers: None
+Next Agent: flutter-architect (based on issue analysis)
+
+## Last Update
+Agent: implement-issue command
+Time: $(date)
+Action: Ticket file created and issue analysis completed
+EOF
+
+    echo "✅ Unified ticket file created: $TICKET_FILE"
+else
+    echo "📋 Found existing unified ticket file: $TICKET_FILE"
+    echo "🔄 Will update progress as agents complete work"
+fi
+```
+
+## STEP 4: SEQUENTIAL DEVELOPMENT WORKFLOW
 
 **Only proceed if NO open PRs exist:**
 
@@ -187,7 +475,18 @@ else
     # ONLY if no open PRs exist and not already on correct branch
     git checkout development
     git pull origin development  # Get latest merged changes
-    git checkout -b feature/issue-$ARGUMENTS-{short-description}
+    
+    # Create branch with descriptive name
+    ISSUE_TITLE=$(gh issue view $ARGUMENTS --json title -q '.title' | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/-\+/-/g' | sed 's/^-\|-$//g' | cut -c1-30)
+    git checkout -b feature/issue-$ARGUMENTS-${ISSUE_TITLE}
+
+    # Update ticket file name with actual branch
+    NEW_TICKET_FILE="docs/tickets/$(git branch --show-current).md"
+    if [[ -f "$TICKET_FILE" && "$TICKET_FILE" != "$NEW_TICKET_FILE" ]]; then
+        mv "$TICKET_FILE" "$NEW_TICKET_FILE"
+        TICKET_FILE="$NEW_TICKET_FILE"
+        echo "📋 Ticket file renamed to match branch: $TICKET_FILE"
+    fi
 
     # Verify correct branch creation
     git log --oneline -1 --decorate
@@ -195,30 +494,37 @@ else
 fi
 ```
 
-**STEP 4: PARALLEL AGENT COORDINATION (MANDATORY)**
+## STEP 5: PARALLEL AGENT COORDINATION (MANDATORY)
 
 **CRITICAL**: ALWAYS use multiple sub-agents in parallel for maximum speed. Never work directly - ALWAYS delegate to specialized agents.
+
+**ALL AGENTS MUST**:
+1. **Use Unified Ticket File**: Update the SAME ticket file with their progress
+2. **Update Nested Checkboxes**: Mark their specific tasks as completed
+3. **Test Validation**: Ensure their code passes all relevant tests
+4. **Cross-Reference Updates**: Update documentation references as required
 
 **CONTEXT-AWARE AGENT INSTRUCTIONS:**
 
 **For CONTINUATION MODE (already on correct branch with existing work):**
 "Continue implementation of issue #$ARGUMENTS using multiple specialized agents in parallel. Current branch analysis shows existing progress - agents should:
 
-1. **Assess Current State**: Review existing implementation and identify completion gaps
+1. **Read Unified Ticket File**: Check docs/tickets/$(git branch --show-current).md for current progress
 2. **Continue TDD Approach**: Build upon existing tests or implement missing test coverage
-3. **Complete Missing Components**: Finish any incomplete implementations 
-4. **Maintain Consistency**: Ensure new work integrates seamlessly with existing code
+3. **Update Ticket Progress**: Mark completed tasks in the nested checkbox structure
+4. **Maintain Test Currency**: Ensure all tests pass and are up-to-date with changes
 
 **For NORMAL MODE (new implementation):**
 "Launch multiple specialized agents simultaneously using separate Task tool calls in a single message for issue #$ARGUMENTS:
 
-**⚠️ AGENT BRANCH DISCIPLINE ⚠️**
+**⚠️ AGENT UNIFIED TICKET DISCIPLINE ⚠️**
 Each agent MUST:
 - Work ONLY on the current feature/issue-$ARGUMENTS branch  
-- NEVER checkout or analyze other branches (main, other features, development)
-- Focus ONLY on their assigned feature/issue-$ARGUMENTS branch
-- **CONTINUATION MODE**: Review existing files and implementation before making changes
-- **CONTINUATION MODE**: Integrate new work with existing code patterns and architecture
+- Update the UNIFIED ticket file: docs/tickets/$(git branch --show-current).md
+- Mark their nested checkbox tasks as completed
+- Ensure ALL tests pass before marking tasks complete
+- Update cross-references in documentation files as required
+- NEVER create separate ticket files - use the ONE unified file
 
 **For Setup/Infrastructure Issues**: Launch ALL in parallel:
 - flutter-architect subagent: Clean Architecture implementation
@@ -243,181 +549,102 @@ Each agent MUST:
 - testing-specialist subagent: Real-time test coverage
 
 **EVERY AGENT MUST**:
-1. **Branch Discipline**: Work ONLY on current feature/issue-$ARGUMENTS branch  
-2. **Continuation Awareness**: Check for existing work before making changes - analyze current files and progress
-3. **TDD Continuation**: If tests exist, ensure they pass; if missing, implement following TDD approach
-4. **Platform Verification**: Run ./scripts/quality-check.sh after implementation
-5. **Parallel Coordination**: Work simultaneously with other assigned agents
-6. **Structured Communication**: Use handoff protocol when coordination needed
-7. **Quality Standards**: Follow all project standards and documentation
-8. **Integration Focus**: Ensure new work integrates seamlessly with existing implementations
-9. **No Branch Hopping**: NEVER checkout or analyze code from other branches"
+1. **Unified Ticket Updates**: Update docs/tickets/$(git branch --show-current).md with progress
+2. **Test Validation**: ALL tests must pass before marking tasks complete
+3. **Cross-Reference Updates**: Update CLAUDE.md and related files with new references
+4. **Platform Verification**: Verify builds work on all platforms
+5. **Documentation Updates**: Update relevant documentation files
+6. **Quality Standards**: Follow all project standards and patterns"
 
-**STEP 5: MANDATORY FINAL VALIDATION**
+## STEP 6: MANDATORY TEST VALIDATION & QUALITY ASSURANCE
 
-**CRITICAL**: After ALL parallel agents complete their work, run final validation:
+**CRITICAL**: After ALL parallel agents complete their work, run comprehensive test validation:
 
-**Final Validation Process:**
-1. **Collect Results**: Gather outputs from all parallel agents
-2. **Platform Verification**: Ensure ALL agents verified platforms successfully
-3. **Code Review**: Launch code-reviewer subagent to validate complete implementation:
-   "Use the code-reviewer subagent to review the complete implementation for issue #$ARGUMENTS"
-4. **Integration Check**: Verify all agent contributions work together seamlessly
-
-**🚨 MANDATORY COMPLETION REQUIREMENTS**
-
-**CRITICAL: ALL agents or sub-agents MUST complete 100% of their assigned tasks. NO PARTIAL WORK ALLOWED.**
-
-**Completion Verification Checklist:**
-- [ ] ✅ **ALL agent tasks 100% complete** - No pending work from any assigned agent
-- [ ] ✅ **Platform verification passed** - All platforms (Web, Android, iOS) build and run successfully  
-- [ ] ✅ **Quality metrics achieved** - Tests pass, coverage >80%, no critical errors
-- [ ] ✅ **Documentation updated** - All relevant docs updated by each agent
-- [ ] ✅ **Custom commands updated** - Any new commands or procedures documented
-- [ ] ✅ **Integration validated** - All agent contributions work together seamlessly
-
-**Agent Task Completion Requirements:**
-Each assigned agent MUST deliver:
-1. **100% Implementation**: Complete all components within their specialization
-2. **Comprehensive Testing**: All code covered by appropriate tests (unit/widget/integration)
-3. **Platform Compatibility**: Code verified working on all target platforms
-4. **Documentation Updates**: Update relevant documentation files
-5. **Performance Validation**: Meet all performance requirements in their domain
-6. **Integration Points**: Ensure smooth integration with other agents' work
-
-**Verification Commands:**
+**Test Validation Process:**
 ```bash
-# MANDATORY: Verify ALL platforms build successfully
-flutter build web --release
-flutter build apk --release  
-flutter build ios --release --no-codesign
+# MANDATORY: All tests must pass before PR creation
+echo "🧪 RUNNING COMPREHENSIVE TEST VALIDATION..."
 
-# MANDATORY: Verify ALL tests pass
-flutter test --coverage
+# Step 1: Update all generated code
+dart run build_runner build --delete-conflicting-outputs
+echo "✅ Generated code updated"
 
-# MANDATORY: Verify code quality
-flutter analyze
-dart format --set-exit-if-changed .
-```
-
-**NO PULL REQUEST** can be created until ALL completion requirements are met.
-
-**Quality Assurance**: The code-reviewer validates against all standards documented in CLAUDE.md, including:
-- Clean Architecture compliance
-- UI design system adherence (docs/ui_guideline.md)
-- Testing coverage requirements (>80% coverage)
-- Performance standards (sub-200ms real-time)
-- Security guidelines (Firebase rules, authentication)
-- **Platform verification completed by ALL agents**
-- **Documentation updates completed by all agents**
-
-**Integration Validation**:
-- All platforms build successfully after ALL agent changes
-- No conflicts between agent implementations
-- Consistent architecture patterns across all agent contributions
-- Complete feature functionality with all specializations integrated
-
-**STEP 6: PR CONFLICT RESOLUTION & COMMIT WORKFLOW**
-
-**🚨 CRITICAL: Before creating PR, check for NEW conflicts that may have appeared**
-
-```bash
-# MANDATORY: Re-check for open PRs before committing
-gh pr list --state open
-
-# If new PRs appeared during work, resolve conflicts first
-if [[ $(gh pr list --state open | wc -l) -gt 0 ]]; then
-    echo "⚠️  NEW CONFLICT: Another PR was created during development!"
-    echo "Resolving conflicts with development branch..."
-    
-    # Pull latest changes and resolve conflicts
-    git fetch origin development
-    git merge origin/development
-    
-    # If conflicts exist, resolve them
-    if [[ $? -ne 0 ]]; then
-        echo "🔧 CONFLICTS DETECTED: Resolving merge conflicts..."
-        echo "1. Review conflicted files"
-        echo "2. Resolve conflicts manually"
-        echo "3. Run platform verification after resolution"
-        echo "4. Commit resolved conflicts"
-        
-        # After manual conflict resolution:
-        git add .
-        git commit -m "resolve: merge conflicts with development branch
-        
-        🤖 Generated with [Claude Code](https://claude.ai/code)
-        
-        Co-Authored-By: Claude <noreply@anthropic.com>"
-        
-        # MANDATORY: Verify platforms still build after conflict resolution
-        echo "🔍 VERIFYING: Platform builds after conflict resolution..."
-        flutter build web --release && echo "✅ Web build successful"
-        flutter build apk --debug && echo "✅ Android build successful"
-        
-        # MANDATORY: Run tests after conflict resolution
-        flutter test test/unit/ --reporter compact && echo "✅ Tests passing"
-    fi
+# Step 2: Run all test suites
+flutter test --reporter compact
+if [[ $? -ne 0 ]]; then
+    echo "❌ TESTS FAILED: Fix all test failures before proceeding"
+    exit 1
 fi
+echo "✅ All tests passing"
+
+# Step 3: Check test coverage
+flutter test --coverage
+if [[ -f coverage/lcov.info ]]; then
+    # Calculate coverage percentage (simplified)
+    COVERAGE=$(lcov --summary coverage/lcov.info 2>/dev/null | grep "lines" | tail -1 | cut -d' ' -f4 | cut -d'%' -f1)
+    if [[ $(echo "$COVERAGE >= 80" | bc -l) -eq 1 ]]; then
+        echo "✅ Test coverage: ${COVERAGE}% (meets >80% requirement)"
+    else
+        echo "❌ INSUFFICIENT COVERAGE: ${COVERAGE}% (requires >80%)"
+        echo "Add more tests before proceeding"
+        exit 1
+    fi
+else
+    echo "⚠️ Coverage report not generated - verify test execution"
+fi
+
+# Step 4: Platform verification with tests
+flutter build web --release
+flutter build apk --debug  
+flutter build ios --debug --no-codesign
+
+echo "✅ All platform builds successful"
+
+# Step 5: Update ticket file with test validation
+TICKET_FILE="docs/tickets/$(git branch --show-current).md"
+sed -i '' 's/- \[ \] \*\*ALL tests passing\*\*/- [x] **ALL tests passing**/' "$TICKET_FILE"
+sed -i '' 's/- \[ \] \*\*Coverage threshold met\*\*/- [x] **Coverage threshold met**/' "$TICKET_FILE"
+sed -i '' 's/- \[ \] \*\*Platform compatibility\*\*/- [x] **Platform compatibility**/' "$TICKET_FILE"
+
+echo "✅ Test validation completed and ticket updated"
 ```
 
-## 🛠️ CONFLICT RESOLUTION REFERENCE
+## STEP 7: CODE REVIEW BY PR-REVIEW-AGENT
 
-**When conflicts occur, use these resolution patterns:**
-
-**Coverage Files:** `rm coverage/lcov.info` (regenerated by tests)
-**Mock Files:** `git rm *.mocks.dart` (regenerated by build_runner)  
-**Test Files:** Manually merge logic, update API calls
-**Config Files:** Merge both versions, verify platform compatibility
-
-## 📝 GITIGNORE MANAGEMENT
-
-**CRITICAL**: Ensure .gitignore properly excludes generated files to prevent conflicts:
+**MANDATORY**: Launch the pr-review-agent for final validation before PR creation:
 
 ```bash
-# Add these entries to .gitignore if not present:
-echo "
-# Generated files
-*.g.dart
-*.freezed.dart  
-*.mocks.dart
-build_runner.yaml
-
-# Test coverage
-coverage/
-lcov.info" >> .gitignore
+# Launch PR review agent for final validation
+echo "🔍 LAUNCHING PR REVIEW AGENT FOR FINAL VALIDATION..."
 ```
 
-**Generated Files Policy:**
-- **Never commit** `*.mocks.dart` files (generated by mockito)
-- **Never commit** `*.g.dart` files (generated by json_annotation)
-- **Never commit** `*.freezed.dart` files (generated by freezed)
-- **Never commit** coverage files (regenerated by tests)
+"Use the pr-review-agent subagent to perform comprehensive pre-PR review for issue #$ARGUMENTS:
 
-**Regeneration Commands:**
-```bash
-dart run build_runner build --delete-conflicting-outputs  # Regenerate all
-flutter test --coverage                                   # Regenerate coverage
-```
+**Review Requirements**:
+1. **Ticket Validation**: Verify all nested checkboxes are completed in unified ticket file
+2. **Code Quality**: Ensure Clean Architecture and coding standards compliance
+3. **Test Validation**: Confirm >80% coverage and all tests passing
+4. **Platform Verification**: Validate all platform builds successful
+5. **Documentation Updates**: Verify cross-references updated in all relevant files
+6. **Security Audit**: Check for security best practices implementation
 
-**STEP 7: COMMIT, PR CREATION & ISSUE COMMUNICATION**
+**PR Review Agent Authority**:
+- ONLY pr-review-agent can approve PR creation
+- ONLY pr-review-agent can merge PRs after creation
+- If changes required, original implementing agents must complete them
 
-**CRITICAL**: This step is MANDATORY for every issue implementation. No implementation is complete without proper GitHub workflow.
+The pr-review-agent will provide final approval or required changes list."
+
+## STEP 8: PR CREATION & ISSUE COMPLETION
+
+**CRITICAL**: This step is MANDATORY for every issue implementation and can ONLY be executed after pr-review-agent approval.
 
 **Quality Validation & Platform Verification:**
 ```bash
-# MANDATORY: Run comprehensive quality checks with platform builds
+# MANDATORY: Final verification before PR creation
 ./scripts/quality-check.sh
 
-# This script automatically:
-# - Formats code and runs analysis
-# - Executes all tests with coverage
-# - Verifies platform configuration (Android/iOS Firebase setup)
-# - Builds and tests all platforms (Web, Android, iOS on macOS)
-# - Provides specific error messages and fixes for common issues
-# - Times out builds to prevent infinite hangs
-
-# If quality-check.sh passes, commit with standards from docs/github_instaruction.md
+# Commit with standards from docs/github_instruction.md
 git add .
 git commit -m "type(scope): description - closes #$ARGUMENTS
 
@@ -438,53 +665,36 @@ if [[ $OPEN_PRS -gt 0 ]]; then
 fi
 
 # Push feature branch
-git push -u origin feature/issue-$ARGUMENTS-{short-description}
+git push -u origin $(git branch --show-current)
 
-# Create PR targeting development branch (NEVER main directly)
-gh pr create --base development --title "type(scope): description" --body "$(cat <<'EOF'
+# Create PR targeting development branch with unified ticket reference
+gh pr create --base development --title "type(scope): description" --body "$(cat <<EOF
 ## Summary
 - [Brief description of what was implemented]
 - [Key architectural decisions or patterns used]
 - [Integration points with existing codebase]
 
+## Unified Ticket Reference
+**Ticket File**: docs/tickets/$(git branch --show-current).md
+- All nested checkboxes completed
+- All agent tasks verified
+- Test validation completed
+- Platform verification successful
+
 ## Test Plan
-- [x] [Test category 1: unit/widget/integration tests written]
-- [x] [Test category 2: specific validation performed]
-- [x] [Quality checks: lint, format, analyze passed]
-- [x] [Architecture compliance: Clean Architecture patterns followed]
+- [x] Unit tests: >80% coverage achieved
+- [x] Widget tests: All UI components tested
+- [x] Integration tests: Complete workflows validated
+- [x] Platform tests: Web, Android, iOS builds successful
+- [x] Quality checks: lint, format, analyze passed
 
-🤖 Generated with [Claude Code](https://claude.ai/code)
-EOF
-)"
-```
+## Documentation Updates
+- [x] CLAUDE.md cross-references updated
+- [x] Agent documentation updated
+- [x] Related MD files cross-referenced
+- [x] Architecture documentation updated
 
-**MANDATORY Issue Comment:**
-```bash
-# Comment on original issue with completion summary
-gh issue comment $ARGUMENTS --body "$(cat <<'EOF'
-## ✅ Issue Implementation Complete
-
-**[Brief title of what was implemented]**
-
-### 🎯 Implementation Summary:
-- ✅ **[Feature/Component 1]**: [What was implemented and how]
-- ✅ **[Feature/Component 2]**: [Key architectural decisions]
-- ✅ **[Testing]**: [Test coverage and validation performed]
-- ✅ **[Quality]**: [Standards compliance and quality metrics]
-
-### 📊 Quality Metrics:
-- **Test Coverage**: [Coverage percentage or test categories]
-- **Architecture Compliance**: [Clean Architecture validation]
-- **Security/Performance**: [Relevant standards met]
-- **Documentation**: [Documentation updates completed]
-
-### 🔗 Pull Request: #[PR_NUMBER]
-Review and merge the implementation at: [GITHUB_PR_URL]
-
-### 🚀 Next Steps:
-[Brief description of what comes next in development sequence]
-
-**Status**: ✅ **COMPLETED** - [Implementation is ready for review/merge]
+**⚠️ PR Review Authority**: Only pr-review-agent can merge this PR
 
 🤖 Generated with [Claude Code](https://claude.ai/code)
 EOF
@@ -494,115 +704,50 @@ EOF
 **Branch Strategy**: Always target `development` branch for PRs (see parallel development workflow in CLAUDE.md)
 
 **IMPLEMENTATION NOT COMPLETE UNTIL**:
-1. ✅ Platform verification passed (all platforms build successfully)
-2. ✅ Quality checks passed (tests, analysis, coverage)
-3. ✅ Code committed with proper message format
-4. ✅ Pull request created targeting `development` branch  
-5. ✅ Issue commented with implementation summary and PR link
-6. ✅ All documentation updates completed
+1. ✅ All nested checkboxes completed in unified ticket file
+2. ✅ ALL tests passing with >80% coverage
+3. ✅ Platform verification passed (all platforms build successfully)
+4. ✅ Cross-references updated in all relevant documentation
+5. ✅ pr-review-agent approval received
+6. ✅ Pull request created targeting `development` branch
+7. ✅ Issue commented with implementation summary and PR link
 
-**Platform Verification Requirements:**
-- ✅ Web build successful
-- ✅ Android build successful (with proper Firebase configuration)
-- ✅ iOS build successful on macOS (with iOS 13.0+ deployment target)
-- ✅ All platform-specific configurations validated
+## 📚 MANDATORY CROSS-REFERENCE UPDATES
 
-**AGENT COORDINATION EXAMPLE:**
-Issue #11 (Firebase Setup):
-1. flutter-architect → Creates project structure
-2. firebase-specialist → Implements Firebase integration  
-3. testing-specialist → Adds comprehensive tests
-4. code-reviewer → Final validation
+**CRITICAL**: ALL agents MUST update cross-references when creating or modifying any .md files.
 
-Each agent leaves detailed handoff notes for the next!
+**Files That Must Reference New Documentation:**
+1. **CLAUDE.md** - Master documentation index
+2. **DOCUMENTATION_INDEX.md** - Complete navigation hub
+3. **DEVELOPMENT_GUIDE.md** - Development workflow references
+4. **Agent files** - Related agent documentation
+5. **README.md** - Project overview updates
 
-## DOCUMENTATION UPDATE REQUIREMENT:
-
-**CRITICAL**: Every agent MUST update relevant documentation after completing their work.
-
-**Required Documentation Updates:**
-- **CLAUDE.md**: Update architecture, UI guidelines, Firebase config, or technology stack based on your changes
-- **DEVELOPMENT_GUIDE.md**: Update workflow, commands, or troubleshooting based on your implementation
-- **Agent Documentation**: Update your own agent file and relevant coordination protocols
-- **Script Updates**: Modify automation scripts if new procedures are needed
-
-**Documentation Update Format:**
+**Cross-Reference Update Format:**
 ```markdown
-## DOCUMENTATION UPDATES COMPLETED:
+## Recently Added Documentation
+- **docs/tickets/{branch-name}.md** - Unified ticket tracking for issue #{number}
+- **{new-file}.md** - Description of new documentation
 
-### [Document Name] Changes:
-- [Section] - [What was updated and why]
-- [Section] - [New information added]
-
-**Context for Next Agent**: [Summary of changes that affect subsequent work]
+## Related Documentation
+- See {file}.md for {specific topic}
+- Reference {file}.md for {related workflow}
 ```
 
-**Quality Gate**: No work is considered complete until documentation is updated for other agents to have full context.
+**Quality Gate**: No work is considered complete until ALL cross-references are updated in relevant files.
 
-## 📋 MANDATORY TICKET TRACKING SYSTEM
+## 🔒 PR MERGE AUTHORITY
 
-**CRITICAL**: ALL agents and sub-agents MUST create and maintain a ticket tracking file for session continuity.
+**NEW CRITICAL REQUIREMENT**: Only the pr-review-agent has authority to merge pull requests.
 
-**Ticket Tracking File Structure:**
-```
-docs/tickets/issue-{number}-{branch-name}.md
-```
+**PR Merge Workflow**:
+1. **PR Creation**: Any agent can create PR after following this workflow
+2. **PR Review**: ONLY pr-review-agent reviews and approves/requests changes
+3. **Change Requests**: Original implementing agents must complete requested changes
+4. **Final Approval**: pr-review-agent provides final approval
+5. **PR Merge**: ONLY pr-review-agent can merge the approved PR
 
-**File Creation (MANDATORY at start of work):**
-```bash
-# Create ticket tracking file immediately after branch creation
-mkdir -p docs/tickets
-touch docs/tickets/issue-$ARGUMENTS-$(git branch --show-current).md
-```
-
-**Ticket File Format (CONCISE - NO DESCRIPTIONS):**
-```markdown
-# Issue #$ARGUMENTS - {Branch Name}
-
-## Todos
-- [ ] [Task 1] - pending
-- [x] [Task 2] - completed
-- [ ] [Task 3] - in_progress
-- [ ] [Task 4] - blocked: [reason]
-
-## Status Summary
-Current: [in_progress/blocked/testing/completed]
-Blockers: [None/specific blocker]
-Next: [Immediate next task]
-
-## Files Modified
-- path/to/file1.dart
-- path/to/file2.dart
-
-## Last Update
-Agent: [agent-name]
-Time: [timestamp]
-```
-
-**Update Requirements:**
-1. **CREATE IMMEDIATELY**: When starting work on issue
-2. **UPDATE ON EVERY TODO CHANGE**: Mark status (pending/in_progress/completed/blocked)
-3. **KEEP CONCISE**: One line per todo, no explanations
-4. **SESSION CONTINUITY**: New sessions read this file to continue work
-
-**Continuation Workflow:**
-```bash
-# When resuming work in new session
-TICKET_FILE=$(ls docs/tickets/issue-$ARGUMENTS-*.md 2>/dev/null | head -1)
-if [[ -f "$TICKET_FILE" ]]; then
-    echo "📋 Found existing ticket tracking file: $TICKET_FILE"
-    cat "$TICKET_FILE"
-    echo "🔄 Continuing from previous session..."
-fi
-```
-
-**Agent Handoff with Ticket Tracking:**
-```
-HANDOFF TO [NEXT-AGENT]:
-- Ticket File: docs/tickets/issue-{number}-{branch}.md
-- Current Status: [Check ticket file for todos]
-- Continue From: [Specific todo marked as in_progress]
-```
+**No other agent or process can merge PRs** - this ensures quality and consistency.
 
 ## 🆓 FREE SERVICES ONLY POLICY
 
