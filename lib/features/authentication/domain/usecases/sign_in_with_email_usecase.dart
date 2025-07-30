@@ -67,7 +67,6 @@ class SignInWithEmailUseCase
       return Result.failure(
         ValidationFailure(
           message: 'Please enter a valid email address',
-          code: 'invalid-email',
         ),
       );
     }
@@ -77,7 +76,6 @@ class SignInWithEmailUseCase
       return Result.failure(
         ValidationFailure(
           message: 'Password must be at least 8 characters long',
-          code: 'weak-password',
         ),
       );
     }

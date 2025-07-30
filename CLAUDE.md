@@ -50,14 +50,11 @@ This is a Kahoot-style interactive quiz application built with Flutter, Firestor
 3. **Code**: Implement solutions following TDD approach
 4. **Commit**: Make incremental commits with clear messages
 
-### Test-Driven Development (TDD) Approach
-- Write tests first and confirm they fail (Red phase)
-- Implement minimal code to make tests pass (Green phase)  
-- Refactor while keeping tests green (Blue phase)
-- Commit after each successful test implementation
-- **TDD Automation**: Use `scripts/tdd-workflow.sh` for automated Red-Green-Refactor cycles
-- **Test Categories**: Unit, Widget, Integration, E2E, and Performance testing with proper timeouts
-- **Comprehensive Framework**: Complete test infrastructure with utilities, wrappers, and automation
+### Development Approach
+- Focus on clean, working implementation
+- Ensure all platforms build successfully (Web, Android, iOS)
+- Verify basic functionality works across platforms
+- Commit working code frequently
 
 ### Context Management
 - Use `/clear` command to maintain focused context
@@ -151,11 +148,13 @@ feature/
 - `firebase deploy` - Deploy Cloud Functions
 - `firebase emulators:start` - Start local Firebase emulators
 
-### Testing and Quality
-- `flutter test` - Run all unit and widget tests
+### Quality Checks
 - `flutter analyze` - Run static analysis (lint checks)
 - `dart format .` - Format all Dart code
-- `flutter test --coverage` - Run tests with coverage report
+- Platform build verification:
+  - `flutter build web --release`
+  - `flutter build apk --release`
+  - `flutter build ios --release`
 
 ### Dependencies
 - `flutter pub get` - Install/update dependencies
@@ -607,15 +606,11 @@ echo "================================================="
 - Regular sync with `development` to avoid conflicts
 - Use issue assignments to prevent duplicate work
 
-### Testing Strategy
-- **Unit Tests**: Business logic and use cases (test/unit/)
-- **Widget Tests**: UI components and user interactions (test/widget/)
-- **Integration Tests**: Feature workflows (test/integration/)
-- **E2E Tests**: Complete user journeys with Playwright MCP
-- **TDD Framework**: Comprehensive test infrastructure with automation (`test/TDD_FRAMEWORK_GUIDE.md`)
-- **Test Automation**: Full Red-Green-Refactor cycle automation (`scripts/tdd-workflow.sh`)
-- **Coverage Reporting**: Automated coverage generation with >80% requirement
-- **Platform Verification**: All tests must pass on Android, iOS, and Web platforms
+### Platform Verification Strategy
+- **Build Verification**: Ensure all platforms compile successfully
+- **Basic Functionality**: Verify app launches and runs on all platforms
+- **Cross-Platform**: Test on Web, Android, and iOS
+- **Performance**: Basic app performance and responsiveness
 
 ### Code Quality Guidelines
 

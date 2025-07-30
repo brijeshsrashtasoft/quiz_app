@@ -17,7 +17,6 @@ class SendPasswordResetUseCase
         return Result.failure(
           ValidationFailure(
             message: 'Please enter a valid email address',
-            code: 'invalid-email',
           ),
         );
       }
