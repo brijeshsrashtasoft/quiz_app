@@ -15,13 +15,15 @@ Example: `/project:implement-ticket US-001`
 - Read ticket file from `docs/github_tickets/`
 - Parse acceptance criteria and technical requirements
 - Analyze current codebase implementation
-- Create implementation plan
+- Analyze test codebase implementation
+- Create implementation plan for main app and testcase
 
 ### 2. Implementation Phase
 - Deploy multiple specialized agents in parallel
 - Follow existing architecture patterns
 - Implement features incrementally
-- Update ticket status in real-time
+- Implement testcase suits incrementally if not present follow same main app folder structure 
+- Update ticket status in real-time by finding specific ticket in `docs/github_tickets/`
 
 ### 3. Verification Phase
 - Run static analysis (`flutter analyze`)
