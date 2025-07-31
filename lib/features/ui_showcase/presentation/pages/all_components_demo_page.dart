@@ -20,7 +20,8 @@ class AllComponentsDemoPage extends ConsumerStatefulWidget {
   const AllComponentsDemoPage({super.key});
 
   @override
-  ConsumerState<AllComponentsDemoPage> createState() => _AllComponentsDemoPageState();
+  ConsumerState<AllComponentsDemoPage> createState() =>
+      _AllComponentsDemoPageState();
 }
 
 class _AllComponentsDemoPageState extends ConsumerState<AllComponentsDemoPage> {
@@ -58,38 +59,38 @@ class _AllComponentsDemoPageState extends ConsumerState<AllComponentsDemoPage> {
               children: [
                 _buildSectionTitle('Answer Buttons'),
                 _buildAnswerButtonsSection(),
-                
+
                 const SizedBox(height: AppSpacing.spacingXL),
                 _buildSectionTitle('Animations & Effects'),
                 _buildAnimationsSection(),
-                
+
                 const SizedBox(height: AppSpacing.spacingXL),
                 _buildSectionTitle('Timer Components'),
                 _buildTimerSection(),
-                
+
                 const SizedBox(height: AppSpacing.spacingXL),
                 _buildSectionTitle('Score Display'),
                 _buildScoreSection(),
-                
+
                 const SizedBox(height: AppSpacing.spacingXL),
                 _buildSectionTitle('Question Display'),
                 _buildQuestionSection(),
-                
+
                 const SizedBox(height: AppSpacing.spacingXL),
                 _buildSectionTitle('Lobby & Avatars'),
                 _buildLobbySection(),
-                
+
                 const SizedBox(height: AppSpacing.spacingXL),
                 _buildSectionTitle('Loading Animations'),
                 _buildLoadingSection(),
-                
+
                 const SizedBox(height: AppSpacing.spacingXL),
                 _buildSectionTitle('Primary Buttons'),
                 _buildPrimaryButtonsSection(),
               ],
             ),
           ),
-          
+
           // Particle effects overlay
           if (_showParticles)
             Positioned.fill(
@@ -110,10 +111,7 @@ class _AllComponentsDemoPageState extends ConsumerState<AllComponentsDemoPage> {
   }
 
   Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: AppTextStyles.sectionHeader,
-    );
+    return Text(title, style: AppTextStyles.sectionHeader);
   }
 
   Widget _buildAnswerButtonsSection() {
@@ -277,10 +275,7 @@ class _AllComponentsDemoPageState extends ConsumerState<AllComponentsDemoPage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            CompactScoreCounter(
-              score: _score,
-              isHighScore: _isHighScore,
-            ),
+            CompactScoreCounter(score: _score, isHighScore: _isHighScore),
             ElevatedButton(
               onPressed: () {
                 setState(() {
@@ -384,18 +379,9 @@ class _AllComponentsDemoPageState extends ConsumerState<AllComponentsDemoPage> {
         const Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            LoadingAnimations(
-              type: LoadingType.spinner,
-              size: 48,
-            ),
-            LoadingAnimations(
-              type: LoadingType.bounce,
-              size: 48,
-            ),
-            LoadingAnimations(
-              type: LoadingType.pulse,
-              size: 48,
-            ),
+            LoadingAnimations(type: LoadingType.spinner, size: 48),
+            LoadingAnimations(type: LoadingType.bounce, size: 48),
+            LoadingAnimations(type: LoadingType.pulse, size: 48),
           ],
         ),
         const SizedBox(height: AppSpacing.spacingL),
@@ -442,10 +428,7 @@ class _AllComponentsDemoPageState extends ConsumerState<AllComponentsDemoPage> {
           isLoading: true,
         ),
         const SizedBox(height: AppSpacing.spacingM),
-        const PrimaryButton(
-          text: 'Disabled',
-          onPressed: null,
-        ),
+        const PrimaryButton(text: 'Disabled', onPressed: null),
       ],
     );
   }

@@ -28,7 +28,7 @@ class AnswerSelectionGrid extends StatefulWidget {
   State<AnswerSelectionGrid> createState() => _AnswerSelectionGridState();
 }
 
-class _AnswerSelectionGridState extends State<AnswerSelectionGrid> 
+class _AnswerSelectionGridState extends State<AnswerSelectionGrid>
     with TickerProviderStateMixin {
   late List<AnimationController> _tapControllers;
   late List<AnimationController> _resultControllers;
@@ -44,7 +44,7 @@ class _AnswerSelectionGridState extends State<AnswerSelectionGrid>
         vsync: this,
       ),
     );
-    
+
     _resultControllers = List.generate(
       widget.answers.length,
       (_) => AnimationController(
@@ -52,7 +52,7 @@ class _AnswerSelectionGridState extends State<AnswerSelectionGrid>
         vsync: this,
       ),
     );
-    
+
     for (int i = 0; i < widget.answers.length; i++) {
       _shakeKeys[i] = GlobalKey<ShakeWidgetState>();
     }
@@ -61,7 +61,7 @@ class _AnswerSelectionGridState extends State<AnswerSelectionGrid>
   @override
   void didUpdateWidget(AnswerSelectionGrid oldWidget) {
     super.didUpdateWidget(oldWidget);
-    
+
     if (widget.showResults && !oldWidget.showResults) {
       _playResultAnimations();
     }
@@ -82,9 +82,9 @@ class _AnswerSelectionGridState extends State<AnswerSelectionGrid>
     if (widget.correctIndex != null) {
       // Animate correct answer
       _resultControllers[widget.correctIndex!].forward();
-      
+
       // Shake wrong answer if selected
-      if (widget.selectedIndex != null && 
+      if (widget.selectedIndex != null &&
           widget.selectedIndex != widget.correctIndex) {
         _shakeKeys[widget.selectedIndex!]?.currentState?.shake();
       }
@@ -153,33 +153,35 @@ class _AnswerSelectionGridState extends State<AnswerSelectionGrid>
         itemCount: widget.answers.length,
         itemBuilder: (context, index) {
           final isCorrect = widget.showResults && index == widget.correctIndex;
-          final isWrong = widget.showResults && 
-              index == widget.selectedIndex && 
+          final isWrong =
+              widget.showResults &&
+              index == widget.selectedIndex &&
               index != widget.correctIndex;
-          
+
           return ShakeWidget(
             key: _shakeKeys[index],
             child: AnimatedBuilder(
               animation: _resultControllers[index],
               builder: (context, child) {
                 final scale = isCorrect
-                    ? Tween<double>(
-                        begin: 1.0,
-                        end: 1.05,
-                      ).animate(CurvedAnimation(
-                        parent: _resultControllers[index],
-                        curve: AppAnimations.correctAnswerCurve,
-                      )).value
+                    ? Tween<double>(begin: 1.0, end: 1.05)
+                          .animate(
+                            CurvedAnimation(
+                              parent: _resultControllers[index],
+                              curve: AppAnimations.correctAnswerCurve,
+                            ),
+                          )
+                          .value
                     : 1.0;
-                
+
                 return Transform.scale(
                   scale: scale,
                   child: _AnswerButton(
                     text: widget.answers[index],
                     color: _getButtonColor(index),
                     shape: _getButtonShape(index),
-                    onPressed: widget.showResults 
-                        ? null 
+                    onPressed: widget.showResults
+                        ? null
                         : () => widget.onAnswerSelected(index),
                     isSelected: widget.selectedIndex == index,
                     isCorrect: isCorrect,
@@ -223,27 +225,23 @@ class _AnswerButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTapDown: onPressed != null 
-          ? (_) => tapController.forward() 
-          : null,
-      onTapUp: onPressed != null 
-          ? (_) => tapController.reverse() 
-          : null,
-      onTapCancel: onPressed != null 
-          ? () => tapController.reverse() 
-          : null,
+      onTapDown: onPressed != null ? (_) => tapController.forward() : null,
+      onTapUp: onPressed != null ? (_) => tapController.reverse() : null,
+      onTapCancel: onPressed != null ? () => tapController.reverse() : null,
       onTap: onPressed,
       child: AnimatedBuilder(
         animation: tapController,
         builder: (context, child) {
-          final scale = Tween<double>(
-            begin: 1.0,
-            end: AppAnimations.buttonPressScale,
-          ).animate(CurvedAnimation(
-            parent: tapController,
-            curve: AppAnimations.buttonTapCurve,
-          )).value;
-          
+          final scale =
+              Tween<double>(begin: 1.0, end: AppAnimations.buttonPressScale)
+                  .animate(
+                    CurvedAnimation(
+                      parent: tapController,
+                      curve: AppAnimations.buttonTapCurve,
+                    ),
+                  )
+                  .value;
+
           return Transform.scale(
             scale: scale,
             child: Container(
@@ -258,10 +256,7 @@ class _AnswerButton extends StatelessWidget {
                   ),
                 ],
                 border: isSelected && !showResult
-                    ? Border.all(
-                        color: AppColors.pureWhite,
-                        width: 3,
-                      )
+                    ? Border.all(color: AppColors.pureWhite, width: 3)
                     : null,
               ),
               child: Stack(
@@ -276,7 +271,7 @@ class _AnswerButton extends StatelessWidget {
                       color: AppColors.pureWhite.withOpacity(0.2),
                     ),
                   ),
-                  
+
                   // Main content
                   Center(
                     child: Padding(
@@ -285,8 +280,8 @@ class _AnswerButton extends StatelessWidget {
                         text,
                         style: AppTextStyles.answerOption.copyWith(
                           color: AppColors.pureWhite,
-                          fontWeight: isSelected || isCorrect 
-                              ? FontWeight.w700 
+                          fontWeight: isSelected || isCorrect
+                              ? FontWeight.w700
                               : FontWeight.w500,
                         ),
                         textAlign: TextAlign.center,
@@ -295,7 +290,7 @@ class _AnswerButton extends StatelessWidget {
                       ),
                     ),
                   ),
-                  
+
                   // Result indicator
                   if (showResult && (isCorrect || isWrong))
                     Positioned(
@@ -308,12 +303,10 @@ class _AnswerButton extends StatelessWidget {
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
-                          isCorrect 
-                              ? Icons.check_rounded 
-                              : Icons.close_rounded,
+                          isCorrect ? Icons.check_rounded : Icons.close_rounded,
                           size: 20,
-                          color: isCorrect 
-                              ? AppColors.turquoise 
+                          color: isCorrect
+                              ? AppColors.turquoise
                               : AppColors.coralRed,
                         ),
                       ),

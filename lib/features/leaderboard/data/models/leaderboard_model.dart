@@ -22,22 +22,22 @@ class LeaderboardModel with _$LeaderboardModel {
       _$LeaderboardModelFromJson(json);
 
   factory LeaderboardModel.fromEntity(Leaderboard entity) => LeaderboardModel(
-        sessionId: entity.sessionId,
-        quizId: entity.quizId,
-        entries: entity.entries
-            .map((e) => LeaderboardEntryModel.fromEntity(e))
-            .toList(),
-        lastUpdated: entity.lastUpdated,
-        type: entity.type.name,
-        totalPlayers: entity.totalPlayers,
-      );
+    sessionId: entity.sessionId,
+    quizId: entity.quizId,
+    entries: entity.entries
+        .map((e) => LeaderboardEntryModel.fromEntity(e))
+        .toList(),
+    lastUpdated: entity.lastUpdated,
+    type: entity.type.name,
+    totalPlayers: entity.totalPlayers,
+  );
 
   Leaderboard toEntity() => Leaderboard(
-        sessionId: sessionId,
-        quizId: quizId,
-        entries: entries.map((e) => e.toEntity()).toList(),
-        lastUpdated: lastUpdated,
-        type: LeaderboardType.values.firstWhere((e) => e.name == type),
-        totalPlayers: totalPlayers,
-      );
+    sessionId: sessionId,
+    quizId: quizId,
+    entries: entries.map((e) => e.toEntity()).toList(),
+    lastUpdated: lastUpdated,
+    type: LeaderboardType.values.firstWhere((e) => e.name == type),
+    totalPlayers: totalPlayers,
+  );
 }

@@ -13,27 +13,24 @@ import '../widgets/score_display.dart';
 
 class GamePlayScreen extends ConsumerStatefulWidget {
   final bool isHost;
-  
-  const GamePlayScreen({
-    super.key,
-    this.isHost = false,
-  });
+
+  const GamePlayScreen({super.key, this.isHost = false});
 
   @override
   ConsumerState<GamePlayScreen> createState() => _GamePlayScreenState();
 }
 
-class _GamePlayScreenState extends ConsumerState<GamePlayScreen> 
+class _GamePlayScreenState extends ConsumerState<GamePlayScreen>
     with TickerProviderStateMixin {
   late AnimationController _questionTransitionController;
   late AnimationController _answerRevealController;
   late Animation<double> _slideAnimation;
   late Animation<double> _fadeAnimation;
-  
+
   int? _selectedAnswer;
   bool _showResults = false;
   int _currentScore = 0;
-  
+
   // Mock question data
   final _currentQuestion = {
     'id': '1',
@@ -55,28 +52,26 @@ class _GamePlayScreenState extends ConsumerState<GamePlayScreen>
       duration: AppAnimations.newQuestionDuration,
       vsync: this,
     );
-    
+
     _answerRevealController = AnimationController(
       duration: AppAnimations.correctAnswerDuration,
       vsync: this,
     );
-    
-    _slideAnimation = Tween<double>(
-      begin: 100,
-      end: 0,
-    ).animate(CurvedAnimation(
-      parent: _questionTransitionController,
-      curve: AppAnimations.newQuestionCurve,
-    ));
-    
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _questionTransitionController,
-      curve: AppAnimations.easeIn,
-    ));
-    
+
+    _slideAnimation = Tween<double>(begin: 100, end: 0).animate(
+      CurvedAnimation(
+        parent: _questionTransitionController,
+        curve: AppAnimations.newQuestionCurve,
+      ),
+    );
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _questionTransitionController,
+        curve: AppAnimations.easeIn,
+      ),
+    );
+
     _questionTransitionController.forward();
   }
 
@@ -92,7 +87,7 @@ class _GamePlayScreenState extends ConsumerState<GamePlayScreen>
       setState(() {
         _selectedAnswer = index;
       });
-      
+
       // Submit answer logic
       _submitAnswer(index);
     }
@@ -100,7 +95,7 @@ class _GamePlayScreenState extends ConsumerState<GamePlayScreen>
 
   void _submitAnswer(int index) {
     // TODO: Submit answer to backend
-    
+
     // Show results after delay
     Future.delayed(const Duration(seconds: 2), () {
       if (mounted) {
@@ -118,16 +113,13 @@ class _GamePlayScreenState extends ConsumerState<GamePlayScreen>
   @override
   Widget build(BuildContext context) {
     final timeLimit = _currentQuestion['timeLimit'] as int;
-    
+
     return PageLayout(
       title: widget.isHost ? 'Hosting Game' : 'Playing Game',
       actions: [
         ScoreDisplay(score: _currentScore),
         const SizedBox(width: AppSpacing.spacingM),
-        ConnectionStatusIndicator(
-          isConnected: true,
-          onReconnect: () {},
-        ),
+        ConnectionStatusIndicator(isConnected: true, onReconnect: () {}),
       ],
       child: AnimatedBuilder(
         animation: _questionTransitionController,
@@ -151,7 +143,7 @@ class _GamePlayScreenState extends ConsumerState<GamePlayScreen>
                       },
                     ),
                   ),
-                  
+
                   // Question display
                   Expanded(
                     child: Center(
@@ -162,19 +154,21 @@ class _GamePlayScreenState extends ConsumerState<GamePlayScreen>
                       ),
                     ),
                   ),
-                  
+
                   // Answer grid
                   if (!widget.isHost)
                     AnswerSelectionGrid(
                       answers: List<String>.from(
-                        (_currentQuestion['answers'] as List)
-                            .map((a) => a['text']),
+                        (_currentQuestion['answers'] as List).map(
+                          (a) => a['text'],
+                        ),
                       ),
                       selectedIndex: _selectedAnswer,
                       showResults: _showResults,
-                      correctIndex: _showResults 
-                          ? (_currentQuestion['answers'] as List)
-                              .indexWhere((a) => a['isCorrect'] as bool)
+                      correctIndex: _showResults
+                          ? (_currentQuestion['answers'] as List).indexWhere(
+                              (a) => a['isCorrect'] as bool,
+                            )
                           : null,
                       onAnswerSelected: _handleAnswerSelected,
                       revealController: _answerRevealController,
@@ -191,12 +185,11 @@ class _GamePlayScreenState extends ConsumerState<GamePlayScreen>
                           ),
                           const SizedBox(height: AppSpacing.spacingL),
                           // TODO: Show real-time answer statistics
-                          if (_showResults)
-                            _buildAnswerStatistics(),
+                          if (_showResults) _buildAnswerStatistics(),
                         ],
                       ),
                     ),
-                  
+
                   const SizedBox(height: AppSpacing.spacingXL),
                 ],
               ),
@@ -215,7 +208,7 @@ class _GamePlayScreenState extends ConsumerState<GamePlayScreen>
       {'answer': 'Saturn', 'count': 3, 'percentage': 15},
       {'answer': 'Mars', 'count': 2, 'percentage': 10},
     ];
-    
+
     return Column(
       children: stats.map((stat) {
         final isCorrect = stat['answer'] == 'Jupiter';
@@ -223,14 +216,12 @@ class _GamePlayScreenState extends ConsumerState<GamePlayScreen>
           margin: const EdgeInsets.only(bottom: AppSpacing.spacingM),
           padding: AppSpacing.allM,
           decoration: BoxDecoration(
-            color: isCorrect 
+            color: isCorrect
                 ? AppColors.turquoise.withOpacity(0.1)
                 : AppColors.pureWhite,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: isCorrect 
-                  ? AppColors.turquoise 
-                  : AppColors.lightGray,
+              color: isCorrect ? AppColors.turquoise : AppColors.lightGray,
               width: isCorrect ? 2 : 1,
             ),
           ),
@@ -244,10 +235,7 @@ class _GamePlayScreenState extends ConsumerState<GamePlayScreen>
                   ),
                 ),
               ),
-              Text(
-                '${stat['count']} players',
-                style: AppTextStyles.caption,
-              ),
+              Text('${stat['count']} players', style: AppTextStyles.caption),
               const SizedBox(width: AppSpacing.spacingM),
               Container(
                 width: 60,
@@ -255,9 +243,7 @@ class _GamePlayScreenState extends ConsumerState<GamePlayScreen>
                   '${stat['percentage']}%',
                   style: AppTextStyles.bodyText.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: isCorrect 
-                        ? AppColors.turquoise 
-                        : AppColors.charcoal,
+                    color: isCorrect ? AppColors.turquoise : AppColors.charcoal,
                   ),
                   textAlign: TextAlign.right,
                 ),

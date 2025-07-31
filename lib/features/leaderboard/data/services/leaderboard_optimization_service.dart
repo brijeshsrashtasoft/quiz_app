@@ -7,11 +7,11 @@ class LeaderboardOptimizationService {
   final _scoreUpdateSubject = PublishSubject<ScoreModel>();
   final _leaderboardCache = <String, LeaderboardModel>{};
   final _updateDebouncer = <String, Timer>{};
-  
+
   static const _debounceDuration = Duration(milliseconds: 300);
   static const _batchSize = 10;
-  
-  Stream<List<ScoreModel>> get batchedScoreUpdates => 
+
+  Stream<List<ScoreModel>> get batchedScoreUpdates =>
       _scoreUpdateSubject.bufferTime(_debounceDuration);
 
   void addScoreUpdate(ScoreModel score) {
@@ -43,7 +43,7 @@ class LeaderboardOptimizationService {
   ) {
     final sorted = List<T>.from(entries)
       ..sort((a, b) => getScore(b).compareTo(getScore(a)));
-    
+
     return sorted;
   }
 

@@ -9,6 +9,7 @@ import '../../../../shared/constants/app_animations.dart';
 import '../../../../shared/widgets/navigation/app_navigation_bar.dart';
 import '../../../../shared/widgets/cards/quiz_card.dart';
 import '../../../../core/navigation/route_constants.dart';
+import '../../../authentication/domain/entities/auth_state.dart';
 import '../../../authentication/presentation/providers/auth_providers.dart';
 
 /// Main home page with dashboard and navigation
@@ -153,7 +154,7 @@ class _HomePageState extends ConsumerState<HomePage>
                     Text(
                       '$greeting,',
                       style: AppTextStyles.bodyText.copyWith(
-                        color: AppColors.pureWhite.withValues(alpha: 0.8),
+                        color: AppColors.pureWhite.withOpacity(0.8),
                       ),
                     ),
                     const SizedBox(height: AppSpacing.spacingXS),
@@ -171,7 +172,7 @@ class _HomePageState extends ConsumerState<HomePage>
                 width: 60,
                 height: 60,
                 decoration: BoxDecoration(
-                  color: AppColors.pureWhite.withValues(alpha: 0.2),
+                  color: AppColors.pureWhite.withOpacity(0.2),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
@@ -188,7 +189,7 @@ class _HomePageState extends ConsumerState<HomePage>
           Text(
             'Ready to challenge minds and have fun with interactive quizzes?',
             style: AppTextStyles.bodyText.copyWith(
-              color: AppColors.pureWhite.withValues(alpha: 0.9),
+              color: AppColors.pureWhite.withOpacity(0.9),
             ),
           ),
         ],
@@ -481,7 +482,7 @@ class _QuickActionCardState extends State<_QuickActionCard>
                       width: 48,
                       height: 48,
                       decoration: BoxDecoration(
-                        color: widget.color.withValues(alpha: 0.1),
+                        color: widget.color.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(widget.icon, color: widget.color, size: 24),
@@ -569,7 +570,7 @@ class _RecentActivityItem extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: getTypeColor().withValues(alpha: 0.1),
+                  color: getTypeColor().withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(icon, color: getTypeColor(), size: 20),

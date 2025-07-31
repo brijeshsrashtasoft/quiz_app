@@ -11,17 +11,23 @@ class LeaderboardPreview extends StatefulWidget {
   State<LeaderboardPreview> createState() => _LeaderboardPreviewState();
 }
 
-class _LeaderboardPreviewState extends State<LeaderboardPreview> 
+class _LeaderboardPreviewState extends State<LeaderboardPreview>
     with TickerProviderStateMixin {
   late List<AnimationController> _animationControllers;
   late List<Animation<double>> _slideAnimations;
-  
+
   // Mock leaderboard data
   final List<Map<String, dynamic>> _topPlayers = [
     {'name': 'Quiz Master', 'score': 5200, 'position': 1, 'change': 0},
     {'name': 'Brain Storm', 'score': 4800, 'position': 2, 'change': 1},
     {'name': 'Smart Cookie', 'score': 4500, 'position': 3, 'change': -1},
-    {'name': 'You', 'score': 4200, 'position': 4, 'change': 2, 'isCurrentPlayer': true},
+    {
+      'name': 'You',
+      'score': 4200,
+      'position': 4,
+      'change': 2,
+      'isCurrentPlayer': true,
+    },
     {'name': 'Quick Think', 'score': 3900, 'position': 5, 'change': 0},
   ];
 
@@ -32,32 +38,26 @@ class _LeaderboardPreviewState extends State<LeaderboardPreview>
       _topPlayers.length,
       (index) => AnimationController(
         duration: Duration(
-          milliseconds: AppAnimations.leaderboardStagger.inMilliseconds * (index + 1),
+          milliseconds:
+              AppAnimations.leaderboardStagger.inMilliseconds * (index + 1),
         ),
         vsync: this,
       ),
     );
-    
+
     _slideAnimations = _animationControllers.map((controller) {
-      return Tween<double>(
-        begin: 50,
-        end: 0,
-      ).animate(CurvedAnimation(
-        parent: controller,
-        curve: AppAnimations.easeOut,
-      ));
+      return Tween<double>(begin: 50, end: 0).animate(
+        CurvedAnimation(parent: controller, curve: AppAnimations.easeOut),
+      );
     }).toList();
-    
+
     // Start animations sequentially
     for (int i = 0; i < _animationControllers.length; i++) {
-      Future.delayed(
-        AppAnimations.getLeaderboardStagger(i),
-        () {
-          if (mounted) {
-            _animationControllers[i].forward();
-          }
-        },
-      );
+      Future.delayed(AppAnimations.getLeaderboardStagger(i), () {
+        if (mounted) {
+          _animationControllers[i].forward();
+        }
+      });
     }
   }
 
@@ -75,12 +75,9 @@ class _LeaderboardPreviewState extends State<LeaderboardPreview>
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.spacingL),
       child: Column(
         children: [
-          Text(
-            'Leaderboard',
-            style: AppTextStyles.sectionHeader,
-          ),
+          Text('Leaderboard', style: AppTextStyles.sectionHeader),
           const SizedBox(height: AppSpacing.spacingL),
-          
+
           Expanded(
             child: ListView.builder(
               itemCount: _topPlayers.length,
@@ -93,10 +90,7 @@ class _LeaderboardPreviewState extends State<LeaderboardPreview>
                       offset: Offset(0, _slideAnimations[index].value),
                       child: FadeTransition(
                         opacity: _animationControllers[index],
-                        child: _LeaderboardItem(
-                          player: player,
-                          index: index,
-                        ),
+                        child: _LeaderboardItem(player: player, index: index),
                       ),
                     );
                   },
@@ -114,10 +108,7 @@ class _LeaderboardItem extends StatelessWidget {
   final Map<String, dynamic> player;
   final int index;
 
-  const _LeaderboardItem({
-    required this.player,
-    required this.index,
-  });
+  const _LeaderboardItem({required this.player, required this.index});
 
   @override
   Widget build(BuildContext context) {
@@ -125,19 +116,17 @@ class _LeaderboardItem extends StatelessWidget {
     final isTopThree = position <= 3;
     final isCurrentPlayer = player['isCurrentPlayer'] ?? false;
     final change = player['change'] as int;
-    
+
     return Container(
       margin: const EdgeInsets.only(bottom: AppSpacing.spacingM),
       padding: AppSpacing.allM,
       decoration: BoxDecoration(
-        gradient: isTopThree
-            ? _getGradientForPosition(position)
-            : null,
+        gradient: isTopThree ? _getGradientForPosition(position) : null,
         color: isTopThree
             ? null
-            : (isCurrentPlayer 
-                ? AppColors.vibrantPurple.withOpacity(0.1)
-                : AppColors.pureWhite),
+            : (isCurrentPlayer
+                  ? AppColors.vibrantPurple.withOpacity(0.1)
+                  : AppColors.pureWhite),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isCurrentPlayer
@@ -178,22 +167,20 @@ class _LeaderboardItem extends StatelessWidget {
               ),
             ),
           ),
-          
+
           const SizedBox(width: AppSpacing.spacingM),
-          
+
           // Player name
           Expanded(
             child: Text(
               player['name'] as String,
               style: AppTextStyles.bodyText.copyWith(
                 fontWeight: isCurrentPlayer ? FontWeight.w700 : FontWeight.w500,
-                color: isTopThree
-                    ? AppColors.pureWhite
-                    : AppColors.charcoal,
+                color: isTopThree ? AppColors.pureWhite : AppColors.charcoal,
               ),
             ),
           ),
-          
+
           // Position change indicator
           if (change != 0)
             Container(
@@ -232,17 +219,15 @@ class _LeaderboardItem extends StatelessWidget {
                 ],
               ),
             ),
-          
+
           const SizedBox(width: AppSpacing.spacingM),
-          
+
           // Score
           Text(
             '${player['score']}',
             style: AppTextStyles.scoreDisplay.copyWith(
               fontSize: 20,
-              color: isTopThree
-                  ? AppColors.pureWhite
-                  : AppColors.vibrantPurple,
+              color: isTopThree ? AppColors.pureWhite : AppColors.vibrantPurple,
             ),
           ),
         ],

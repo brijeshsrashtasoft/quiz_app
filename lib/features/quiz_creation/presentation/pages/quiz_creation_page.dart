@@ -75,16 +75,14 @@ class _QuizCreationPageState extends ConsumerState<QuizCreationPage>
     final size = MediaQuery.of(context).size;
     final isTablet = size.width > 600;
     final isDesktop = size.width > 1200;
+    final isSmallScreen = size.height < 700;
 
     return Scaffold(
       backgroundColor: AppColors.backgroundPrimary,
       appBar: AppBar(
         backgroundColor: AppColors.pureWhite,
         elevation: 0,
-        title: Text(
-          'Create New Quiz',
-          style: AppTextStyles.sectionHeader,
-        ),
+        title: Text('Create New Quiz', style: AppTextStyles.sectionHeader),
         leading: IconButton(
           icon: const Icon(Icons.close, color: AppColors.charcoal),
           onPressed: () {
@@ -105,106 +103,148 @@ class _QuizCreationPageState extends ConsumerState<QuizCreationPage>
           const SizedBox(width: AppSpacing.spacingM),
         ],
       ),
-      body: FadeTransition(
-        opacity: _fadeController,
-        child: Column(
-          children: [
-            // Progress stepper
-            Container(
-              color: AppColors.pureWhite,
-              padding: EdgeInsets.symmetric(
-                horizontal: isDesktop
-                    ? AppSpacing.spacingXXL
-                    : AppSpacing.spacingL,
-                vertical: AppSpacing.spacingM,
-              ),
-              child: QuizStepperWidget(
-                currentStep: _currentStep,
-                onStepTapped: (step) {
-                  setState(() {
-                    _currentStep = step;
-                  });
-                  _slideController.forward(from: 0);
-                },
-              ),
-            ),
-            // Step content
-            Expanded(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.all(
-                  isDesktop
-                      ? AppSpacing.spacingXXL
-                      : isTablet
-                          ? AppSpacing.spacingXL
-                          : AppSpacing.spacingL,
-                ),
-                child: Center(
-                  child: Container(
-                    constraints: BoxConstraints(
-                      maxWidth: isDesktop ? 800 : double.infinity,
-                    ),
-                    child: SlideTransition(
-                      position: _slideController.drive(
-                        Tween<Offset>(
-                          begin: const Offset(0.05, 0),
-                          end: Offset.zero,
-                        ).chain(CurveTween(curve: AppAnimations.newQuestionCurve)),
-                      ),
-                      child: _buildStepContent(),
+      body: SafeArea(
+        child: FadeTransition(
+          opacity: _fadeController,
+          child: Column(
+            children: [
+              // Progress stepper with flexible height
+              Flexible(
+                flex: 0,
+                child: Container(
+                  color: AppColors.pureWhite,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isDesktop
+                        ? AppSpacing.spacingXXL
+                        : isSmallScreen
+                        ? AppSpacing.spacingM
+                        : AppSpacing.spacingL,
+                    vertical: isSmallScreen ? AppSpacing.spacingS : AppSpacing.spacingM,
+                  ),
+                  child: IntrinsicHeight(
+                    child: QuizStepperWidget(
+                      currentStep: _currentStep,
+                      onStepTapped: (step) {
+                        setState(() {
+                          _currentStep = step;
+                        });
+                        _slideController.forward(from: 0);
+                      },
                     ),
                   ),
                 ),
               ),
-            ),
-            // Navigation buttons
-            Container(
-              decoration: BoxDecoration(
-                color: AppColors.pureWhite,
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.shadowLight.withOpacity(0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, -2),
-                  ),
-                ],
-              ),
-              padding: EdgeInsets.all(
-                isDesktop
-                    ? AppSpacing.spacingXL
-                    : AppSpacing.spacingL,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  if (_currentStep > 0)
-                    TextButton.icon(
-                      onPressed: _previousStep,
-                      icon: const Icon(
-                        Icons.arrow_back,
-                        color: AppColors.coolGray,
-                      ),
-                      label: Text(
-                        'Previous',
-                        style: AppTextStyles.buttonMedium.copyWith(
-                          color: AppColors.coolGray,
-                        ),
-                      ),
-                    )
-                  else
-                    const SizedBox(),
-                  PrimaryButton(
-                    onPressed: _currentStep == 2 ? _saveAndPreview : _nextStep,
-                    text: _currentStep == 2 ? 'Save & Preview' : 'Next',
-                    icon: _currentStep == 2
-                        ? Icons.visibility
-                        : Icons.arrow_forward,
-                    backgroundColor: AppColors.vibrantPurple,
+              // Step content with proper flex constraints
+              Expanded(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final availableHeight = constraints.maxHeight;
+                    final contentPadding = isDesktop
+                        ? AppSpacing.spacingXXL
+                        : isTablet
+                        ? AppSpacing.spacingXL
+                        : isSmallScreen
+                        ? AppSpacing.spacingM
+                        : AppSpacing.spacingL;
                     
-                  ),
-                ],
+                    return CustomScrollView(
+                      physics: const ClampingScrollPhysics(),
+                      slivers: [
+                        SliverPadding(
+                          padding: EdgeInsets.all(contentPadding),
+                          sliver: SliverFillRemaining(
+                            hasScrollBody: false,
+                            child: Center(
+                              child: ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  maxWidth: isDesktop ? 800 : double.infinity,
+                                  maxHeight: availableHeight,
+                                ),
+                                child: SlideTransition(
+                                  position: _slideController.drive(
+                                    Tween<Offset>(
+                                      begin: const Offset(0.05, 0),
+                                      end: Offset.zero,
+                                    ).chain(
+                                      CurveTween(curve: AppAnimations.newQuestionCurve),
+                                    ),
+                                  ),
+                                  child: _buildStepContent(),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
               ),
-            ),
-          ],
+              // Navigation buttons with SafeArea and flexible height
+              Flexible(
+                flex: 0,
+                child: SafeArea(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.pureWhite,
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.shadowLight.withValues(alpha: 0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, -2),
+                        ),
+                      ],
+                    ),
+                    padding: EdgeInsets.all(
+                      isDesktop 
+                          ? AppSpacing.spacingXL 
+                          : isSmallScreen
+                          ? AppSpacing.spacingM
+                          : AppSpacing.spacingL,
+                    ),
+                    child: IntrinsicHeight(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          if (_currentStep > 0)
+                            Flexible(
+                              child: TextButton.icon(
+                                onPressed: _previousStep,
+                                icon: const Icon(
+                                  Icons.arrow_back,
+                                  color: AppColors.coolGray,
+                                ),
+                                label: Flexible(
+                                  child: Text(
+                                    'Previous',
+                                    style: AppTextStyles.buttonMedium.copyWith(
+                                      color: AppColors.coolGray,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ),
+                            )
+                          else
+                            const Spacer(),
+                          Flexible(
+                            child: PrimaryButton(
+                              onPressed: _currentStep == 2 ? _saveAndPreview : _nextStep,
+                              text: _currentStep == 2 ? 'Save & Preview' : 'Next',
+                              icon: _currentStep == 2
+                                  ? Icons.visibility
+                                  : Icons.arrow_forward,
+                              backgroundColor: AppColors.vibrantPurple,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -224,110 +264,144 @@ class _QuizCreationPageState extends ConsumerState<QuizCreationPage>
   }
 
   Widget _buildQuizSettings() {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: const BorderSide(color: AppColors.lightGray, width: 1),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.spacingXL),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Quiz Settings',
-              style: AppTextStyles.sectionHeader,
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isSmallScreen = screenHeight < 700;
+    final maxSettingsHeight = isSmallScreen 
+        ? screenHeight * 0.5 
+        : screenHeight * 0.6;
+    
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Card(
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: const BorderSide(color: AppColors.lightGray, width: 1),
+          ),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: maxSettingsHeight,
+              maxWidth: constraints.maxWidth,
             ),
-            const SizedBox(height: AppSpacing.spacingL),
-            SwitchListTile(
-              title: Text(
-                'Make quiz public',
-                style: AppTextStyles.bodyText,
+            child: SingleChildScrollView(
+              physics: const ClampingScrollPhysics(),
+              child: IntrinsicHeight(
+                child: Padding(
+                  padding: EdgeInsets.all(
+                    isSmallScreen ? AppSpacing.spacingL : AppSpacing.spacingXL,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Quiz Settings', style: AppTextStyles.sectionHeader),
+                      const SizedBox(height: AppSpacing.spacingL),
+                      IntrinsicHeight(
+                        child: SwitchListTile(
+                          title: Text('Make quiz public', style: AppTextStyles.bodyText),
+                          subtitle: Text(
+                            'Allow anyone to play this quiz',
+                            style: AppTextStyles.caption,
+                          ),
+                          value: true,
+                          onChanged: (value) {
+                            // Handle public toggle
+                          },
+                          activeColor: AppColors.vibrantPurple,
+                        ),
+                      ),
+                      const Divider(height: AppSpacing.spacingXL),
+                      IntrinsicHeight(
+                        child: SwitchListTile(
+                          title: Text('Enable leaderboard', style: AppTextStyles.bodyText),
+                          subtitle: Text(
+                            'Show player rankings after each game',
+                            style: AppTextStyles.caption,
+                          ),
+                          value: true,
+                          onChanged: (value) {
+                            // Handle leaderboard toggle
+                          },
+                          activeColor: AppColors.vibrantPurple,
+                        ),
+                      ),
+                      const Divider(height: AppSpacing.spacingXL),
+                      IntrinsicHeight(
+                        child: SwitchListTile(
+                          title: Text('Randomize questions', style: AppTextStyles.bodyText),
+                          subtitle: Text(
+                            'Questions appear in random order',
+                            style: AppTextStyles.caption,
+                          ),
+                          value: false,
+                          onChanged: (value) {
+                            // Handle randomize toggle
+                          },
+                          activeColor: AppColors.vibrantPurple,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              subtitle: Text(
-                'Allow anyone to play this quiz',
-                style: AppTextStyles.caption,
-              ),
-              value: true,
-              onChanged: (value) {
-                // Handle public toggle
-              },
-              activeColor: AppColors.vibrantPurple,
             ),
-            const Divider(height: AppSpacing.spacingXL),
-            SwitchListTile(
-              title: Text(
-                'Enable leaderboard',
-                style: AppTextStyles.bodyText,
-              ),
-              subtitle: Text(
-                'Show player rankings after each game',
-                style: AppTextStyles.caption,
-              ),
-              value: true,
-              onChanged: (value) {
-                // Handle leaderboard toggle
-              },
-              activeColor: AppColors.vibrantPurple,
-            ),
-            const Divider(height: AppSpacing.spacingXL),
-            SwitchListTile(
-              title: Text(
-                'Randomize questions',
-                style: AppTextStyles.bodyText,
-              ),
-              subtitle: Text(
-                'Questions appear in random order',
-                style: AppTextStyles.caption,
-              ),
-              value: false,
-              onChanged: (value) {
-                // Handle randomize toggle
-              },
-              activeColor: AppColors.vibrantPurple,
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
   void _showExitConfirmation(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        title: Text(
-          'Leave quiz creation?',
-          style: AppTextStyles.sectionHeader,
-        ),
-        content: Text(
-          'Your progress will be saved as a draft.',
-          style: AppTextStyles.bodyText,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Continue Editing',
-              style: AppTextStyles.buttonMedium.copyWith(
-                color: AppColors.coolGray,
+      builder: (context) => LayoutBuilder(
+        builder: (context, constraints) {
+          final maxWidth = constraints.maxWidth * 0.9;
+          final maxHeight = constraints.maxHeight * 0.8;
+          
+          return Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: maxWidth.clamp(280.0, 400.0),
+                maxHeight: maxHeight,
+              ),
+              child: AlertDialog(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                title: Text('Leave quiz creation?', style: AppTextStyles.sectionHeader),
+                content: SingleChildScrollView(
+                  child: Text(
+                    'Your progress will be saved as a draft.',
+                    style: AppTextStyles.bodyText,
+                  ),
+                ),
+                actions: [
+                  Flexible(
+                    child: TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(
+                        'Continue Editing',
+                        style: AppTextStyles.buttonMedium.copyWith(
+                          color: AppColors.coolGray,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ),
+                  Flexible(
+                    child: PrimaryButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        context.pop();
+                      },
+                      text: 'Save & Exit',
+                      backgroundColor: AppColors.vibrantPurple,
+                    ),
+                  ),
+                ],
               ),
             ),
-          ),
-          PrimaryButton(
-            onPressed: () {
-              Navigator.pop(context);
-              context.pop();
-            },
-            text: 'Save & Exit',
-            backgroundColor: AppColors.vibrantPurple,
-            
-          ),
-        ],
+          );
+        },
       ),
     );
   }

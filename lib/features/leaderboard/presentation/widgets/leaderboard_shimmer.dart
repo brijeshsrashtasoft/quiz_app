@@ -45,34 +45,18 @@ class LeaderboardShimmer extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 120,
-                  height: 16,
-                  color: Colors.white,
-                ),
+                Container(width: 120, height: 16, color: Colors.white),
                 const SizedBox(height: AppSpacing.xs),
-                Container(
-                  width: 80,
-                  height: 12,
-                  color: Colors.white,
-                ),
+                Container(width: 80, height: 12, color: Colors.white),
               ],
             ),
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Container(
-                width: 60,
-                height: 20,
-                color: Colors.white,
-              ),
+              Container(width: 60, height: 20, color: Colors.white),
               const SizedBox(height: AppSpacing.xs),
-              Container(
-                width: 40,
-                height: 12,
-                color: Colors.white,
-              ),
+              Container(width: 40, height: 12, color: Colors.white),
             ],
           ),
         ],

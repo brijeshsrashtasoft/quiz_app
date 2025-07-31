@@ -92,7 +92,7 @@ class StartGame {
 extension GameSessionSettingsX on GameSessionSettings {
   /// Whether all players must be ready before starting
   bool get requireAllReady => false; // Can be added to settings if needed
-  
+
   /// Minimum players required to start
   int get minPlayers => 1;
 }

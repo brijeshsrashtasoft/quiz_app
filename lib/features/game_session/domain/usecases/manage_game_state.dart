@@ -36,10 +36,7 @@ class ManageGameState {
 
       // Emit game event for phase change
       await _emitGameEvent(
-        GameEvent.phaseChanged(
-          newPhase: newPhase,
-          timestamp: phaseStartTime,
-        ),
+        GameEvent.phaseChanged(newPhase: newPhase, timestamp: phaseStartTime),
       );
 
       return Result.success(gameState);
@@ -81,7 +78,7 @@ class ManageGameState {
 
       // Update player ready status
       final updatedPlayer = player.copyWith(isReady: isReady);
-      
+
       final updateResult = await _repository.updatePlayerInSession(
         sessionId,
         playerId,
@@ -120,10 +117,7 @@ class ManageGameState {
 
       // Emit player left event
       await _emitGameEvent(
-        GameEvent.playerLeft(
-          playerId: playerId,
-          timestamp: DateTime.now(),
-        ),
+        GameEvent.playerLeft(playerId: playerId, timestamp: DateTime.now()),
       );
 
       return const Result.success(null);
@@ -158,7 +152,7 @@ class ManageGameState {
 /// Game flow controller for orchestrating game phases
 class GameFlowController {
   final ManageGameState _manageGameState;
-  
+
   const GameFlowController(this._manageGameState);
 
   /// Get next phase in game flow
@@ -173,8 +167,8 @@ class GameFlowController {
       case GamePhase.answerReveal:
         return GamePhase.leaderboardDisplay;
       case GamePhase.leaderboardDisplay:
-        return hasMoreQuestions 
-            ? GamePhase.questionDisplay 
+        return hasMoreQuestions
+            ? GamePhase.questionDisplay
             : GamePhase.gameCompleted;
       case GamePhase.gameCompleted:
         return GamePhase.gameCompleted; // Terminal state

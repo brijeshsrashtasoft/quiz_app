@@ -18,7 +18,9 @@ abstract class BaseWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return AnimatedBuilder(
-      animation: rebuildOnThemeChange ? Theme.of(context) : const AlwaysStoppedAnimation(0),
+      animation: rebuildOnThemeChange
+          ? Theme.of(context)
+          : const AlwaysStoppedAnimation(0),
       builder: (context, child) => buildWidget(context, ref),
     );
   }
@@ -33,9 +35,8 @@ abstract class BaseStatefulWidget extends ConsumerStatefulWidget {
 }
 
 /// Base state abstraction for stateful widgets
-abstract class BaseState<T extends BaseStatefulWidget> extends ConsumerState<T> 
+abstract class BaseState<T extends BaseStatefulWidget> extends ConsumerState<T>
     with WidgetsBindingObserver {
-  
   /// Whether this widget is currently mounted
   bool get isMounted => mounted;
 
@@ -91,7 +92,8 @@ abstract class BaseState<T extends BaseStatefulWidget> extends ConsumerState<T>
 }
 
 /// Mixin for widgets that need animation controllers
-mixin AnimationControllerMixin<T extends StatefulWidget> on State<T>, TickerProviderStateMixin {
+mixin AnimationControllerMixin<T extends StatefulWidget>
+    on State<T>, TickerProviderStateMixin {
   final Map<String, AnimationController> _controllers = {};
   final Map<String, Animation> _animations = {};
 
@@ -135,7 +137,8 @@ mixin AnimationControllerMixin<T extends StatefulWidget> on State<T>, TickerProv
   }
 
   /// Get a registered animation
-  Animation<T>? getAnimation<T>(String key) => _animations[key] as Animation<T>?;
+  Animation<T>? getAnimation<T>(String key) =>
+      _animations[key] as Animation<T>?;
 
   @override
   void dispose() {
@@ -202,7 +205,7 @@ mixin ResponsiveMixin {
 
 /// Screen size categories for responsive design
 enum ScreenSize {
-  small,  // < 600px (mobile)
+  small, // < 600px (mobile)
   medium, // 600-1200px (tablet)
-  large,  // > 1200px (desktop)
+  large, // > 1200px (desktop)
 }

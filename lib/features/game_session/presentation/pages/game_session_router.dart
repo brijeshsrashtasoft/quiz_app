@@ -19,46 +19,42 @@ import '../../../../shared/widgets/error/error_widget.dart';
 class GameSessionRouter extends ConsumerWidget {
   final String sessionId;
 
-  const GameSessionRouter({
-    super.key,
-    required this.sessionId,
-  });
+  const GameSessionRouter({super.key, required this.sessionId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final sessionAsync = ref.watch(optimizedSessionStreamProvider(sessionId));
     final userRole = ref.watch(userSessionRoleProvider(sessionId));
-    
+
     return sessionAsync.when(
       data: (session) {
         if (session == null) {
           return _buildErrorState(context, 'Session not found');
         }
-        
+
         // Route based on session status
         switch (session.status) {
           case GameSessionStatus.waiting:
             return _buildWaitingLobby(context, ref, session);
           case GameSessionStatus.active:
-            return GamePlayPage(
-              sessionId: sessionId,
-              quizId: session.quizId,
-            );
+            return GamePlayPage(sessionId: sessionId, quizId: session.quizId);
           case GameSessionStatus.completed:
             return _buildCompletedState(context, session);
         }
       },
-      loading: () => const Scaffold(
-        body: Center(child: LoadingOverlay()),
-      ),
+      loading: () => const Scaffold(body: Center(child: LoadingOverlay())),
       error: (error, _) => _buildErrorState(context, error.toString()),
     );
   }
 
-  Widget _buildWaitingLobby(BuildContext context, WidgetRef ref, dynamic session) {
+  Widget _buildWaitingLobby(
+    BuildContext context,
+    WidgetRef ref,
+    dynamic session,
+  ) {
     final userRole = ref.watch(userSessionRoleProvider(sessionId)).value;
     final isHost = userRole == UserSessionRole.host;
-    
+
     return AppScaffold(
       backgroundColor: AppColors.backgroundPrimary,
       appBar: AppBar(
@@ -73,9 +69,9 @@ class GameSessionRouter extends ConsumerWidget {
             children: [
               // PIN Display
               PinDisplay(pin: session.pin),
-              
+
               AppSpacing.verticalSpacingXL,
-              
+
               // Player List
               Expanded(
                 child: LobbyPlayerList(
@@ -83,7 +79,7 @@ class GameSessionRouter extends ConsumerWidget {
                   hostId: session.hostId,
                 ),
               ),
-              
+
               // Host Controls
               if (isHost) ...[
                 AppSpacing.verticalSpacingL,
@@ -91,7 +87,8 @@ class GameSessionRouter extends ConsumerWidget {
                   sessionId: sessionId,
                   canStart: session.playerCount >= 2,
                   onStart: () {
-                    ref.read(sessionStateNotifierProvider(sessionId).notifier)
+                    ref
+                        .read(sessionStateNotifierProvider(sessionId).notifier)
                         .startSession();
                   },
                 ),

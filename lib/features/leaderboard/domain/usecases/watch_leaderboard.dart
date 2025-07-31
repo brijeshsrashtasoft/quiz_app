@@ -6,7 +6,8 @@ import '../../../../core/usecases/stream_usecase.dart';
 import '../entities/leaderboard.dart';
 import '../repositories/leaderboard_repository.dart';
 
-class WatchLeaderboard implements StreamUseCase<Leaderboard, WatchLeaderboardParams> {
+class WatchLeaderboard
+    implements StreamUseCase<Leaderboard, WatchLeaderboardParams> {
   final LeaderboardRepository repository;
 
   const WatchLeaderboard(this.repository);

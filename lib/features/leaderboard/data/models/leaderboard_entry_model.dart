@@ -43,17 +43,17 @@ class LeaderboardEntryModel with _$LeaderboardEntryModel {
       );
 
   LeaderboardEntry toEntity() => LeaderboardEntry(
-        playerId: playerId,
-        playerName: playerName,
-        rank: rank,
-        previousRank: previousRank,
-        totalScore: totalScore,
-        correctAnswers: correctAnswers,
-        totalQuestions: totalQuestions,
-        averageResponseTime: averageResponseTime,
-        currentStreak: currentStreak,
-        maxStreak: maxStreak,
-        lastUpdated: lastUpdated,
-        avatarUrl: avatarUrl,
-      );
+    playerId: playerId,
+    playerName: playerName,
+    rank: rank,
+    previousRank: previousRank,
+    totalScore: totalScore,
+    correctAnswers: correctAnswers,
+    totalQuestions: totalQuestions,
+    averageResponseTime: averageResponseTime,
+    currentStreak: currentStreak,
+    maxStreak: maxStreak,
+    lastUpdated: lastUpdated,
+    avatarUrl: avatarUrl,
+  );
 }

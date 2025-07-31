@@ -51,10 +51,10 @@ class GameState with _$GameState {
   /// Calculate answer distribution percentages
   Map<int, double> getAnswerDistribution() {
     if (playerAnswers.isEmpty) return {};
-    
+
     final distribution = <int, int>{};
     for (final answer in playerAnswers.values) {
-      distribution[answer.selectedOption] = 
+      distribution[answer.selectedOption] =
           (distribution[answer.selectedOption] ?? 0) + 1;
     }
 
@@ -137,7 +137,8 @@ enum GamePhase {
   }
 
   bool get allowsAnswerSubmission => this == GamePhase.questionActive;
-  bool get showsResults => this == GamePhase.answerReveal || this == GamePhase.leaderboardDisplay;
+  bool get showsResults =>
+      this == GamePhase.answerReveal || this == GamePhase.leaderboardDisplay;
 }
 
 /// Game event entity for tracking game progression
@@ -165,11 +166,9 @@ class GameEvent with _$GameEvent {
     required DateTime timestamp,
   }) = PlayerLeftEvent;
 
-  const factory GameEvent.gameStarted({
-    required DateTime timestamp,
-  }) = GameStartedEvent;
+  const factory GameEvent.gameStarted({required DateTime timestamp}) =
+      GameStartedEvent;
 
-  const factory GameEvent.gameCompleted({
-    required DateTime timestamp,
-  }) = GameCompletedEvent;
+  const factory GameEvent.gameCompleted({required DateTime timestamp}) =
+      GameCompletedEvent;
 }

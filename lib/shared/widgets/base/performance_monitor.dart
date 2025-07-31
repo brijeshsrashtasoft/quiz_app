@@ -28,16 +28,16 @@ mixin PerformanceMonitor<T extends StatefulWidget> on State<T> {
   /// Stop timing an operation and record the measurement
   Duration? stopTimer(String operation) {
     if (!_isMonitoring) return null;
-    
+
     final timer = _timers[operation];
     if (timer == null || !timer.isRunning) return null;
-    
+
     timer.stop();
     final duration = timer.elapsed;
-    
+
     _measurements[operation] ??= [];
     _measurements[operation]!.add(duration);
-    
+
     _timers.remove(operation);
     return duration;
   }
@@ -65,7 +65,7 @@ mixin PerformanceMonitor<T extends StatefulWidget> on State<T> {
   /// Monitor frame rendering performance
   void monitorFrameRendering(String key) {
     if (!_isMonitoring) return;
-    
+
     final callback = (Duration timestamp) {
       final renderTime = SchedulerBinding.instance.currentFrameTimeStamp;
       _measurements['frame_$key'] ??= [];
@@ -75,7 +75,7 @@ mixin PerformanceMonitor<T extends StatefulWidget> on State<T> {
         ),
       );
     };
-    
+
     _frameCallbacks[key] = callback;
     SchedulerBinding.instance.addPersistentFrameCallback(callback);
   }
@@ -93,30 +93,28 @@ mixin PerformanceMonitor<T extends StatefulWidget> on State<T> {
   Duration? getAverageDuration(String operation) {
     final measurements = _measurements[operation];
     if (measurements == null || measurements.isEmpty) return null;
-    
+
     final totalMicroseconds = measurements
         .map((d) => d.inMicroseconds)
         .reduce((a, b) => a + b);
-    
-    return Duration(
-      microseconds: totalMicroseconds ~/ measurements.length,
-    );
+
+    return Duration(microseconds: totalMicroseconds ~/ measurements.length);
   }
 
   /// Get performance statistics for an operation
   PerformanceStats? getStats(String operation) {
     final measurements = _measurements[operation];
     if (measurements == null || measurements.isEmpty) return null;
-    
+
     final microseconds = measurements.map((d) => d.inMicroseconds).toList();
     microseconds.sort();
-    
+
     final sum = microseconds.reduce((a, b) => a + b);
     final average = sum / microseconds.length;
     final median = microseconds[microseconds.length ~/ 2];
     final min = microseconds.first;
     final max = microseconds.last;
-    
+
     return PerformanceStats(
       operation: operation,
       count: measurements.length,
@@ -159,10 +157,10 @@ mixin PerformanceMonitor<T extends StatefulWidget> on State<T> {
       debugPrint('Performance monitoring is not enabled');
       return;
     }
-    
+
     debugPrint('=== Performance Report ===');
     final stats = getAllStats();
-    
+
     for (final stat in stats.values) {
       debugPrint('Operation: ${stat.operation}');
       debugPrint('  Count: ${stat.count}');
@@ -216,10 +214,10 @@ class PerformanceStats {
 
 /// Performance rating enum
 enum PerformanceRating {
-  excellent,  // < 16ms (60+ fps)
-  good,       // < 33ms (30+ fps)
+  excellent, // < 16ms (60+ fps)
+  good, // < 33ms (30+ fps)
   acceptable, // < 50ms (20+ fps)
-  poor,       // >= 50ms (< 20 fps)
+  poor, // >= 50ms (< 20 fps)
 }
 
 /// Widget performance observer
@@ -238,12 +236,12 @@ class WidgetPerformanceObserver extends StatefulWidget {
   });
 
   @override
-  State<WidgetPerformanceObserver> createState() => _WidgetPerformanceObserverState();
+  State<WidgetPerformanceObserver> createState() =>
+      _WidgetPerformanceObserverState();
 }
 
 class _WidgetPerformanceObserverState extends State<WidgetPerformanceObserver>
     with PerformanceMonitor {
-  
   @override
   void initState() {
     super.initState();
@@ -255,12 +253,12 @@ class _WidgetPerformanceObserverState extends State<WidgetPerformanceObserver>
   void _schedulePerformanceUpdate() {
     Future.delayed(widget.updateInterval, () {
       if (!mounted) return;
-      
+
       final stats = getStats('frame_${widget.widgetName}');
       if (stats != null) {
         widget.onPerformanceUpdate?.call(stats);
       }
-      
+
       _schedulePerformanceUpdate();
     });
   }

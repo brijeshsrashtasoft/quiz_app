@@ -29,7 +29,8 @@ class _QuizPreviewPageState extends ConsumerState<QuizPreviewPage>
   // Mock data for preview
   final _mockQuiz = {
     'title': 'World Geography Quiz',
-    'description': 'Test your knowledge of world geography with these challenging questions!',
+    'description':
+        'Test your knowledge of world geography with these challenging questions!',
     'category': 'Geography',
     'questions': [
       {
@@ -108,17 +109,15 @@ class _QuizPreviewPageState extends ConsumerState<QuizPreviewPage>
     final isTablet = size.width > 600;
     final isDesktop = size.width > 1200;
     final questions = _mockQuiz['questions'] as List;
-    final currentQuestion = questions[_currentQuestionIndex] as Map<String, dynamic>;
+    final currentQuestion =
+        questions[_currentQuestionIndex] as Map<String, dynamic>;
 
     return Scaffold(
       backgroundColor: AppColors.backgroundPrimary,
       appBar: AppBar(
         backgroundColor: AppColors.pureWhite,
         elevation: 0,
-        title: Text(
-          'Preview Quiz',
-          style: AppTextStyles.sectionHeader,
-        ),
+        title: Text('Preview Quiz', style: AppTextStyles.sectionHeader),
         actions: [
           TextButton.icon(
             onPressed: () {
@@ -143,9 +142,7 @@ class _QuizPreviewPageState extends ConsumerState<QuizPreviewPage>
             Container(
               color: AppColors.pureWhite,
               padding: EdgeInsets.all(
-                isDesktop
-                    ? AppSpacing.spacingXL
-                    : AppSpacing.spacingL,
+                isDesktop ? AppSpacing.spacingXL : AppSpacing.spacingL,
               ),
               child: Center(
                 child: Container(
@@ -206,8 +203,8 @@ class _QuizPreviewPageState extends ConsumerState<QuizPreviewPage>
                   isDesktop
                       ? AppSpacing.spacingXXL
                       : isTablet
-                          ? AppSpacing.spacingXL
-                          : AppSpacing.spacingL,
+                      ? AppSpacing.spacingXL
+                      : AppSpacing.spacingL,
                 ),
                 child: Center(
                   child: Container(
@@ -246,7 +243,9 @@ class _QuizPreviewPageState extends ConsumerState<QuizPreviewPage>
                             Tween<Offset>(
                               begin: const Offset(0.05, 0),
                               end: Offset.zero,
-                            ).chain(CurveTween(curve: AppAnimations.newQuestionCurve)),
+                            ).chain(
+                              CurveTween(curve: AppAnimations.newQuestionCurve),
+                            ),
                           ),
                           child: Card(
                             elevation: 0,
@@ -258,7 +257,9 @@ class _QuizPreviewPageState extends ConsumerState<QuizPreviewPage>
                               ),
                             ),
                             child: Padding(
-                              padding: const EdgeInsets.all(AppSpacing.spacingXL),
+                              padding: const EdgeInsets.all(
+                                AppSpacing.spacingXL,
+                              ),
                               child: Column(
                                 children: [
                                   Text(
@@ -293,9 +294,7 @@ class _QuizPreviewPageState extends ConsumerState<QuizPreviewPage>
                 ],
               ),
               padding: EdgeInsets.all(
-                isDesktop
-                    ? AppSpacing.spacingXL
-                    : AppSpacing.spacingL,
+                isDesktop ? AppSpacing.spacingXL : AppSpacing.spacingL,
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -321,12 +320,13 @@ class _QuizPreviewPageState extends ConsumerState<QuizPreviewPage>
                       if (_currentQuestionIndex == questions.length - 1)
                         PrimaryButton(
                           onPressed: () {
-                            context.go('${RouteConstants.quizCreation}/publish');
+                            context.go(
+                              '${RouteConstants.quizCreation}/publish',
+                            );
                           },
                           text: 'Publish Quiz',
                           icon: Icons.publish,
                           backgroundColor: AppColors.success,
-                          
                         )
                       else
                         PrimaryButton(
@@ -334,7 +334,6 @@ class _QuizPreviewPageState extends ConsumerState<QuizPreviewPage>
                           text: 'Next',
                           icon: Icons.arrow_forward,
                           backgroundColor: AppColors.vibrantPurple,
-                          
                         ),
                     ],
                   ),
@@ -369,9 +368,10 @@ class _QuizPreviewPageState extends ConsumerState<QuizPreviewPage>
             shape: _getShapeForIndex(index),
             isSelected: _selectedAnswer == index,
             isCorrect: _showCorrectAnswer && index == correctAnswer,
-            isIncorrect: _showCorrectAnswer && 
-                         _selectedAnswer == index && 
-                         index != correctAnswer,
+            isIncorrect:
+                _showCorrectAnswer &&
+                _selectedAnswer == index &&
+                index != correctAnswer,
             showResult: _showCorrectAnswer,
             onPressed: () => _selectAnswer(index),
           );
@@ -387,9 +387,10 @@ class _QuizPreviewPageState extends ConsumerState<QuizPreviewPage>
               shape: AnswerShape.circle,
               isSelected: _selectedAnswer == 0,
               isCorrect: _showCorrectAnswer && 0 == correctAnswer,
-              isIncorrect: _showCorrectAnswer && 
-                           _selectedAnswer == 0 && 
-                           0 != correctAnswer,
+              isIncorrect:
+                  _showCorrectAnswer &&
+                  _selectedAnswer == 0 &&
+                  0 != correctAnswer,
               showResult: _showCorrectAnswer,
               onPressed: () => _selectAnswer(0),
             ),
@@ -401,9 +402,10 @@ class _QuizPreviewPageState extends ConsumerState<QuizPreviewPage>
               shape: AnswerShape.square,
               isSelected: _selectedAnswer == 1,
               isCorrect: _showCorrectAnswer && 1 == correctAnswer,
-              isIncorrect: _showCorrectAnswer && 
-                           _selectedAnswer == 1 && 
-                           1 != correctAnswer,
+              isIncorrect:
+                  _showCorrectAnswer &&
+                  _selectedAnswer == 1 &&
+                  1 != correctAnswer,
               showResult: _showCorrectAnswer,
               onPressed: () => _selectAnswer(1),
             ),
@@ -456,11 +458,7 @@ class _QuizPreviewPageState extends ConsumerState<QuizPreviewPage>
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            icon,
-            size: 16,
-            color: color,
-          ),
+          Icon(icon, size: 16, color: color),
           const SizedBox(width: AppSpacing.spacingXS),
           Text(
             label,

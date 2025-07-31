@@ -23,9 +23,10 @@ class QuizCreationState with _$QuizCreationState {
 }
 
 /// Provider for managing quiz creation state
-final quizCreationProvider = StateNotifierProvider<QuizCreationNotifier, QuizCreationState>((ref) {
-  return QuizCreationNotifier();
-});
+final quizCreationProvider =
+    StateNotifierProvider<QuizCreationNotifier, QuizCreationState>((ref) {
+      return QuizCreationNotifier();
+    });
 
 /// Notifier for quiz creation state management
 class QuizCreationNotifier extends StateNotifier<QuizCreationState> {
@@ -48,9 +49,7 @@ class QuizCreationNotifier extends StateNotifier<QuizCreationState> {
 
   /// Add a new question
   void addQuestion(QuestionEntity question) {
-    state = state.copyWith(
-      questions: [...state.questions, question],
-    );
+    state = state.copyWith(questions: [...state.questions, question]);
   }
 
   /// Update an existing question
@@ -112,7 +111,9 @@ class QuizCreationNotifier extends StateNotifier<QuizCreationState> {
       return false;
     }
     if (state.description.isEmpty || state.description.length < 10) {
-      state = state.copyWith(error: 'Quiz description must be at least 10 characters');
+      state = state.copyWith(
+        error: 'Quiz description must be at least 10 characters',
+      );
       return false;
     }
     if (state.questions.isEmpty) {
@@ -148,8 +149,8 @@ final draftQuizProvider = StateProvider<QuizCreationState?>((ref) => null);
 final hasUnsavedChangesProvider = Provider<bool>((ref) {
   final currentState = ref.watch(quizCreationProvider);
   final draftState = ref.watch(draftQuizProvider);
-  
+
   if (draftState == null) return false;
-  
+
   return currentState != draftState;
 });

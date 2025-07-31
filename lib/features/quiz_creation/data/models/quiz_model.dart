@@ -13,7 +13,7 @@ part 'quiz_model.g.dart';
 @freezed
 class QuizModel with _$QuizModel {
   const QuizModel._();
-  
+
   const factory QuizModel({
     required String id,
     required String title,
@@ -31,10 +31,10 @@ class QuizModel with _$QuizModel {
     @Default(0) int totalRatings,
     @Default(0.0) double rating,
   }) = _QuizModel;
-  
+
   factory QuizModel.fromJson(Map<String, dynamic> json) =>
       _$QuizModelFromJson(json);
-  
+
   /// Convert from domain entity
   factory QuizModel.fromEntity(Quiz entity) {
     return QuizModel(
@@ -57,7 +57,7 @@ class QuizModel with _$QuizModel {
       rating: entity.rating,
     );
   }
-  
+
   /// Convert to domain entity
   Quiz toEntity() {
     return Quiz(
@@ -78,7 +78,7 @@ class QuizModel with _$QuizModel {
       rating: rating,
     );
   }
-  
+
   /// Convert to Firestore format
   Map<String, dynamic> toFirestore() {
     return {
@@ -98,13 +98,11 @@ class QuizModel with _$QuizModel {
       'rating': rating,
     };
   }
-  
+
   /// Create from Firestore document
-  factory QuizModel.fromFirestore(
-    DocumentSnapshot<Map<String, dynamic>> doc,
-  ) {
+  factory QuizModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data()!;
-    
+
     return QuizModel(
       id: doc.id,
       title: data['title'] as String,
@@ -131,12 +129,9 @@ class QuizModel with _$QuizModel {
       rating: (data['rating'] as num?)?.toDouble() ?? 0.0,
     );
   }
-  
+
   /// Create from Firestore data map (for subcollections)
-  factory QuizModel.fromFirestoreData(
-    String id,
-    Map<String, dynamic> data,
-  ) {
+  factory QuizModel.fromFirestoreData(String id, Map<String, dynamic> data) {
     return QuizModel(
       id: id,
       title: data['title'] as String,

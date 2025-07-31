@@ -11,12 +11,14 @@ class CalculateScore implements UseCase<ScoreEntity, CalculateScoreParams> {
   @override
   Future<Either<Failure, ScoreEntity>> call(CalculateScoreParams params) async {
     try {
-      final multiplier = params.multiplier ?? const ScoreMultiplier(
-        speedMultiplier: 1.0,
-        streakMultiplier: 1.0,
-        accuracyMultiplier: 1.0,
-        basePoints: ScoreMultiplier.baseQuestionPoints,
-      );
+      final multiplier =
+          params.multiplier ??
+          const ScoreMultiplier(
+            speedMultiplier: 1.0,
+            streakMultiplier: 1.0,
+            accuracyMultiplier: 1.0,
+            basePoints: ScoreMultiplier.baseQuestionPoints,
+          );
 
       final totalScore = multiplier.calculateTotalScore(
         isCorrect: params.isCorrect,
@@ -25,10 +27,13 @@ class CalculateScore implements UseCase<ScoreEntity, CalculateScoreParams> {
         currentStreak: params.currentStreak,
       );
 
-      final speedBonus = params.isCorrect 
-          ? multiplier.calculateSpeedBonus(params.responseTime, params.questionDuration)
+      final speedBonus = params.isCorrect
+          ? multiplier.calculateSpeedBonus(
+              params.responseTime,
+              params.questionDuration,
+            )
           : 0;
-      
+
       final streakBonus = params.isCorrect
           ? multiplier.calculateStreakBonus(params.currentStreak)
           : 0;
@@ -76,13 +81,13 @@ class CalculateScoreParams extends Equatable {
 
   @override
   List<Object?> get props => [
-        playerId,
-        playerName,
-        isCorrect,
-        responseTime,
-        questionDuration,
-        currentStreak,
-        questionIndex,
-        multiplier,
-      ];
+    playerId,
+    playerName,
+    isCorrect,
+    responseTime,
+    questionDuration,
+    currentStreak,
+    questionIndex,
+    multiplier,
+  ];
 }

@@ -55,75 +55,105 @@ class _QuizMetadataFormState extends ConsumerState<QuizMetadataForm>
 
   @override
   Widget build(BuildContext context) {
-    return SlideTransition(
-      position: _animationController.drive(
-        Tween<Offset>(
-          begin: const Offset(0, 0.05),
-          end: Offset.zero,
-        ).chain(CurveTween(curve: AppAnimations.easeOut)),
-      ),
-      child: Card(
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: AppColors.lightGray, width: 1),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.spacingXL),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Quiz Information',
-                style: AppTextStyles.sectionHeader,
-              ),
-              const SizedBox(height: AppSpacing.spacingL),
-              // Title input
-              CustomTextInput(
-                controller: _titleController,
-                label: 'Quiz Title',
-                hint: 'Enter an engaging title for your quiz',
-                maxLength: 100,
-                prefixIcon: Icon(Icons.title),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a title';
-                  }
-                  if (value.length < 3) {
-                    return 'Title must be at least 3 characters';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: AppSpacing.spacingL),
-              // Description input
-              CustomTextInput(
-                controller: _descriptionController,
-                label: 'Description',
-                hint: 'Describe what your quiz is about',
-                maxLines: 3,
-                maxLength: 300,
-                prefixIcon: Icon(Icons.description_outlined),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a description';
-                  }
-                  if (value.length < 10) {
-                    return 'Description must be at least 10 characters';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: AppSpacing.spacingL),
-              // Category dropdown
-              _buildCategoryDropdown(),
-              const SizedBox(height: AppSpacing.spacingXL),
-              // Quiz preview card
-              _buildPreviewCard(),
-            ],
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmallScreen = screenHeight < 700;
+    final maxFormHeight = isSmallScreen 
+        ? screenHeight * 0.6 
+        : screenHeight * 0.7;
+    
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SlideTransition(
+          position: _animationController.drive(
+            Tween<Offset>(
+              begin: const Offset(0, 0.05),
+              end: Offset.zero,
+            ).chain(CurveTween(curve: AppAnimations.easeOut)),
           ),
-        ),
-      ),
+          child: Card(
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: const BorderSide(color: AppColors.lightGray, width: 1),
+            ),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: maxFormHeight,
+                maxWidth: constraints.maxWidth,
+              ),
+              child: SingleChildScrollView(
+                physics: const ClampingScrollPhysics(),
+                child: IntrinsicHeight(
+                  child: Padding(
+                    padding: EdgeInsets.all(
+                      isSmallScreen ? AppSpacing.spacingL : AppSpacing.spacingXL,
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Quiz Information', style: AppTextStyles.sectionHeader),
+                        const SizedBox(height: AppSpacing.spacingL),
+                        // Title input with flexible layout
+                        Flexible(
+                          child: CustomTextInput(
+                            controller: _titleController,
+                            label: 'Quiz Title',
+                            hint: 'Enter an engaging title for your quiz',
+                            maxLength: 100,
+                            prefixIcon: Icon(Icons.title),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter a title';
+                              }
+                              if (value.length < 3) {
+                                return 'Title must be at least 3 characters';
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.spacingL),
+                        // Description input with flexible layout
+                        Flexible(
+                          child: CustomTextInput(
+                            controller: _descriptionController,
+                            label: 'Description',
+                            hint: 'Describe what your quiz is about',
+                            maxLines: isSmallScreen ? 2 : 3,
+                            maxLength: 300,
+                            prefixIcon: Icon(Icons.description_outlined),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter a description';
+                              }
+                              if (value.length < 10) {
+                                return 'Description must be at least 10 characters';
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.spacingL),
+                        // Category dropdown with flexible layout
+                        Flexible(
+                          child: _buildCategoryDropdown(),
+                        ),
+                        const SizedBox(height: AppSpacing.spacingXL),
+                        // Quiz preview card with flexible layout
+                        Flexible(
+                          child: _buildPreviewCard(),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -131,10 +161,7 @@ class _QuizMetadataFormState extends ConsumerState<QuizMetadataForm>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Category',
-          style: AppTextStyles.inputLabel,
-        ),
+        Text('Category', style: AppTextStyles.inputLabel),
         const SizedBox(height: AppSpacing.spacingS),
         Container(
           decoration: BoxDecoration(
@@ -155,15 +182,9 @@ class _QuizMetadataFormState extends ConsumerState<QuizMetadataForm>
               ),
             ),
             style: AppTextStyles.inputText,
-            icon: const Icon(
-              Icons.arrow_drop_down,
-              color: AppColors.coolGray,
-            ),
+            icon: const Icon(Icons.arrow_drop_down, color: AppColors.coolGray),
             items: _categories.map((category) {
-              return DropdownMenuItem(
-                value: category,
-                child: Text(category),
-              );
+              return DropdownMenuItem(value: category, child: Text(category));
             }).toList(),
             onChanged: (value) {
               setState(() {
@@ -177,82 +198,103 @@ class _QuizMetadataFormState extends ConsumerState<QuizMetadataForm>
   }
 
   Widget _buildPreviewCard() {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.spacingL),
-      decoration: BoxDecoration(
-        color: AppColors.offWhite,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.lightGray),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                Icons.visibility_outlined,
-                color: AppColors.vibrantPurple,
-                size: 20,
-              ),
-              const SizedBox(width: AppSpacing.spacingS),
-              Text(
-                'Preview',
-                style: AppTextStyles.caption.copyWith(
-                  color: AppColors.vibrantPurple,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Container(
+          width: constraints.maxWidth,
+          padding: const EdgeInsets.all(AppSpacing.spacingL),
+          decoration: BoxDecoration(
+            color: AppColors.offWhite,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.lightGray),
           ),
-          const SizedBox(height: AppSpacing.spacingM),
-          Text(
-            _titleController.text.isEmpty
-                ? 'Your quiz title will appear here'
-                : _titleController.text,
-            style: _titleController.text.isEmpty
-                ? AppTextStyles.cardTitle.copyWith(
-                    color: AppColors.coolGray,
-                    fontStyle: FontStyle.italic,
-                  )
-                : AppTextStyles.cardTitle,
-          ),
-          const SizedBox(height: AppSpacing.spacingS),
-          Text(
-            _descriptionController.text.isEmpty
-                ? 'Your quiz description will appear here'
-                : _descriptionController.text,
-            style: _descriptionController.text.isEmpty
-                ? AppTextStyles.cardDescription.copyWith(
-                    fontStyle: FontStyle.italic,
-                  )
-                : AppTextStyles.cardDescription,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: AppSpacing.spacingM),
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.spacingM,
-                  vertical: AppSpacing.spacingXS,
+          child: IntrinsicHeight(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.visibility_outlined,
+                      color: AppColors.vibrantPurple,
+                      size: 20,
+                    ),
+                    const SizedBox(width: AppSpacing.spacingS),
+                    Flexible(
+                      child: Text(
+                        'Preview',
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppColors.vibrantPurple,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
                 ),
-                decoration: BoxDecoration(
-                  color: AppColors.vibrantPurple.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  _selectedCategory,
-                  style: AppTextStyles.caption.copyWith(
-                    color: AppColors.vibrantPurple,
-                    fontWeight: FontWeight.w500,
+                const SizedBox(height: AppSpacing.spacingM),
+                Flexible(
+                  child: Text(
+                    _titleController.text.isEmpty
+                        ? 'Your quiz title will appear here'
+                        : _titleController.text,
+                    style: _titleController.text.isEmpty
+                        ? AppTextStyles.cardTitle.copyWith(
+                            color: AppColors.coolGray,
+                            fontStyle: FontStyle.italic,
+                          )
+                        : AppTextStyles.cardTitle,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(height: AppSpacing.spacingS),
+                Flexible(
+                  child: Text(
+                    _descriptionController.text.isEmpty
+                        ? 'Your quiz description will appear here'
+                        : _descriptionController.text,
+                    style: _descriptionController.text.isEmpty
+                        ? AppTextStyles.cardDescription.copyWith(
+                            fontStyle: FontStyle.italic,
+                          )
+                        : AppTextStyles.cardDescription,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.spacingM),
+                Row(
+                  children: [
+                    Flexible(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.spacingM,
+                          vertical: AppSpacing.spacingXS,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.vibrantPurple.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          _selectedCategory,
+                          style: AppTextStyles.caption.copyWith(
+                            color: AppColors.vibrantPurple,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

@@ -84,7 +84,7 @@ class JoinGameSession {
       final error = session.status == GameSessionStatus.active
           ? PinValidationError.sessionInProgress
           : PinValidationError.sessionCompleted;
-      
+
       return Failure.sessionFailure(
         message: error.message,
         code: 'INVALID_SESSION_STATE',
@@ -134,23 +134,23 @@ class JoinGameSessionParams {
   /// Validate player name
   String? validatePlayerName() {
     final trimmed = playerName.trim();
-    
+
     if (trimmed.isEmpty) {
       return 'Please enter your name';
     }
-    
+
     if (trimmed.length < 2) {
       return 'Name must be at least 2 characters';
     }
-    
+
     if (trimmed.length > 20) {
       return 'Name must be less than 20 characters';
     }
-    
+
     if (!RegExp(r'^[a-zA-Z0-9\s]+$').hasMatch(trimmed)) {
       return 'Name can only contain letters, numbers, and spaces';
     }
-    
+
     return null;
   }
 }

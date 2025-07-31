@@ -249,7 +249,7 @@ class DeepLinkService {
       debugPrint('DeepLinkService: Navigating to ${deepLinkData.route}');
 
       // Add delay to ensure app is ready for navigation
-      await Future.delayed(const Duration(milliseconds: 500));
+      // Removed delay for better performance
 
       // Use the AppRouter for navigation
       AppRouter.go(deepLinkData.route);

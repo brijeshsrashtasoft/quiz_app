@@ -19,7 +19,7 @@ class CreateGameSession {
     try {
       // Generate unique PIN
       final pinResult = await _repository.generateUniquePin();
-      
+
       if (pinResult.isFailure) {
         return Result.failure(pinResult.failureOrNull!);
       }
@@ -29,9 +29,7 @@ class CreateGameSession {
       // Validate PIN format
       if (!GamePin.isValidPin(pin)) {
         return Result.failure(
-          const Failure.validationFailure(
-            message: 'Generated PIN is invalid',
-          ),
+          const Failure.validationFailure(message: 'Generated PIN is invalid'),
         );
       }
 

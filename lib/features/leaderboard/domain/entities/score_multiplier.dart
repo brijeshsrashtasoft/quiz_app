@@ -21,14 +21,15 @@ class ScoreMultiplier with _$ScoreMultiplier {
 
   int calculateSpeedBonus(Duration responseTime, Duration questionDuration) {
     if (responseTime >= questionDuration) return 0;
-    
-    final double remainingRatio = 1 - (responseTime.inMilliseconds / questionDuration.inMilliseconds);
+
+    final double remainingRatio =
+        1 - (responseTime.inMilliseconds / questionDuration.inMilliseconds);
     return (maxSpeedBonus * remainingRatio * speedMultiplier).round();
   }
 
   int calculateStreakBonus(int currentStreak) {
     if (currentStreak <= 0) return 0;
-    
+
     final double streakFactor = (currentStreak.clamp(0, 10) / 10.0);
     return (maxStreakBonus * streakFactor * streakMultiplier).round();
   }
@@ -43,7 +44,7 @@ class ScoreMultiplier with _$ScoreMultiplier {
 
     final int speedBonus = calculateSpeedBonus(responseTime, questionDuration);
     final int streakBonus = calculateStreakBonus(currentStreak);
-    
+
     return basePoints + speedBonus + streakBonus;
   }
 }

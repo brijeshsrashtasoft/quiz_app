@@ -62,7 +62,7 @@ class BreadcrumbNavigation extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(AppSpacing.spacingXS),
                   decoration: BoxDecoration(
-                    color: AppColors.lightGray.withOpacity(0.3),
+                    color: AppColors.lightGray.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Icon(
@@ -344,7 +344,7 @@ class CompactBreadcrumb extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(AppSpacing.spacingS),
                 decoration: BoxDecoration(
-                  color: AppColors.lightGray.withOpacity(0.3),
+                  color: AppColors.lightGray.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(

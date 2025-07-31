@@ -7,43 +7,41 @@ import '../repositories/quiz_repository.dart';
 /// Following Clean Architecture principles from CLAUDE.md
 class GetUserQuizzesUseCase {
   final QuizRepository _repository;
-  
+
   GetUserQuizzesUseCase(this._repository);
-  
+
   /// Execute the use case
   Future<Result<List<Quiz>>> call(GetUserQuizzesParams params) async {
     // Validate user ID
     if (params.userId.isEmpty) {
       return const Result.failure(
-        ValidationFailure(
-          message: 'User ID cannot be empty.',
-        ),
+        ValidationFailure(message: 'User ID cannot be empty.'),
       );
     }
-    
+
     // Get user's quizzes
     final result = await _repository.getQuizzesByUser(
       params.userId,
       limit: params.limit,
       lastCreatedAt: params.lastCreatedAt,
     );
-    
+
     if (result.isFailure) {
       return result;
     }
-    
+
     final quizzes = result.dataOrNull!;
-    
+
     // Filter based on parameters
     List<Quiz> filteredQuizzes = quizzes;
-    
+
     // Filter by status if specified
     if (params.filterByStatus != null) {
       filteredQuizzes = filteredQuizzes
           .where((quiz) => quiz.status == params.filterByStatus)
           .toList();
     }
-    
+
     // Filter by draft status if specified
     if (params.includeDrafts != null) {
       if (params.includeDrafts!) {
@@ -58,7 +56,7 @@ class GetUserQuizzesUseCase {
             .toList();
       }
     }
-    
+
     // Sort based on preference
     switch (params.sortBy) {
       case QuizSortOption.createdAt:
@@ -81,10 +79,10 @@ class GetUserQuizzesUseCase {
         filteredQuizzes.sort((a, b) => b.rating.compareTo(a.rating));
         break;
     }
-    
+
     return Result.success(filteredQuizzes);
   }
-  
+
   /// Get user's draft quizzes
   Future<Result<List<Quiz>>> getDrafts(String userId) async {
     return _repository.getDraftQuizzes(userId);
@@ -99,7 +97,7 @@ class GetUserQuizzesParams {
   final QuizStatus? filterByStatus;
   final bool? includeDrafts;
   final QuizSortOption sortBy;
-  
+
   const GetUserQuizzesParams({
     required this.userId,
     this.limit,
@@ -111,10 +109,4 @@ class GetUserQuizzesParams {
 }
 
 /// Options for sorting quizzes
-enum QuizSortOption {
-  createdAt,
-  updatedAt,
-  title,
-  playCount,
-  rating,
-}
+enum QuizSortOption { createdAt, updatedAt, title, playCount, rating }

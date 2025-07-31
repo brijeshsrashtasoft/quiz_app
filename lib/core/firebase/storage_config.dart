@@ -43,7 +43,9 @@ class StorageConfig {
 
       // Validate content type
       if (!_isValidImageType(contentType)) {
-        throw Exception('Invalid image type. Only JPEG, PNG, and WebP are allowed');
+        throw Exception(
+          'Invalid image type. Only JPEG, PNG, and WebP are allowed',
+        );
       }
 
       final ref = quizImagesRef.child('$quizId/$imageId');
@@ -55,10 +57,7 @@ class StorageConfig {
         },
       );
 
-      final uploadTask = ref.putData(
-        Uint8List.fromList(imageBytes),
-        metadata,
-      );
+      final uploadTask = ref.putData(Uint8List.fromList(imageBytes), metadata);
 
       // Monitor upload progress
       uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
@@ -91,10 +90,7 @@ class StorageConfig {
     required String contentType,
   }) async {
     try {
-      AppLogger.firebase(
-        'StorageConfig',
-        'Uploading user avatar: $userId',
-      );
+      AppLogger.firebase('StorageConfig', 'Uploading user avatar: $userId');
 
       // Validate file size (5MB limit for free tier)
       const maxSize = 5 * 1024 * 1024; // 5MB
@@ -104,7 +100,9 @@ class StorageConfig {
 
       // Validate content type
       if (!_isValidImageType(contentType)) {
-        throw Exception('Invalid image type. Only JPEG, PNG, and WebP are allowed');
+        throw Exception(
+          'Invalid image type. Only JPEG, PNG, and WebP are allowed',
+        );
       }
 
       final extension = _getExtensionFromContentType(contentType);
@@ -117,10 +115,7 @@ class StorageConfig {
         },
       );
 
-      final uploadTask = ref.putData(
-        Uint8List.fromList(imageBytes),
-        metadata,
-      );
+      final uploadTask = ref.putData(Uint8List.fromList(imageBytes), metadata);
 
       final snapshot = await uploadTask;
       final downloadUrl = await snapshot.ref.getDownloadURL();
@@ -151,10 +146,7 @@ class StorageConfig {
       final ref = quizImagesRef.child('$quizId/$imageId');
       await ref.delete();
 
-      AppLogger.firebase(
-        'StorageConfig',
-        'Quiz image deleted successfully',
-      );
+      AppLogger.firebase('StorageConfig', 'Quiz image deleted successfully');
     } catch (e, stackTrace) {
       AppLogger.error('Failed to delete quiz image', e, stackTrace);
       rethrow;
@@ -170,11 +162,9 @@ class StorageConfig {
       );
 
       final listResult = await quizImagesRef.child(quizId).listAll();
-      
+
       // Delete all items in parallel
-      await Future.wait(
-        listResult.items.map((ref) => ref.delete()),
-      );
+      await Future.wait(listResult.items.map((ref) => ref.delete()));
 
       AppLogger.firebase(
         'StorageConfig',

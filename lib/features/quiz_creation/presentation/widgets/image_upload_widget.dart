@@ -55,7 +55,7 @@ class _ImageUploadWidgetState extends ConsumerState<ImageUploadWidget>
     setState(() {
       _isUploading = false;
     });
-    
+
     _animationController.forward();
   }
 
@@ -148,11 +148,7 @@ class _ImageUploadWidgetState extends ConsumerState<ImageUploadWidget>
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
-                      Icons.image,
-                      size: 60,
-                      color: AppColors.coolGray,
-                    ),
+                    Icon(Icons.image, size: 60, color: AppColors.coolGray),
                     const SizedBox(height: AppSpacing.spacingM),
                     Text(
                       'Image Preview',

@@ -6,24 +6,26 @@ import '../../utils/logger.dart';
 /// Handles connection pooling, recovery, and offline state
 class ConnectionManager {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  
+
   bool _isInitialized = false;
-  
-  final _connectionStateController = StreamController<ConnectionState>.broadcast();
-  Stream<ConnectionState> get connectionState => _connectionStateController.stream;
+
+  final _connectionStateController =
+      StreamController<ConnectionState>.broadcast();
+  Stream<ConnectionState> get connectionState =>
+      _connectionStateController.stream;
 
   /// Initialize connection monitoring
   Future<void> initialize() async {
     if (_isInitialized) return;
-    
+
     _isInitialized = true;
-    
+
     // Enable Firestore offline persistence
     _firestore.settings = const Settings(
       persistenceEnabled: true,
       cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
     );
-    
+
     AppLogger.info('ConnectionManager', 'Initialized with offline persistence');
     _connectionStateController.add(ConnectionState.online);
   }
@@ -47,18 +49,13 @@ class ConnectionManager {
 }
 
 /// Connection states
-enum ConnectionState {
-  online,
-  offline,
-  syncing,
-  error,
-}
+enum ConnectionState { online, offline, syncing, error }
 
 /// Connection pooling for managing multiple listeners efficiently
 class ListenerPool {
   final Map<String, StreamSubscription> _activeListeners = {};
   final Map<String, int> _listenerRefCounts = {};
-  
+
   /// Add a listener with reference counting
   void addListener(
     String key,
@@ -71,15 +68,17 @@ class ListenerPool {
       _listenerRefCounts[key] = (_listenerRefCounts[key] ?? 0) + 1;
       return;
     }
-    
+
     // Create new listener
     final subscription = stream.listen(
       onData,
-      onError: onError ?? (error, stack) {
-        AppLogger.error('Listener error for $key', error, stack);
-      },
+      onError:
+          onError ??
+          (error, stack) {
+            AppLogger.error('Listener error for $key', error, stack);
+          },
     );
-    
+
     _activeListeners[key] = subscription;
     _listenerRefCounts[key] = 1;
   }

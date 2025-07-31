@@ -25,18 +25,12 @@ class AnimatedStateManager<T> extends ChangeNotifier {
   }
 
   /// Register an animation controller
-  void registerController(
-    String key,
-    AnimationController controller,
-  ) {
+  void registerController(String key, AnimationController controller) {
     _controllers[key] = controller;
   }
 
   /// Register an animation
-  void registerAnimation<A>(
-    String key,
-    Animation<A> animation,
-  ) {
+  void registerAnimation<A>(String key, Animation<A> animation) {
     _animations[key] = animation;
   }
 
@@ -44,7 +38,8 @@ class AnimatedStateManager<T> extends ChangeNotifier {
   AnimationController? getController(String key) => _controllers[key];
 
   /// Get animation by key
-  Animation<A>? getAnimation<A>(String key) => _animations[key] as Animation<A>?;
+  Animation<A>? getAnimation<A>(String key) =>
+      _animations[key] as Animation<A>?;
 
   /// Trigger animation with state change
   Future<void> animateToState(
@@ -75,18 +70,18 @@ class AnimatedStateManager<T> extends ChangeNotifier {
 }
 
 /// Provider for animated state managers
-final animatedStateManagerProvider = Provider.family<
-    AnimatedStateManager<T>,
-    AnimatedStateConfig<T>,
-    T
->((ref, config) {
-  final manager = AnimatedStateManager<T>(
-    initialState: config.initialState,
-    defaultDuration: config.defaultDuration,
-  );
-  ref.onDispose(() => manager.dispose());
-  return manager;
-});
+final animatedStateManagerProvider =
+    Provider.family<AnimatedStateManager<T>, AnimatedStateConfig<T>, T>((
+      ref,
+      config,
+    ) {
+      final manager = AnimatedStateManager<T>(
+        initialState: config.initialState,
+        defaultDuration: config.defaultDuration,
+      );
+      ref.onDispose(() => manager.dispose());
+      return manager;
+    });
 
 /// Configuration for animated state manager
 class AnimatedStateConfig<T> {
@@ -124,7 +119,8 @@ abstract class AnimatedStatefulWidget<T> extends ConsumerStatefulWidget {
 
 /// Base state for animated stateful widgets
 abstract class AnimatedState<W extends AnimatedStatefulWidget<T>, T>
-    extends ConsumerState<W> with TickerProviderStateMixin {
+    extends ConsumerState<W>
+    with TickerProviderStateMixin {
   late final AnimatedStateManager<T> stateManager;
   final Map<String, AnimationController> _localControllers = {};
 
@@ -215,10 +211,7 @@ mixin AnimatedTransitionMixin<T extends StatefulWidget> on State<T> {
     required Animatable<U> animatable,
     required TickerProvider vsync,
   }) {
-    final controller = AnimationController(
-      vsync: vsync,
-      duration: duration,
-    );
+    final controller = AnimationController(vsync: vsync, duration: duration);
     _transitionControllers[key] = controller;
 
     final animation = animatable.animate(controller);
@@ -283,13 +276,9 @@ class AnimatedValueNotifier<T> extends ValueNotifier<T> {
     );
 
     _targetValue = newValue;
-    _animation = Tween<T>(
-      begin: value,
-      end: newValue,
-    ).animate(CurvedAnimation(
-      parent: _controller!,
-      curve: customCurve ?? curve,
-    ));
+    _animation = Tween<T>(begin: value, end: newValue).animate(
+      CurvedAnimation(parent: _controller!, curve: customCurve ?? curve),
+    );
 
     _animation!.addListener(() {
       value = _animation!.value;

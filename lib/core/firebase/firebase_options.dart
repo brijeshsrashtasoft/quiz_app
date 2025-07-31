@@ -31,51 +31,51 @@ class DefaultFirebaseOptions {
     }
   }
 
-  // TODO: Replace with actual Firebase project configuration
-  // Run `flutterfire configure` to generate these options
+  // Test mode Firebase configuration for development
+  // Replace with actual Firebase project configuration in production
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'your-web-api-key',
-    appId: 'your-web-app-id',
-    messagingSenderId: 'your-sender-id',
-    projectId: 'your-project-id',
-    authDomain: 'your-project.firebaseapp.com',
-    storageBucket: 'your-project.appspot.com',
-    measurementId: 'your-measurement-id',
+    apiKey: 'AIzaSyTestKeyForWebPlatform123456789',
+    appId: '1:123456789:web:abcdef123456789',
+    messagingSenderId: '123456789',
+    projectId: 'quiz-app-test-project',
+    authDomain: 'quiz-app-test-project.firebaseapp.com',
+    storageBucket: 'quiz-app-test-project.appspot.com',
+    measurementId: 'G-TEST123456',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'your-android-api-key',
-    appId: 'your-android-app-id',
-    messagingSenderId: 'your-sender-id',
-    projectId: 'your-project-id',
-    storageBucket: 'your-project.appspot.com',
+    apiKey: 'AIzaSyTestKeyForAndroidPlatform123456789',
+    appId: '1:123456789:android:abcdef123456789',
+    messagingSenderId: '123456789',
+    projectId: 'quiz-app-test-project',
+    storageBucket: 'quiz-app-test-project.appspot.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'your-ios-api-key',
-    appId: 'your-ios-app-id',
-    messagingSenderId: 'your-sender-id',
-    projectId: 'your-project-id',
-    storageBucket: 'your-project.appspot.com',
+    apiKey: 'AIzaSyTestKeyForIOSPlatform123456789',
+    appId: '1:123456789:ios:abcdef123456789',
+    messagingSenderId: '123456789',
+    projectId: 'quiz-app-test-project',
+    storageBucket: 'quiz-app-test-project.appspot.com',
     iosBundleId: 'com.example.quizApp',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'your-macos-api-key',
-    appId: 'your-macos-app-id',
-    messagingSenderId: 'your-sender-id',
-    projectId: 'your-project-id',
-    storageBucket: 'your-project.appspot.com',
+    apiKey: 'AIzaSyTestKeyForMacOSPlatform123456789',
+    appId: '1:123456789:ios:abcdef123456789',
+    messagingSenderId: '123456789',
+    projectId: 'quiz-app-test-project',
+    storageBucket: 'quiz-app-test-project.appspot.com',
     iosBundleId: 'com.example.quizApp',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'your-windows-api-key',
-    appId: 'your-windows-app-id',
-    messagingSenderId: 'your-sender-id',
-    projectId: 'your-project-id',
-    authDomain: 'your-project.firebaseapp.com',
-    storageBucket: 'your-project.appspot.com',
-    measurementId: 'your-measurement-id',
+    apiKey: 'AIzaSyTestKeyForWindowsPlatform123456789',
+    appId: '1:123456789:web:windowsabcdef123456789',
+    messagingSenderId: '123456789',
+    projectId: 'quiz-app-test-project',
+    authDomain: 'quiz-app-test-project.firebaseapp.com',
+    storageBucket: 'quiz-app-test-project.appspot.com',
+    measurementId: 'G-TESTWIN123',
   );
 }

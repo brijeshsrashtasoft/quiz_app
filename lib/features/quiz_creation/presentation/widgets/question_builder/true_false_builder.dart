@@ -32,10 +32,7 @@ class _TrueFalseBuilderState extends State<TrueFalseBuilder>
       duration: AppAnimations.mediumAnimation,
       vsync: this,
     );
-    _scaleAnimation = Tween<double>(
-      begin: 0.8,
-      end: 1.0,
-    ).animate(
+    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
       CurvedAnimation(
         parent: _animationController,
         curve: AppAnimations.elastic,
@@ -52,43 +49,47 @@ class _TrueFalseBuilderState extends State<TrueFalseBuilder>
 
   @override
   Widget build(BuildContext context) {
+    final isSmallScreen = MediaQuery.of(context).size.height < 700;
+    
     return ScaleTransition(
       scale: _scaleAnimation,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Select Correct Answer',
-            style: AppTextStyles.inputLabel,
-          ),
+          Text('Select Correct Answer', style: AppTextStyles.inputLabel),
           const SizedBox(height: AppSpacing.spacingM),
-          Row(
-            children: [
-              Expanded(
-                child: _buildOption(
-                  index: 0,
-                  label: 'True',
-                  icon: Icons.check_circle_outline,
-                  color: AppColors.turquoise,
+          IntrinsicHeight(
+            child: Row(
+              children: [
+                Expanded(
+                  child: _buildOption(
+                    index: 0,
+                    label: 'True',
+                    icon: Icons.check_circle_outline,
+                    color: AppColors.turquoise,
+                  ),
                 ),
-              ),
-              const SizedBox(width: AppSpacing.spacingM),
-              Expanded(
-                child: _buildOption(
-                  index: 1,
-                  label: 'False',
-                  icon: Icons.cancel_outlined,
-                  color: AppColors.coralRed,
+                const SizedBox(width: AppSpacing.spacingM),
+                Expanded(
+                  child: _buildOption(
+                    index: 1,
+                    label: 'False',
+                    icon: Icons.cancel_outlined,
+                    color: AppColors.coralRed,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           const SizedBox(height: AppSpacing.spacingM),
           // Visual indicator
           AnimatedContainer(
             duration: AppAnimations.shortAnimation,
             curve: AppAnimations.easeInOut,
-            padding: const EdgeInsets.all(AppSpacing.spacingM),
+            padding: EdgeInsets.all(
+              isSmallScreen ? AppSpacing.spacingS : AppSpacing.spacingM,
+            ),
             decoration: BoxDecoration(
               color: widget.correctAnswer == 0
                   ? AppColors.turquoise.withOpacity(0.1)
@@ -101,32 +102,37 @@ class _TrueFalseBuilderState extends State<TrueFalseBuilder>
                 width: 1,
               ),
             ),
-            child: Row(
-              children: [
-                Icon(
-                  widget.correctAnswer == 0
-                      ? Icons.info_outline
-                      : Icons.info_outline,
-                  color: widget.correctAnswer == 0
-                      ? AppColors.turquoise
-                      : AppColors.coralRed,
-                  size: 20,
-                ),
-                const SizedBox(width: AppSpacing.spacingS),
-                Expanded(
-                  child: Text(
+            child: IntrinsicHeight(
+              child: Row(
+                children: [
+                  Icon(
                     widget.correctAnswer == 0
-                        ? 'The correct answer is TRUE'
-                        : 'The correct answer is FALSE',
-                    style: AppTextStyles.caption.copyWith(
-                      color: widget.correctAnswer == 0
-                          ? AppColors.turquoise
-                          : AppColors.coralRed,
-                      fontWeight: FontWeight.w500,
+                        ? Icons.info_outline
+                        : Icons.info_outline,
+                    color: widget.correctAnswer == 0
+                        ? AppColors.turquoise
+                        : AppColors.coralRed,
+                    size: isSmallScreen ? 18 : 20,
+                  ),
+                  const SizedBox(width: AppSpacing.spacingS),
+                  Expanded(
+                    child: Text(
+                      widget.correctAnswer == 0
+                          ? 'The correct answer is TRUE'
+                          : 'The correct answer is FALSE',
+                      style: AppTextStyles.caption.copyWith(
+                        color: widget.correctAnswer == 0
+                            ? AppColors.turquoise
+                            : AppColors.coralRed,
+                        fontWeight: FontWeight.w500,
+                        fontSize: isSmallScreen ? 11 : 12,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 2,
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
@@ -141,6 +147,9 @@ class _TrueFalseBuilderState extends State<TrueFalseBuilder>
     required Color color,
   }) {
     final isSelected = widget.correctAnswer == index;
+    final isSmallScreen = MediaQuery.of(context).size.height < 700;
+    final iconSize = isSmallScreen ? 36.0 : 48.0;
+    final borderWidth = isSelected ? (isSmallScreen ? 2.0 : 3.0) : 1.0;
 
     return GestureDetector(
       onTap: () {
@@ -151,66 +160,77 @@ class _TrueFalseBuilderState extends State<TrueFalseBuilder>
       child: AnimatedContainer(
         duration: AppAnimations.shortAnimation,
         curve: AppAnimations.easeInOut,
-        padding: const EdgeInsets.all(AppSpacing.spacingL),
+        padding: EdgeInsets.all(
+          isSmallScreen ? AppSpacing.spacingM : AppSpacing.spacingL,
+        ),
         decoration: BoxDecoration(
           color: isSelected ? color.withOpacity(0.1) : AppColors.pureWhite,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected ? color : AppColors.lightGray,
-            width: isSelected ? 3 : 1,
+            width: borderWidth,
           ),
           boxShadow: isSelected
               ? [
                   BoxShadow(
                     color: color.withOpacity(0.2),
-                    blurRadius: 12,
+                    blurRadius: isSmallScreen ? 8 : 12,
                     offset: const Offset(0, 4),
                   ),
                 ]
               : [],
         ),
-        child: Column(
-          children: [
-            AnimatedContainer(
-              duration: AppAnimations.shortAnimation,
-              transform: Matrix4.identity()
-                ..scale(isSelected ? 1.1 : 1.0),
-              child: Icon(
-                icon,
-                color: isSelected ? color : AppColors.coolGray,
-                size: 48,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.spacingM),
-            Text(
-              label,
-              style: AppTextStyles.sectionHeader.copyWith(
-                color: isSelected ? color : AppColors.coolGray,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.spacingXS),
-            AnimatedOpacity(
-              duration: AppAnimations.shortAnimation,
-              opacity: isSelected ? 1.0 : 0.0,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.spacingM,
-                  vertical: AppSpacing.spacingXS,
+        child: IntrinsicHeight(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AnimatedContainer(
+                duration: AppAnimations.shortAnimation,
+                transform: Matrix4.identity()..scale(isSelected ? 1.1 : 1.0),
+                child: Icon(
+                  icon,
+                  color: isSelected ? color : AppColors.coolGray,
+                  size: iconSize,
                 ),
-                decoration: BoxDecoration(
-                  color: color,
-                  borderRadius: BorderRadius.circular(20),
-                ),
+              ),
+              const SizedBox(height: AppSpacing.spacingM),
+              Flexible(
                 child: Text(
-                  'Correct',
-                  style: AppTextStyles.caption.copyWith(
-                    color: AppColors.pureWhite,
-                    fontWeight: FontWeight.w600,
+                  label,
+                  style: AppTextStyles.sectionHeader.copyWith(
+                    color: isSelected ? color : AppColors.coolGray,
+                    fontSize: isSmallScreen ? 16 : 18,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.spacingXS),
+              AnimatedOpacity(
+                duration: AppAnimations.shortAnimation,
+                opacity: isSelected ? 1.0 : 0.0,
+                child: Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isSmallScreen ? AppSpacing.spacingS : AppSpacing.spacingM,
+                    vertical: AppSpacing.spacingXS,
+                  ),
+                  decoration: BoxDecoration(
+                    color: color,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    'Correct',
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.pureWhite,
+                      fontWeight: FontWeight.w600,
+                      fontSize: isSmallScreen ? 10 : 12,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

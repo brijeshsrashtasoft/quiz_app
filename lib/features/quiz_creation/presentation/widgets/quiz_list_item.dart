@@ -49,7 +49,7 @@ class _QuizListItemState extends State<QuizListItem>
   String _formatDate(DateTime date) {
     final now = DateTime.now();
     final difference = now.difference(date);
-    
+
     if (difference.inDays == 0) {
       return 'Today';
     } else if (difference.inDays == 1) {
@@ -158,10 +158,7 @@ class _QuizListItemState extends State<QuizListItem>
                       ),
                       // Actions menu
                       PopupMenuButton<String>(
-                        icon: Icon(
-                          Icons.more_vert,
-                          color: AppColors.coolGray,
-                        ),
+                        icon: Icon(Icons.more_vert, color: AppColors.coolGray),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -183,7 +180,11 @@ class _QuizListItemState extends State<QuizListItem>
                             value: 'edit',
                             child: Row(
                               children: [
-                                Icon(Icons.edit_outlined, color: AppColors.charcoal, size: 20),
+                                Icon(
+                                  Icons.edit_outlined,
+                                  color: AppColors.charcoal,
+                                  size: 20,
+                                ),
                                 const SizedBox(width: AppSpacing.spacingM),
                                 Text('Edit', style: AppTextStyles.bodyText),
                               ],
@@ -193,7 +194,11 @@ class _QuizListItemState extends State<QuizListItem>
                             value: 'share',
                             child: Row(
                               children: [
-                                Icon(Icons.share_outlined, color: AppColors.charcoal, size: 20),
+                                Icon(
+                                  Icons.share_outlined,
+                                  color: AppColors.charcoal,
+                                  size: 20,
+                                ),
                                 const SizedBox(width: AppSpacing.spacingM),
                                 Text('Share', style: AppTextStyles.bodyText),
                               ],
@@ -204,7 +209,11 @@ class _QuizListItemState extends State<QuizListItem>
                             value: 'delete',
                             child: Row(
                               children: [
-                                Icon(Icons.delete_outline, color: AppColors.coralRed, size: 20),
+                                Icon(
+                                  Icons.delete_outline,
+                                  color: AppColors.coralRed,
+                                  size: 20,
+                                ),
                                 const SizedBox(width: AppSpacing.spacingM),
                                 Text(
                                   'Delete',
@@ -268,11 +277,7 @@ class _QuizListItemState extends State<QuizListItem>
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            icon,
-            size: 14,
-            color: color,
-          ),
+          Icon(icon, size: 14, color: color),
           const SizedBox(width: AppSpacing.spacingXS),
           Text(
             label,
@@ -292,11 +297,7 @@ class _QuizListItemState extends State<QuizListItem>
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              icon,
-              color: color,
-              size: 20,
-            ),
+            Icon(icon, color: color, size: 20),
             const SizedBox(width: AppSpacing.spacingXS),
             Text(
               value,
@@ -308,10 +309,7 @@ class _QuizListItemState extends State<QuizListItem>
           ],
         ),
         const SizedBox(height: AppSpacing.spacingXS),
-        Text(
-          label,
-          style: AppTextStyles.caption,
-        ),
+        Text(label, style: AppTextStyles.caption),
       ],
     );
   }

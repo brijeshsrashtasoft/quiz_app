@@ -373,4 +373,13 @@ class AppTextStyles {
         return leaderboardRank;
     }
   }
+
+  // Missing text styles used throughout the codebase
+  // Mapping common aliases to existing styles for consistency
+  static const TextStyle h1 = gameTitle;
+  static const TextStyle h2 = sectionHeader;
+  static const TextStyle h3 = questionText;
+  static const TextStyle h4 = cardTitle;
+  static const TextStyle body = bodyText;
+  static const TextStyle sectionSubheader = cardTitle;
 }

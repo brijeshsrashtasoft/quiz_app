@@ -43,7 +43,7 @@ class _EmailVerificationPageState extends ConsumerState<EmailVerificationPage>
 
   void _setupAnimations() {
     _animationController = AnimationController(
-      duration: AppAnimations.mediumAnimation,
+      duration: AppAnimations.shortAnimation,
       vsync: this,
     );
 
@@ -55,7 +55,7 @@ class _EmailVerificationPageState extends ConsumerState<EmailVerificationPage>
     );
 
     _slideAnimation =
-        Tween<Offset>(begin: const Offset(0.0, 0.3), end: Offset.zero).animate(
+        Tween<Offset>(begin: const Offset(0.0, 0.1), end: Offset.zero).animate(
           CurvedAnimation(
             parent: _animationController,
             curve: AppAnimations.easeOut,

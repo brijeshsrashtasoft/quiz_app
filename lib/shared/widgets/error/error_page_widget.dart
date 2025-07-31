@@ -6,7 +6,6 @@ import '../../constants/app_text_styles.dart';
 import '../../constants/app_spacing.dart';
 import '../../constants/app_animations.dart';
 import '../buttons/primary_button.dart';
-import '../layout/page_layout.dart';
 import '../../../core/navigation/route_constants.dart';
 
 /// Comprehensive error page widget for handling various error states
@@ -91,7 +90,7 @@ class _ErrorPageWidgetState extends State<ErrorPageWidget>
 
   @override
   Widget build(BuildContext context) {
-    return AppScaffold(
+    return Scaffold(
       backgroundColor: AppColors.offWhite,
       body: SafeArea(
         child: AnimatedBuilder(
@@ -125,10 +124,10 @@ class _ErrorPageWidgetState extends State<ErrorPageWidget>
               width: 120,
               height: 120,
               decoration: BoxDecoration(
-                color: AppColors.error.withOpacity(0.1),
+                color: AppColors.error.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: AppColors.error.withOpacity(0.3),
+                  color: AppColors.error.withValues(alpha: 0.3),
                   width: 2,
                 ),
               ),
@@ -174,7 +173,7 @@ class _ErrorPageWidgetState extends State<ErrorPageWidget>
                 vertical: AppSpacing.spacingS,
               ),
               decoration: BoxDecoration(
-                color: AppColors.lightGray.withOpacity(0.5),
+                color: AppColors.lightGray.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
@@ -264,7 +263,7 @@ class _ErrorPageWidgetState extends State<ErrorPageWidget>
     return Container(
       padding: const EdgeInsets.all(AppSpacing.spacingM),
       decoration: BoxDecoration(
-        color: AppColors.lightGray.withOpacity(0.3),
+        color: AppColors.lightGray.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: AppColors.lightGray),
       ),
@@ -350,9 +349,9 @@ class NotFoundErrorWidget extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(AppSpacing.spacingM),
           decoration: BoxDecoration(
-            color: AppColors.info.withOpacity(0.1),
+            color: AppColors.info.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: AppColors.info.withOpacity(0.3)),
+            border: Border.all(color: AppColors.info.withValues(alpha: 0.3)),
           ),
           child: Column(
             children: [
@@ -458,9 +457,9 @@ class _QuickNavChip extends StatelessWidget {
           vertical: AppSpacing.spacingS,
         ),
         decoration: BoxDecoration(
-          color: AppColors.vibrantPurple.withOpacity(0.1),
+          color: AppColors.vibrantPurple.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppColors.vibrantPurple.withOpacity(0.3)),
+          border: Border.all(color: AppColors.vibrantPurple.withValues(alpha: 0.3)),
         ),
         child: Text(
           label,

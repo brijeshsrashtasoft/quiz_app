@@ -8,10 +8,7 @@ import '../../../../shared/constants/app_spacing.dart';
 class PodiumDisplay extends StatelessWidget {
   final List<LeaderboardEntry> topThree;
 
-  const PodiumDisplay({
-    super.key,
-    required this.topThree,
-  });
+  const PodiumDisplay({super.key, required this.topThree});
 
   @override
   Widget build(BuildContext context) {
@@ -43,22 +40,21 @@ class PodiumDisplay extends StatelessWidget {
           final delay = delays[index];
 
           return Expanded(
-            child: _buildPodiumStep(
-              entry: entry,
-              height: height,
-              rank: entry!.rank,
-            ).animate()
-              .slideY(
-                begin: 1,
-                end: 0,
-                duration: 800.ms,
-                delay: delay.ms,
-                curve: Curves.easeOutBack,
-              )
-              .fadeIn(
-                duration: 600.ms,
-                delay: delay.ms,
-              ),
+            child:
+                _buildPodiumStep(
+                      entry: entry,
+                      height: height,
+                      rank: entry!.rank,
+                    )
+                    .animate()
+                    .slideY(
+                      begin: 1,
+                      end: 0,
+                      duration: 800.ms,
+                      delay: delay.ms,
+                      curve: Curves.easeOutBack,
+                    )
+                    .fadeIn(duration: 600.ms, delay: delay.ms),
           );
         }),
       ),
@@ -98,9 +94,7 @@ class PodiumDisplay extends StatelessWidget {
         const SizedBox(height: AppSpacing.xs),
         Text(
           '${entry.totalScore} pts',
-          style: AppTextStyles.caption.copyWith(
-            color: AppColors.textSecondary,
-          ),
+          style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
         ),
         const SizedBox(height: AppSpacing.md),
         Container(
@@ -152,26 +146,28 @@ class PodiumDisplay extends StatelessWidget {
                   left: 0,
                   right: 0,
                   child: Center(
-                    child: Icon(
-                      Icons.emoji_events,
-                      color: Colors.white.withOpacity(0.9),
-                      size: 40,
-                    ).animate(
-                      onPlay: (controller) => controller.repeat(),
-                    )
-                      .rotate(
-                        begin: -0.05,
-                        end: 0.05,
-                        duration: 2.seconds,
-                        curve: Curves.easeInOut,
-                      )
-                      .then()
-                      .rotate(
-                        begin: 0.05,
-                        end: -0.05,
-                        duration: 2.seconds,
-                        curve: Curves.easeInOut,
-                      ),
+                    child:
+                        Icon(
+                              Icons.emoji_events,
+                              color: Colors.white.withOpacity(0.9),
+                              size: 40,
+                            )
+                            .animate(
+                              onPlay: (controller) => controller.repeat(),
+                            )
+                            .rotate(
+                              begin: -0.05,
+                              end: 0.05,
+                              duration: 2.seconds,
+                              curve: Curves.easeInOut,
+                            )
+                            .then()
+                            .rotate(
+                              begin: 0.05,
+                              end: -0.05,
+                              duration: 2.seconds,
+                              curve: Curves.easeInOut,
+                            ),
                   ),
                 ),
             ],
@@ -193,10 +189,7 @@ class PodiumDisplay extends StatelessWidget {
       height: 64,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(
-          color: colors[rank - 1],
-          width: 3,
-        ),
+        border: Border.all(color: colors[rank - 1], width: 3),
         boxShadow: [
           BoxShadow(
             color: colors[rank - 1].withOpacity(0.3),
@@ -213,9 +206,7 @@ class PodiumDisplay extends StatelessWidget {
         child: entry.avatarUrl == null
             ? Text(
                 entry.playerName[0].toUpperCase(),
-                style: AppTextStyles.h2.copyWith(
-                  color: colors[rank - 1],
-                ),
+                style: AppTextStyles.h2.copyWith(color: colors[rank - 1]),
               )
             : null,
       ),

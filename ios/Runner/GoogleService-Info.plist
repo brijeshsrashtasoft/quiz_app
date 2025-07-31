@@ -3,17 +3,17 @@
 <plist version="1.0">
 <dict>
 	<key>API_KEY</key>
-	<string>YOUR_API_KEY</string>
+	<string>AIzaSyDxqDm2ldQn6LKD_d7jmUX8j49jwBQ0fQA</string>
 	<key>GCM_SENDER_ID</key>
-	<string>YOUR_PROJECT_NUMBER</string>
+	<string>130579954244</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.example.quiz_app</string>
+	<string>com.example.quizApp</string>
 	<key>PROJECT_ID</key>
-	<string>your-firebase-project-id</string>
+	<string>quiz-app-1753821039</string>
 	<key>STORAGE_BUCKET</key>
-	<string>your-firebase-project-id.appspot.com</string>
+	<string>quiz-app-1753821039.firebasestorage.app</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -25,8 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:YOUR_PROJECT_NUMBER:ios:YOUR_APP_ID</string>
-	<key>DATABASE_URL</key>
-	<string>https://your-firebase-project-id-default-rtdb.firebaseio.com</string>
+	<string>1:130579954244:ios:c10a1ba68a363f00f91a11</string>
 </dict>
 </plist>

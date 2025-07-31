@@ -37,21 +37,13 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen>
       vsync: this,
     );
 
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
 
-    _slideAnimation = Tween<double>(
-      begin: 50.0,
-      end: 0.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOutCubic,
-    ));
+    _slideAnimation = Tween<double>(begin: 50.0, end: 0.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOutCubic),
+    );
 
     _animationController.forward();
   }
@@ -126,7 +118,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen>
 
   Widget _buildLeaderboardContent(dynamic leaderboard) {
     final entries = leaderboard.entries;
-    
+
     if (entries.isEmpty) {
       return _buildEmptyState();
     }
@@ -150,40 +142,35 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen>
         SliverPadding(
           padding: const EdgeInsets.all(AppSpacing.md),
           sliver: SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                final entry = entries[index];
-                final showAnimation = !widget.isFinal || index < 10;
-                
-                return AnimatedBuilder(
-                  animation: _animationController,
-                  builder: (context, child) {
-                    if (!showAnimation) return child!;
-                    
-                    final delay = index * 0.1;
-                    final animationValue = (_animationController.value - delay)
-                        .clamp(0.0, 1.0);
-                    
-                    return FadeTransition(
-                      opacity: AlwaysStoppedAnimation(animationValue),
-                      child: Transform.translate(
-                        offset: Offset(
-                          0,
-                          20 * (1 - animationValue),
-                        ),
-                        child: child,
-                      ),
-                    );
-                  },
-                  child: LeaderboardEntryWidget(
-                    entry: entry,
-                    isCurrentPlayer: entry.playerId == ref.read(currentPlayerIdProvider),
-                    showAnimation: !widget.isFinal,
-                  ),
-                );
-              },
-              childCount: entries.length,
-            ),
+            delegate: SliverChildBuilderDelegate((context, index) {
+              final entry = entries[index];
+              final showAnimation = !widget.isFinal || index < 10;
+
+              return AnimatedBuilder(
+                animation: _animationController,
+                builder: (context, child) {
+                  if (!showAnimation) return child!;
+
+                  final delay = index * 0.1;
+                  final animationValue = (_animationController.value - delay)
+                      .clamp(0.0, 1.0);
+
+                  return FadeTransition(
+                    opacity: AlwaysStoppedAnimation(animationValue),
+                    child: Transform.translate(
+                      offset: Offset(0, 20 * (1 - animationValue)),
+                      child: child,
+                    ),
+                  );
+                },
+                child: LeaderboardEntryWidget(
+                  entry: entry,
+                  isCurrentPlayer:
+                      entry.playerId == ref.read(currentPlayerIdProvider),
+                  showAnimation: !widget.isFinal,
+                ),
+              );
+            }, childCount: entries.length),
           ),
         ),
       ],
@@ -203,9 +190,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen>
           const SizedBox(height: AppSpacing.md),
           Text(
             'No scores yet',
-            style: AppTextStyles.h3.copyWith(
-              color: AppColors.textSecondary,
-            ),
+            style: AppTextStyles.h3.copyWith(color: AppColors.textSecondary),
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
@@ -234,9 +219,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen>
             const SizedBox(height: AppSpacing.md),
             Text(
               'Oops! Something went wrong',
-              style: AppTextStyles.h3.copyWith(
-                color: AppColors.textPrimary,
-              ),
+              style: AppTextStyles.h3.copyWith(color: AppColors.textPrimary),
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(

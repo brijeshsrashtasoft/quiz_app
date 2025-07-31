@@ -7,9 +7,9 @@ import '../repositories/quiz_repository.dart';
 /// Following Clean Architecture principles from CLAUDE.md
 class PublishQuizUseCase {
   final QuizRepository _repository;
-  
+
   PublishQuizUseCase(this._repository);
-  
+
   /// Execute the use case
   Future<Result<Quiz>> call(PublishQuizParams params) async {
     // Check if user owns the quiz
@@ -17,11 +17,11 @@ class PublishQuizUseCase {
       params.userId,
       params.quizId,
     );
-    
+
     if (ownershipResult.isFailure) {
       return Result.failure(ownershipResult.failureOrNull!);
     }
-    
+
     if (!ownershipResult.dataOrNull!) {
       return const Result.failure(
         Failure.authFailure(
@@ -30,16 +30,16 @@ class PublishQuizUseCase {
         ),
       );
     }
-    
+
     // Validate quiz before publishing
     final validationResult = await _repository.validateQuiz(params.quizId);
-    
+
     if (validationResult.isFailure) {
       return Result.failure(validationResult.failureOrNull!);
     }
-    
+
     final validation = validationResult.dataOrNull!;
-    
+
     if (!validation.isValid) {
       return Result.failure(
         ValidationFailure(
@@ -52,34 +52,32 @@ class PublishQuizUseCase {
         ),
       );
     }
-    
+
     // Get the quiz to check current status
     final quizResult = await _repository.getQuizById(params.quizId);
     if (quizResult.isFailure) {
       return Result.failure(quizResult.failureOrNull!);
     }
-    
+
     final quiz = quizResult.dataOrNull!;
-    
+
     // Check if already published
     if (quiz.isPublished) {
       return const Result.failure(
-        ValidationFailure(
-          message: 'Quiz is already published.',
-        ),
+        ValidationFailure(message: 'Quiz is already published.'),
       );
     }
-    
+
     // Publish the quiz
     final publishResult = await _repository.publishQuiz(params.quizId);
-    
+
     if (publishResult.isFailure) {
       return publishResult;
     }
-    
+
     // Log analytics event (future implementation)
     // await _analyticsService.logQuizPublished(params.quizId);
-    
+
     return publishResult;
   }
 }
@@ -88,9 +86,6 @@ class PublishQuizUseCase {
 class PublishQuizParams {
   final String quizId;
   final String userId;
-  
-  const PublishQuizParams({
-    required this.quizId,
-    required this.userId,
-  });
+
+  const PublishQuizParams({required this.quizId, required this.userId});
 }

@@ -8,7 +8,6 @@ import '../../../../shared/constants/app_spacing.dart';
 import '../../../../shared/constants/app_animations.dart';
 import '../../../../shared/widgets/buttons/primary_button.dart';
 import '../../../../shared/widgets/inputs/text_input.dart';
-import '../../../../shared/widgets/layout/page_layout.dart';
 import '../../../../core/navigation/route_constants.dart';
 import '../../../../core/errors/failures.dart';
 import '../providers/auth_providers.dart';
@@ -26,7 +25,7 @@ class RegisterPage extends ConsumerStatefulWidget {
 }
 
 class _RegisterPageState extends ConsumerState<RegisterPage>
-    with SingleTickerProviderStateMixin, FormValidationMixin {
+    with TickerProviderStateMixin, FormValidationMixin {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -34,8 +33,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage>
   final _confirmPasswordController = TextEditingController();
 
   late AnimationController _animationController;
+  late AnimationController _formFieldAnimationController;
   late Animation<double> _fadeInAnimation;
   late Animation<Offset> _slideAnimation;
+  late Animation<double> _formFieldStaggerAnimation;
 
   bool _isLoading = false;
   bool _obscurePassword = true;
@@ -60,6 +61,11 @@ class _RegisterPageState extends ConsumerState<RegisterPage>
       vsync: this,
     );
 
+    _formFieldAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 1200),
+      vsync: this,
+    );
+
     _fadeInAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _animationController,
@@ -71,16 +77,25 @@ class _RegisterPageState extends ConsumerState<RegisterPage>
         Tween<Offset>(begin: const Offset(0.0, 0.3), end: Offset.zero).animate(
           CurvedAnimation(
             parent: _animationController,
-            curve: AppAnimations.easeOut,
+            curve: AppAnimations.bounce,
           ),
         );
 
+    _formFieldStaggerAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _formFieldAnimationController,
+        curve: Curves.easeInOutCubic,
+      ),
+    );
+
     _animationController.forward();
+    _formFieldAnimationController.forward();
   }
 
   @override
   void dispose() {
     _animationController.dispose();
+    _formFieldAnimationController.dispose();
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
@@ -131,18 +146,30 @@ class _RegisterPageState extends ConsumerState<RegisterPage>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.offWhite,
-      body: SafeArea(
-        child: AnimatedBuilder(
-          animation: _animationController,
-          builder: (context, child) {
-            return FadeTransition(
-              opacity: _fadeInAnimation,
-              child: SlideTransition(
-                position: _slideAnimation,
-                child: _buildContent(),
-              ),
-            );
-          },
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppColors.mintGreen.withValues(alpha: 0.05),
+              AppColors.warmYellow.withValues(alpha: 0.05),
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: AnimatedBuilder(
+            animation: _animationController,
+            builder: (context, child) {
+              return FadeTransition(
+                opacity: _fadeInAnimation,
+                child: SlideTransition(
+                  position: _slideAnimation,
+                  child: _buildContent(),
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -158,7 +185,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage>
           children: [
             const SizedBox(height: AppSpacing.spacingXL),
 
-            // Auth Header
+            // Auth Header with celebration animation
             const AuthHeader(
               title: 'Join the Fun!',
               subtitle: 'Create your account to start quizzing',
@@ -167,52 +194,67 @@ class _RegisterPageState extends ConsumerState<RegisterPage>
 
             const SizedBox(height: AppSpacing.sectionSpacing),
 
-            // Name Input
-            CustomTextInput(
-              controller: _nameController,
-              label: 'Full Name',
-              hint: 'Enter your full name',
-              keyboardType: TextInputType.name,
-              prefixIcon: Icon(
-                Icons.person_outlined,
-                color: AppColors.coolGray,
-              ),
-              textInputAction: TextInputAction.next,
-              validator: (value) => validateName(value, minLength: 2),
-            ),
-
-            const SizedBox(height: AppSpacing.spacingL),
-
-            // Email Input
-            CustomTextInput(
-              controller: _emailController,
-              label: 'Email',
-              hint: 'Enter your email address',
-              keyboardType: TextInputType.emailAddress,
-              prefixIcon: Icon(Icons.email_outlined, color: AppColors.coolGray),
-              textInputAction: TextInputAction.next,
-              validator: validateEmail,
-            ),
-
-            const SizedBox(height: AppSpacing.spacingL),
-
-            // Password Input
-            CustomTextInput(
-              controller: _passwordController,
-              label: 'Password',
-              hint: 'Create a strong password',
-              obscureText: _obscurePassword,
-              prefixIcon: Icon(Icons.lock_outlined, color: AppColors.coolGray),
-              suffixIcon: IconButton(
-                icon: Icon(
-                  _obscurePassword ? Icons.visibility : Icons.visibility_off,
-                  color: AppColors.coolGray,
+            // Name Input with stagger animation
+            _buildStaggeredFormField(
+              delay: 0.0,
+              child: CustomTextInput(
+                controller: _nameController,
+                label: 'Full Name',
+                hint: 'Enter your full name',
+                keyboardType: TextInputType.name,
+                prefixIcon: Icon(
+                  Icons.person_outlined,
+                  color: AppColors.vibrantPurple,
                 ),
-                onPressed: () =>
-                    setState(() => _obscurePassword = !_obscurePassword),
+                textInputAction: TextInputAction.next,
+                validator: (value) => validateName(value, minLength: 2),
               ),
-              textInputAction: TextInputAction.next,
-              validator: validateStrongPassword,
+            ),
+
+            const SizedBox(height: AppSpacing.spacingL),
+
+            // Email Input with stagger animation
+            _buildStaggeredFormField(
+              delay: 0.1,
+              child: CustomTextInput(
+                controller: _emailController,
+                label: 'Email',
+                hint: 'Enter your email address',
+                keyboardType: TextInputType.emailAddress,
+                prefixIcon: Icon(
+                  Icons.email_outlined,
+                  color: AppColors.turquoise,
+                ),
+                textInputAction: TextInputAction.next,
+                validator: validateEmail,
+              ),
+            ),
+
+            const SizedBox(height: AppSpacing.spacingL),
+
+            // Password Input with stagger animation
+            _buildStaggeredFormField(
+              delay: 0.2,
+              child: CustomTextInput(
+                controller: _passwordController,
+                label: 'Password',
+                hint: 'Create a strong password',
+                obscureText: _obscurePassword,
+                prefixIcon: Icon(
+                  Icons.lock_outlined,
+                  color: AppColors.mintGreen,
+                ),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                    color: AppColors.coolGray,
+                  ),
+                  onPressed: () =>
+                      setState(() => _obscurePassword = !_obscurePassword),
+                ),
+                textInputAction: TextInputAction.next,
+                validator: validateStrongPassword,
+              ),
             ),
 
             const SizedBox(height: AppSpacing.spacingM),
@@ -225,28 +267,36 @@ class _RegisterPageState extends ConsumerState<RegisterPage>
 
             const SizedBox(height: AppSpacing.spacingL),
 
-            // Confirm Password Input
-            CustomTextInput(
-              controller: _confirmPasswordController,
-              label: 'Confirm Password',
-              hint: 'Confirm your password',
-              obscureText: _obscureConfirmPassword,
-              prefixIcon: Icon(Icons.lock_outlined, color: AppColors.coolGray),
-              suffixIcon: IconButton(
-                icon: Icon(
-                  _obscureConfirmPassword
-                      ? Icons.visibility
-                      : Icons.visibility_off,
-                  color: AppColors.coolGray,
+            // Confirm Password Input with stagger animation
+            _buildStaggeredFormField(
+              delay: 0.3,
+              child: CustomTextInput(
+                controller: _confirmPasswordController,
+                label: 'Confirm Password',
+                hint: 'Confirm your password',
+                obscureText: _obscureConfirmPassword,
+                prefixIcon: Icon(
+                  Icons.lock_outlined,
+                  color: AppColors.warmYellow,
                 ),
-                onPressed: () => setState(
-                  () => _obscureConfirmPassword = !_obscureConfirmPassword,
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscureConfirmPassword
+                        ? Icons.visibility
+                        : Icons.visibility_off,
+                    color: AppColors.coolGray,
+                  ),
+                  onPressed: () => setState(
+                    () => _obscureConfirmPassword = !_obscureConfirmPassword,
+                  ),
+                ),
+                textInputAction: TextInputAction.done,
+                onSubmitted: (_) => _handleRegister(),
+                validator: (value) => validatePasswordConfirmation(
+                  value,
+                  _passwordController.text,
                 ),
               ),
-              textInputAction: TextInputAction.done,
-              onSubmitted: (_) => _handleRegister(),
-              validator: (value) =>
-                  validatePasswordConfirmation(value, _passwordController.text),
             ),
 
             const SizedBox(height: AppSpacing.spacingL),
@@ -297,39 +347,51 @@ class _RegisterPageState extends ConsumerState<RegisterPage>
 
             const SizedBox(height: AppSpacing.spacingL),
 
-            // Error Message
-            if (_errorMessage != null) ...[
-              Container(
-                padding: const EdgeInsets.all(AppSpacing.spacingM),
-                decoration: BoxDecoration(
-                  color: AppColors.error.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: AppColors.error.withValues(alpha: 0.3),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.error_outline, color: AppColors.error, size: 20),
-                    const SizedBox(width: AppSpacing.spacingS),
-                    Expanded(
-                      child: Text(
-                        _errorMessage!,
-                        style: AppTextStyles.errorText,
+            // Error Message with animation
+            AnimatedSwitcher(
+              duration: AppAnimations.shortAnimation,
+              child: _errorMessage != null
+                  ? Container(
+                      padding: const EdgeInsets.all(AppSpacing.spacingM),
+                      decoration: BoxDecoration(
+                        color: AppColors.error.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: AppColors.error.withValues(alpha: 0.3),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.error_outline,
+                            color: AppColors.error,
+                            size: 20,
+                          ),
+                          const SizedBox(width: AppSpacing.spacingS),
+                          Expanded(
+                            child: Text(
+                              _errorMessage!,
+                              style: AppTextStyles.errorText,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : const SizedBox.shrink(),
+            ),
+            if (_errorMessage != null)
               const SizedBox(height: AppSpacing.spacingL),
-            ],
 
-            // Register Button
-            PrimaryButton(
-              text: 'Create Account',
-              onPressed: _isLoading ? null : _handleRegister,
-              isLoading: _isLoading,
-              icon: Icons.person_add,
+            // Register Button with pop animation
+            _buildStaggeredFormField(
+              delay: 0.4,
+              child: PrimaryButton(
+                text: 'Create Account',
+                onPressed: _isLoading ? null : _handleRegister,
+                isLoading: _isLoading,
+                icon: Icons.person_add,
+                backgroundColor: AppColors.mintGreen,
+              ),
             ),
 
             const SizedBox(height: AppSpacing.spacingL),
@@ -386,6 +448,27 @@ class _RegisterPageState extends ConsumerState<RegisterPage>
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildStaggeredFormField({
+    required double delay,
+    required Widget child,
+  }) {
+    return AnimatedBuilder(
+      animation: _formFieldStaggerAnimation,
+      builder: (context, _) {
+        final animationValue = Curves.easeOutBack.transform(
+          (_formFieldStaggerAnimation.value - delay).clamp(0.0, 1.0),
+        );
+        return Opacity(
+          opacity: animationValue,
+          child: Transform.translate(
+            offset: Offset(0, 20 * (1 - animationValue)),
+            child: child,
+          ),
+        );
+      },
     );
   }
 }

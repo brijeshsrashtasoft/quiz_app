@@ -35,7 +35,7 @@ class QuestionDisplay extends ConsumerWidget {
         // Progress indicator
         _buildProgressIndicator(),
         AppSpacing.verticalSpacingM,
-        
+
         // Question card with animation
         _buildQuestionCard(context)
             .animate()
@@ -45,12 +45,10 @@ class QuestionDisplay extends ConsumerWidget {
               duration: AppAnimations.newQuestionDuration,
               curve: AppAnimations.newQuestionCurve,
             )
-            .fadeIn(
-              duration: AppAnimations.newQuestionDuration,
-            ),
-        
+            .fadeIn(duration: AppAnimations.newQuestionDuration),
+
         AppSpacing.verticalSpacingM,
-        
+
         // Timer display
         _buildTimerDisplay(context),
       ],
@@ -59,29 +57,32 @@ class QuestionDisplay extends ConsumerWidget {
 
   Widget _buildProgressIndicator() {
     final progress = questionNumber / totalQuestions;
-    
+
     return Container(
       height: AppDimensions.progressBarHeight,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(AppDimensions.progressBarHeight / 2),
+        borderRadius: BorderRadius.circular(
+          AppDimensions.progressBarHeight / 2,
+        ),
         color: AppColors.lightGray,
       ),
       child: FractionallySizedBox(
         alignment: Alignment.centerLeft,
         widthFactor: progress,
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(AppDimensions.progressBarHeight / 2),
-            gradient: AppColors.purpleGradient,
-          ),
-        )
-        .animate()
-        .scaleX(
-          begin: 0.8,
-          end: 1.0,
-          duration: AppAnimations.mediumAnimation,
-          curve: AppAnimations.easeOut,
-        ),
+        child:
+            Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(
+                  AppDimensions.progressBarHeight / 2,
+                ),
+                gradient: AppColors.purpleGradient,
+              ),
+            ).animate().scaleX(
+              begin: 0.8,
+              end: 1.0,
+              duration: AppAnimations.mediumAnimation,
+              curve: AppAnimations.easeOut,
+            ),
       ),
     );
   }
@@ -110,9 +111,9 @@ class QuestionDisplay extends ConsumerWidget {
               ),
             ),
           ),
-          
+
           AppSpacing.verticalSpacingL,
-          
+
           // Question image if available
           if (question.questionImageUrl != null) ...[
             ClipRRect(
@@ -126,24 +127,20 @@ class QuestionDisplay extends ConsumerWidget {
             ),
             AppSpacing.verticalSpacingM,
           ],
-          
+
           // Question text
           Text(
             question.questionText,
             style: AppTextStyles.questionText,
             textAlign: TextAlign.center,
           ),
-          
+
           // Points indicator
           AppSpacing.verticalSpacingM,
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.star_rounded,
-                color: AppColors.warmYellow,
-                size: 20,
-              ),
+              Icon(Icons.star_rounded, color: AppColors.warmYellow, size: 20),
               AppSpacing.horizontalSpacingXS,
               Text(
                 '${question.questionPoints} points',
@@ -160,11 +157,7 @@ class QuestionDisplay extends ConsumerWidget {
   }
 
   Widget _buildTimerDisplay(BuildContext context) {
-    return TimerDisplay(
-      duration: timeLimit,
-      onComplete: onTimeUp,
-      size: 80,
-    );
+    return TimerDisplay(duration: timeLimit, onComplete: onTimeUp, size: 80);
   }
 }
 
@@ -196,20 +189,14 @@ class _TimerDisplayState extends State<TimerDisplay>
   void initState() {
     super.initState();
     _remainingSeconds = widget.duration.inSeconds;
-    
-    _controller = AnimationController(
-      duration: widget.duration,
-      vsync: this,
-    );
-    
+
+    _controller = AnimationController(duration: widget.duration, vsync: this);
+
     _animation = Tween<double>(
       begin: 1.0,
       end: 0.0,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.linear,
-    ));
-    
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.linear));
+
     _controller.addListener(() {
       final newSeconds = (widget.duration.inSeconds * _animation.value).round();
       if (newSeconds != _remainingSeconds) {
@@ -219,13 +206,13 @@ class _TimerDisplayState extends State<TimerDisplay>
         });
       }
     });
-    
+
     _controller.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         widget.onComplete?.call();
       }
     });
-    
+
     _controller.forward();
   }
 
@@ -251,37 +238,37 @@ class _TimerDisplayState extends State<TimerDisplay>
                 size: Size(widget.size, widget.size),
                 painter: CircularProgressPainter(
                   progress: _animation.value,
-                  color: _isWarning ? AppColors.coralRed : AppColors.vibrantPurple,
+                  color: _isWarning
+                      ? AppColors.coralRed
+                      : AppColors.vibrantPurple,
                   backgroundColor: AppColors.lightGray,
                 ),
               );
             },
           ),
-          
+
           // Timer text
           AnimatedDefaultTextStyle(
-            duration: AppAnimations.shortAnimation,
-            style: AppTextStyles.timerDisplay.copyWith(
-              color: _isWarning ? AppColors.coralRed : AppColors.charcoal,
-              fontSize: widget.size * 0.4,
-            ),
-            child: Text(
-              _remainingSeconds.toString(),
-            ),
-          )
-          .animate(
-            onPlay: (controller) {
-              if (_isWarning) {
-                controller.repeat();
-              }
-            },
-          )
-          .scale(
-            begin: 1.0,
-            end: _isWarning ? 1.1 : 1.0,
-            duration: AppAnimations.timerWarningDuration,
-            curve: AppAnimations.timerWarningCurve,
-          ),
+                duration: AppAnimations.shortAnimation,
+                style: AppTextStyles.timerDisplay.copyWith(
+                  color: _isWarning ? AppColors.coralRed : AppColors.charcoal,
+                  fontSize: widget.size * 0.4,
+                ),
+                child: Text(_remainingSeconds.toString()),
+              )
+              .animate(
+                onPlay: (controller) {
+                  if (_isWarning) {
+                    controller.repeat();
+                  }
+                },
+              )
+              .scale(
+                begin: 1.0,
+                end: _isWarning ? 1.1 : 1.0,
+                duration: AppAnimations.timerWarningDuration,
+                curve: AppAnimations.timerWarningCurve,
+              ),
         ],
       ),
     );
@@ -304,22 +291,22 @@ class CircularProgressPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = size.width / 2;
-    
+
     // Background circle
     final backgroundPaint = Paint()
       ..color = backgroundColor
       ..strokeWidth = 6
       ..style = PaintingStyle.stroke;
-    
+
     canvas.drawCircle(center, radius - 3, backgroundPaint);
-    
+
     // Progress arc
     final progressPaint = Paint()
       ..color = color
       ..strokeWidth = 6
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
-    
+
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: radius - 3),
       -90 * (3.14159 / 180),

@@ -143,7 +143,10 @@ class DarkTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppDimensions.radiusMedium),
-          borderSide: const BorderSide(color: AppColors.vibrantPurple, width: 2),
+          borderSide: const BorderSide(
+            color: AppColors.vibrantPurple,
+            width: 2,
+          ),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppDimensions.radiusMedium),
@@ -153,8 +156,12 @@ class DarkTheme {
           borderRadius: BorderRadius.circular(AppDimensions.radiusMedium),
           borderSide: const BorderSide(color: AppColors.coralRed, width: 2),
         ),
-        labelStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.lightGray),
-        hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.mediumGray),
+        labelStyle: AppTextStyles.bodyMedium.copyWith(
+          color: AppColors.lightGray,
+        ),
+        hintStyle: AppTextStyles.bodyMedium.copyWith(
+          color: AppColors.mediumGray,
+        ),
         errorStyle: AppTextStyles.caption.copyWith(color: AppColors.coralRed),
       ),
 
@@ -187,14 +194,20 @@ class DarkTheme {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppDimensions.radiusLarge),
         ),
-        titleTextStyle: AppTextStyles.headlineSmall.copyWith(color: AppColors.pureWhite),
-        contentTextStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.lightGray),
+        titleTextStyle: AppTextStyles.headlineSmall.copyWith(
+          color: AppColors.pureWhite,
+        ),
+        contentTextStyle: AppTextStyles.bodyMedium.copyWith(
+          color: AppColors.lightGray,
+        ),
       ),
 
       // Snackbar theme
       snackBarTheme: SnackBarThemeData(
         backgroundColor: AppColors.darkGray,
-        contentTextStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.pureWhite),
+        contentTextStyle: AppTextStyles.bodyMedium.copyWith(
+          color: AppColors.pureWhite,
+        ),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppDimensions.radiusSmall),
         ),

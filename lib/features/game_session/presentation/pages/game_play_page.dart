@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../quiz_creation/domain/entities/quiz_entity.dart';
+import '../../../quiz_creation/domain/entities/quiz.dart';
 import '../../../quiz_creation/domain/entities/question_entities.dart';
 import '../../domain/entities/game_session_entity.dart';
 import '../providers/session_providers.dart';
@@ -14,7 +14,7 @@ import '../widgets/leaderboard_preview.dart';
 import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/constants/app_spacing.dart';
 import '../../../../shared/constants/app_text_styles.dart';
-import '../../../../shared/widgets/layouts/app_scaffold.dart';
+import '../../../../shared/widgets/layout/app_scaffold.dart';
 import '../../../../shared/widgets/loading/loading_overlay.dart';
 import '../../../../shared/widgets/error/error_widget.dart';
 
@@ -39,7 +39,7 @@ class _GamePlayPageState extends ConsumerState<GamePlayPage> {
   int _currentQuestionIndex = 0;
   bool _showingAnswerReveal = false;
   Map<String, int> _currentAnswers = {};
-  
+
   @override
   void initState() {
     super.initState();
@@ -75,7 +75,7 @@ class _GamePlayPageState extends ConsumerState<GamePlayPage> {
           ),
         ],
         createdAt: DateTime.now(),
-        settings: const QuizSettings(),
+        settings: const GameSessionSettings(),
       );
     });
   }
@@ -83,13 +83,14 @@ class _GamePlayPageState extends ConsumerState<GamePlayPage> {
   void _handleAnswerSubmit(int answerIndex) {
     final userId = ref.read(currentUserProvider)?.id;
     if (userId == null) return;
-    
+
     setState(() {
       _currentAnswers[userId] = answerIndex;
     });
-    
+
     // Submit answer to backend
-    ref.read(sessionStateNotifierProvider(widget.sessionId).notifier)
+    ref
+        .read(sessionStateNotifierProvider(widget.sessionId).notifier)
         .updatePlayerScore(100, [answerIndex]); // TODO: Calculate actual score
   }
 
@@ -97,9 +98,11 @@ class _GamePlayPageState extends ConsumerState<GamePlayPage> {
     setState(() {
       _showingAnswerReveal = true;
     });
-    
+
     // Auto-advance after reveal for non-hosts
-    final isHost = ref.read(userSessionRoleProvider(widget.sessionId)).value == UserSessionRole.host;
+    final isHost =
+        ref.read(userSessionRoleProvider(widget.sessionId)).value ==
+        UserSessionRole.host;
     if (!isHost) {
       Future.delayed(const Duration(seconds: 5), () {
         if (mounted) {
@@ -111,7 +114,7 @@ class _GamePlayPageState extends ConsumerState<GamePlayPage> {
 
   void _nextQuestion() {
     if (_quiz == null) return;
-    
+
     setState(() {
       if (_currentQuestionIndex < _quiz!.questions.length - 1) {
         _currentQuestionIndex++;
@@ -122,21 +125,26 @@ class _GamePlayPageState extends ConsumerState<GamePlayPage> {
         context.go('/game/${widget.sessionId}/results');
       }
     });
-    
+
     // Update backend
-    final isHost = ref.read(userSessionRoleProvider(widget.sessionId)).value == UserSessionRole.host;
+    final isHost =
+        ref.read(userSessionRoleProvider(widget.sessionId)).value ==
+        UserSessionRole.host;
     if (isHost) {
-      ref.read(sessionStateNotifierProvider(widget.sessionId).notifier)
+      ref
+          .read(sessionStateNotifierProvider(widget.sessionId).notifier)
           .updateCurrentQuestion(_currentQuestionIndex);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final sessionAsync = ref.watch(optimizedSessionStreamProvider(widget.sessionId));
+    final sessionAsync = ref.watch(
+      optimizedSessionStreamProvider(widget.sessionId),
+    );
     final connectionState = ref.watch(connectionStateProvider);
     final userRole = ref.watch(userSessionRoleProvider(widget.sessionId));
-    
+
     return AppScaffold(
       backgroundColor: AppColors.backgroundPrimary,
       body: sessionAsync.when(
@@ -150,17 +158,21 @@ class _GamePlayPageState extends ConsumerState<GamePlayPage> {
               ),
             );
           }
-          
+
           return Stack(
             children: [
-              _buildGameContent(session, userRole.value ?? UserSessionRole.player),
-              
+              _buildGameContent(
+                session,
+                userRole.value ?? UserSessionRole.player,
+              ),
+
               // Connection status overlay
               Positioned(
                 top: MediaQuery.of(context).padding.top + 8,
                 right: 16,
                 child: ConnectionStatusIndicator(
-                  connectionState: connectionState.value ?? ConnectionState.disconnected,
+                  connectionState:
+                      connectionState.value ?? ConnectionState.disconnected,
                 ),
               ),
             ],
@@ -171,7 +183,8 @@ class _GamePlayPageState extends ConsumerState<GamePlayPage> {
           child: AppErrorWidget(
             title: 'Error loading session',
             message: error.toString(),
-            onRetry: () => ref.refresh(optimizedSessionStreamProvider(widget.sessionId)),
+            onRetry: () =>
+                ref.refresh(optimizedSessionStreamProvider(widget.sessionId)),
           ),
         ),
       ),
@@ -182,15 +195,15 @@ class _GamePlayPageState extends ConsumerState<GamePlayPage> {
     if (_quiz == null || _currentQuestionIndex >= _quiz!.questions.length) {
       return const Center(child: CircularProgressIndicator());
     }
-    
+
     final currentQuestion = _quiz!.questions[_currentQuestionIndex];
     final isHost = role == UserSessionRole.host;
-    
+
     return LayoutBuilder(
       builder: (context, constraints) {
         final isTablet = constraints.maxWidth > 600;
         final isDesktop = constraints.maxWidth > 1200;
-        
+
         if (isDesktop) {
           return _buildDesktopLayout(session, currentQuestion, isHost);
         } else if (isTablet) {
@@ -220,14 +233,16 @@ class _GamePlayPageState extends ConsumerState<GamePlayPage> {
                   question: currentQuestion,
                   questionNumber: _currentQuestionIndex + 1,
                   totalQuestions: _quiz!.questions.length,
-                  timeLimit: Duration(seconds: currentQuestion.questionTimeLimit),
+                  timeLimit: Duration(
+                    seconds: currentQuestion.questionTimeLimit,
+                  ),
                   onTimeUp: _handleTimeUp,
                 ),
               ),
             ),
-            
+
             AppSpacing.verticalSpacingM,
-            
+
             // Answer section
             Expanded(
               flex: 3,
@@ -245,9 +260,9 @@ class _GamePlayPageState extends ConsumerState<GamePlayPage> {
                       isSubmitted: _currentAnswers.containsKey(
                         ref.read(currentUserProvider)?.id,
                       ),
-                      selectedAnswer: _currentAnswers[
-                        ref.read(currentUserProvider)?.id ?? ''
-                      ],
+                      selectedAnswer:
+                          _currentAnswers[ref.read(currentUserProvider)?.id ??
+                              ''],
                       showCorrectAnswer: false,
                     ),
             ),
@@ -278,9 +293,9 @@ class _GamePlayPageState extends ConsumerState<GamePlayPage> {
                 onTimeUp: _handleTimeUp,
               ),
             ),
-            
+
             AppSpacing.horizontalSpacingL,
-            
+
             // Right side - Answers
             Expanded(
               flex: 1,
@@ -301,9 +316,9 @@ class _GamePlayPageState extends ConsumerState<GamePlayPage> {
                         isSubmitted: _currentAnswers.containsKey(
                           ref.read(currentUserProvider)?.id,
                         ),
-                        selectedAnswer: _currentAnswers[
-                          ref.read(currentUserProvider)?.id ?? ''
-                        ],
+                        selectedAnswer:
+                            _currentAnswers[ref.read(currentUserProvider)?.id ??
+                                ''],
                         showCorrectAnswer: false,
                       ),
                     ),
@@ -332,9 +347,9 @@ class _GamePlayPageState extends ConsumerState<GamePlayPage> {
                 maxPlayersToShow: 10,
               ),
             ),
-            
+
             AppSpacing.horizontalSpacingXL,
-            
+
             // Center - Main game content
             Expanded(
               child: Column(
@@ -346,13 +361,15 @@ class _GamePlayPageState extends ConsumerState<GamePlayPage> {
                       question: currentQuestion,
                       questionNumber: _currentQuestionIndex + 1,
                       totalQuestions: _quiz!.questions.length,
-                      timeLimit: Duration(seconds: currentQuestion.questionTimeLimit),
+                      timeLimit: Duration(
+                        seconds: currentQuestion.questionTimeLimit,
+                      ),
                       onTimeUp: _handleTimeUp,
                     ),
                   ),
-                  
+
                   AppSpacing.verticalSpacingL,
-                  
+
                   // Answers
                   Expanded(
                     flex: 3,
@@ -372,23 +389,22 @@ class _GamePlayPageState extends ConsumerState<GamePlayPage> {
                             isSubmitted: _currentAnswers.containsKey(
                               ref.read(currentUserProvider)?.id,
                             ),
-                            selectedAnswer: _currentAnswers[
-                              ref.read(currentUserProvider)?.id ?? ''
-                            ],
+                            selectedAnswer:
+                                _currentAnswers[ref
+                                        .read(currentUserProvider)
+                                        ?.id ??
+                                    ''],
                             showCorrectAnswer: false,
                           ),
                   ),
                 ],
               ),
             ),
-            
+
             // Right sidebar - Game info
             if (isHost) ...[
               AppSpacing.horizontalSpacingXL,
-              SizedBox(
-                width: 250,
-                child: _buildHostControls(session),
-              ),
+              SizedBox(width: 250, child: _buildHostControls(session)),
             ],
           ],
         ),
@@ -404,19 +420,19 @@ class _GamePlayPageState extends ConsumerState<GamePlayPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Host Controls',
-              style: AppTextStyles.sectionSubheader,
-            ),
+            Text('Host Controls', style: AppTextStyles.sectionSubheader),
             AppSpacing.verticalSpacingM,
-            
+
             // Session info
             _buildInfoRow('PIN', session.pin),
             _buildInfoRow('Players', '${session.playerCount}'),
-            _buildInfoRow('Question', '${_currentQuestionIndex + 1}/${_quiz!.questions.length}'),
-            
+            _buildInfoRow(
+              'Question',
+              '${_currentQuestionIndex + 1}/${_quiz!.questions.length}',
+            ),
+
             AppSpacing.verticalSpacingL,
-            
+
             // Control buttons
             if (_showingAnswerReveal) ...[
               SizedBox(
@@ -428,9 +444,9 @@ class _GamePlayPageState extends ConsumerState<GamePlayPage> {
                 ),
               ),
             ],
-            
+
             AppSpacing.verticalSpacingM,
-            
+
             SizedBox(
               width: double.infinity,
               child: OutlinedButton.icon(

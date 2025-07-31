@@ -4,6 +4,7 @@ import '../../constants/app_colors.dart';
 import '../../constants/app_text_styles.dart';
 import '../../constants/app_spacing.dart';
 import '../../constants/app_dimensions.dart';
+import '../../constants/app_animations.dart';
 
 /// Custom text input following Kahoot-style design system
 /// Reference: docs/ui_guideline.md
@@ -83,19 +84,41 @@ class CustomTextInput extends StatefulWidget {
   State<CustomTextInput> createState() => _CustomTextInputState();
 }
 
-class _CustomTextInputState extends State<CustomTextInput> {
+class _CustomTextInputState extends State<CustomTextInput>
+    with SingleTickerProviderStateMixin {
   late FocusNode _focusNode;
+  late AnimationController _animationController;
+  late Animation<double> _focusAnimation;
+  late Animation<double> _errorShakeAnimation;
   bool _isFocused = false;
+  bool _hasError = false;
 
   @override
   void initState() {
     super.initState();
     _focusNode = widget.focusNode ?? FocusNode();
     _focusNode.addListener(_onFocusChange);
+
+    _animationController = AnimationController(
+      duration: AppAnimations.shortAnimation,
+      vsync: this,
+    );
+
+    _focusAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: AppAnimations.easeInOut,
+      ),
+    );
+
+    _errorShakeAnimation = Tween<double>(begin: 0.0, end: 10.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.elasticIn),
+    );
   }
 
   @override
   void dispose() {
+    _animationController.dispose();
     if (widget.focusNode == null) {
       _focusNode.dispose();
     } else {
@@ -108,6 +131,26 @@ class _CustomTextInputState extends State<CustomTextInput> {
     setState(() {
       _isFocused = _focusNode.hasFocus;
     });
+
+    if (_isFocused) {
+      _animationController.forward();
+    } else {
+      _animationController.reverse();
+    }
+  }
+
+  @override
+  void didUpdateWidget(CustomTextInput oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final hadError = _hasError;
+    _hasError = widget.errorText != null;
+
+    if (_hasError && !hadError) {
+      // Trigger shake animation on new error
+      _animationController.forward().then((_) {
+        _animationController.reverse();
+      });
+    }
   }
 
   @override
@@ -132,66 +175,85 @@ class _CustomTextInputState extends State<CustomTextInput> {
           SizedBox(height: AppSpacing.spacingXS),
         ],
 
-        Container(
-          decoration: BoxDecoration(
-            color: widget.fillColor ?? AppColors.pureWhite,
-            borderRadius: BorderRadius.circular(
-              widget.borderRadius ?? AppDimensions.inputRadius,
-            ),
-            border: Border.all(
-              color: borderColor,
-              width: _isFocused ? 2.0 : 1.0,
-            ),
-            boxShadow: _isFocused
-                ? [
-                    BoxShadow(
-                      color: borderColor.withValues(alpha: 0.1),
-                      offset: const Offset(0, 2),
-                      blurRadius: 8,
-                    ),
-                  ]
-                : null,
-          ),
-          child: TextFormField(
-            controller: widget.controller,
-            focusNode: _focusNode,
-            keyboardType: widget.keyboardType,
-            textInputAction: widget.textInputAction,
-            onChanged: widget.onChanged,
-            onFieldSubmitted: widget.onSubmitted,
-            onTap: widget.onTap,
-            validator: widget.validator,
-            obscureText: widget.obscureText,
-            enabled: widget.enabled,
-            readOnly: widget.readOnly,
-            maxLines: widget.maxLines,
-            minLines: widget.minLines,
-            maxLength: widget.maxLength,
-            inputFormatters: widget.inputFormatters,
-            autofocus: widget.autofocus,
-            textCapitalization: widget.textCapitalization,
-            style: widget.textStyle ?? AppTextStyles.bodyMedium,
-            decoration: InputDecoration(
-              hintText: widget.hint,
-              hintStyle: widget.hintStyle ?? AppTextStyles.inputHint,
-              prefixIcon: widget.prefixIcon,
-              suffixIcon: widget.suffixIcon,
-              prefixText: widget.prefixText,
-              suffixText: widget.suffixText,
-              contentPadding:
-                  widget.contentPadding ??
-                  EdgeInsets.symmetric(
-                    horizontal: AppSpacing.spacingM,
-                    vertical: AppSpacing.spacingM,
+        AnimatedBuilder(
+          animation: _animationController,
+          builder: (context, child) {
+            return Transform.translate(
+              offset: hasError
+                  ? Offset(
+                      _errorShakeAnimation.value *
+                          (1 - _animationController.value),
+                      0,
+                    )
+                  : Offset.zero,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: widget.fillColor ?? AppColors.pureWhite,
+                  borderRadius: BorderRadius.circular(
+                    widget.borderRadius ?? AppDimensions.inputRadius,
                   ),
-              border: InputBorder.none,
-              enabledBorder: InputBorder.none,
-              focusedBorder: InputBorder.none,
-              errorBorder: InputBorder.none,
-              focusedErrorBorder: InputBorder.none,
-              counterText: '',
-            ),
-          ),
+                  border: Border.all(
+                    color: borderColor,
+                    width: _isFocused ? 2.0 : 1.0,
+                  ),
+                  boxShadow: [
+                    if (_isFocused)
+                      BoxShadow(
+                        color: borderColor.withValues(
+                          alpha: 0.2 * _focusAnimation.value,
+                        ),
+                        offset: Offset(0, 4 * _focusAnimation.value),
+                        blurRadius: 12 * _focusAnimation.value,
+                        spreadRadius: 2 * _focusAnimation.value,
+                      ),
+                  ],
+                ),
+                child: Transform.scale(
+                  scale: 1.0 + (0.02 * _focusAnimation.value),
+                  child: TextFormField(
+                    controller: widget.controller,
+                    focusNode: _focusNode,
+                    keyboardType: widget.keyboardType,
+                    textInputAction: widget.textInputAction,
+                    onChanged: widget.onChanged,
+                    onFieldSubmitted: widget.onSubmitted,
+                    onTap: widget.onTap,
+                    validator: widget.validator,
+                    obscureText: widget.obscureText,
+                    enabled: widget.enabled,
+                    readOnly: widget.readOnly,
+                    maxLines: widget.maxLines,
+                    minLines: widget.minLines,
+                    maxLength: widget.maxLength,
+                    inputFormatters: widget.inputFormatters,
+                    autofocus: widget.autofocus,
+                    textCapitalization: widget.textCapitalization,
+                    style: widget.textStyle ?? AppTextStyles.bodyMedium,
+                    decoration: InputDecoration(
+                      hintText: widget.hint,
+                      hintStyle: widget.hintStyle ?? AppTextStyles.inputHint,
+                      prefixIcon: widget.prefixIcon,
+                      suffixIcon: widget.suffixIcon,
+                      prefixText: widget.prefixText,
+                      suffixText: widget.suffixText,
+                      contentPadding:
+                          widget.contentPadding ??
+                          EdgeInsets.symmetric(
+                            horizontal: AppSpacing.spacingM,
+                            vertical: AppSpacing.spacingM,
+                          ),
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      errorBorder: InputBorder.none,
+                      focusedErrorBorder: InputBorder.none,
+                      counterText: '',
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
         ),
 
         if (widget.errorText != null) ...[

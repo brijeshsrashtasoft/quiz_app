@@ -25,28 +25,28 @@ class ScoreModel with _$ScoreModel {
       _$ScoreModelFromJson(json);
 
   factory ScoreModel.fromEntity(ScoreEntity entity) => ScoreModel(
-        playerId: entity.playerId,
-        playerName: entity.playerName,
-        basePoints: entity.basePoints,
-        speedBonus: entity.speedBonus,
-        streakBonus: entity.streakBonus,
-        totalScore: entity.totalScore,
-        timestamp: entity.timestamp,
-        questionIndex: entity.questionIndex,
-        responseTimeMs: entity.responseTime.inMilliseconds,
-        isCorrect: entity.isCorrect,
-      );
+    playerId: entity.playerId,
+    playerName: entity.playerName,
+    basePoints: entity.basePoints,
+    speedBonus: entity.speedBonus,
+    streakBonus: entity.streakBonus,
+    totalScore: entity.totalScore,
+    timestamp: entity.timestamp,
+    questionIndex: entity.questionIndex,
+    responseTimeMs: entity.responseTime.inMilliseconds,
+    isCorrect: entity.isCorrect,
+  );
 
   ScoreEntity toEntity() => ScoreEntity(
-        playerId: playerId,
-        playerName: playerName,
-        basePoints: basePoints,
-        speedBonus: speedBonus,
-        streakBonus: streakBonus,
-        totalScore: totalScore,
-        timestamp: timestamp,
-        questionIndex: questionIndex,
-        responseTime: Duration(milliseconds: responseTimeMs),
-        isCorrect: isCorrect,
-      );
+    playerId: playerId,
+    playerName: playerName,
+    basePoints: basePoints,
+    speedBonus: speedBonus,
+    streakBonus: streakBonus,
+    totalScore: totalScore,
+    timestamp: timestamp,
+    questionIndex: questionIndex,
+    responseTime: Duration(milliseconds: responseTimeMs),
+    isCorrect: isCorrect,
+  );
 }

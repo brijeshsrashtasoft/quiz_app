@@ -24,10 +24,7 @@ class LobbyPlayerList extends StatelessWidget {
       itemCount: players.length,
       itemBuilder: (context, index) {
         final player = players[index];
-        final animation = Tween<double>(
-          begin: 0.0,
-          end: 1.0,
-        ).animate(
+        final animation = Tween<double>(begin: 0.0, end: 1.0).animate(
           CurvedAnimation(
             parent: staggerController,
             curve: Interval(
@@ -37,7 +34,7 @@ class LobbyPlayerList extends StatelessWidget {
             ),
           ),
         );
-        
+
         return FadeTransition(
           opacity: animation,
           child: SlideTransition(
@@ -45,11 +42,7 @@ class LobbyPlayerList extends StatelessWidget {
               begin: const Offset(1.0, 0.0),
               end: Offset.zero,
             ).animate(animation),
-            child: _PlayerCard(
-              player: player,
-              isHost: isHost,
-              index: index,
-            ),
+            child: _PlayerCard(player: player, isHost: isHost, index: index),
           ),
         );
       },
@@ -72,7 +65,7 @@ class _PlayerCard extends StatefulWidget {
   State<_PlayerCard> createState() => _PlayerCardState();
 }
 
-class _PlayerCardState extends State<_PlayerCard> 
+class _PlayerCardState extends State<_PlayerCard>
     with SingleTickerProviderStateMixin {
   late AnimationController _bounceController;
   late Animation<double> _bounceAnimation;
@@ -84,15 +77,11 @@ class _PlayerCardState extends State<_PlayerCard>
       duration: AppAnimations.achievementDuration,
       vsync: this,
     );
-    
-    _bounceAnimation = Tween<double>(
-      begin: 1.0,
-      end: 1.05,
-    ).animate(CurvedAnimation(
-      parent: _bounceController,
-      curve: AppAnimations.bounce,
-    ));
-    
+
+    _bounceAnimation = Tween<double>(begin: 1.0, end: 1.05).animate(
+      CurvedAnimation(parent: _bounceController, curve: AppAnimations.bounce),
+    );
+
     // Bounce animation on join
     Future.delayed(Duration(milliseconds: widget.index * 100), () {
       if (mounted) {
@@ -113,7 +102,7 @@ class _PlayerCardState extends State<_PlayerCard>
   Widget build(BuildContext context) {
     final isReady = widget.player['isReady'] as bool;
     final name = widget.player['name'] as String;
-    
+
     return AnimatedBuilder(
       animation: _bounceAnimation,
       builder: (context, child) {
@@ -126,14 +115,14 @@ class _PlayerCardState extends State<_PlayerCard>
               color: AppColors.pureWhite,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: isReady 
+                color: isReady
                     ? AppColors.turquoise.withOpacity(0.3)
                     : AppColors.lightGray,
                 width: isReady ? 2 : 1,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: isReady 
+                  color: isReady
                       ? AppColors.turquoise.withOpacity(0.1)
                       : AppColors.shadowLight,
                   blurRadius: 10,
@@ -144,13 +133,10 @@ class _PlayerCardState extends State<_PlayerCard>
             child: Row(
               children: [
                 // Avatar
-                CompactLobbyAvatar(
-                  playerName: name,
-                  isReady: isReady,
-                ),
-                
+                CompactLobbyAvatar(playerName: name, isReady: isReady),
+
                 const SizedBox(width: AppSpacing.spacingM),
-                
+
                 // Name and status
                 Expanded(
                   child: Column(
@@ -169,8 +155,8 @@ class _PlayerCardState extends State<_PlayerCard>
                             width: 8,
                             height: 8,
                             decoration: BoxDecoration(
-                              color: isReady 
-                                  ? AppColors.turquoise 
+                              color: isReady
+                                  ? AppColors.turquoise
                                   : AppColors.coolGray,
                               shape: BoxShape.circle,
                             ),
@@ -179,8 +165,8 @@ class _PlayerCardState extends State<_PlayerCard>
                           Text(
                             isReady ? 'Ready' : 'Joining...',
                             style: AppTextStyles.caption.copyWith(
-                              color: isReady 
-                                  ? AppColors.turquoise 
+                              color: isReady
+                                  ? AppColors.turquoise
                                   : AppColors.coolGray,
                             ),
                           ),
@@ -189,7 +175,7 @@ class _PlayerCardState extends State<_PlayerCard>
                     ],
                   ),
                 ),
-                
+
                 // Host badge or kick button
                 if (widget.index == 0)
                   Container(

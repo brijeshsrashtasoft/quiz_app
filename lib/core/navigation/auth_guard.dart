@@ -25,16 +25,34 @@ class AuthGuard implements AuthGuardInterface {
       // Get ProviderContainer from context
       final container = ProviderScope.containerOf(context);
 
-      // Check authentication state using Firebase Auth
-      final authState = await container.read(authStateProvider.future);
+      // Check current auth state value directly (don't wait for future)
+      final authStateValue = container.read(authStateProvider).value;
 
-      if (!authState.isAuthenticated) {
-        debugPrint('AuthGuard: User not authenticated, redirecting to login');
-        return RouteConstants.login;
+      if (authStateValue == null) {
+        // Auth state not loaded yet, redirect to splash
+        debugPrint('AuthGuard: Auth state not loaded, redirecting to splash');
+        return RouteConstants.splash;
       }
 
-      debugPrint('AuthGuard: User authenticated: ${authState.user?.email}');
-      return null; // Allow access
+      // Check authentication status using when pattern
+      return authStateValue.when(
+        authenticated: (user) {
+          debugPrint('AuthGuard: User authenticated: ${user.email}');
+          return null; // Allow access
+        },
+        unauthenticated: () {
+          debugPrint('AuthGuard: User not authenticated, redirecting to login');
+          return RouteConstants.login;
+        },
+        loading: () {
+          debugPrint('AuthGuard: Auth state loading, redirecting to splash');
+          return RouteConstants.splash;
+        },
+        error: (message, code) {
+          debugPrint('AuthGuard: Auth error: $message, redirecting to login');
+          return RouteConstants.login;
+        },
+      );
     } catch (e) {
       // In case of any error, redirect to login for safety
       debugPrint('AuthGuard error: $e');
@@ -52,20 +70,38 @@ class GuestGuard implements AuthGuardInterface {
     try {
       final container = ProviderScope.containerOf(context);
 
-      // Check authentication state using Firebase Auth
-      final authState = await container.read(authStateProvider.future);
+      // Check current auth state value directly (don't wait for future)
+      final authStateValue = container.read(authStateProvider).value;
 
-      if (authState.isAuthenticated) {
-        debugPrint(
-          'GuestGuard: User already authenticated, redirecting to home',
-        );
-        return RouteConstants.home; // Redirect authenticated users to home
+      if (authStateValue == null) {
+        // Auth state not loaded yet, allow access to auth pages
+        debugPrint('GuestGuard: Auth state not loaded, allowing access');
+        return null;
       }
 
-      debugPrint(
-        'GuestGuard: User not authenticated, allowing access to auth pages',
+      // Check authentication status using when pattern
+      return authStateValue.when(
+        authenticated: (user) {
+          debugPrint(
+            'GuestGuard: User already authenticated, redirecting to home',
+          );
+          return RouteConstants.home; // Redirect authenticated users to home
+        },
+        unauthenticated: () {
+          debugPrint(
+            'GuestGuard: User not authenticated, allowing access to auth pages',
+          );
+          return null; // Allow access to auth pages
+        },
+        loading: () {
+          debugPrint('GuestGuard: Auth state loading, allowing access');
+          return null; // Allow access while loading
+        },
+        error: (message, code) {
+          debugPrint('GuestGuard: Auth error, allowing access');
+          return null; // Allow access on error
+        },
       );
-      return null; // Allow access to auth pages
     } catch (e) {
       debugPrint('GuestGuard error: $e');
       return null; // Allow access in case of error
@@ -91,12 +127,29 @@ class SessionGuard implements AuthGuardInterface {
       final container = ProviderScope.containerOf(context);
 
       // First check if user is authenticated
-      final authState = await container.read(authStateProvider.future);
-      if (!authState.isAuthenticated) {
+      final authStateValue = container.read(authStateProvider).value;
+
+      if (authStateValue == null) {
+        // Auth state not loaded yet, redirect to splash
         debugPrint(
-          'SessionGuard: User not authenticated, redirecting to login',
+          'SessionGuard: Auth state not loaded, redirecting to splash',
         );
-        return RouteConstants.login;
+        return RouteConstants.splash;
+      }
+
+      // Check authentication status using when pattern
+      final authRedirect = authStateValue.when(
+        authenticated: (_) => null, // Allow access if authenticated
+        unauthenticated: () => RouteConstants.login,
+        loading: () => RouteConstants.splash,
+        error: (_, __) => RouteConstants.login,
+      );
+
+      if (authRedirect != null) {
+        debugPrint(
+          'SessionGuard: User not authenticated, redirecting to $authRedirect',
+        );
+        return authRedirect;
       }
 
       // Validate game session exists and is active using Firestore
@@ -116,7 +169,14 @@ class SessionGuard implements AuthGuardInterface {
           }
 
           // Check if user can access this session
-          final currentUserId = authState.user!.id;
+          // We know user is authenticated here based on previous check
+          final currentUserId = authStateValue.when(
+            authenticated: (user) => user.id,
+            unauthenticated: () =>
+                '', // This case won't happen due to earlier check
+            loading: () => '',
+            error: (_, __) => '',
+          );
           final canAccess =
               session.isHost(currentUserId) ||
               session.isPlayer(currentUserId) ||
@@ -162,12 +222,29 @@ class QuizOwnershipGuard implements AuthGuardInterface {
       final container = ProviderScope.containerOf(context);
 
       // First check if user is authenticated
-      final authState = await container.read(authStateProvider.future);
-      if (!authState.isAuthenticated) {
+      final authStateValue = container.read(authStateProvider).value;
+
+      if (authStateValue == null) {
+        // Auth state not loaded yet, redirect to splash
         debugPrint(
-          'QuizOwnershipGuard: User not authenticated, redirecting to login',
+          'QuizOwnershipGuard: Auth state not loaded, redirecting to splash',
         );
-        return RouteConstants.login;
+        return RouteConstants.splash;
+      }
+
+      // Check authentication status using when pattern
+      final authRedirect = authStateValue.when(
+        authenticated: (_) => null, // Allow access if authenticated
+        unauthenticated: () => RouteConstants.login,
+        loading: () => RouteConstants.splash,
+        error: (_, __) => RouteConstants.login,
+      );
+
+      if (authRedirect != null) {
+        debugPrint(
+          'QuizOwnershipGuard: User not authenticated, redirecting to $authRedirect',
+        );
+        return authRedirect;
       }
 
       // Validate quiz ownership using Firestore
@@ -176,7 +253,14 @@ class QuizOwnershipGuard implements AuthGuardInterface {
 
       return quizResult.when(
         success: (quiz) {
-          final currentUserId = authState.user!.id;
+          // We know user is authenticated here based on previous check
+          final currentUserId = authStateValue.when(
+            authenticated: (user) => user.id,
+            unauthenticated: () =>
+                '', // This case won't happen due to earlier check
+            loading: () => '',
+            error: (_, __) => '',
+          );
 
           // Check if user owns the quiz
           if (quiz.createdBy != currentUserId) {
@@ -217,32 +301,42 @@ class HostGuard implements AuthGuardInterface {
       final container = ProviderScope.containerOf(context);
 
       // Check if user is authenticated
-      final authState = await container.read(authStateProvider.future);
-      if (!authState.isAuthenticated) {
-        debugPrint('HostGuard: User not authenticated, redirecting to login');
-        return RouteConstants.login;
+      final authStateValue = container.read(authStateProvider).value;
+
+      if (authStateValue == null) {
+        // Auth state not loaded yet, redirect to splash
+        debugPrint('HostGuard: Auth state not loaded, redirecting to splash');
+        return RouteConstants.splash;
       }
 
-      // For now, allow all authenticated users to host games
-      // In the future, this could check for specific permissions or user roles
-      // Example: if (!authState.user?.canHostGames) { return RouteConstants.home; }
+      // Check authentication status using when pattern
+      return authStateValue.when(
+        authenticated: (user) {
+          // Basic host permission checks
+          if (!user.isProfileComplete) {
+            debugPrint('HostGuard: User profile incomplete, cannot host games');
+            return RouteConstants.profile;
+          }
 
-      final user = authState.user!;
+          // For now, allow all authenticated users to host games
+          // In the future, this could check for specific permissions or user roles
 
-      // Basic host permission checks
-      if (!user.isProfileComplete) {
-        debugPrint('HostGuard: User profile incomplete, cannot host games');
-        return RouteConstants.profile;
-      }
-
-      // Additional checks could include:
-      // - User verification status
-      // - Account age requirements
-      // - Previous hosting history
-      // - Subscription status
-
-      debugPrint('HostGuard: User ${user.email} can host games');
-      return null; // Allow access
+          debugPrint('HostGuard: User ${user.email} can host games');
+          return null; // Allow access
+        },
+        unauthenticated: () {
+          debugPrint('HostGuard: User not authenticated, redirecting to login');
+          return RouteConstants.login;
+        },
+        loading: () {
+          debugPrint('HostGuard: Auth state loading, redirecting to splash');
+          return RouteConstants.splash;
+        },
+        error: (message, code) {
+          debugPrint('HostGuard: Auth error: $message, redirecting to login');
+          return RouteConstants.login;
+        },
+      );
     } catch (e) {
       debugPrint('HostGuard error: $e');
       return RouteConstants.home;
@@ -260,27 +354,46 @@ class AdminGuard implements AuthGuardInterface {
       final container = ProviderScope.containerOf(context);
 
       // Check if user is authenticated
-      final authState = await container.read(authStateProvider.future);
-      if (!authState.isAuthenticated) {
-        debugPrint('AdminGuard: User not authenticated, redirecting to login');
-        return RouteConstants.login;
+      final authStateValue = container.read(authStateProvider).value;
+
+      if (authStateValue == null) {
+        // Auth state not loaded yet, redirect to splash
+        debugPrint('AdminGuard: Auth state not loaded, redirecting to splash');
+        return RouteConstants.splash;
       }
 
-      final user = authState.user!;
+      // Check authentication status using when pattern
+      return authStateValue.when(
+        authenticated: (user) {
+          // Check admin privileges based on email domain or specific user IDs
+          // This is a simple implementation - in production, use proper role-based access
+          final isAdmin = _checkAdminPrivileges(user.email);
 
-      // Check admin privileges based on email domain or specific user IDs
-      // This is a simple implementation - in production, use proper role-based access
-      final isAdmin = _checkAdminPrivileges(user.email);
+          if (!isAdmin) {
+            debugPrint(
+              'AdminGuard: User ${user.email} does not have admin privileges',
+            );
+            return RouteConstants.home;
+          }
 
-      if (!isAdmin) {
-        debugPrint(
-          'AdminGuard: User ${user.email} does not have admin privileges',
-        );
-        return RouteConstants.home;
-      }
-
-      debugPrint('AdminGuard: Admin access granted for ${user.email}');
-      return null; // Allow access
+          debugPrint('AdminGuard: Admin access granted for ${user.email}');
+          return null; // Allow access
+        },
+        unauthenticated: () {
+          debugPrint(
+            'AdminGuard: User not authenticated, redirecting to login',
+          );
+          return RouteConstants.login;
+        },
+        loading: () {
+          debugPrint('AdminGuard: Auth state loading, redirecting to splash');
+          return RouteConstants.splash;
+        },
+        error: (message, code) {
+          debugPrint('AdminGuard: Auth error: $message, redirecting to login');
+          return RouteConstants.login;
+        },
+      );
     } catch (e) {
       debugPrint('AdminGuard error: $e');
       return RouteConstants.home;

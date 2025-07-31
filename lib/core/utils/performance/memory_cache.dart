@@ -1,33 +1,30 @@
 import 'dart:collection';
-import '../../utils/logger.dart';
+import 'package:rxdart/rxdart.dart';
 
 /// Memory cache with LRU eviction for optimizing data access
 class MemoryCache<K, V> {
   final int maxSize;
   final Duration? ttl;
-  
+
   final LinkedHashMap<K, _CacheEntry<V>> _cache = LinkedHashMap();
-  
-  MemoryCache({
-    required this.maxSize,
-    this.ttl,
-  });
+
+  MemoryCache({required this.maxSize, this.ttl});
 
   /// Get value from cache
   V? get(K key) {
     final entry = _cache[key];
     if (entry == null) return null;
-    
+
     // Check if expired
     if (entry.isExpired) {
       _cache.remove(key);
       return null;
     }
-    
+
     // Move to end (most recently used)
     _cache.remove(key);
     _cache[key] = entry;
-    
+
     return entry.value;
   }
 
@@ -35,14 +32,14 @@ class MemoryCache<K, V> {
   void put(K key, V value) {
     // Remove if already exists
     _cache.remove(key);
-    
+
     // Add to end
     _cache[key] = _CacheEntry(
       value: value,
       timestamp: DateTime.now(),
       ttl: ttl,
     );
-    
+
     // Evict oldest if over capacity
     if (_cache.length > maxSize) {
       final firstKey = _cache.keys.first;
@@ -67,12 +64,12 @@ class MemoryCache<K, V> {
   bool containsKey(K key) {
     final entry = _cache[key];
     if (entry == null) return false;
-    
+
     if (entry.isExpired) {
       _cache.remove(key);
       return false;
     }
-    
+
     return true;
   }
 
@@ -97,11 +94,7 @@ class _CacheEntry<V> {
   final DateTime timestamp;
   final Duration? ttl;
 
-  _CacheEntry({
-    required this.value,
-    required this.timestamp,
-    this.ttl,
-  });
+  _CacheEntry({required this.value, required this.timestamp, this.ttl});
 
   bool get isExpired {
     if (ttl == null) return false;
@@ -113,31 +106,29 @@ class _CacheEntry<V> {
 class CachedStreamTransformer<T> {
   final Duration cacheDuration;
   final MemoryCache<String, T> _cache;
-  
-  CachedStreamTransformer({
-    required this.cacheDuration,
-    int maxCacheSize = 100,
-  }) : _cache = MemoryCache<String, T>(
-          maxSize: maxCacheSize,
-          ttl: cacheDuration,
-        );
+
+  CachedStreamTransformer({required this.cacheDuration, int maxCacheSize = 100})
+    : _cache = MemoryCache<String, T>(
+        maxSize: maxCacheSize,
+        ttl: cacheDuration,
+      );
 
   /// Transform stream with caching
   Stream<T> transform(Stream<T> source, String cacheKey) {
     // Get cached value first
     final cached = _cache.get(cacheKey);
-    
+
     // Create stream that starts with cached value if available
     final transformedStream = source.map((data) {
       _cache.put(cacheKey, data);
       return data;
     });
-    
+
     // If we have cached data, prepend it to the stream
     if (cached != null) {
-      return Stream.value(cached).followedBy(transformedStream);
+      return transformedStream.startWith(cached);
     }
-    
+
     return transformedStream;
   }
 

@@ -51,6 +51,29 @@
   <link rel="manifest" href="manifest.json">
 </head>
 <body>
+  <!-- Firebase Web SDK Initialization with Error Handling -->
+  <script>
+    // Global error handler for Firebase initialization
+    window.addEventListener('error', function(e) {
+      console.warn('Global error caught during initialization:', e.error);
+      // Don't block app startup for Firebase errors
+      if (e.error && e.error.toString().includes('firebase')) {
+        console.warn('Firebase initialization error detected - app will continue in offline mode');
+        e.preventDefault();
+      }
+    });
+
+    // Unhandled promise rejections (common with Firebase JS issues)
+    window.addEventListener('unhandledrejection', function(e) {
+      console.warn('Unhandled promise rejection caught:', e.reason);
+      // Don't block app startup for Firebase promise rejections
+      if (e.reason && e.reason.toString().includes('firebase')) {
+        console.warn('Firebase promise rejection detected - app will continue in offline mode');
+        e.preventDefault();
+      }
+    });
+  </script>
+
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

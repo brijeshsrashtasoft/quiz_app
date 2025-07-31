@@ -5,14 +5,16 @@ import 'app_theme.dart';
 import 'dark_theme.dart';
 
 /// Theme mode state provider
-final themeModeProvider = StateNotifierProvider<ThemeModeNotifier, ThemeMode>((ref) {
+final themeModeProvider = StateNotifierProvider<ThemeModeNotifier, ThemeMode>((
+  ref,
+) {
   return ThemeModeNotifier();
 });
 
 /// Theme mode notifier for managing theme switching
 class ThemeModeNotifier extends StateNotifier<ThemeMode> {
   static const String _themeKey = 'app_theme_mode';
-  
+
   ThemeModeNotifier() : super(ThemeMode.system) {
     _loadTheme();
   }
@@ -33,11 +35,11 @@ class ThemeModeNotifier extends StateNotifier<ThemeMode> {
 
   /// Toggle between light and dark mode
   Future<void> toggleTheme() async {
-    final newMode = state == ThemeMode.light 
-        ? ThemeMode.dark 
-        : state == ThemeMode.dark 
-            ? ThemeMode.system 
-            : ThemeMode.light;
+    final newMode = state == ThemeMode.light
+        ? ThemeMode.dark
+        : state == ThemeMode.dark
+        ? ThemeMode.system
+        : ThemeMode.light;
     await setThemeMode(newMode);
   }
 
@@ -55,14 +57,19 @@ class ThemeModeNotifier extends StateNotifier<ThemeMode> {
 }
 
 /// Theme data provider for getting current theme
-final themeDataProvider = Provider.family<ThemeData, Brightness>((ref, brightness) {
-  return brightness == Brightness.light ? AppTheme.lightTheme : DarkTheme.darkTheme;
+final themeDataProvider = Provider.family<ThemeData, Brightness>((
+  ref,
+  brightness,
+) {
+  return brightness == Brightness.light
+      ? AppTheme.lightTheme
+      : DarkTheme.darkTheme;
 });
 
 /// Current theme provider
 final currentThemeProvider = Provider<ThemeData>((ref) {
   final themeMode = ref.watch(themeModeProvider);
-  
+
   switch (themeMode) {
     case ThemeMode.light:
       return AppTheme.lightTheme;

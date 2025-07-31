@@ -16,7 +16,6 @@ import '../../domain/repositories/quiz_repository.dart' show QuizStats;
 /// Following CLAUDE.md patterns and Firestore integration
 class QuizFirestoreDataSource extends BaseFirebaseDataSource {
   static const String _collection = 'quizzes';
-  
 
   /// Create new quiz
   Future<Result<QuizModel>> createQuiz(QuizModel quiz) async {
@@ -564,16 +563,13 @@ class QuizFirestoreDataSource extends BaseFirebaseDataSource {
   /// This method should be called with a debounce timer to avoid excessive writes
   Future<Result<void>> autoSaveQuiz(QuizModel quiz) async {
     try {
-      AppLogger.firebase(
-        'QuizDataSource',
-        'Auto-saving quiz: ${quiz.id}',
-      );
+      AppLogger.firebase('QuizDataSource', 'Auto-saving quiz: ${quiz.id}');
 
       final data = quiz.toFirestore();
       data.remove('id');
       data.remove('createdAt');
       data.remove('createdBy');
-      
+
       // Add last modified timestamp
       data['lastModified'] = FieldValue.serverTimestamp();
 
@@ -658,11 +654,7 @@ class QuizFirestoreDataSource extends BaseFirebaseDataSource {
 
       return Result.success(imageUrl);
     } catch (e, stackTrace) {
-      AppLogger.error(
-        'Failed to upload question image',
-        e,
-        stackTrace,
-      );
+      AppLogger.error('Failed to upload question image', e, stackTrace);
       return Result.failure(
         FirestoreException(
           message: 'Failed to upload image: ${e.toString()}',
@@ -683,18 +675,11 @@ class QuizFirestoreDataSource extends BaseFirebaseDataSource {
         'Deleting question image for quiz: $quizId',
       );
 
-      await StorageConfig.deleteQuizImage(
-        quizId: quizId,
-        imageId: questionId,
-      );
+      await StorageConfig.deleteQuizImage(quizId: quizId, imageId: questionId);
 
       return const Result.success(null);
     } catch (e, stackTrace) {
-      AppLogger.error(
-        'Failed to delete question image',
-        e,
-        stackTrace,
-      );
+      AppLogger.error('Failed to delete question image', e, stackTrace);
       return Result.failure(
         FirestoreException(
           message: 'Failed to delete image: ${e.toString()}',
@@ -716,11 +701,7 @@ class QuizFirestoreDataSource extends BaseFirebaseDataSource {
 
       return const Result.success(null);
     } catch (e, stackTrace) {
-      AppLogger.error(
-        'Failed to delete all quiz images',
-        e,
-        stackTrace,
-      );
+      AppLogger.error('Failed to delete all quiz images', e, stackTrace);
       return Result.failure(
         FirestoreException(
           message: 'Failed to delete images: ${e.toString()}',
@@ -751,7 +732,7 @@ class QuizFirestoreDataSource extends BaseFirebaseDataSource {
           .snapshots()
           .map<Result<Map<String, dynamic>>>((snapshot) {
             final editors = <String, dynamic>{};
-            
+
             for (final doc in snapshot.docs) {
               editors[doc.id] = doc.data();
             }
@@ -810,19 +791,15 @@ class QuizFirestoreDataSource extends BaseFirebaseDataSource {
           .collection('active_editors')
           .doc(userId)
           .set({
-        'userId': userId,
-        'userName': userName,
-        'joinedAt': FieldValue.serverTimestamp(),
-        'lastActiveAt': FieldValue.serverTimestamp(),
-      });
+            'userId': userId,
+            'userName': userName,
+            'joinedAt': FieldValue.serverTimestamp(),
+            'lastActiveAt': FieldValue.serverTimestamp(),
+          });
 
       return const Result.success(null);
     } catch (e, stackTrace) {
-      AppLogger.error(
-        'Failed to register active editor',
-        e,
-        stackTrace,
-      );
+      AppLogger.error('Failed to register active editor', e, stackTrace);
       return Result.failure(
         FirestoreException(
           message: 'Failed to register editor: ${e.toString()}',
@@ -852,11 +829,7 @@ class QuizFirestoreDataSource extends BaseFirebaseDataSource {
 
       return const Result.success(null);
     } catch (e, stackTrace) {
-      AppLogger.error(
-        'Failed to unregister active editor',
-        e,
-        stackTrace,
-      );
+      AppLogger.error('Failed to unregister active editor', e, stackTrace);
       return Result.failure(
         FirestoreException(
           message: 'Failed to unregister editor: ${e.toString()}',
@@ -877,17 +850,11 @@ class QuizFirestoreDataSource extends BaseFirebaseDataSource {
           .doc(quizId)
           .collection('active_editors')
           .doc(userId)
-          .update({
-        'lastActiveAt': FieldValue.serverTimestamp(),
-      });
+          .update({'lastActiveAt': FieldValue.serverTimestamp()});
 
       return const Result.success(null);
     } catch (e, stackTrace) {
-      AppLogger.error(
-        'Failed to update editor activity',
-        e,
-        stackTrace,
-      );
+      AppLogger.error('Failed to update editor activity', e, stackTrace);
       return Result.failure(
         FirestoreException(
           message: 'Failed to update activity: ${e.toString()}',
@@ -901,7 +868,7 @@ class QuizFirestoreDataSource extends BaseFirebaseDataSource {
   Future<Result<QuizModel>> publishQuiz(String quizId) async {
     try {
       final timestamp = FieldValue.serverTimestamp();
-      
+
       await FirestoreConfig.quizzesCollection.doc(quizId).update({
         'publishedAt': timestamp,
         'isDraft': false,
@@ -910,7 +877,7 @@ class QuizFirestoreDataSource extends BaseFirebaseDataSource {
 
       // Get updated quiz
       final doc = await FirestoreConfig.quizzesCollection.doc(quizId).get();
-      
+
       if (!doc.exists) {
         return Result.failure(
           FirestoreException(
@@ -922,7 +889,7 @@ class QuizFirestoreDataSource extends BaseFirebaseDataSource {
 
       final data = doc.data()!;
       data['id'] = doc.id;
-      
+
       return Result.success(QuizModel.fromFirestoreData(doc.id, data));
     } catch (e, stackTrace) {
       AppLogger.error('Failed to publish quiz', e, stackTrace);
@@ -946,7 +913,7 @@ class QuizFirestoreDataSource extends BaseFirebaseDataSource {
 
       // Get updated quiz
       final doc = await FirestoreConfig.quizzesCollection.doc(quizId).get();
-      
+
       if (!doc.exists) {
         return Result.failure(
           FirestoreException(
@@ -958,7 +925,7 @@ class QuizFirestoreDataSource extends BaseFirebaseDataSource {
 
       final data = doc.data()!;
       data['id'] = doc.id;
-      
+
       return Result.success(QuizModel.fromFirestoreData(doc.id, data));
     } catch (e, stackTrace) {
       AppLogger.error('Failed to unpublish quiz', e, stackTrace);
@@ -976,7 +943,7 @@ class QuizFirestoreDataSource extends BaseFirebaseDataSource {
     try {
       // Get original quiz
       final doc = await FirestoreConfig.quizzesCollection.doc(quizId).get();
-      
+
       if (!doc.exists) {
         return Result.failure(
           FirestoreException(
@@ -988,9 +955,9 @@ class QuizFirestoreDataSource extends BaseFirebaseDataSource {
 
       final data = doc.data()!;
       data['id'] = doc.id;
-      
+
       final originalQuiz = QuizModel.fromFirestoreData(doc.id, data);
-      
+
       // Create cloned quiz
       final clonedQuiz = originalQuiz.copyWith(
         id: '', // Will be assigned by Firestore
@@ -1055,14 +1022,14 @@ class QuizFirestoreDataSource extends BaseFirebaseDataSource {
   Future<Result<bool>> userOwnsQuiz(String userId, String quizId) async {
     try {
       final doc = await FirestoreConfig.quizzesCollection.doc(quizId).get();
-      
+
       if (!doc.exists) {
         return const Result.success(false);
       }
 
       final data = doc.data()!;
       final ownerId = data['createdBy'] as String;
-      
+
       return Result.success(ownerId == userId);
     } catch (e, stackTrace) {
       AppLogger.error('Failed to check quiz ownership', e, stackTrace);
@@ -1092,7 +1059,7 @@ class QuizFirestoreDataSource extends BaseFirebaseDataSource {
         'Technology',
         'General Knowledge',
       ];
-      
+
       return const Result.success(categories);
     } catch (e, stackTrace) {
       AppLogger.error('Failed to get quiz categories', e, stackTrace);
@@ -1109,7 +1076,7 @@ class QuizFirestoreDataSource extends BaseFirebaseDataSource {
   Future<Result<QuizStats>> getQuizStats(String quizId) async {
     try {
       final doc = await FirestoreConfig.quizzesCollection.doc(quizId).get();
-      
+
       if (!doc.exists) {
         return Result.failure(
           FirestoreException(
@@ -1120,7 +1087,7 @@ class QuizFirestoreDataSource extends BaseFirebaseDataSource {
       }
 
       final data = doc.data()!;
-      
+
       return Result.success(
         QuizStats(
           totalPlays: data['playCount'] as int? ?? 0,
@@ -1146,7 +1113,7 @@ class QuizFirestoreDataSource extends BaseFirebaseDataSource {
   Future<Result<void>> batchCreateQuizzes(List<QuizModel> quizzes) async {
     try {
       final batch = FirestoreConfig.getBatch();
-      
+
       for (final quiz in quizzes) {
         final docRef = FirestoreConfig.quizzesCollection.doc();
         final data = quiz.toFirestore();
@@ -1155,12 +1122,12 @@ class QuizFirestoreDataSource extends BaseFirebaseDataSource {
       }
 
       await batch.commit();
-      
+
       AppLogger.firebase(
         'QuizDataSource',
         'Batch created ${quizzes.length} quizzes',
       );
-      
+
       return const Result.success(null);
     } catch (e, stackTrace) {
       AppLogger.error('Failed to batch create quizzes', e, stackTrace);
@@ -1177,18 +1144,18 @@ class QuizFirestoreDataSource extends BaseFirebaseDataSource {
   Future<Result<void>> batchDeleteQuizzes(List<String> quizIds) async {
     try {
       final batch = FirestoreConfig.getBatch();
-      
+
       for (final quizId in quizIds) {
         batch.delete(FirestoreConfig.quizzesCollection.doc(quizId));
       }
 
       await batch.commit();
-      
+
       AppLogger.firebase(
         'QuizDataSource',
         'Batch deleted ${quizIds.length} quizzes',
       );
-      
+
       return const Result.success(null);
     } catch (e, stackTrace) {
       AppLogger.error('Failed to batch delete quizzes', e, stackTrace);

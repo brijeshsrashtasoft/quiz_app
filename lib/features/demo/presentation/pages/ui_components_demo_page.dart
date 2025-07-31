@@ -18,7 +18,8 @@ class UIComponentsDemoPage extends ConsumerStatefulWidget {
   const UIComponentsDemoPage({super.key});
 
   @override
-  ConsumerState<UIComponentsDemoPage> createState() => _UIComponentsDemoPageState();
+  ConsumerState<UIComponentsDemoPage> createState() =>
+      _UIComponentsDemoPageState();
 }
 
 class _UIComponentsDemoPageState extends ConsumerState<UIComponentsDemoPage> {
@@ -33,11 +34,13 @@ class _UIComponentsDemoPageState extends ConsumerState<UIComponentsDemoPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Theme(
       data: _isDarkMode ? ThemeData.dark() : ThemeData.light(),
       child: Scaffold(
-        backgroundColor: _isDarkMode ? AppColors.darkBackground : AppColors.offWhite,
+        backgroundColor: _isDarkMode
+            ? AppColors.darkBackground
+            : AppColors.offWhite,
         appBar: AppBar(
           title: const Text('UI Components Demo'),
           backgroundColor: AppColors.vibrantPurple,
@@ -151,10 +154,7 @@ class _UIComponentsDemoPageState extends ConsumerState<UIComponentsDemoPage> {
                         isOnline: true,
                         isReady: false,
                       ),
-                      LobbyAvatar(
-                        playerName: 'Bob Wilson',
-                        isOnline: false,
-                      ),
+                      LobbyAvatar(playerName: 'Bob Wilson', isOnline: false),
                       LobbyAvatar(
                         playerName: 'Alice Brown',
                         isOnline: true,
@@ -223,7 +223,7 @@ class _UIComponentsDemoPageState extends ConsumerState<UIComponentsDemoPage> {
                 ],
               ),
             ),
-            
+
             // Particle Effects Overlay
             if (_showParticles)
               ParticleEffects(
@@ -256,11 +256,11 @@ class _UIComponentsDemoPageState extends ConsumerState<UIComponentsDemoPage> {
 
   void _handleAnswerSelection(int index, bool isCorrect) {
     if (_showResult) return;
-    
+
     setState(() {
       _selectedAnswer = index;
       _showResult = true;
-      
+
       if (isCorrect) {
         _currentScore += 100;
         _showParticles = true;
@@ -268,7 +268,7 @@ class _UIComponentsDemoPageState extends ConsumerState<UIComponentsDemoPage> {
         _isShaking = true;
       }
     });
-    
+
     // Auto-reset after 2 seconds
     Future.delayed(const Duration(seconds: 2), () {
       if (mounted) {

@@ -18,7 +18,7 @@ class HostGameScreen extends ConsumerStatefulWidget {
   ConsumerState<HostGameScreen> createState() => _HostGameScreenState();
 }
 
-class _HostGameScreenState extends ConsumerState<HostGameScreen> 
+class _HostGameScreenState extends ConsumerState<HostGameScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
@@ -31,23 +31,21 @@ class _HostGameScreenState extends ConsumerState<HostGameScreen>
       duration: AppAnimations.mediumAnimation,
       vsync: this,
     );
-    
-    _scaleAnimation = Tween<double>(
-      begin: 0.8,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: AppAnimations.elastic,
-    ));
-    
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: AppAnimations.easeOut,
-    ));
-    
+
+    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: AppAnimations.elastic,
+      ),
+    );
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: AppAnimations.easeOut,
+      ),
+    );
+
     _animationController.forward();
   }
 
@@ -74,15 +72,15 @@ class _HostGameScreenState extends ConsumerState<HostGameScreen>
               child: Column(
                 children: [
                   const SizedBox(height: AppSpacing.spacingXL),
-                  
+
                   // Large PIN Display
                   ScaleTransition(
                     scale: _scaleAnimation,
                     child: const PinDisplay(pin: gamePin),
                   ),
-                  
+
                   const SizedBox(height: AppSpacing.spacingXL),
-                  
+
                   // Instructions
                   Text(
                     'Players can join using this PIN at',
@@ -97,9 +95,9 @@ class _HostGameScreenState extends ConsumerState<HostGameScreen>
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  
+
                   const SizedBox(height: AppSpacing.spacingXL),
-                  
+
                   // Player count
                   Container(
                     padding: AppSpacing.allM,
@@ -130,15 +128,17 @@ class _HostGameScreenState extends ConsumerState<HostGameScreen>
                       ],
                     ),
                   ),
-                  
+
                   const Spacer(),
-                  
+
                   // Host controls
                   if (!isGameStarted) ...[
                     PrimaryButton(
-                      onPressed: joinedPlayers > 0 ? () {
-                        // TODO: Start game logic
-                      } : null,
+                      onPressed: joinedPlayers > 0
+                          ? () {
+                              // TODO: Start game logic
+                            }
+                          : null,
                       text: 'Start Game',
                       isEnabled: joinedPlayers > 0,
                       width: double.infinity,
@@ -155,7 +155,7 @@ class _HostGameScreenState extends ConsumerState<HostGameScreen>
                     ),
                   ] else
                     const HostControlPanel(),
-                  
+
                   const SizedBox(height: AppSpacing.spacingXL),
                 ],
               ),

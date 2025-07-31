@@ -248,7 +248,7 @@ class NavigationLoadingStates {
         .animate(onPlay: (controller) => controller.repeat())
         .shimmer(
           duration: const Duration(milliseconds: 1500),
-          color: AppColors.pureWhite.withOpacity(0.8),
+          color: AppColors.pureWhite.withValues(alpha: 0.8),
         );
   }
 
@@ -408,7 +408,7 @@ class NavigationLoadingStates {
         .animate(onPlay: (controller) => controller.repeat())
         .shimmer(
           duration: const Duration(milliseconds: 1500),
-          color: AppColors.pureWhite.withOpacity(0.6),
+          color: AppColors.pureWhite.withValues(alpha: 0.6),
         );
   }
 }

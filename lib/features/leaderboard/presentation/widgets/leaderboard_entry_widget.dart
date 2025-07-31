@@ -33,13 +33,9 @@ class _LeaderboardEntryWidgetState extends State<LeaderboardEntryWidget>
       vsync: this,
     );
 
-    _rankChangeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.elasticOut,
-    ));
+    _rankChangeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.elasticOut),
+    );
 
     if (widget.showAnimation && widget.entry.rankChange != RankChange.same) {
       _animationController.forward();
@@ -113,22 +109,14 @@ class _LeaderboardEntryWidgetState extends State<LeaderboardEntryWidget>
       decoration: BoxDecoration(
         color: isTop3 ? colors[widget.entry.rank - 1] : AppColors.surface,
         shape: BoxShape.circle,
-        border: !isTop3
-            ? Border.all(color: AppColors.divider, width: 2)
-            : null,
+        border: !isTop3 ? Border.all(color: AppColors.divider, width: 2) : null,
       ),
       child: Center(
         child: isTop3
-            ? Icon(
-                Icons.emoji_events,
-                color: Colors.white,
-                size: 24,
-              )
+            ? Icon(Icons.emoji_events, color: Colors.white, size: 24)
             : Text(
                 '${widget.entry.rank}',
-                style: AppTextStyles.h3.copyWith(
-                  color: AppColors.textPrimary,
-                ),
+                style: AppTextStyles.h3.copyWith(color: AppColors.textPrimary),
               ),
       ),
     );
@@ -153,11 +141,7 @@ class _LeaderboardEntryWidgetState extends State<LeaderboardEntryWidget>
           const SizedBox(height: AppSpacing.xs),
           Row(
             children: [
-              Icon(
-                Icons.check_circle,
-                size: 16,
-                color: AppColors.success,
-              ),
+              Icon(Icons.check_circle, size: 16, color: AppColors.success),
               const SizedBox(width: AppSpacing.xs),
               Text(
                 '${widget.entry.correctAnswers}/${widget.entry.totalQuestions}',
@@ -175,9 +159,7 @@ class _LeaderboardEntryWidgetState extends State<LeaderboardEntryWidget>
                 const SizedBox(width: AppSpacing.xs),
                 Text(
                   '${widget.entry.currentStreak}',
-                  style: AppTextStyles.caption.copyWith(
-                    color: AppColors.error,
-                  ),
+                  style: AppTextStyles.caption.copyWith(color: AppColors.error),
                 ),
               ],
             ],
@@ -202,9 +184,7 @@ class _LeaderboardEntryWidgetState extends State<LeaderboardEntryWidget>
         ),
         Text(
           'points',
-          style: AppTextStyles.caption.copyWith(
-            color: AppColors.textSecondary,
-          ),
+          style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
         ),
       ],
     );
@@ -217,7 +197,8 @@ class _LeaderboardEntryWidgetState extends State<LeaderboardEntryWidget>
     }
 
     final isUp = widget.entry.rankChange == RankChange.up;
-    final rankDifference = (widget.entry.previousRank - widget.entry.rank).abs();
+    final rankDifference = (widget.entry.previousRank - widget.entry.rank)
+        .abs();
 
     return AnimatedBuilder(
       animation: _rankChangeAnimation,

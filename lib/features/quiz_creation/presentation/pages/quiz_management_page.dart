@@ -78,7 +78,7 @@ class _QuizManagementPageState extends ConsumerState<QuizManagementPage>
 
   List<Map<String, dynamic>> get _filteredQuizzes {
     var filtered = _quizzes;
-    
+
     // Apply filter
     if (_selectedFilter != 'all') {
       filtered = filtered.where((quiz) {
@@ -94,16 +94,22 @@ class _QuizManagementPageState extends ConsumerState<QuizManagementPage>
         }
       }).toList();
     }
-    
+
     // Apply search
     if (_searchQuery.isNotEmpty) {
       filtered = filtered.where((quiz) {
-        return quiz['title'].toString().toLowerCase().contains(_searchQuery.toLowerCase()) ||
-               quiz['description'].toString().toLowerCase().contains(_searchQuery.toLowerCase()) ||
-               quiz['category'].toString().toLowerCase().contains(_searchQuery.toLowerCase());
+        return quiz['title'].toString().toLowerCase().contains(
+              _searchQuery.toLowerCase(),
+            ) ||
+            quiz['description'].toString().toLowerCase().contains(
+              _searchQuery.toLowerCase(),
+            ) ||
+            quiz['category'].toString().toLowerCase().contains(
+              _searchQuery.toLowerCase(),
+            );
       }).toList();
     }
-    
+
     return filtered;
   }
 
@@ -118,10 +124,7 @@ class _QuizManagementPageState extends ConsumerState<QuizManagementPage>
       appBar: AppBar(
         backgroundColor: AppColors.pureWhite,
         elevation: 0,
-        title: Text(
-          'My Quizzes',
-          style: AppTextStyles.sectionHeader,
-        ),
+        title: Text('My Quizzes', style: AppTextStyles.sectionHeader),
         actions: [
           IconButton(
             onPressed: () {
@@ -173,13 +176,20 @@ class _QuizManagementPageState extends ConsumerState<QuizManagementPage>
                 ),
                 _buildStatCard(
                   'Total Plays',
-                  _quizzes.fold<int>(0, (sum, quiz) => sum + (quiz['plays'] as int)).toString(),
+                  _quizzes
+                      .fold<int>(0, (sum, quiz) => sum + (quiz['plays'] as int))
+                      .toString(),
                   Icons.play_circle_outline,
                   AppColors.turquoise,
                 ),
                 _buildStatCard(
                   'Avg Rating',
-                  (_quizzes.fold<double>(0, (sum, quiz) => sum + (quiz['rating'] as double)) / _quizzes.length).toStringAsFixed(1),
+                  (_quizzes.fold<double>(
+                            0,
+                            (sum, quiz) => sum + (quiz['rating'] as double),
+                          ) /
+                          _quizzes.length)
+                      .toStringAsFixed(1),
                   Icons.star_outline,
                   AppColors.warmYellow,
                 ),
@@ -192,9 +202,7 @@ class _QuizManagementPageState extends ConsumerState<QuizManagementPage>
                 ? _buildEmptyState()
                 : ListView.builder(
                     padding: EdgeInsets.all(
-                      isDesktop
-                          ? AppSpacing.spacingXL
-                          : AppSpacing.spacingL,
+                      isDesktop ? AppSpacing.spacingXL : AppSpacing.spacingL,
                     ),
                     itemCount: _filteredQuizzes.length,
                     itemBuilder: (context, index) {
@@ -204,13 +212,15 @@ class _QuizManagementPageState extends ConsumerState<QuizManagementPage>
                           Tween<Offset>(
                             begin: const Offset(0.1, 0),
                             end: Offset.zero,
-                          ).chain(CurveTween(
-                            curve: Interval(
-                              index * 0.1,
-                              1.0,
-                              curve: AppAnimations.easeOut,
+                          ).chain(
+                            CurveTween(
+                              curve: Interval(
+                                index * 0.1,
+                                1.0,
+                                curve: AppAnimations.easeOut,
+                              ),
                             ),
-                          )),
+                          ),
                         ),
                         child: QuizListItem(
                           quiz: quiz,
@@ -239,17 +249,14 @@ class _QuizManagementPageState extends ConsumerState<QuizManagementPage>
         },
         backgroundColor: AppColors.vibrantPurple,
         icon: const Icon(Icons.add),
-        label: Text(
-          'Create Quiz',
-          style: AppTextStyles.buttonMedium,
-        ),
+        label: Text('Create Quiz', style: AppTextStyles.buttonMedium),
       ),
     );
   }
 
   Widget _buildFilterChip(String value, String label, IconData icon) {
     final isSelected = _selectedFilter == value;
-    
+
     return FilterChip(
       selected: isSelected,
       onSelected: (selected) {
@@ -281,7 +288,12 @@ class _QuizManagementPageState extends ConsumerState<QuizManagementPage>
     );
   }
 
-  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
+  Widget _buildStatCard(
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.spacingM),
       decoration: BoxDecoration(
@@ -297,23 +309,14 @@ class _QuizManagementPageState extends ConsumerState<QuizManagementPage>
       ),
       child: Column(
         children: [
-          Icon(
-            icon,
-            color: color,
-            size: 24,
-          ),
+          Icon(icon, color: color, size: 24),
           const SizedBox(height: AppSpacing.spacingS),
           Text(
             value,
-            style: AppTextStyles.sectionHeader.copyWith(
-              color: color,
-            ),
+            style: AppTextStyles.sectionHeader.copyWith(color: color),
           ),
           const SizedBox(height: AppSpacing.spacingXS),
-          Text(
-            title,
-            style: AppTextStyles.caption,
-          ),
+          Text(title, style: AppTextStyles.caption),
         ],
       ),
     );
@@ -324,16 +327,10 @@ class _QuizManagementPageState extends ConsumerState<QuizManagementPage>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.quiz_outlined,
-            size: 80,
-            color: AppColors.lightGray,
-          ),
+          Icon(Icons.quiz_outlined, size: 80, color: AppColors.lightGray),
           const SizedBox(height: AppSpacing.spacingL),
           Text(
-            _searchQuery.isNotEmpty
-                ? 'No quizzes found'
-                : 'No quizzes yet',
+            _searchQuery.isNotEmpty ? 'No quizzes found' : 'No quizzes yet',
             style: AppTextStyles.sectionHeader.copyWith(
               color: AppColors.coolGray,
             ),
@@ -343,9 +340,7 @@ class _QuizManagementPageState extends ConsumerState<QuizManagementPage>
             _searchQuery.isNotEmpty
                 ? 'Try adjusting your search or filters'
                 : 'Create your first quiz to get started',
-            style: AppTextStyles.bodyText.copyWith(
-              color: AppColors.coolGray,
-            ),
+            style: AppTextStyles.bodyText.copyWith(color: AppColors.coolGray),
           ),
           const SizedBox(height: AppSpacing.spacingXL),
           if (_searchQuery.isEmpty)
@@ -356,7 +351,6 @@ class _QuizManagementPageState extends ConsumerState<QuizManagementPage>
               text: 'Create Your First Quiz',
               icon: Icons.add,
               backgroundColor: AppColors.vibrantPurple,
-              
             ),
         ],
       ),
@@ -367,22 +361,15 @@ class _QuizManagementPageState extends ConsumerState<QuizManagementPage>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        title: Text(
-          'Search Quizzes',
-          style: AppTextStyles.sectionHeader,
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text('Search Quizzes', style: AppTextStyles.sectionHeader),
         content: TextField(
           autofocus: true,
           decoration: InputDecoration(
             hintText: 'Search by title, description, or category',
             hintStyle: AppTextStyles.inputHint,
             prefixIcon: Icon(Icons.search, color: AppColors.coolGray),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           ),
           onChanged: (value) {
             setState(() {
@@ -409,7 +396,6 @@ class _QuizManagementPageState extends ConsumerState<QuizManagementPage>
             onPressed: () => Navigator.pop(context),
             text: 'Done',
             backgroundColor: AppColors.vibrantPurple,
-            
           ),
         ],
       ),
@@ -420,13 +406,8 @@ class _QuizManagementPageState extends ConsumerState<QuizManagementPage>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        title: Text(
-          'Delete Quiz?',
-          style: AppTextStyles.sectionHeader,
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text('Delete Quiz?', style: AppTextStyles.sectionHeader),
         content: Text(
           'Are you sure you want to delete "${quiz['title']}"? This action cannot be undone.',
           style: AppTextStyles.bodyText,
@@ -457,7 +438,6 @@ class _QuizManagementPageState extends ConsumerState<QuizManagementPage>
             },
             text: 'Delete',
             backgroundColor: AppColors.coralRed,
-            
           ),
         ],
       ),

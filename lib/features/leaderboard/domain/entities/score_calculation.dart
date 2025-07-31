@@ -64,28 +64,24 @@ class ScoreConfig with _$ScoreConfig {
   const factory ScoreConfig({
     /// Base score for correct answer
     @Default(1000) int baseScoreCorrect,
-    
+
     /// Speed bonus thresholds (in milliseconds)
-    @Default(3000) int speedBonusThreshold1,  // < 3 seconds
-    @Default(5000) int speedBonusThreshold2,  // < 5 seconds
+    @Default(3000) int speedBonusThreshold1, // < 3 seconds
+    @Default(5000) int speedBonusThreshold2, // < 5 seconds
     @Default(10000) int speedBonusThreshold3, // < 10 seconds
-    
     /// Speed multipliers
-    @Default(2.0) double speedMultiplier1,     // < 3 seconds
-    @Default(1.5) double speedMultiplier2,     // < 5 seconds
-    @Default(1.2) double speedMultiplier3,     // < 10 seconds
-    
+    @Default(2.0) double speedMultiplier1, // < 3 seconds
+    @Default(1.5) double speedMultiplier2, // < 5 seconds
+    @Default(1.2) double speedMultiplier3, // < 10 seconds
     /// Streak multipliers
-    @Default(1.1) double streakMultiplier3,    // 3+ correct
-    @Default(1.25) double streakMultiplier5,   // 5+ correct
-    @Default(1.5) double streakMultiplier10,   // 10+ correct
-    @Default(2.0) double streakMultiplier20,   // 20+ correct
-    
+    @Default(1.1) double streakMultiplier3, // 3+ correct
+    @Default(1.25) double streakMultiplier5, // 5+ correct
+    @Default(1.5) double streakMultiplier10, // 10+ correct
+    @Default(2.0) double streakMultiplier20, // 20+ correct
     /// Accuracy multipliers
     @Default(1.1) double accuracyMultiplier80, // 80%+ accuracy
     @Default(1.25) double accuracyMultiplier90, // 90%+ accuracy
     @Default(1.5) double accuracyMultiplier100, // 100% accuracy
-    
     /// Bonus points
     @Default(100) int speedBonus1,
     @Default(50) int speedBonus2,
@@ -141,11 +137,12 @@ extension ScoreCalculationX on ScoreCalculation {
         speedMultiplier >= 1.0 &&
         streakMultiplier >= 1.0 &&
         accuracyMultiplier >= 1.0 &&
-        accuracy >= 0 && accuracy <= 100;
+        accuracy >= 0 &&
+        accuracy <= 100;
   }
 
   /// Get total multiplier
-  double get totalMultiplier => 
+  double get totalMultiplier =>
       speedMultiplier * streakMultiplier * accuracyMultiplier;
 
   /// Get total bonus

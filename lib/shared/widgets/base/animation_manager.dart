@@ -58,7 +58,8 @@ class AnimationManager {
   AnimationController? getController(String key) => _controllers[key];
 
   /// Get an animation by key
-  Animation<T>? getAnimation<T>(String key) => _animations[key] as Animation<T>?;
+  Animation<T>? getAnimation<T>(String key) =>
+      _animations[key] as Animation<T>?;
 
   /// Play an animation forward
   Future<void> play(String controllerKey) async {
@@ -104,7 +105,7 @@ class AnimationManager {
   void addListener(String key, VoidCallback listener) {
     _listeners[key] ??= [];
     _listeners[key]!.add(listener);
-    
+
     final controller = _controllers[key];
     controller?.addListener(listener);
   }
@@ -112,7 +113,7 @@ class AnimationManager {
   /// Remove a listener from an animation
   void removeListener(String key, VoidCallback listener) {
     _listeners[key]?.remove(listener);
-    
+
     final controller = _controllers[key];
     controller?.removeListener(listener);
   }
@@ -146,7 +147,7 @@ class AnimationManager {
         if (item.delay != null) {
           await Future.delayed(item.delay!);
         }
-        
+
         switch (item.action) {
           case AnimationAction.forward:
             await controller.forward();
@@ -172,12 +173,12 @@ class AnimationManager {
   /// Create parallel animations
   Future<void> parallel(List<AnimationParallelItem> items) async {
     final futures = <Future>[];
-    
+
     for (final item in items) {
       final controller = _controllers[item.controllerKey];
       if (controller != null) {
         Future<void> animationFuture;
-        
+
         switch (item.action) {
           case AnimationAction.forward:
             animationFuture = controller.forward();
@@ -196,17 +197,15 @@ class AnimationManager {
             animationFuture = Future.value();
             break;
         }
-        
+
         if (item.delay != null) {
-          futures.add(
-            Future.delayed(item.delay!).then((_) => animationFuture),
-          );
+          futures.add(Future.delayed(item.delay!).then((_) => animationFuture));
         } else {
           futures.add(animationFuture);
         }
       }
     }
-    
+
     await Future.wait(futures);
   }
 }
@@ -240,22 +239,19 @@ class AnimationParallelItem extends AnimationSequenceItem {
 }
 
 /// Animation actions
-enum AnimationAction {
-  forward,
-  reverse,
-  repeat,
-  reset,
-}
+enum AnimationAction { forward, reverse, repeat, reset }
 
 /// Provider for animation manager
-final animationManagerProvider = Provider.family<AnimationManager, TickerProvider>((ref, vsync) {
-  final manager = AnimationManager(vsync: vsync);
-  ref.onDispose(() => manager.dispose());
-  return manager;
-});
+final animationManagerProvider =
+    Provider.family<AnimationManager, TickerProvider>((ref, vsync) {
+      final manager = AnimationManager(vsync: vsync);
+      ref.onDispose(() => manager.dispose());
+      return manager;
+    });
 
 /// Mixin for widgets that use animation manager
-mixin AnimationManagerMixin<T extends StatefulWidget> on State<T>, TickerProviderStateMixin {
+mixin AnimationManagerMixin<T extends StatefulWidget>
+    on State<T>, TickerProviderStateMixin {
   late final AnimationManager animationManager;
 
   @override

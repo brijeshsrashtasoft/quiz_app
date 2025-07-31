@@ -20,7 +20,9 @@ class NextQuestion {
   }) async {
     try {
       // Get current session
-      final sessionResult = await _sessionRepository.getGameSessionById(sessionId);
+      final sessionResult = await _sessionRepository.getGameSessionById(
+        sessionId,
+      );
 
       if (sessionResult.isFailure) {
         return Result.failure(sessionResult.failureOrNull!);
@@ -50,7 +52,7 @@ class NextQuestion {
 
       // Get quiz data
       final quizResult = await _quizRepository.getQuizById(session.quizId);
-      
+
       if (quizResult.isFailure) {
         return Result.failure(quizResult.failureOrNull!);
       }
@@ -61,8 +63,10 @@ class NextQuestion {
       // Check if there are more questions
       if (nextIndex >= quiz.questions.length) {
         // Game is complete - update session status
-        final completeResult = await _sessionRepository.completeGameSession(sessionId);
-        
+        final completeResult = await _sessionRepository.completeGameSession(
+          sessionId,
+        );
+
         if (completeResult.isFailure) {
           return Result.failure(completeResult.failureOrNull!);
         }

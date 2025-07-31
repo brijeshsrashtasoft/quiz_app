@@ -45,30 +45,28 @@ class AnswerStats with _$AnswerStats {
 /// Extensions for answer processing
 extension GameAnswerEntityX on GameAnswerEntity {
   /// Calculate points based on speed and correctness
-  int calculatePoints({
-    required int basePoints,
-    required int maxTimeMs,
-  }) {
+  int calculatePoints({required int basePoints, required int maxTimeMs}) {
     if (!isCorrect) return 0;
-    
+
     // Base points for correct answer
     int points = basePoints;
-    
+
     // Speed bonus (up to 50% extra)
     if (responseTimeMs < maxTimeMs) {
-      final speedBonus = ((maxTimeMs - responseTimeMs) / maxTimeMs * basePoints * 0.5).round();
+      final speedBonus =
+          ((maxTimeMs - responseTimeMs) / maxTimeMs * basePoints * 0.5).round();
       points += speedBonus;
     }
-    
+
     // Add streak bonus if any
     points += streakBonus;
-    
+
     return points;
   }
-  
+
   /// Check if answer was submitted quickly
   bool get isQuickAnswer => responseTimeMs < 3000; // Less than 3 seconds
-  
+
   /// Get performance rating
   AnswerPerformance get performance {
     if (!isCorrect) return AnswerPerformance.incorrect;
@@ -84,7 +82,7 @@ enum AnswerPerformance {
   good,
   slow,
   incorrect;
-  
+
   String get displayName {
     switch (this) {
       case AnswerPerformance.excellent:
@@ -97,7 +95,7 @@ enum AnswerPerformance {
         return 'Incorrect';
     }
   }
-  
+
   String get emoji {
     switch (this) {
       case AnswerPerformance.excellent:

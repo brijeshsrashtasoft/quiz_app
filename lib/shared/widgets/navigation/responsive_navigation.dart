@@ -342,14 +342,14 @@ class _DesktopNavigationItemState extends State<_DesktopNavigationItem>
               ),
               decoration: BoxDecoration(
                 color: widget.isActive
-                    ? AppColors.vibrantPurple.withOpacity(0.1)
+                    ? AppColors.vibrantPurple.withValues(alpha: 0.1)
                     : _isHovered
-                    ? AppColors.lightGray.withOpacity(0.5)
+                    ? AppColors.lightGray.withValues(alpha: 0.5)
                     : Colors.transparent,
                 borderRadius: BorderRadius.circular(8),
                 border: widget.isActive
                     ? Border.all(
-                        color: AppColors.vibrantPurple.withOpacity(0.3),
+                        color: AppColors.vibrantPurple.withValues(alpha: 0.3),
                       )
                     : null,
               ),

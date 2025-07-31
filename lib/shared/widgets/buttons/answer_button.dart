@@ -90,7 +90,8 @@ class _AnswerButtonState extends State<AnswerButton>
   Color get _backgroundColor {
     if (widget.showResult || widget.isCorrect || widget.isWrong) {
       if (widget.isCorrect) return AppColors.correctAnswer;
-      if (widget.isIncorrect || widget.isWrong) return AppColors.incorrectAnswer;
+      if (widget.isIncorrect || widget.isWrong)
+        return AppColors.incorrectAnswer;
     }
 
     if (widget.isSelected && !widget.showResult) {

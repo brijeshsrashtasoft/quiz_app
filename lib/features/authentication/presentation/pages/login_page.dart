@@ -8,7 +8,6 @@ import '../../../../shared/constants/app_spacing.dart';
 import '../../../../shared/constants/app_animations.dart';
 import '../../../../shared/widgets/buttons/primary_button.dart';
 import '../../../../shared/widgets/inputs/text_input.dart';
-import '../../../../shared/widgets/layout/page_layout.dart';
 import '../../../../core/navigation/route_constants.dart';
 import '../../../../core/errors/failures.dart';
 import '../providers/auth_providers.dart';
@@ -26,14 +25,16 @@ class LoginPage extends ConsumerStatefulWidget {
 }
 
 class _LoginPageState extends ConsumerState<LoginPage>
-    with SingleTickerProviderStateMixin, FormValidationMixin {
+    with TickerProviderStateMixin, FormValidationMixin {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
   late AnimationController _animationController;
+  late AnimationController _buttonAnimationController;
   late Animation<double> _fadeInAnimation;
   late Animation<Offset> _slideAnimation;
+  late Animation<double> _buttonBounceAnimation;
 
   bool _isLoading = false;
   bool _obscurePassword = true;
@@ -51,6 +52,11 @@ class _LoginPageState extends ConsumerState<LoginPage>
       vsync: this,
     );
 
+    _buttonAnimationController = AnimationController(
+      duration: AppAnimations.shortAnimation,
+      vsync: this,
+    );
+
     _fadeInAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _animationController,
@@ -59,19 +65,29 @@ class _LoginPageState extends ConsumerState<LoginPage>
     );
 
     _slideAnimation =
-        Tween<Offset>(begin: const Offset(0.0, 0.3), end: Offset.zero).animate(
+        Tween<Offset>(begin: const Offset(0.0, 0.2), end: Offset.zero).animate(
           CurvedAnimation(
             parent: _animationController,
-            curve: AppAnimations.easeOut,
+            curve: AppAnimations.bounce,
           ),
         );
 
+    _buttonBounceAnimation = Tween<double>(begin: 1.0, end: 1.1).animate(
+      CurvedAnimation(
+        parent: _buttonAnimationController,
+        curve: AppAnimations.elastic,
+      ),
+    );
+
     _animationController.forward();
+    // Subtle continuous bounce for sign-in button
+    _buttonAnimationController.repeat(reverse: true);
   }
 
   @override
   void dispose() {
     _animationController.dispose();
+    _buttonAnimationController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -118,18 +134,30 @@ class _LoginPageState extends ConsumerState<LoginPage>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.offWhite,
-      body: SafeArea(
-        child: AnimatedBuilder(
-          animation: _animationController,
-          builder: (context, child) {
-            return FadeTransition(
-              opacity: _fadeInAnimation,
-              child: SlideTransition(
-                position: _slideAnimation,
-                child: _buildContent(),
-              ),
-            );
-          },
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topRight,
+            end: Alignment.bottomLeft,
+            colors: [
+              AppColors.vibrantPurple.withValues(alpha: 0.05),
+              AppColors.turquoise.withValues(alpha: 0.05),
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: AnimatedBuilder(
+            animation: _animationController,
+            builder: (context, child) {
+              return FadeTransition(
+                opacity: _fadeInAnimation,
+                child: SlideTransition(
+                  position: _slideAnimation,
+                  child: _buildContent(),
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -145,7 +173,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
           children: [
             const SizedBox(height: AppSpacing.spacingXXL),
 
-            // Auth Header
+            // Auth Header with animated icon
             const AuthHeader(
               title: 'Welcome Back!',
               subtitle: 'Sign in to join amazing quizzes',
@@ -206,39 +234,56 @@ class _LoginPageState extends ConsumerState<LoginPage>
 
             const SizedBox(height: AppSpacing.spacingL),
 
-            // Error Message
-            if (_errorMessage != null) ...[
-              Container(
-                padding: const EdgeInsets.all(AppSpacing.spacingM),
-                decoration: BoxDecoration(
-                  color: AppColors.error.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: AppColors.error.withValues(alpha: 0.3),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.error_outline, color: AppColors.error, size: 20),
-                    const SizedBox(width: AppSpacing.spacingS),
-                    Expanded(
-                      child: Text(
-                        _errorMessage!,
-                        style: AppTextStyles.errorText,
+            // Error Message with animation
+            AnimatedSwitcher(
+              duration: AppAnimations.shortAnimation,
+              child: _errorMessage != null
+                  ? Container(
+                      padding: const EdgeInsets.all(AppSpacing.spacingM),
+                      decoration: BoxDecoration(
+                        color: AppColors.error.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: AppColors.error.withValues(alpha: 0.3),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.error_outline,
+                            color: AppColors.error,
+                            size: 20,
+                          ),
+                          const SizedBox(width: AppSpacing.spacingS),
+                          Expanded(
+                            child: Text(
+                              _errorMessage!,
+                              style: AppTextStyles.errorText,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : const SizedBox.shrink(),
+            ),
+            if (_errorMessage != null)
               const SizedBox(height: AppSpacing.spacingL),
-            ],
 
-            // Login Button
-            PrimaryButton(
-              text: 'Sign In',
-              onPressed: _isLoading ? null : _handleLogin,
-              isLoading: _isLoading,
-              icon: Icons.login,
+            // Login Button with bounce animation
+            AnimatedBuilder(
+              animation: _buttonBounceAnimation,
+              builder: (context, child) {
+                return Transform.scale(
+                  scale: _buttonBounceAnimation.value,
+                  child: PrimaryButton(
+                    text: 'Sign In',
+                    onPressed: _isLoading ? null : _handleLogin,
+                    isLoading: _isLoading,
+                    icon: Icons.login,
+                    backgroundColor: AppColors.vibrantPurple,
+                  ),
+                );
+              },
             ),
 
             const SizedBox(height: AppSpacing.spacingL),

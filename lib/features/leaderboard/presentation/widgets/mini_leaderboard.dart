@@ -9,10 +9,7 @@ import '../../../../shared/constants/app_spacing.dart';
 class MiniLeaderboard extends ConsumerWidget {
   final String sessionId;
 
-  const MiniLeaderboard({
-    super.key,
-    required this.sessionId,
-  });
+  const MiniLeaderboard({super.key, required this.sessionId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -73,16 +70,23 @@ class MiniLeaderboard extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.sm),
-          ...topThree.take(3).map((entry) => _buildMiniEntry(
-                entry,
-                isCurrentPlayer: entry.playerId == currentPlayerId,
-              )),
+          ...topThree
+              .take(3)
+              .map(
+                (entry) => _buildMiniEntry(
+                  entry,
+                  isCurrentPlayer: entry.playerId == currentPlayerId,
+                ),
+              ),
         ],
       ),
     );
   }
 
-  Widget _buildMiniEntry(LeaderboardEntry entry, {bool isCurrentPlayer = false}) {
+  Widget _buildMiniEntry(
+    LeaderboardEntry entry, {
+    bool isCurrentPlayer = false,
+  }) {
     final rankColors = [
       AppColors.warning,
       AppColors.textSecondary,
@@ -130,7 +134,9 @@ class MiniLeaderboard extends ConsumerWidget {
                 color: isCurrentPlayer
                     ? AppColors.primary
                     : AppColors.textPrimary,
-                fontWeight: isCurrentPlayer ? FontWeight.bold : FontWeight.normal,
+                fontWeight: isCurrentPlayer
+                    ? FontWeight.bold
+                    : FontWeight.normal,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,

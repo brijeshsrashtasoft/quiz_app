@@ -28,11 +28,11 @@ class _AddQuestionDialogState extends State<AddQuestionDialog>
     with TickerProviderStateMixin {
   late final AnimationController _scaleController;
   late final AnimationController _slideController;
-  
+
   final _questionController = TextEditingController();
   final _timeLimitController = TextEditingController(text: '20');
   final _pointsController = TextEditingController(text: '100');
-  
+
   String _questionType = 'multiple_choice';
   List<String> _options = ['', '', '', ''];
   int _correctAnswer = 0;
@@ -49,10 +49,10 @@ class _AddQuestionDialogState extends State<AddQuestionDialog>
       duration: AppAnimations.shortAnimation,
       vsync: this,
     );
-    
+
     _scaleController.forward();
     _slideController.forward();
-    
+
     // Load existing question if editing
     if (widget.existingQuestion != null) {
       _loadExistingQuestion();
@@ -107,216 +107,252 @@ class _AddQuestionDialogState extends State<AddQuestionDialog>
 
   @override
   Widget build(BuildContext context) {
-    return ScaleTransition(
-      scale: _scaleController.drive(
-        CurveTween(curve: AppAnimations.elastic),
-      ),
-      child: Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-        ),
-        child: Container(
-          width: MediaQuery.of(context).size.width * 0.9,
-          constraints: const BoxConstraints(maxWidth: 600),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Header
-              Container(
-                padding: const EdgeInsets.all(AppSpacing.spacingL),
-                decoration: BoxDecoration(
-                  color: AppColors.vibrantPurple,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(24),
-                    topRight: Radius.circular(24),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      widget.existingQuestion != null
-                          ? 'Edit Question'
-                          : 'Add New Question',
-                      style: AppTextStyles.sectionHeader.copyWith(
-                        color: AppColors.pureWhite,
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      icon: const Icon(
-                        Icons.close,
-                        color: AppColors.pureWhite,
-                      ),
-                    ),
-                  ],
-                ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final screenHeight = constraints.maxHeight;
+        final screenWidth = constraints.maxWidth;
+        final isSmallScreen = screenHeight < 700;
+        final dialogWidth = (screenWidth * 0.9).clamp(320.0, 600.0);
+        final dialogHeight = (screenHeight * 0.9).clamp(400.0, screenHeight * 0.95);
+        
+        return ScaleTransition(
+          scale: _scaleController.drive(CurveTween(curve: AppAnimations.elastic)),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: dialogWidth,
+                maxHeight: dialogHeight,
               ),
-              // Content
-              Flexible(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(AppSpacing.spacingL),
-                  child: SlideTransition(
-                    position: _slideController.drive(
-                      Tween<Offset>(
-                        begin: const Offset(0, 0.1),
-                        end: Offset.zero,
-                      ).chain(CurveTween(curve: AppAnimations.easeOut)),
+              child: Dialog(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Header with fixed height
+                    Container(
+                      padding: EdgeInsets.all(
+                        isSmallScreen ? AppSpacing.spacingM : AppSpacing.spacingL,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.vibrantPurple,
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(24),
+                          topRight: Radius.circular(24),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              widget.existingQuestion != null
+                                  ? 'Edit Question'
+                                  : 'Add New Question',
+                              style: AppTextStyles.sectionHeader.copyWith(
+                                color: AppColors.pureWhite,
+                                fontSize: isSmallScreen ? 16 : 18,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () => Navigator.pop(context),
+                            icon: const Icon(Icons.close, color: AppColors.pureWhite),
+                            constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+                          ),
+                        ],
+                      ),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Question type selector
-                        _buildQuestionTypeSelector(),
-                        const SizedBox(height: AppSpacing.spacingL),
-                        // Question input
-                        CustomTextInput(
-                          controller: _questionController,
-                          label: 'Question',
-                          hint: 'Enter your question here',
-                          maxLines: 2,
-                          maxLength: 200,
-                          prefixIcon: Icon(Icons.help_outline),
+                    // Content with flexible scrolling
+                    Expanded(
+                      child: SingleChildScrollView(
+                        physics: const ClampingScrollPhysics(),
+                        padding: EdgeInsets.all(
+                          isSmallScreen ? AppSpacing.spacingM : AppSpacing.spacingL,
                         ),
-                        const SizedBox(height: AppSpacing.spacingL),
-                        // Image upload
-                        _buildImageUpload(),
-                        const SizedBox(height: AppSpacing.spacingL),
-                        // Question builder based on type
-                        AnimatedSwitcher(
-                          duration: AppAnimations.shortAnimation,
-                          child: _questionType == 'multiple_choice'
-                              ? MultipleChoiceBuilder(
-                                  options: _options,
-                                  correctAnswer: _correctAnswer,
-                                  onOptionsChanged: (options) {
-                                    setState(() {
-                                      _options = options;
-                                    });
-                                  },
-                                  onCorrectAnswerChanged: (index) {
-                                    setState(() {
-                                      _correctAnswer = index;
-                                    });
-                                  },
-                                )
-                              : TrueFalseBuilder(
-                                  correctAnswer: _correctAnswer,
-                                  onCorrectAnswerChanged: (index) {
-                                    setState(() {
-                                      _correctAnswer = index;
-                                      _options = ['True', 'False'];
-                                    });
-                                  },
+                        child: SlideTransition(
+                          position: _slideController.drive(
+                            Tween<Offset>(
+                              begin: const Offset(0, 0.1),
+                              end: Offset.zero,
+                            ).chain(CurveTween(curve: AppAnimations.easeOut)),
+                          ),
+                          child: IntrinsicHeight(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                // Question type selector
+                                _buildQuestionTypeSelector(),
+                                const SizedBox(height: AppSpacing.spacingL),
+                                // Question input
+                                CustomTextInput(
+                                  controller: _questionController,
+                                  label: 'Question',
+                                  hint: 'Enter your question here',
+                                  maxLines: isSmallScreen ? 2 : 3,
+                                  maxLength: 200,
+                                  prefixIcon: Icon(Icons.help_outline),
                                 ),
+                                const SizedBox(height: AppSpacing.spacingL),
+                                // Image upload
+                                _buildImageUpload(),
+                                const SizedBox(height: AppSpacing.spacingL),
+                                // Question builder based on type
+                                ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                    maxHeight: isSmallScreen ? 200 : 300,
+                                  ),
+                                  child: AnimatedSwitcher(
+                                    duration: AppAnimations.shortAnimation,
+                                    child: _questionType == 'multiple_choice'
+                                        ? MultipleChoiceBuilder(
+                                            options: _options,
+                                            correctAnswer: _correctAnswer,
+                                            onOptionsChanged: (options) {
+                                              setState(() {
+                                                _options = options;
+                                              });
+                                            },
+                                            onCorrectAnswerChanged: (index) {
+                                              setState(() {
+                                                _correctAnswer = index;
+                                              });
+                                            },
+                                          )
+                                        : TrueFalseBuilder(
+                                            correctAnswer: _correctAnswer,
+                                            onCorrectAnswerChanged: (index) {
+                                              setState(() {
+                                                _correctAnswer = index;
+                                                _options = ['True', 'False'];
+                                              });
+                                            },
+                                          ),
+                                  ),
+                                ),
+                                const SizedBox(height: AppSpacing.spacingL),
+                                // Time and points with proper flex
+                                IntrinsicHeight(
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: CustomTextInput(
+                                          controller: _timeLimitController,
+                                          label: 'Time (sec)',
+                                          hint: '20',
+                                          keyboardType: TextInputType.number,
+                                          prefixIcon: Icon(Icons.timer_outlined),
+                                          inputFormatters: [
+                                            FilteringTextInputFormatter.digitsOnly,
+                                            LengthLimitingTextInputFormatter(3),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(width: AppSpacing.spacingM),
+                                      Expanded(
+                                        child: CustomTextInput(
+                                          controller: _pointsController,
+                                          label: 'Points',
+                                          hint: '100',
+                                          keyboardType: TextInputType.number,
+                                          prefixIcon: Icon(Icons.star_outline),
+                                          inputFormatters: [
+                                            FilteringTextInputFormatter.digitsOnly,
+                                            LengthLimitingTextInputFormatter(4),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
-                        const SizedBox(height: AppSpacing.spacingL),
-                        // Time and points
-                        Row(
+                      ),
+                    ),
+                    // Footer with fixed height
+                    Container(
+                      padding: EdgeInsets.all(
+                        isSmallScreen ? AppSpacing.spacingM : AppSpacing.spacingL,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.offWhite,
+                        borderRadius: const BorderRadius.only(
+                          bottomLeft: Radius.circular(24),
+                          bottomRight: Radius.circular(24),
+                        ),
+                      ),
+                      child: IntrinsicHeight(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            Expanded(
-                              child: CustomTextInput(
-                                controller: _timeLimitController,
-                                label: 'Time Limit (seconds)',
-                                hint: '20',
-                                keyboardType: TextInputType.number,
-                                prefixIcon: Icon(Icons.timer_outlined),
-                                inputFormatters: [
-                                  FilteringTextInputFormatter.digitsOnly,
-                                  LengthLimitingTextInputFormatter(3),
-                                ],
+                            Flexible(
+                              child: TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: Text(
+                                  'Cancel',
+                                  style: AppTextStyles.buttonMedium.copyWith(
+                                    color: AppColors.coolGray,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
                             ),
                             const SizedBox(width: AppSpacing.spacingM),
-                            Expanded(
-                              child: CustomTextInput(
-                                controller: _pointsController,
-                                label: 'Points',
-                                hint: '100',
-                                keyboardType: TextInputType.number,
-                                prefixIcon: Icon(Icons.star_outline),
-                                inputFormatters: [
-                                  FilteringTextInputFormatter.digitsOnly,
-                                  LengthLimitingTextInputFormatter(4),
-                                ],
+                            Flexible(
+                              child: PrimaryButton(
+                                onPressed: _saveQuestion,
+                                text: widget.existingQuestion != null
+                                    ? 'Update'
+                                    : 'Add Question',
+                                backgroundColor: AppColors.vibrantPurple,
                               ),
                             ),
                           ],
                         ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              // Footer
-              Container(
-                padding: const EdgeInsets.all(AppSpacing.spacingL),
-                decoration: BoxDecoration(
-                  color: AppColors.offWhite,
-                  borderRadius: const BorderRadius.only(
-                    bottomLeft: Radius.circular(24),
-                    bottomRight: Radius.circular(24),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: Text(
-                        'Cancel',
-                        style: AppTextStyles.buttonMedium.copyWith(
-                          color: AppColors.coolGray,
-                        ),
                       ),
-                    ),
-                    const SizedBox(width: AppSpacing.spacingM),
-                    PrimaryButton(
-                      onPressed: _saveQuestion,
-                      text: widget.existingQuestion != null
-                          ? 'Update Question'
-                          : 'Add Question',
-                      backgroundColor: AppColors.vibrantPurple,
                     ),
                   ],
                 ),
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
   Widget _buildQuestionTypeSelector() {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Question Type',
-          style: AppTextStyles.inputLabel,
-        ),
+        Text('Question Type', style: AppTextStyles.inputLabel),
         const SizedBox(height: AppSpacing.spacingS),
-        Row(
-          children: [
-            Expanded(
-              child: _buildTypeOption(
-                'multiple_choice',
-                'Multiple Choice',
-                Icons.radio_button_checked,
-                AppColors.vibrantPurple,
+        IntrinsicHeight(
+          child: Row(
+            children: [
+              Expanded(
+                child: _buildTypeOption(
+                  'multiple_choice',
+                  'Multiple Choice',
+                  Icons.radio_button_checked,
+                  AppColors.vibrantPurple,
+                ),
               ),
-            ),
-            const SizedBox(width: AppSpacing.spacingM),
-            Expanded(
-              child: _buildTypeOption(
-                'true_false',
-                'True/False',
-                Icons.toggle_on,
-                AppColors.turquoise,
+              const SizedBox(width: AppSpacing.spacingM),
+              Expanded(
+                child: _buildTypeOption(
+                  'true_false',
+                  'True/False',
+                  Icons.toggle_on,
+                  AppColors.turquoise,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );
@@ -329,7 +365,8 @@ class _AddQuestionDialogState extends State<AddQuestionDialog>
     Color color,
   ) {
     final isSelected = _questionType == value;
-    
+    final isSmallScreen = MediaQuery.of(context).size.height < 700;
+
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -344,7 +381,9 @@ class _AddQuestionDialogState extends State<AddQuestionDialog>
       },
       child: AnimatedContainer(
         duration: AppAnimations.shortAnimation,
-        padding: const EdgeInsets.all(AppSpacing.spacingM),
+        padding: EdgeInsets.all(
+          isSmallScreen ? AppSpacing.spacingS : AppSpacing.spacingM,
+        ),
         decoration: BoxDecoration(
           color: isSelected ? color.withOpacity(0.1) : AppColors.offWhite,
           borderRadius: BorderRadius.circular(12),
@@ -353,74 +392,92 @@ class _AddQuestionDialogState extends State<AddQuestionDialog>
             width: isSelected ? 2 : 1,
           ),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              color: isSelected ? color : AppColors.coolGray,
-              size: 20,
-            ),
-            const SizedBox(width: AppSpacing.spacingS),
-            Text(
-              label,
-              style: AppTextStyles.buttonMedium.copyWith(
+        child: IntrinsicHeight(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
                 color: isSelected ? color : AppColors.coolGray,
+                size: isSmallScreen ? 18 : 20,
               ),
-            ),
-          ],
+              const SizedBox(width: AppSpacing.spacingS),
+              Flexible(
+                child: Text(
+                  label,
+                  style: AppTextStyles.buttonMedium.copyWith(
+                    color: isSelected ? color : AppColors.coolGray,
+                    fontSize: isSmallScreen ? 12 : 14,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildImageUpload() {
+    final isSmallScreen = MediaQuery.of(context).size.height < 700;
+    
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.spacingM),
+      padding: EdgeInsets.all(
+        isSmallScreen ? AppSpacing.spacingS : AppSpacing.spacingM,
+      ),
       decoration: BoxDecoration(
         color: AppColors.offWhite,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: AppColors.lightGray,
-        ),
+        border: Border.all(color: AppColors.lightGray),
       ),
-      child: Row(
-        children: [
-          Icon(
-            Icons.image_outlined,
-            color: AppColors.coolGray,
-          ),
-          const SizedBox(width: AppSpacing.spacingM),
-          Expanded(
-            child: Text(
-              _imageUrl != null
-                  ? 'Image uploaded'
-                  : 'Add image (optional)',
-              style: AppTextStyles.bodyText.copyWith(
-                color: _imageUrl != null
-                    ? AppColors.vibrantPurple
-                    : AppColors.coolGray,
-              ),
+      child: IntrinsicHeight(
+        child: Row(
+          children: [
+            Icon(
+              Icons.image_outlined, 
+              color: AppColors.coolGray,
+              size: isSmallScreen ? 20 : 24,
             ),
-          ),
-          TextButton(
-            onPressed: () {
-              // Handle image upload
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Image upload will be implemented'),
-                  backgroundColor: AppColors.info,
+            const SizedBox(width: AppSpacing.spacingM),
+            Expanded(
+              child: Text(
+                _imageUrl != null ? 'Image uploaded' : 'Add image (optional)',
+                style: AppTextStyles.bodyText.copyWith(
+                  color: _imageUrl != null
+                      ? AppColors.vibrantPurple
+                      : AppColors.coolGray,
+                  fontSize: isSmallScreen ? 12 : 14,
                 ),
-              );
-            },
-            child: Text(
-              _imageUrl != null ? 'Change' : 'Upload',
-              style: AppTextStyles.buttonSmall.copyWith(
-                color: AppColors.vibrantPurple,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
-          ),
-        ],
+            const SizedBox(width: AppSpacing.spacingS),
+            Flexible(
+              child: TextButton(
+                onPressed: () {
+                  // Handle image upload
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Image upload will be implemented'),
+                      backgroundColor: AppColors.info,
+                    ),
+                  );
+                },
+                child: Text(
+                  _imageUrl != null ? 'Change' : 'Upload',
+                  style: AppTextStyles.buttonSmall.copyWith(
+                    color: AppColors.vibrantPurple,
+                    fontSize: isSmallScreen ? 10 : 12,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

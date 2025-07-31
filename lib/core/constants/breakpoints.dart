@@ -13,9 +13,9 @@ class Breakpoints {
   static const double desktop4K = 2560;
 
   // Common breakpoint groups
-  static const double smallScreen = 600;   // < 600px
+  static const double smallScreen = 600; // < 600px
   static const double mediumScreen = 1024; // 600px - 1024px
-  static const double largeScreen = 1440;  // 1024px - 1440px
+  static const double largeScreen = 1440; // 1024px - 1440px
   static const double extraLargeScreen = 1920; // > 1440px
 
   // Grid system breakpoints
@@ -34,7 +34,9 @@ class Breakpoints {
 
   // Layout breakpoints
   static bool isSmallScreen(double width) => width < smallScreen;
-  static bool isMediumScreen(double width) => width >= smallScreen && width < mediumScreen;
-  static bool isLargeScreen(double width) => width >= mediumScreen && width < largeScreen;
+  static bool isMediumScreen(double width) =>
+      width >= smallScreen && width < mediumScreen;
+  static bool isLargeScreen(double width) =>
+      width >= mediumScreen && width < largeScreen;
   static bool isExtraLargeScreen(double width) => width >= largeScreen;
 }

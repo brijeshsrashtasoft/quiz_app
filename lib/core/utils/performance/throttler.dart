@@ -10,7 +10,7 @@ class Throttler {
 
   Throttler({required this.duration});
 
-  /// Run the callback immediately if not throttling, 
+  /// Run the callback immediately if not throttling,
   /// otherwise queue it to run after the throttle period
   void run(void Function() callback) {
     if (!_isThrottling) {

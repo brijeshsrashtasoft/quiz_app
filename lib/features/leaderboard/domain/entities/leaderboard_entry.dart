@@ -28,9 +28,8 @@ class LeaderboardEntry with _$LeaderboardEntry {
     return RankChange.same;
   }
 
-  double get accuracy => totalQuestions > 0 
-      ? (correctAnswers / totalQuestions) * 100 
-      : 0.0;
+  double get accuracy =>
+      totalQuestions > 0 ? (correctAnswers / totalQuestions) * 100 : 0.0;
 }
 
 enum RankChange { up, down, same, new_ }

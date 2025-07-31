@@ -28,7 +28,7 @@ class CompositeWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final children = components.map((c) => c.build(context)).toList();
-    
+
     if (builder != null) {
       return builder!(context, children);
     }
@@ -48,13 +48,17 @@ class CompositeWidget extends StatelessWidget {
     }
   }
 
-  List<Widget> _addSpacing(List<Widget> children, double spacing, Axis direction) {
+  List<Widget> _addSpacing(
+    List<Widget> children,
+    double spacing,
+    Axis direction,
+  ) {
     if (spacing == 0 || children.isEmpty) return children;
-    
+
     final spacer = direction == Axis.horizontal
         ? SizedBox(width: spacing)
         : SizedBox(height: spacing);
-    
+
     final result = <Widget>[];
     for (int i = 0; i < children.length; i++) {
       result.add(children[i]);
@@ -70,10 +74,7 @@ class CompositeWidget extends StatelessWidget {
 abstract class WidgetDecorator extends StatelessWidget {
   final Widget child;
 
-  const WidgetDecorator({
-    super.key,
-    required this.child,
-  });
+  const WidgetDecorator({super.key, required this.child});
 
   Widget decorate(BuildContext context, Widget child);
 
@@ -103,7 +104,12 @@ class PaddingDecorator extends WidgetDecorator {
 class AnimationDecorator extends WidgetDecorator {
   final Duration duration;
   final Curve curve;
-  final Widget Function(BuildContext context, Widget child, Animation<double> animation) builder;
+  final Widget Function(
+    BuildContext context,
+    Widget child,
+    Animation<double> animation,
+  )
+  builder;
 
   const AnimationDecorator({
     super.key,
@@ -119,8 +125,8 @@ class AnimationDecorator extends WidgetDecorator {
       tween: Tween(begin: 0.0, end: 1.0),
       duration: duration,
       curve: curve,
-      builder: (context, value, _) => builder(context, child, 
-        AlwaysStoppedAnimation(value)),
+      builder: (context, value, _) =>
+          builder(context, child, AlwaysStoppedAnimation(value)),
     );
   }
 }
@@ -128,7 +134,8 @@ class AnimationDecorator extends WidgetDecorator {
 /// Theme decorator
 class ThemeDecorator extends WidgetDecorator {
   final ThemeData? theme;
-  final Widget Function(BuildContext context, Widget child, ThemeData theme)? builder;
+  final Widget Function(BuildContext context, Widget child, ThemeData theme)?
+  builder;
 
   const ThemeDecorator({
     super.key,
@@ -142,11 +149,11 @@ class ThemeDecorator extends WidgetDecorator {
     if (builder != null) {
       return builder!(context, child, Theme.of(context));
     }
-    
+
     if (theme != null) {
       return Theme(data: theme!, child: child);
     }
-    
+
     return child;
   }
 }
@@ -219,7 +226,9 @@ class WidgetBuilder {
   }
 
   WidgetBuilder padding(EdgeInsetsGeometry padding) {
-    _decorators.add((child) => PaddingDecorator(padding: padding, child: child));
+    _decorators.add(
+      (child) => PaddingDecorator(padding: padding, child: child),
+    );
     return this;
   }
 
@@ -228,12 +237,14 @@ class WidgetBuilder {
     Curve curve = Curves.easeInOut,
     required Widget Function(BuildContext, Widget, Animation<double>) builder,
   }) {
-    _decorators.add((child) => AnimationDecorator(
-      duration: duration,
-      curve: curve,
-      builder: builder,
-      child: child,
-    ));
+    _decorators.add(
+      (child) => AnimationDecorator(
+        duration: duration,
+        curve: curve,
+        builder: builder,
+        child: child,
+      ),
+    );
     return this;
   }
 
@@ -247,12 +258,14 @@ class WidgetBuilder {
     VoidCallback? onDoubleTap,
     VoidCallback? onLongPress,
   }) {
-    _decorators.add((child) => GestureDecorator(
-      onTap: onTap,
-      onDoubleTap: onDoubleTap,
-      onLongPress: onLongPress,
-      child: child,
-    ));
+    _decorators.add(
+      (child) => GestureDecorator(
+        onTap: onTap,
+        onDoubleTap: onDoubleTap,
+        onLongPress: onLongPress,
+        child: child,
+      ),
+    );
     return this;
   }
 
@@ -320,10 +333,7 @@ mixin CompositionMixin {
     }
 
     if (animationDuration != null) {
-      result = AnimatedContainer(
-        duration: animationDuration,
-        child: result,
-      );
+      result = AnimatedContainer(duration: animationDuration, child: result);
     }
 
     return result;

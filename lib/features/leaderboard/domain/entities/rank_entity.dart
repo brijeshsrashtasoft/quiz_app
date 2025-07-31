@@ -78,7 +78,7 @@ extension RankEntityX on RankEntity {
         playerName.isNotEmpty &&
         position > 0 &&
         score >= 0 &&
-        accuracy >= 0 && 
+        accuracy >= 0 &&
         accuracy <= 100;
   }
 

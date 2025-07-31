@@ -9,7 +9,7 @@ part 'quiz_metadata_model.g.dart';
 @freezed
 class QuizMetadataModel with _$QuizMetadataModel {
   const QuizMetadataModel._();
-  
+
   const factory QuizMetadataModel({
     required String category,
     required List<String> tags,
@@ -21,10 +21,10 @@ class QuizMetadataModel with _$QuizMetadataModel {
     int? recommendedAge,
     Map<String, dynamic>? customProperties,
   }) = _QuizMetadataModel;
-  
+
   factory QuizMetadataModel.fromJson(Map<String, dynamic> json) =>
       _$QuizMetadataModelFromJson(json);
-  
+
   /// Convert from domain entity
   factory QuizMetadataModel.fromEntity(QuizMetadata entity) {
     return QuizMetadataModel(
@@ -39,7 +39,7 @@ class QuizMetadataModel with _$QuizMetadataModel {
       customProperties: entity.customProperties,
     );
   }
-  
+
   /// Convert to domain entity
   QuizMetadata toEntity() {
     return QuizMetadata(
@@ -54,7 +54,7 @@ class QuizMetadataModel with _$QuizMetadataModel {
       customProperties: customProperties,
     );
   }
-  
+
   /// Convert to Firestore format
   Map<String, dynamic> toFirestore() {
     return {
@@ -69,7 +69,7 @@ class QuizMetadataModel with _$QuizMetadataModel {
       if (customProperties != null) 'customProperties': customProperties,
     };
   }
-  
+
   /// Create from Firestore data
   factory QuizMetadataModel.fromFirestore(Map<String, dynamic> data) {
     return QuizMetadataModel(

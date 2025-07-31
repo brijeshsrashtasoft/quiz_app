@@ -60,19 +60,19 @@ abstract class QuizRepository {
   /// Batch operations for quiz management
   Future<Result<void>> batchCreateQuizzes(List<Quiz> quizzes);
   Future<Result<void>> batchDeleteQuizzes(List<String> quizIds);
-  
+
   /// Publish quiz (make it available for playing)
   Future<Result<Quiz>> publishQuiz(String quizId);
-  
+
   /// Unpublish quiz
   Future<Result<Quiz>> unpublishQuiz(String quizId);
-  
+
   /// Clone quiz
   Future<Result<Quiz>> cloneQuiz(String quizId, String newOwnerId);
-  
+
   /// Get draft quizzes for user
   Future<Result<List<Quiz>>> getDraftQuizzes(String userId);
-  
+
   /// Validate quiz before publishing
   Future<Result<QuizValidationResult>> validateQuiz(String quizId);
 }
@@ -92,7 +92,7 @@ class QuizStats {
     required this.lastPlayed,
     this.additionalStats,
   });
-  
+
   double get completionRate {
     if (totalPlays == 0) return 0;
     return (totalPlayers / totalPlays) * 100;
@@ -104,20 +104,20 @@ class QuizValidationResult {
   final bool isValid;
   final List<String> errors;
   final List<String> warnings;
-  
+
   const QuizValidationResult({
     required this.isValid,
     required this.errors,
     required this.warnings,
   });
-  
-  factory QuizValidationResult.valid() => const QuizValidationResult(
-    isValid: true,
-    errors: [],
-    warnings: [],
-  );
-  
-  factory QuizValidationResult.invalid(List<String> errors, [List<String>? warnings]) => QuizValidationResult(
+
+  factory QuizValidationResult.valid() =>
+      const QuizValidationResult(isValid: true, errors: [], warnings: []);
+
+  factory QuizValidationResult.invalid(
+    List<String> errors, [
+    List<String>? warnings,
+  ]) => QuizValidationResult(
     isValid: false,
     errors: errors,
     warnings: warnings ?? [],

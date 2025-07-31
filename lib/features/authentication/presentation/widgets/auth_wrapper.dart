@@ -8,7 +8,9 @@ import '../../../../shared/constants/app_spacing.dart';
 import '../../../../shared/constants/app_animations.dart';
 import '../../../../shared/widgets/layout/page_layout.dart';
 import '../../../../core/navigation/route_constants.dart';
+import '../../domain/entities/auth_state.dart';
 import '../providers/auth_providers.dart';
+import '../pages/login_page.dart';
 
 /// Authentication wrapper widget that handles app-level authentication state
 /// Routes users to appropriate screens based on authentication status
@@ -24,7 +26,7 @@ class AuthWrapperWidget extends ConsumerWidget {
     required this.authenticatedChild,
     this.unauthenticatedChild,
     this.showSplashScreen = true,
-    this.splashDuration = const Duration(seconds: 2),
+    this.splashDuration = const Duration(milliseconds: 500),
   });
 
   @override
@@ -40,25 +42,18 @@ class AuthWrapperWidget extends ConsumerWidget {
         onRetry: () => ref.invalidate(authStateProvider),
       ),
       data: (state) {
-        if (state.isLoading) {
-          return showSplashScreen
+        return state.when(
+          authenticated: (user) => authenticatedChild,
+          unauthenticated: () =>
+              unauthenticatedChild ?? const AuthRedirectScreen(),
+          loading: () => showSplashScreen
               ? const AuthSplashScreen()
-              : const AuthLoadingScreen();
-        }
-
-        if (state.hasError) {
-          return AuthErrorScreen(
-            error: state.errorMessage ?? 'Authentication error occurred',
+              : const AuthLoadingScreen(),
+          error: (message, code) => AuthErrorScreen(
+            error: message,
             onRetry: () => ref.invalidate(authStateProvider),
-          );
-        }
-
-        if (state.isAuthenticated) {
-          return authenticatedChild;
-        }
-
-        // User is not authenticated
-        return unauthenticatedChild ?? const AuthRedirectScreen();
+          ),
+        );
       },
     );
   }
@@ -368,10 +363,11 @@ class AuthenticatedRoute extends ConsumerWidget {
         }
 
         // Check email verification if required
-        if (requireEmailVerification &&
-            state.firebaseUser != null &&
-            !state.firebaseUser!.emailVerified) {
-          return const EmailVerificationScreen();
+        if (requireEmailVerification) {
+          final firebaseUser = ref.watch(currentFirebaseUserProvider);
+          if (firebaseUser != null && !firebaseUser.emailVerified) {
+            return const EmailVerificationScreen();
+          }
         }
 
         return child;

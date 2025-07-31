@@ -68,6 +68,10 @@ class _QuestionCardWidgetState extends State<QuestionCardWidget>
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmallScreen = screenWidth < 600;
+    final isVerySmallScreen = screenWidth < 400;
+    
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
@@ -100,109 +104,145 @@ class _QuestionCardWidgetState extends State<QuestionCardWidget>
               onTap: widget.onEdit,
               borderRadius: BorderRadius.circular(16),
               child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.spacingL),
-                child: Row(
-                  children: [
-                    // Drag handle
-                    Icon(
-                      Icons.drag_indicator,
-                      color: AppColors.coolGray,
-                      size: 24,
-                    ),
-                    const SizedBox(width: AppSpacing.spacingM),
-                    // Question number
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: _getQuestionTypeColor().withOpacity(0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(
-                        child: Text(
-                          '${widget.index + 1}',
-                          style: AppTextStyles.cardTitle.copyWith(
-                            color: _getQuestionTypeColor(),
-                            fontWeight: FontWeight.w700,
+                padding: EdgeInsets.all(
+                  isSmallScreen ? AppSpacing.spacingM : AppSpacing.spacingL,
+                ),
+                child: IntrinsicHeight(
+                  child: Row(
+                    children: [
+                      // Drag handle (hide on very small screens)
+                      if (!isVerySmallScreen) ...[
+                        Icon(
+                          Icons.drag_indicator,
+                          color: AppColors.coolGray,
+                          size: isSmallScreen ? 20 : 24,
+                        ),
+                        SizedBox(width: isSmallScreen ? AppSpacing.spacingS : AppSpacing.spacingM),
+                      ],
+                      // Question number
+                      Container(
+                        width: isSmallScreen ? 32 : 40,
+                        height: isSmallScreen ? 32 : 40,
+                        decoration: BoxDecoration(
+                          color: _getQuestionTypeColor().withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Text(
+                            '${widget.index + 1}',
+                            style: AppTextStyles.cardTitle.copyWith(
+                              color: _getQuestionTypeColor(),
+                              fontWeight: FontWeight.w700,
+                              fontSize: isSmallScreen ? 14 : 16,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: AppSpacing.spacingM),
-                    // Question content
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                _getQuestionTypeIcon(),
-                                size: 16,
-                                color: _getQuestionTypeColor(),
-                              ),
-                              const SizedBox(width: AppSpacing.spacingXS),
-                              Text(
-                                widget.question['type'] == 'multiple_choice'
-                                    ? 'Multiple Choice'
-                                    : 'True/False',
-                                style: AppTextStyles.caption.copyWith(
+                      SizedBox(width: isSmallScreen ? AppSpacing.spacingS : AppSpacing.spacingM),
+                      // Question content
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  _getQuestionTypeIcon(),
+                                  size: isSmallScreen ? 14 : 16,
                                   color: _getQuestionTypeColor(),
-                                  fontWeight: FontWeight.w600,
+                                ),
+                                const SizedBox(width: AppSpacing.spacingXS),
+                                Flexible(
+                                  child: Text(
+                                    widget.question['type'] == 'multiple_choice'
+                                        ? (isVerySmallScreen ? 'MC' : 'Multiple Choice')
+                                        : 'True/False',
+                                    style: AppTextStyles.caption.copyWith(
+                                      color: _getQuestionTypeColor(),
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: isSmallScreen ? 10 : 12,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: AppSpacing.spacingXS),
+                            Text(
+                              widget.question['question'],
+                              style: AppTextStyles.bodyText.copyWith(
+                                fontSize: isSmallScreen ? 12 : 14,
+                              ),
+                              maxLines: isSmallScreen ? 1 : 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: AppSpacing.spacingS),
+                            if (!isVerySmallScreen)
+                              SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Row(
+                                  children: [
+                                    _buildInfoChip(
+                                      Icons.timer_outlined,
+                                      '${widget.question['timeLimit']}s',
+                                      AppColors.timeWarning,
+                                    ),
+                                    const SizedBox(width: AppSpacing.spacingS),
+                                    _buildInfoChip(
+                                      Icons.star_outline,
+                                      '${widget.question['points']}',
+                                      AppColors.warmYellow,
+                                    ),
+                                    const SizedBox(width: AppSpacing.spacingS),
+                                    _buildInfoChip(
+                                      Icons.format_list_numbered,
+                                      '${widget.question['options'].length}',
+                                      AppColors.mintGreen,
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ],
+                          ],
+                        ),
+                      ),
+                      // Action buttons
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ConstrainedBox(
+                            constraints: BoxConstraints(
+                              minWidth: isSmallScreen ? 32 : 40,
+                              minHeight: isSmallScreen ? 32 : 40,
+                            ),
+                            child: IconButton(
+                              onPressed: widget.onEdit,
+                              icon: const Icon(Icons.edit_outlined),
+                              color: AppColors.coolGray,
+                              tooltip: 'Edit question',
+                              iconSize: isSmallScreen ? 18 : 20,
+                              padding: EdgeInsets.all(isSmallScreen ? 4 : 8),
+                            ),
                           ),
-                          const SizedBox(height: AppSpacing.spacingXS),
-                          Text(
-                            widget.question['question'],
-                            style: AppTextStyles.bodyText,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: AppSpacing.spacingS),
-                          Row(
-                            children: [
-                              _buildInfoChip(
-                                Icons.timer_outlined,
-                                '${widget.question['timeLimit']}s',
-                                AppColors.timeWarning,
+                          if (!isVerySmallScreen)
+                            ConstrainedBox(
+                              constraints: BoxConstraints(
+                                minWidth: isSmallScreen ? 32 : 40,
+                                minHeight: isSmallScreen ? 32 : 40,
                               ),
-                              const SizedBox(width: AppSpacing.spacingS),
-                              _buildInfoChip(
-                                Icons.star_outline,
-                                '${widget.question['points']} pts',
-                                AppColors.warmYellow,
+                              child: IconButton(
+                                onPressed: widget.onDelete,
+                                icon: const Icon(Icons.delete_outline),
+                                color: AppColors.coralRed,
+                                tooltip: 'Delete question',
+                                iconSize: isSmallScreen ? 18 : 20,
+                                padding: EdgeInsets.all(isSmallScreen ? 4 : 8),
                               ),
-                              const SizedBox(width: AppSpacing.spacingS),
-                              _buildInfoChip(
-                                Icons.format_list_numbered,
-                                '${widget.question['options'].length} options',
-                                AppColors.mintGreen,
-                              ),
-                            ],
-                          ),
+                            ),
                         ],
                       ),
-                    ),
-                    // Action buttons
-                    Row(
-                      children: [
-                        IconButton(
-                          onPressed: widget.onEdit,
-                          icon: const Icon(Icons.edit_outlined),
-                          color: AppColors.coolGray,
-                          tooltip: 'Edit question',
-                        ),
-                        IconButton(
-                          onPressed: widget.onDelete,
-                          icon: const Icon(Icons.delete_outline),
-                          color: AppColors.coralRed,
-                          tooltip: 'Delete question',
-                        ),
-                      ],
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -213,9 +253,12 @@ class _QuestionCardWidgetState extends State<QuestionCardWidget>
   }
 
   Widget _buildInfoChip(IconData icon, String label, Color color) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmallScreen = screenWidth < 600;
+    
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.spacingS,
+      padding: EdgeInsets.symmetric(
+        horizontal: isSmallScreen ? AppSpacing.spacingXS : AppSpacing.spacingS,
         vertical: AppSpacing.spacingXS,
       ),
       decoration: BoxDecoration(
@@ -226,16 +269,20 @@ class _QuestionCardWidgetState extends State<QuestionCardWidget>
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            icon,
-            size: 14,
+            icon, 
+            size: isSmallScreen ? 12 : 14, 
             color: color,
           ),
           const SizedBox(width: AppSpacing.spacingXS),
-          Text(
-            label,
-            style: AppTextStyles.caption.copyWith(
-              color: color,
-              fontWeight: FontWeight.w500,
+          Flexible(
+            child: Text(
+              label,
+              style: AppTextStyles.caption.copyWith(
+                color: color,
+                fontWeight: FontWeight.w500,
+                fontSize: isSmallScreen ? 9 : 11,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],

@@ -1,56 +1,97 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/firebase/firebase_core_config.dart';
+import 'core/firebase/firebase_service_wrapper.dart';
 import 'core/utils/logger.dart';
+import 'core/utils/startup_performance.dart';
 import 'core/navigation/navigation.dart';
-import 'core/navigation/deep_link_service.dart';
 import 'shared/theme/app_theme.dart';
 import 'core/error_handling/global_error_handler.dart';
 
 void main() async {
+  // Mark app start time for performance monitoring
+  StartupPerformance.markAppStart();
+
   // Ensure Flutter binding is initialized
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize global error handling
+  // Initialize services asynchronously after app starts
+  await _initializeServicesAsync();
+
+  // Initialize global error handling first (lightweight)
   final globalErrorHandler = GlobalErrorHandler.instance;
   globalErrorHandler.initialize();
 
-  // Run app in error-protected zone
-  await globalErrorHandler.runInErrorZone(() async {
-    try {
-      // Initialize Firebase
-      await FirebaseCoreConfig.initialize();
-      AppLogger.info(
-        'Application started successfully with Firebase initialized',
-      );
-
-      // Initialize deep link service
-      await DeepLinkService.instance.initialize();
-      AppLogger.info('Deep link service initialized successfully');
-
-      // Run app with Riverpod
-      runApp(const ProviderScope(child: QuizApp()));
-    } catch (e, stackTrace) {
-      AppLogger.fatal('Failed to initialize application', e, stackTrace);
-
-      // Report initialization error through global handler
-      globalErrorHandler.reportError(
-        e,
-        stackTrace,
-        context: 'Application Initialization',
-      );
-
-      // Run app without Firebase in case of initialization failure
-      runApp(const ProviderScope(child: QuizApp()));
-    }
-  });
+  // Run app immediately with async initialization
+  runApp(const ProviderScope(child: QuizApp()));
 }
 
-class QuizApp extends ConsumerWidget {
+/// Initialize services asynchronously without blocking app startup
+Future<void> _initializeServicesAsync() async {
+  try {
+    final initStartTime = DateTime.now();
+
+    // Initialize Firebase asynchronously with timeout
+    await FirebaseCoreConfig.initialize().timeout(
+      const Duration(seconds: 2),
+      onTimeout: () {
+        AppLogger.warning('Firebase initialization timed out after 2 seconds');
+        throw TimeoutException(
+          'Firebase initialization timeout',
+          const Duration(seconds: 2),
+        );
+      },
+    );
+
+    final initDuration = DateTime.now().difference(initStartTime);
+    StartupPerformance.markFirebaseInit();
+
+    AppLogger.info(
+      'Firebase initialized successfully in ${initDuration.inMilliseconds}ms',
+    );
+
+    // Deep link service will be initialized on-demand by DeepLinkHandler
+  } catch (e, stackTrace) {
+    AppLogger.error('Service initialization failed', e, stackTrace);
+    // Don't crash the app - services can retry later
+    // App continues to work without Firebase services
+
+    // Log Firebase status for debugging
+    try {
+      final FirebaseServiceWrapper serviceWrapper =
+          FirebaseServiceWrapper.instance;
+      AppLogger.info(serviceWrapper.getFirebaseStatus());
+    } catch (statusError) {
+      AppLogger.warning('Could not get Firebase status', statusError);
+    }
+  }
+}
+
+class QuizApp extends ConsumerStatefulWidget {
   const QuizApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<QuizApp> createState() => _QuizAppState();
+}
+
+class _QuizAppState extends ConsumerState<QuizApp> {
+  @override
+  void initState() {
+    super.initState();
+    // Mark first frame after app widget is created
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      StartupPerformance.markFirstFrame();
+
+      // Log performance summary after a brief delay to capture complete metrics
+      Future.delayed(const Duration(milliseconds: 500), () {
+        StartupPerformance.logSummary();
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final router = ref.watch(routerProvider);
 
     return MaterialApp.router(
@@ -78,37 +119,51 @@ class DeepLinkHandler extends ConsumerStatefulWidget {
 }
 
 class _DeepLinkHandlerState extends ConsumerState<DeepLinkHandler> {
+  bool _deepLinkInitialized = false;
+
   @override
   void initState() {
     super.initState();
-
-    // Listen to deep link stream
+    // Initialize deep link service lazily after first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _setupDeepLinkListener();
+      _initializeDeepLinkService();
     });
   }
 
-  void _setupDeepLinkListener() {
-    ref.listen<AsyncValue<DeepLinkData>>(deepLinkStreamProvider, (
-      previous,
-      next,
-    ) {
-      next.whenData((deepLinkData) {
-        debugPrint('DeepLinkHandler: Received deep link: $deepLinkData');
+  Future<void> _initializeDeepLinkService() async {
+    if (_deepLinkInitialized) return;
 
-        // Handle deep link navigation with context
-        if (mounted) {
-          DeepLinkService.instance.handleDeepLinkWithContext(
-            context,
-            deepLinkData,
-          );
-        }
-      });
-    });
+    try {
+      await DeepLinkService.instance.initialize();
+      _deepLinkInitialized = true;
+      AppLogger.info('Deep link service initialized');
+    } catch (e) {
+      AppLogger.warning('Deep link initialization failed', e);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    // Listen to deep link stream only if initialized
+    if (_deepLinkInitialized) {
+      ref.listen<AsyncValue<DeepLinkData>>(deepLinkStreamProvider, (
+        previous,
+        next,
+      ) {
+        next.whenData((deepLinkData) {
+          debugPrint('DeepLinkHandler: Received deep link: $deepLinkData');
+
+          // Handle deep link navigation immediately
+          if (mounted) {
+            DeepLinkService.instance.handleDeepLinkWithContext(
+              context,
+              deepLinkData,
+            );
+          }
+        });
+      });
+    }
+
     return widget.child;
   }
 }

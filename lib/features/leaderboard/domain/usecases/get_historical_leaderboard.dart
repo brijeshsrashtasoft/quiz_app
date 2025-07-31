@@ -5,13 +5,16 @@ import '../../../../core/usecases/usecase.dart';
 import '../entities/leaderboard_entry.dart';
 import '../repositories/leaderboard_repository.dart';
 
-class GetHistoricalLeaderboard implements UseCase<List<LeaderboardEntry>, GetHistoricalLeaderboardParams> {
+class GetHistoricalLeaderboard
+    implements UseCase<List<LeaderboardEntry>, GetHistoricalLeaderboardParams> {
   final LeaderboardRepository repository;
 
   const GetHistoricalLeaderboard(this.repository);
 
   @override
-  Future<Either<Failure, List<LeaderboardEntry>>> call(GetHistoricalLeaderboardParams params) async {
+  Future<Either<Failure, List<LeaderboardEntry>>> call(
+    GetHistoricalLeaderboardParams params,
+  ) async {
     return await repository.getHistoricalLeaderboard(
       quizId: params.quizId,
       startDate: params.startDate,

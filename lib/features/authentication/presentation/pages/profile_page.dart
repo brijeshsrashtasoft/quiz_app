@@ -9,6 +9,7 @@ import '../../../../shared/constants/app_animations.dart';
 import '../../../../shared/widgets/buttons/primary_button.dart';
 import '../../../../shared/widgets/navigation/app_navigation_bar.dart';
 import '../../../../core/navigation/route_constants.dart';
+import '../../domain/entities/auth_state.dart';
 import '../providers/auth_providers.dart';
 
 /// User profile page with account management

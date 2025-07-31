@@ -33,7 +33,7 @@ class AnswerRevealDisplay extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final answerStats = _calculateAnswerStatistics();
-    
+
     return Column(
       children: [
         // Correct answer reveal
@@ -45,12 +45,10 @@ class AnswerRevealDisplay extends ConsumerWidget {
               duration: AppAnimations.mediumAnimation,
               curve: AppAnimations.elastic,
             )
-            .fadeIn(
-              duration: AppAnimations.mediumAnimation,
-            ),
-        
+            .fadeIn(duration: AppAnimations.mediumAnimation),
+
         AppSpacing.verticalSpacingL,
-        
+
         // Answer statistics
         _buildStatisticsSection(answerStats)
             .animate()
@@ -65,9 +63,9 @@ class AnswerRevealDisplay extends ConsumerWidget {
               delay: AppAnimations.staggerDelay,
               duration: AppAnimations.mediumAnimation,
             ),
-        
+
         AppSpacing.verticalSpacingL,
-        
+
         // Top scorers
         _buildTopScorersSection()
             .animate()
@@ -82,18 +80,16 @@ class AnswerRevealDisplay extends ConsumerWidget {
               delay: AppAnimations.staggerDelay * 2,
               duration: AppAnimations.mediumAnimation,
             ),
-        
+
         if (isHost && onContinue != null) ...[
           AppSpacing.verticalSpacingXL,
-          _buildContinueButton()
-              .animate()
-              .scale(
-                begin: 0,
-                end: 1,
-                delay: const Duration(seconds: 2),
-                duration: AppAnimations.mediumAnimation,
-                curve: AppAnimations.bounce,
-              ),
+          _buildContinueButton().animate().scale(
+            begin: 0,
+            end: 1,
+            delay: const Duration(seconds: 2),
+            duration: AppAnimations.mediumAnimation,
+            curve: AppAnimations.bounce,
+          ),
         ],
       ],
     );
@@ -101,9 +97,10 @@ class AnswerRevealDisplay extends ConsumerWidget {
 
   Widget _buildCorrectAnswerCard(BuildContext context) {
     final correctAnswerText = question.when(
-      multipleChoice: (_, __, options, correctIndex, ___, ____, _____, ______) => 
-          options[correctIndex],
-      trueFalse: (_, __, correctAnswer, ___, ____, _____, ______) => 
+      multipleChoice:
+          (_, __, options, correctIndex, ___, ____, _____, ______) =>
+              options[correctIndex],
+      trueFalse: (_, __, correctAnswer, ___, ____, _____, ______) =>
           correctAnswer ? 'True' : 'False',
     );
 
@@ -116,19 +113,19 @@ class AnswerRevealDisplay extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
-                Icons.check_circle_rounded,
-                color: AppColors.pureWhite,
-                size: 32,
-              )
-              .animate(
-                onPlay: (controller) => controller.repeat(reverse: true),
-              )
-              .scale(
-                begin: 1.0,
-                end: 1.1,
-                duration: AppAnimations.longAnimation,
-                curve: AppAnimations.easeInOut,
-              ),
+                    Icons.check_circle_rounded,
+                    color: AppColors.pureWhite,
+                    size: 32,
+                  )
+                  .animate(
+                    onPlay: (controller) => controller.repeat(reverse: true),
+                  )
+                  .scale(
+                    begin: 1.0,
+                    end: 1.1,
+                    duration: AppAnimations.longAnimation,
+                    curve: AppAnimations.easeInOut,
+                  ),
               AppSpacing.horizontalSpacingM,
               Text(
                 'Correct Answer',
@@ -153,7 +150,9 @@ class AnswerRevealDisplay extends ConsumerWidget {
               padding: EdgeInsets.all(AppSpacing.spacingM),
               decoration: BoxDecoration(
                 color: AppColors.pureWhite.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(AppDimensions.borderRadiusM),
+                borderRadius: BorderRadius.circular(
+                  AppDimensions.borderRadiusM,
+                ),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -187,10 +186,7 @@ class AnswerRevealDisplay extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Answer Distribution',
-            style: AppTextStyles.sectionSubheader,
-          ),
+          Text('Answer Distribution', style: AppTextStyles.sectionSubheader),
           AppSpacing.verticalSpacingM,
           AnswerStatisticsChart(
             question: question,
@@ -237,8 +233,9 @@ class AnswerRevealDisplay extends ConsumerWidget {
     }
 
     // Sort by score (those who answered fastest get more points)
-    correctPlayers.sort((a, b) => 
-        (b.value?.score ?? 0).compareTo(a.value?.score ?? 0));
+    correctPlayers.sort(
+      (a, b) => (b.value?.score ?? 0).compareTo(a.value?.score ?? 0),
+    );
 
     return AppCard(
       padding: EdgeInsets.all(AppSpacing.spacingL),
@@ -263,24 +260,21 @@ class AnswerRevealDisplay extends ConsumerWidget {
           ...correctPlayers.take(5).mapIndexed((index, entry) {
             final player = entry.value!;
             final delay = Duration(milliseconds: 100 * index);
-            
+
             return _buildTopScorerItem(
-              rank: index + 1,
-              playerName: player.name,
-              points: question.questionPoints,
-            )
-            .animate()
-            .slideX(
-              begin: 0.2,
-              end: 0,
-              delay: delay,
-              duration: AppAnimations.mediumAnimation,
-              curve: AppAnimations.easeOut,
-            )
-            .fadeIn(
-              delay: delay,
-              duration: AppAnimations.mediumAnimation,
-            );
+                  rank: index + 1,
+                  playerName: player.name,
+                  points: question.questionPoints,
+                )
+                .animate()
+                .slideX(
+                  begin: 0.2,
+                  end: 0,
+                  delay: delay,
+                  duration: AppAnimations.mediumAnimation,
+                  curve: AppAnimations.easeOut,
+                )
+                .fadeIn(delay: delay, duration: AppAnimations.mediumAnimation);
           }),
         ],
       ),
@@ -297,10 +291,10 @@ class AnswerRevealDisplay extends ConsumerWidget {
       AppColors.coolGray,
       AppColors.coralRed.withOpacity(0.7),
     ];
-    
+
     final showMedal = rank <= 3;
     final medalColor = showMedal ? medalColors[rank - 1] : AppColors.coolGray;
-    
+
     return Container(
       margin: EdgeInsets.only(bottom: AppSpacing.spacingS),
       padding: EdgeInsets.symmetric(
@@ -308,22 +302,21 @@ class AnswerRevealDisplay extends ConsumerWidget {
         vertical: AppSpacing.spacingS,
       ),
       decoration: BoxDecoration(
-        color: rank == 1 
+        color: rank == 1
             ? AppColors.achievement.withOpacity(0.1)
             : AppColors.offWhite,
         borderRadius: BorderRadius.circular(AppDimensions.borderRadiusM),
-        border: rank == 1 
-            ? Border.all(color: AppColors.achievement.withOpacity(0.3), width: 2)
+        border: rank == 1
+            ? Border.all(
+                color: AppColors.achievement.withOpacity(0.3),
+                width: 2,
+              )
             : null,
       ),
       child: Row(
         children: [
           if (showMedal)
-            Icon(
-              Icons.military_tech_rounded,
-              color: medalColor,
-              size: 24,
-            )
+            Icon(Icons.military_tech_rounded, color: medalColor, size: 24)
           else
             Container(
               width: 24,
@@ -378,10 +371,7 @@ class AnswerRevealDisplay extends ConsumerWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            'Next Question',
-            style: AppTextStyles.buttonLarge,
-          ),
+          Text('Next Question', style: AppTextStyles.buttonLarge),
           AppSpacing.horizontalSpacingS,
           Icon(Icons.arrow_forward_rounded),
         ],
@@ -391,20 +381,20 @@ class AnswerRevealDisplay extends ConsumerWidget {
 
   Map<int, int> _calculateAnswerStatistics() {
     final stats = <int, int>{};
-    
+
     // Initialize with all possible answers
     final optionCount = question.options.length;
     for (int i = 0; i < optionCount; i++) {
       stats[i] = 0;
     }
-    
+
     // Count actual answers
     for (final answer in playerAnswers.values) {
       if (answer >= 0 && answer < optionCount) {
         stats[answer] = (stats[answer] ?? 0) + 1;
       }
     }
-    
+
     return stats;
   }
 }

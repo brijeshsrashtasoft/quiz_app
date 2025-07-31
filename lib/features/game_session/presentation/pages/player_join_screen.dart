@@ -18,12 +18,12 @@ class PlayerJoinScreen extends ConsumerStatefulWidget {
   ConsumerState<PlayerJoinScreen> createState() => _PlayerJoinScreenState();
 }
 
-class _PlayerJoinScreenState extends ConsumerState<PlayerJoinScreen> 
+class _PlayerJoinScreenState extends ConsumerState<PlayerJoinScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _slideAnimation;
   late Animation<double> _fadeAnimation;
-  
+
   final _pinController = TextEditingController();
   final _nicknameController = TextEditingController();
   bool _showNicknameInput = false;
@@ -36,23 +36,21 @@ class _PlayerJoinScreenState extends ConsumerState<PlayerJoinScreen>
       duration: AppAnimations.mediumAnimation,
       vsync: this,
     );
-    
-    _slideAnimation = Tween<double>(
-      begin: 50,
-      end: 0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: AppAnimations.easeOut,
-    ));
-    
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: AppAnimations.easeIn,
-    ));
-    
+
+    _slideAnimation = Tween<double>(begin: 50, end: 0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: AppAnimations.easeOut,
+      ),
+    );
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: AppAnimations.easeIn,
+      ),
+    );
+
     _animationController.forward();
   }
 
@@ -79,7 +77,7 @@ class _PlayerJoinScreenState extends ConsumerState<PlayerJoinScreen>
       setState(() {
         _isJoining = true;
       });
-      
+
       // TODO: Implement actual join logic
       Future.delayed(const Duration(seconds: 2), () {
         if (mounted) {
@@ -103,7 +101,7 @@ class _PlayerJoinScreenState extends ConsumerState<PlayerJoinScreen>
               child: Column(
                 children: [
                   const SizedBox(height: AppSpacing.spacingXXL),
-                  
+
                   // Logo or icon
                   Container(
                     width: 120,
@@ -125,19 +123,19 @@ class _PlayerJoinScreenState extends ConsumerState<PlayerJoinScreen>
                       color: AppColors.pureWhite,
                     ),
                   ),
-                  
+
                   const SizedBox(height: AppSpacing.spacingXL),
-                  
+
                   Text(
-                    _showNicknameInput 
-                        ? 'Choose your nickname' 
+                    _showNicknameInput
+                        ? 'Choose your nickname'
                         : 'Enter game PIN',
                     style: AppTextStyles.sectionHeader,
                     textAlign: TextAlign.center,
                   ),
-                  
+
                   const SizedBox(height: AppSpacing.spacingXL),
-                  
+
                   // Input section
                   AnimatedSwitcher(
                     duration: AppAnimations.mediumAnimation,
@@ -153,25 +151,25 @@ class _PlayerJoinScreenState extends ConsumerState<PlayerJoinScreen>
                             onCompleted: _handlePinSubmit,
                           ),
                   ),
-                  
+
                   const SizedBox(height: AppSpacing.spacingXL),
-                  
+
                   // Action button
                   PrimaryButton(
-                    onPressed: _isJoining 
-                        ? null 
-                        : (_showNicknameInput 
-                            ? _handleJoinGame 
-                            : _handlePinSubmit),
-                    text: _isJoining 
-                        ? 'Joining...' 
+                    onPressed: _isJoining
+                        ? null
+                        : (_showNicknameInput
+                              ? _handleJoinGame
+                              : _handlePinSubmit),
+                    text: _isJoining
+                        ? 'Joining...'
                         : (_showNicknameInput ? 'Join Game' : 'Enter'),
                     isLoading: _isJoining,
                     width: double.infinity,
                   ),
-                  
+
                   const SizedBox(height: AppSpacing.spacingM),
-                  
+
                   // Back button
                   if (_showNicknameInput && !_isJoining)
                     TextButton(
@@ -200,9 +198,9 @@ class _PlayerJoinScreenState extends ConsumerState<PlayerJoinScreen>
                         ),
                       ),
                     ),
-                  
+
                   const Spacer(),
-                  
+
                   // Help text
                   Container(
                     padding: AppSpacing.allM,
@@ -228,7 +226,7 @@ class _PlayerJoinScreenState extends ConsumerState<PlayerJoinScreen>
                       ],
                     ),
                   ),
-                  
+
                   const SizedBox(height: AppSpacing.spacingXL),
                 ],
               ),

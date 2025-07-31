@@ -14,7 +14,7 @@ class AnswerRevealScreen extends ConsumerStatefulWidget {
   final bool isCorrect;
   final int pointsEarned;
   final String correctAnswer;
-  
+
   const AnswerRevealScreen({
     super.key,
     this.isHost = false,
@@ -27,14 +27,14 @@ class AnswerRevealScreen extends ConsumerStatefulWidget {
   ConsumerState<AnswerRevealScreen> createState() => _AnswerRevealScreenState();
 }
 
-class _AnswerRevealScreenState extends ConsumerState<AnswerRevealScreen> 
+class _AnswerRevealScreenState extends ConsumerState<AnswerRevealScreen>
     with TickerProviderStateMixin {
   late AnimationController _resultController;
   late AnimationController _leaderboardController;
   late Animation<double> _scaleAnimation;
   late Animation<double> _fadeAnimation;
   late Animation<double> _slideAnimation;
-  
+
   bool _showParticles = false;
 
   @override
@@ -44,36 +44,27 @@ class _AnswerRevealScreenState extends ConsumerState<AnswerRevealScreen>
       duration: AppAnimations.achievementDuration,
       vsync: this,
     );
-    
+
     _leaderboardController = AnimationController(
       duration: AppAnimations.leaderboardDuration,
       vsync: this,
     );
-    
-    _scaleAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _resultController,
-      curve: AppAnimations.bounce,
-    ));
-    
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _resultController,
-      curve: AppAnimations.easeIn,
-    ));
-    
-    _slideAnimation = Tween<double>(
-      begin: 100,
-      end: 0,
-    ).animate(CurvedAnimation(
-      parent: _leaderboardController,
-      curve: AppAnimations.easeOut,
-    ));
-    
+
+    _scaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _resultController, curve: AppAnimations.bounce),
+    );
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _resultController, curve: AppAnimations.easeIn),
+    );
+
+    _slideAnimation = Tween<double>(begin: 100, end: 0).animate(
+      CurvedAnimation(
+        parent: _leaderboardController,
+        curve: AppAnimations.easeOut,
+      ),
+    );
+
     _resultController.forward().then((_) {
       if (widget.isCorrect && !widget.isHost) {
         setState(() => _showParticles = true);
@@ -97,12 +88,12 @@ class _AnswerRevealScreenState extends ConsumerState<AnswerRevealScreen>
   Widget build(BuildContext context) {
     return PageLayout(
       title: 'Results',
-      child: Stack(
+      body: Stack(
         children: [
           Column(
             children: [
               const SizedBox(height: AppSpacing.spacingXL),
-              
+
               // Result icon and message
               FadeTransition(
                 opacity: _fadeAnimation,
@@ -111,13 +102,15 @@ class _AnswerRevealScreenState extends ConsumerState<AnswerRevealScreen>
                   child: _buildResultDisplay(),
                 ),
               ),
-              
+
               const SizedBox(height: AppSpacing.spacingXL),
-              
+
               // Correct answer display
               Container(
                 padding: AppSpacing.allL,
-                margin: const EdgeInsets.symmetric(horizontal: AppSpacing.spacingL),
+                margin: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.spacingL,
+                ),
                 decoration: BoxDecoration(
                   gradient: AppColors.purpleGradient,
                   borderRadius: BorderRadius.circular(20),
@@ -149,9 +142,9 @@ class _AnswerRevealScreenState extends ConsumerState<AnswerRevealScreen>
                   ],
                 ),
               ),
-              
+
               const SizedBox(height: AppSpacing.spacingXL),
-              
+
               // Statistics or leaderboard
               Expanded(
                 child: AnimatedBuilder(
@@ -169,16 +162,13 @@ class _AnswerRevealScreenState extends ConsumerState<AnswerRevealScreen>
                   },
                 ),
               ),
-              
+
               // Next question countdown
               Container(
                 padding: AppSpacing.allL,
                 child: Column(
                   children: [
-                    Text(
-                      'Next question in',
-                      style: AppTextStyles.bodyText,
-                    ),
+                    Text('Next question in', style: AppTextStyles.bodyText),
                     const SizedBox(height: AppSpacing.spacingS),
                     TweenAnimationBuilder<int>(
                       tween: IntTween(begin: 5, end: 0),
@@ -218,10 +208,11 @@ class _AnswerRevealScreenState extends ConsumerState<AnswerRevealScreen>
               ),
             ],
           ),
-          
+
           // Particle effects for correct answer
           if (_showParticles)
-            const ParticleEffects(
+            ParticleEffects(
+              isActive: _showParticles,
               type: ParticleType.confetti,
               duration: Duration(seconds: 3),
             ),
@@ -257,20 +248,17 @@ class _AnswerRevealScreenState extends ConsumerState<AnswerRevealScreen>
               ),
             ),
             const SizedBox(height: AppSpacing.spacingL),
-            Text(
-              'Answer Statistics',
-              style: AppTextStyles.sectionHeader,
-            ),
+            Text('Answer Statistics', style: AppTextStyles.sectionHeader),
           ],
         ),
       );
     }
-    
+
     final isCorrect = widget.isCorrect;
     final color = isCorrect ? AppColors.turquoise : AppColors.coralRed;
     final icon = isCorrect ? Icons.check_circle : Icons.cancel;
     final message = isCorrect ? 'Correct!' : 'Incorrect';
-    
+
     return Column(
       children: [
         Container(
@@ -295,21 +283,12 @@ class _AnswerRevealScreenState extends ConsumerState<AnswerRevealScreen>
                   ),
                 ],
               ),
-              child: Icon(
-                icon,
-                size: 60,
-                color: AppColors.pureWhite,
-              ),
+              child: Icon(icon, size: 60, color: AppColors.pureWhite),
             ),
           ),
         ),
         const SizedBox(height: AppSpacing.spacingL),
-        Text(
-          message,
-          style: AppTextStyles.gameTitle.copyWith(
-            color: color,
-          ),
-        ),
+        Text(message, style: AppTextStyles.gameTitle.copyWith(color: color)),
         if (isCorrect) ...[
           const SizedBox(height: AppSpacing.spacingM),
           Container(
@@ -320,9 +299,7 @@ class _AnswerRevealScreenState extends ConsumerState<AnswerRevealScreen>
             decoration: BoxDecoration(
               color: AppColors.warmYellow.withOpacity(0.1),
               borderRadius: BorderRadius.circular(30),
-              border: Border.all(
-                color: AppColors.warmYellow.withOpacity(0.3),
-              ),
+              border: Border.all(color: AppColors.warmYellow.withOpacity(0.3)),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,

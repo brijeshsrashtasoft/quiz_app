@@ -214,7 +214,7 @@ class _InlineLoadingIndicatorState extends State<InlineLoadingIndicator>
   void initState() {
     super.initState();
     _rotationController = AnimationController(
-      duration: const Duration(seconds: 1),
+      duration: const Duration(milliseconds: 500),
       vsync: this,
     );
 
@@ -380,7 +380,7 @@ class AuthSuccessAnimation extends StatefulWidget {
     required this.isVisible,
     this.message = 'Success!',
     this.onComplete,
-    this.duration = const Duration(seconds: 2),
+    this.duration = const Duration(milliseconds: 500),
   });
 
   @override

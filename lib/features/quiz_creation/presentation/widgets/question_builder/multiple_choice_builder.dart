@@ -88,10 +88,8 @@ class _MultipleChoiceBuilderState extends State<MultipleChoiceBuilder>
       widget.onOptionsChanged(newOptions);
       _controllers.add(TextEditingController());
       _animationControllers.add(
-        AnimationController(
-          duration: AppAnimations.shortAnimation,
-          vsync: this,
-        )..forward(),
+        AnimationController(duration: AppAnimations.shortAnimation, vsync: this)
+          ..forward(),
       );
     });
   }
@@ -109,14 +107,13 @@ class _MultipleChoiceBuilderState extends State<MultipleChoiceBuilder>
 
     _animationControllers[index].reverse().then((_) {
       setState(() {
-        final newOptions = List<String>.from(widget.options)
-          ..removeAt(index);
+        final newOptions = List<String>.from(widget.options)..removeAt(index);
         widget.onOptionsChanged(newOptions);
         _controllers[index].dispose();
         _controllers.removeAt(index);
         _animationControllers[index].dispose();
         _animationControllers.removeAt(index);
-        
+
         // Adjust correct answer if needed
         if (widget.correctAnswer >= index && widget.correctAnswer > 0) {
           widget.onCorrectAnswerChanged(widget.correctAnswer - 1);
@@ -133,42 +130,65 @@ class _MultipleChoiceBuilderState extends State<MultipleChoiceBuilder>
 
   @override
   Widget build(BuildContext context) {
+    final isSmallScreen = MediaQuery.of(context).size.height < 700;
+    
     return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Answer Options',
-              style: AppTextStyles.inputLabel,
-            ),
-            TextButton.icon(
-              onPressed: _addOption,
-              icon: Icon(
-                Icons.add,
-                color: AppColors.vibrantPurple,
-                size: 20,
-              ),
-              label: Text(
-                'Add Option',
-                style: AppTextStyles.buttonSmall.copyWith(
-                  color: AppColors.vibrantPurple,
+        IntrinsicHeight(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  'Answer Options', 
+                  style: AppTextStyles.inputLabel,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-            ),
-          ],
+              const SizedBox(width: AppSpacing.spacingS),
+              Flexible(
+                child: TextButton.icon(
+                  onPressed: _addOption,
+                  icon: Icon(
+                    Icons.add, 
+                    color: AppColors.vibrantPurple, 
+                    size: isSmallScreen ? 18 : 20,
+                  ),
+                  label: Text(
+                    isSmallScreen ? 'Add' : 'Add Option',
+                    style: AppTextStyles.buttonSmall.copyWith(
+                      color: AppColors.vibrantPurple,
+                      fontSize: isSmallScreen ? 10 : 12,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: AppSpacing.spacingM),
-        ...List.generate(widget.options.length, (index) {
-          return ScaleTransition(
-            scale: _animationControllers[index],
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.spacingM),
-              child: _buildOptionRow(index),
+        Flexible(
+          child: SingleChildScrollView(
+            physics: const ClampingScrollPhysics(),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: List.generate(widget.options.length, (index) {
+                return ScaleTransition(
+                  scale: _animationControllers[index],
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      bottom: isSmallScreen ? AppSpacing.spacingS : AppSpacing.spacingM,
+                    ),
+                    child: _buildOptionRow(index),
+                  ),
+                );
+              }),
             ),
-          );
-        }),
+          ),
+        ),
       ],
     );
   }
@@ -177,91 +197,105 @@ class _MultipleChoiceBuilderState extends State<MultipleChoiceBuilder>
     final isCorrect = widget.correctAnswer == index;
     final color = _optionColors[index % _optionColors.length];
     final icon = _optionIcons[index % _optionIcons.length];
+    final isSmallScreen = MediaQuery.of(context).size.height < 700;
+    final radioSize = isSmallScreen ? 28.0 : 32.0;
+    final iconSize = isSmallScreen ? 20.0 : 24.0;
+    final checkIconSize = isSmallScreen ? 16.0 : 18.0;
 
-    return Row(
-      children: [
-        // Radio button for correct answer
-        GestureDetector(
-          onTap: () => widget.onCorrectAnswerChanged(index),
-          child: AnimatedContainer(
-            duration: AppAnimations.shortAnimation,
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: isCorrect ? color : Colors.transparent,
-              border: Border.all(
-                color: isCorrect ? color : AppColors.coolGray,
-                width: isCorrect ? 3 : 2,
-              ),
-            ),
-            child: isCorrect
-                ? Center(
-                    child: Icon(
-                      Icons.check,
-                      color: AppColors.pureWhite,
-                      size: 18,
-                    ),
-                  )
-                : null,
-          ),
-        ),
-        const SizedBox(width: AppSpacing.spacingM),
-        // Option shape icon
-        Icon(
-          icon,
-          color: color,
-          size: 24,
-        ),
-        const SizedBox(width: AppSpacing.spacingM),
-        // Option input
-        Expanded(
-          child: TextFormField(
-            controller: _controllers[index],
-            decoration: InputDecoration(
-              hintText: 'Enter option ${index + 1}',
-              hintStyle: AppTextStyles.inputHint,
-              filled: true,
-              fillColor: isCorrect ? color.withOpacity(0.05) : AppColors.offWhite,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(
-                  color: isCorrect ? color : AppColors.lightGray,
+    return IntrinsicHeight(
+      child: Row(
+        children: [
+          // Radio button for correct answer
+          GestureDetector(
+            onTap: () => widget.onCorrectAnswerChanged(index),
+            child: AnimatedContainer(
+              duration: AppAnimations.shortAnimation,
+              width: radioSize,
+              height: radioSize,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isCorrect ? color : Colors.transparent,
+                border: Border.all(
+                  color: isCorrect ? color : AppColors.coolGray,
+                  width: isCorrect ? (isSmallScreen ? 2 : 3) : (isSmallScreen ? 1.5 : 2),
                 ),
               ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(
-                  color: isCorrect ? color : AppColors.lightGray,
+              child: isCorrect
+                  ? Center(
+                      child: Icon(
+                        Icons.check,
+                        color: AppColors.pureWhite,
+                        size: checkIconSize,
+                      ),
+                    )
+                  : null,
+            ),
+          ),
+          SizedBox(width: isSmallScreen ? AppSpacing.spacingS : AppSpacing.spacingM),
+          // Option shape icon
+          Icon(icon, color: color, size: iconSize),
+          SizedBox(width: isSmallScreen ? AppSpacing.spacingS : AppSpacing.spacingM),
+          // Option input
+          Expanded(
+            child: TextFormField(
+              controller: _controllers[index],
+              decoration: InputDecoration(
+                hintText: 'Option ${index + 1}',
+                hintStyle: AppTextStyles.inputHint.copyWith(
+                  fontSize: isSmallScreen ? 12 : 14,
                 ),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(
-                  color: color,
-                  width: 2,
+                filled: true,
+                fillColor: isCorrect
+                    ? color.withOpacity(0.05)
+                    : AppColors.offWhite,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: isCorrect ? color : AppColors.lightGray,
+                  ),
                 ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: isCorrect ? color : AppColors.lightGray,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: color, width: 2),
+                ),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: isSmallScreen ? AppSpacing.spacingS : AppSpacing.spacingM,
+                  vertical: isSmallScreen ? AppSpacing.spacingS : AppSpacing.spacingM,
+                ),
+                isDense: isSmallScreen,
               ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.spacingM,
-                vertical: AppSpacing.spacingM,
+              style: AppTextStyles.inputText.copyWith(
+                fontSize: isSmallScreen ? 12 : 14,
+              ),
+              onChanged: (value) => _updateOption(index, value),
+            ),
+          ),
+          // Remove button
+          if (widget.options.length > 2)
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                minWidth: isSmallScreen ? 36 : 40,
+                minHeight: isSmallScreen ? 36 : 40,
+              ),
+              child: IconButton(
+                onPressed: () => _removeOption(index),
+                icon: Icon(
+                  Icons.remove_circle_outline, 
+                  color: AppColors.coralRed,
+                  size: isSmallScreen ? 20 : 24,
+                ),
+                tooltip: 'Remove option',
+                padding: EdgeInsets.all(isSmallScreen ? 4 : 8),
               ),
             ),
-            style: AppTextStyles.inputText,
-            onChanged: (value) => _updateOption(index, value),
-          ),
-        ),
-        // Remove button
-        if (widget.options.length > 2)
-          IconButton(
-            onPressed: () => _removeOption(index),
-            icon: Icon(
-              Icons.remove_circle_outline,
-              color: AppColors.coralRed,
-            ),
-            tooltip: 'Remove option',
-          ),
-      ],
+        ],
+      ),
     );
   }
 }

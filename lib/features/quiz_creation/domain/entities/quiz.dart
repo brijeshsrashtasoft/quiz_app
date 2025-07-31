@@ -8,7 +8,7 @@ part 'quiz.freezed.dart';
 @freezed
 class Quiz with _$Quiz {
   const Quiz._();
-  
+
   const factory Quiz({
     required String id,
     required String title,
@@ -26,7 +26,7 @@ class Quiz with _$Quiz {
     @Default(0) int totalRatings,
     @Default(0.0) double rating,
   }) = _Quiz;
-  
+
   /// Check if quiz is valid for gameplay
   bool get isValid {
     return title.isNotEmpty &&
@@ -35,45 +35,48 @@ class Quiz with _$Quiz {
         questions.every((q) => q.isValid) &&
         metadata.isValid;
   }
-  
+
   /// Get total points possible for this quiz
   int get totalPoints {
     return questions.fold(0, (sum, question) => sum + question.questionPoints);
   }
-  
+
   /// Get estimated duration in minutes
   int get estimatedDurationMinutes {
     if (metadata.estimatedDuration != null) return metadata.estimatedDuration!;
-    
+
     // Calculate based on question time limits
-    final totalSeconds = questions.fold(0, (sum, q) => sum + q.questionTimeLimit);
+    final totalSeconds = questions.fold(
+      0,
+      (sum, q) => sum + q.questionTimeLimit,
+    );
     return (totalSeconds / 60).ceil();
   }
-  
+
   /// Check if quiz is owned by specific user
   bool isOwnedBy(String userId) {
     return createdBy == userId;
   }
-  
+
   /// Get question count
   int get questionCount => questions.length;
-  
+
   /// Check if quiz is suitable for multiplayer
   bool get isMultiplayerSuitable {
-    return questions.length >= 3 && 
-           questions.length <= 50 &&
-           !isDraft &&
-           isValid;
+    return questions.length >= 3 &&
+        questions.length <= 50 &&
+        !isDraft &&
+        isValid;
   }
-  
+
   /// Check if quiz is published
   bool get isPublished => publishedAt != null && !isDraft;
-  
+
   /// Check if quiz can be edited
   bool canBeEditedBy(String userId) {
     return isOwnedBy(userId) && (isDraft || playCount == 0);
   }
-  
+
   /// Get quiz status
   QuizStatus get status {
     if (isDraft) return QuizStatus.draft;
@@ -87,7 +90,7 @@ class Quiz with _$Quiz {
 @freezed
 class QuizMetadata with _$QuizMetadata {
   const QuizMetadata._();
-  
+
   const factory QuizMetadata({
     required String category,
     required List<String> tags,
@@ -99,15 +102,15 @@ class QuizMetadata with _$QuizMetadata {
     int? recommendedAge,
     Map<String, dynamic>? customProperties,
   }) = _QuizMetadata;
-  
+
   /// Validate metadata
   bool get isValid {
     return category.isNotEmpty &&
-           tags.isNotEmpty &&
-           difficulty.isNotEmpty &&
-           language.isNotEmpty;
+        tags.isNotEmpty &&
+        difficulty.isNotEmpty &&
+        language.isNotEmpty;
   }
-  
+
   /// Check if quiz is suitable for age
   bool isSuitableForAge(int age) {
     if (recommendedAge == null) return true;
@@ -120,7 +123,7 @@ enum QuizStatus {
   draft,
   private,
   public;
-  
+
   String get displayName {
     switch (this) {
       case QuizStatus.draft:
@@ -131,7 +134,7 @@ enum QuizStatus {
         return 'Public';
     }
   }
-  
+
   bool get canBePublished => this != QuizStatus.public;
   bool get canBeEdited => this == QuizStatus.draft;
 }
@@ -149,7 +152,7 @@ enum QuizCategory {
   technology,
   generalKnowledge,
   custom;
-  
+
   String get displayName {
     switch (this) {
       case QuizCategory.science:
@@ -176,7 +179,7 @@ enum QuizCategory {
         return 'Custom';
     }
   }
-  
+
   String get icon {
     switch (this) {
       case QuizCategory.science:

@@ -31,10 +31,13 @@ class _PinEntryWidgetState extends State<PinEntryWidget> {
   void initState() {
     super.initState();
     _focusNodes = List.generate(widget.pinLength, (_) => FocusNode());
-    _controllers = List.generate(widget.pinLength, (_) => TextEditingController());
+    _controllers = List.generate(
+      widget.pinLength,
+      (_) => TextEditingController(),
+    );
     _animationControllers = [];
     _scaleAnimations = [];
-    
+
     // Listen to main controller changes
     widget.controller.addListener(_updateIndividualControllers);
   }
@@ -77,7 +80,7 @@ class _PinEntryWidgetState extends State<PinEntryWidget> {
         }
       }
       widget.controller.text = newPin;
-      
+
       // Move to next field
       if (index < widget.pinLength - 1) {
         _focusNodes[index + 1].requestFocus();
@@ -107,8 +110,8 @@ class _PinEntryWidgetState extends State<PinEntryWidget> {
         return AnimatedContainer(
           duration: AppAnimations.shortAnimation,
           margin: EdgeInsets.symmetric(
-            horizontal: index == widget.pinLength ~/ 2 
-                ? AppSpacing.spacingM 
+            horizontal: index == widget.pinLength ~/ 2
+                ? AppSpacing.spacingM
                 : AppSpacing.spacingS,
           ),
           child: _PinDigitField(
@@ -143,7 +146,7 @@ class _PinDigitField extends StatefulWidget {
   State<_PinDigitField> createState() => _PinDigitFieldState();
 }
 
-class _PinDigitFieldState extends State<_PinDigitField> 
+class _PinDigitFieldState extends State<_PinDigitField>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
@@ -155,15 +158,14 @@ class _PinDigitFieldState extends State<_PinDigitField>
       duration: AppAnimations.shortAnimation,
       vsync: this,
     );
-    
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 1.1,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: AppAnimations.elastic,
-    ));
-    
+
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.1).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: AppAnimations.elastic,
+      ),
+    );
+
     widget.controller.addListener(_onTextChanged);
   }
 
@@ -193,13 +195,13 @@ class _PinDigitFieldState extends State<_PinDigitField>
             width: 56,
             height: 64,
             decoration: BoxDecoration(
-              color: widget.isActive 
+              color: widget.isActive
                   ? AppColors.vibrantPurple.withOpacity(0.1)
                   : AppColors.pureWhite,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: widget.isActive 
-                    ? AppColors.vibrantPurple 
+                color: widget.isActive
+                    ? AppColors.vibrantPurple
                     : AppColors.lightGray,
                 width: widget.isActive ? 2 : 1,
               ),

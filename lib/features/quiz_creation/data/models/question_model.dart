@@ -9,52 +9,71 @@ part 'question_model.g.dart';
 @freezed
 class QuestionModel with _$QuestionModel {
   const QuestionModel._();
-  
+
   const factory QuestionModel({
     required String id,
     required String type,
     required String question,
     required Map<String, dynamic> data,
   }) = _QuestionModel;
-  
+
   factory QuestionModel.fromJson(Map<String, dynamic> json) =>
       _$QuestionModelFromJson(json);
-  
+
   /// Convert from domain entity
   factory QuestionModel.fromEntity(Question entity) {
     return entity.when(
-      multipleChoice: (id, question, options, correctAnswer, timeLimit, points, imageUrl, explanation) {
-        return QuestionModel(
-          id: id,
-          type: 'multiple_choice',
-          question: question,
-          data: {
-            'options': options,
-            'correctAnswer': correctAnswer,
-            'timeLimit': timeLimit,
-            'points': points,
-            if (imageUrl != null) 'imageUrl': imageUrl,
-            if (explanation != null) 'explanation': explanation,
+      multipleChoice:
+          (
+            id,
+            question,
+            options,
+            correctAnswer,
+            timeLimit,
+            points,
+            imageUrl,
+            explanation,
+          ) {
+            return QuestionModel(
+              id: id,
+              type: 'multiple_choice',
+              question: question,
+              data: {
+                'options': options,
+                'correctAnswer': correctAnswer,
+                'timeLimit': timeLimit,
+                'points': points,
+                if (imageUrl != null) 'imageUrl': imageUrl,
+                if (explanation != null) 'explanation': explanation,
+              },
+            );
           },
-        );
-      },
-      trueFalse: (id, question, correctAnswer, timeLimit, points, imageUrl, explanation) {
-        return QuestionModel(
-          id: id,
-          type: 'true_false',
-          question: question,
-          data: {
-            'correctAnswer': correctAnswer,
-            'timeLimit': timeLimit,
-            'points': points,
-            if (imageUrl != null) 'imageUrl': imageUrl,
-            if (explanation != null) 'explanation': explanation,
+      trueFalse:
+          (
+            id,
+            question,
+            correctAnswer,
+            timeLimit,
+            points,
+            imageUrl,
+            explanation,
+          ) {
+            return QuestionModel(
+              id: id,
+              type: 'true_false',
+              question: question,
+              data: {
+                'correctAnswer': correctAnswer,
+                'timeLimit': timeLimit,
+                'points': points,
+                if (imageUrl != null) 'imageUrl': imageUrl,
+                if (explanation != null) 'explanation': explanation,
+              },
+            );
           },
-        );
-      },
     );
   }
-  
+
   /// Convert to domain entity
   Question toEntity() {
     switch (type) {
@@ -83,27 +102,22 @@ class QuestionModel with _$QuestionModel {
         throw Exception('Unknown question type: $type');
     }
   }
-  
+
   /// Convert to Firestore format
   Map<String, dynamic> toFirestore() {
-    return {
-      'id': id,
-      'type': type,
-      'question': question,
-      ...data,
-    };
+    return {'id': id, 'type': type, 'question': question, ...data};
   }
-  
+
   /// Create from Firestore document
   factory QuestionModel.fromFirestore(Map<String, dynamic> data) {
     final type = data['type'] as String;
     final questionData = Map<String, dynamic>.from(data);
-    
+
     // Remove base fields to get only question-specific data
     questionData.remove('id');
     questionData.remove('type');
     questionData.remove('question');
-    
+
     return QuestionModel(
       id: data['id'] as String,
       type: type,

@@ -128,4 +128,21 @@ class AppSpacing {
   static const EdgeInsets allM = EdgeInsets.all(spacingM);
   static const EdgeInsets allL = EdgeInsets.all(spacingL);
   static const EdgeInsets allXL = EdgeInsets.all(spacingXL);
+
+  // Missing spacing properties used throughout the codebase
+  static const double horizontalSpacingXS = spacingXS;
+  static const double horizontalSpacingS = spacingS;
+  static const double horizontalSpacingM = spacingM;
+  static const double horizontalSpacingL = spacingL;
+  static const double horizontalSpacingXL = spacingXL;
+  static const double horizontalSpacingXXL = spacingXXL;
+
+  static const double verticalSpacingXS = spacingXS;
+  static const double verticalSpacingS = spacingS;
+  static const double verticalSpacingM = spacingM;
+  static const double verticalSpacingL = spacingL;
+  static const double verticalSpacingXL = spacingXL;
+  static const double verticalSpacingXXL = spacingXXL;
+
+  static const double allS = spacingS;
 }

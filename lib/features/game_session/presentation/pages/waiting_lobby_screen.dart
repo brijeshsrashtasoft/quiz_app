@@ -11,27 +11,39 @@ import '../widgets/lobby_player_list.dart';
 
 class WaitingLobbyScreen extends ConsumerStatefulWidget {
   final bool isHost;
-  
-  const WaitingLobbyScreen({
-    super.key,
-    this.isHost = false,
-  });
+
+  const WaitingLobbyScreen({super.key, this.isHost = false});
 
   @override
   ConsumerState<WaitingLobbyScreen> createState() => _WaitingLobbyScreenState();
 }
 
-class _WaitingLobbyScreenState extends ConsumerState<WaitingLobbyScreen> 
+class _WaitingLobbyScreenState extends ConsumerState<WaitingLobbyScreen>
     with TickerProviderStateMixin {
   late AnimationController _pulseController;
   late AnimationController _staggerController;
   late Animation<double> _pulseAnimation;
-  
+
   // Mock data - replace with actual provider data
   final List<Map<String, dynamic>> _players = [
-    {'id': '1', 'name': 'Quiz Master', 'isReady': true, 'joinedAt': DateTime.now()},
-    {'id': '2', 'name': 'Brain Storm', 'isReady': true, 'joinedAt': DateTime.now().subtract(const Duration(seconds: 5))},
-    {'id': '3', 'name': 'Smart Cookie', 'isReady': false, 'joinedAt': DateTime.now().subtract(const Duration(seconds: 10))},
+    {
+      'id': '1',
+      'name': 'Quiz Master',
+      'isReady': true,
+      'joinedAt': DateTime.now(),
+    },
+    {
+      'id': '2',
+      'name': 'Brain Storm',
+      'isReady': true,
+      'joinedAt': DateTime.now().subtract(const Duration(seconds: 5)),
+    },
+    {
+      'id': '3',
+      'name': 'Smart Cookie',
+      'isReady': false,
+      'joinedAt': DateTime.now().subtract(const Duration(seconds: 10)),
+    },
   ];
 
   @override
@@ -41,20 +53,16 @@ class _WaitingLobbyScreenState extends ConsumerState<WaitingLobbyScreen>
       duration: const Duration(seconds: 2),
       vsync: this,
     );
-    
+
     _staggerController = AnimationController(
       duration: const Duration(milliseconds: 1500),
       vsync: this,
     );
-    
-    _pulseAnimation = Tween<double>(
-      begin: 0.95,
-      end: 1.05,
-    ).animate(CurvedAnimation(
-      parent: _pulseController,
-      curve: Curves.easeInOut,
-    ));
-    
+
+    _pulseAnimation = Tween<double>(begin: 0.95, end: 1.05).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
+
     _pulseController.repeat(reverse: true);
     _staggerController.forward();
   }
@@ -71,10 +79,7 @@ class _WaitingLobbyScreenState extends ConsumerState<WaitingLobbyScreen>
     return PageLayout(
       title: 'Waiting for Players',
       actions: [
-        ConnectionStatusIndicator(
-          isConnected: true,
-          onReconnect: () {},
-        ),
+        ConnectionStatusIndicator(isConnected: true, onReconnect: () {}),
       ],
       child: Column(
         children: [
@@ -113,7 +118,7 @@ class _WaitingLobbyScreenState extends ConsumerState<WaitingLobbyScreen>
               ],
             ),
           ),
-          
+
           // Waiting animation
           AnimatedBuilder(
             animation: _pulseAnimation,
@@ -156,20 +161,20 @@ class _WaitingLobbyScreenState extends ConsumerState<WaitingLobbyScreen>
               );
             },
           ),
-          
+
           const SizedBox(height: AppSpacing.spacingL),
-          
+
           // Status text
           Text(
-            widget.isHost 
-                ? 'Waiting for players to join...' 
+            widget.isHost
+                ? 'Waiting for players to join...'
                 : 'Waiting for host to start...',
             style: AppTextStyles.bodyText,
             textAlign: TextAlign.center,
           ),
-          
+
           const SizedBox(height: AppSpacing.spacingXL),
-          
+
           // Player count
           Container(
             padding: const EdgeInsets.symmetric(
@@ -205,9 +210,9 @@ class _WaitingLobbyScreenState extends ConsumerState<WaitingLobbyScreen>
               ],
             ),
           ),
-          
+
           const SizedBox(height: AppSpacing.spacingL),
-          
+
           // Player list
           Expanded(
             child: LobbyPlayerList(
@@ -216,7 +221,7 @@ class _WaitingLobbyScreenState extends ConsumerState<WaitingLobbyScreen>
               isHost: widget.isHost,
             ),
           ),
-          
+
           // Host controls or player status
           if (widget.isHost)
             Container(
@@ -224,9 +229,11 @@ class _WaitingLobbyScreenState extends ConsumerState<WaitingLobbyScreen>
               child: Column(
                 children: [
                   ElevatedButton(
-                    onPressed: _players.length >= 2 ? () {
-                      // TODO: Start game
-                    } : null,
+                    onPressed: _players.length >= 2
+                        ? () {
+                            // TODO: Start game
+                          }
+                        : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.turquoise,
                       foregroundColor: AppColors.pureWhite,
@@ -239,10 +246,7 @@ class _WaitingLobbyScreenState extends ConsumerState<WaitingLobbyScreen>
                       ),
                       minimumSize: const Size(double.infinity, 56),
                     ),
-                    child: Text(
-                      'Start Game',
-                      style: AppTextStyles.buttonLarge,
-                    ),
+                    child: Text('Start Game', style: AppTextStyles.buttonLarge),
                   ),
                   const SizedBox(height: AppSpacing.spacingM),
                   Text(

@@ -114,6 +114,10 @@ class _QuizCardState extends State<QuizCard>
               onTap: widget.onTap,
               child: Container(
                 width: double.infinity,
+                constraints: const BoxConstraints(
+                  minHeight: 160,
+                  maxHeight: 200, // Prevent excessive height
+                ),
                 margin: EdgeInsets.symmetric(
                   horizontal: AppSpacing.spacingM,
                   vertical: AppSpacing.spacingS,
@@ -136,175 +140,153 @@ class _QuizCardState extends State<QuizCard>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Header with image or color bar
-                    Container(
-                      height: 120,
-                      decoration: BoxDecoration(
-                        color: widget.imageUrl == null
-                            ? AppColors.vibrantPurple
-                            : null,
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(AppDimensions.cardRadius),
-                          topRight: Radius.circular(AppDimensions.cardRadius),
+                    // Header with image or color bar - flexible height
+                    Expanded(
+                      flex: 3,
+                      child: Container(
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: widget.imageUrl == null
+                              ? AppColors.vibrantPurple
+                              : null,
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(AppDimensions.cardRadius),
+                            topRight: Radius.circular(AppDimensions.cardRadius),
+                          ),
+                          image: widget.imageUrl != null
+                              ? DecorationImage(
+                                  image: NetworkImage(widget.imageUrl!),
+                                  fit: BoxFit.cover,
+                                )
+                              : null,
                         ),
-                        image: widget.imageUrl != null
-                            ? DecorationImage(
-                                image: NetworkImage(widget.imageUrl!),
-                                fit: BoxFit.cover,
+                        child: widget.imageUrl == null
+                            ? Center(
+                                child: Icon(
+                                  Icons.quiz,
+                                  size: 32, // Reduced from 48
+                                  color: AppColors.pureWhite,
+                                ),
                               )
                             : null,
                       ),
-                      child: widget.imageUrl == null
-                          ? Center(
-                              child: Icon(
-                                Icons.quiz,
-                                size: 48,
-                                color: AppColors.pureWhite,
-                              ),
-                            )
-                          : null,
                     ),
 
-                    // Content
-                    Padding(
-                      padding: EdgeInsets.all(AppSpacing.spacingM),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Title
-                          Text(
-                            widget.title,
-                            style: AppTextStyles.cardTitle.copyWith(
-                              color: textColor,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-
-                          SizedBox(height: AppSpacing.spacingS),
-
-                          // Description
-                          Text(
-                            widget.description,
-                            style: AppTextStyles.cardDescription.copyWith(
-                              color: textColor.withValues(alpha: 0.8),
-                            ),
-                            maxLines: 3,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-
-                          SizedBox(height: AppSpacing.spacingM),
-
-                          // Footer with metadata tags
-                          Wrap(
-                            spacing: AppSpacing.spacingS,
-                            runSpacing: AppSpacing.spacingXS,
-                            children: [
-                              // Question count
-                              Container(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: AppSpacing.spacingS,
-                                  vertical: AppSpacing.spacingXS,
+                    // Content - flexible height
+                    Expanded(
+                      flex: 4,
+                      child: Padding(
+                        padding: EdgeInsets.all(AppSpacing.spacingS), // Reduced from spacingM
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Title
+                            Flexible(
+                              child: Text(
+                                widget.title,
+                                style: AppTextStyles.cardTitle.copyWith(
+                                  color: textColor,
+                                  fontSize: 14, // Slightly smaller
                                 ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.turquoise.withValues(
-                                    alpha: 0.1,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+
+                            SizedBox(height: AppSpacing.spacingXS),
+
+                            // Description
+                            Flexible(
+                              child: Text(
+                                widget.description,
+                                style: AppTextStyles.cardDescription.copyWith(
+                                  color: textColor.withOpacity(0.8),
+                                  fontSize: 12, // Smaller text
+                                ),
+                                maxLines: 2, // Reduced from 3
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+
+                            const Spacer(), // Push footer to bottom
+
+                            // Footer with metadata tags - single row layout
+                            Row(
+                              children: [
+                                // Question count - compact version
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: AppSpacing.spacingXS,
+                                    vertical: 2,
                                   ),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      Icons.help_outline,
-                                      size: 16,
-                                      color: AppColors.turquoise,
-                                    ),
-                                    SizedBox(width: AppSpacing.spacingXS),
-                                    Text(
-                                      '${widget.questionCount} questions',
-                                      style: AppTextStyles.caption.copyWith(
+                                  decoration: BoxDecoration(
+                                    color: AppColors.turquoise.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.help_outline,
+                                        size: 12,
                                         color: AppColors.turquoise,
+                                      ),
+                                      SizedBox(width: 2),
+                                      Text(
+                                        '${widget.questionCount}',
+                                        style: AppTextStyles.caption.copyWith(
+                                          color: AppColors.turquoise,
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 10,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+
+                                SizedBox(width: AppSpacing.spacingXS),
+
+                                // Difficulty badge - compact
+                                if (widget.difficulty != null)
+                                  Container(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: AppSpacing.spacingXS,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: _getDifficultyColor().withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Text(
+                                      widget.difficulty!,
+                                      style: AppTextStyles.caption.copyWith(
+                                        color: _getDifficultyColor(),
                                         fontWeight: FontWeight.w600,
+                                        fontSize: 10,
                                       ),
                                     ),
-                                  ],
-                                ),
-                              ),
+                                  ),
 
-                              // Difficulty badge
-                              if (widget.difficulty != null)
-                                Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: AppSpacing.spacingS,
-                                    vertical: AppSpacing.spacingXS,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: _getDifficultyColor().withValues(
-                                      alpha: 0.1,
-                                    ),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Text(
-                                    widget.difficulty!,
-                                    style: AppTextStyles.caption.copyWith(
-                                      color: _getDifficultyColor(),
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
+                                const Spacer(),
 
-                              // Category badge
-                              if (widget.category != null)
-                                Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: AppSpacing.spacingS,
-                                    vertical: AppSpacing.spacingXS,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.vibrantPurple.withValues(
-                                      alpha: 0.1,
-                                    ),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Text(
-                                    widget.category!,
-                                    style: AppTextStyles.caption.copyWith(
-                                      color: AppColors.vibrantPurple,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-
-                          // Selected indicator
-                          if (widget.isSelected)
-                            Padding(
-                              padding: EdgeInsets.only(
-                                top: AppSpacing.spacingS,
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
+                                // Selected indicator - compact
+                                if (widget.isSelected)
                                   Container(
-                                    padding: EdgeInsets.all(
-                                      AppSpacing.spacingXS,
-                                    ),
+                                    padding: EdgeInsets.all(2),
                                     decoration: BoxDecoration(
                                       color: AppColors.vibrantPurple,
                                       shape: BoxShape.circle,
                                     ),
                                     child: Icon(
                                       Icons.check,
-                                      size: 16,
+                                      size: 12,
                                       color: AppColors.pureWhite,
                                     ),
                                   ),
-                                ],
-                              ),
+                              ],
                             ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ],

@@ -162,7 +162,7 @@ class RouteTransitions {
 
               return Positioned.fill(
                 child: Container(
-                  color: AppColors.charcoal.withOpacity(opacity * 0.3),
+                  color: AppColors.charcoal.withValues(alpha: opacity * 0.3),
                   child: Center(
                     child: Container(
                       padding: const EdgeInsets.all(24),
@@ -224,7 +224,7 @@ class RouteTransitions {
           builder: (context, _) {
             return Positioned.fill(
               child: Container(
-                color: AppColors.error.withOpacity(0.1),
+                color: AppColors.error.withValues(alpha: 0.1),
                 child: Center(
                   child: Container(
                     margin: const EdgeInsets.all(24),
@@ -233,7 +233,7 @@ class RouteTransitions {
                       color: AppColors.pureWhite,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: AppColors.error.withOpacity(0.3),
+                        color: AppColors.error.withValues(alpha: 0.3),
                         width: 2,
                       ),
                     ),

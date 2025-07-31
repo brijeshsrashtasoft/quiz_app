@@ -39,7 +39,9 @@ class GamePin {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is GamePin && runtimeType == other.runtimeType && value == other.value;
+      other is GamePin &&
+          runtimeType == other.runtimeType &&
+          value == other.value;
 
   @override
   int get hashCode => value.hashCode;
@@ -61,7 +63,10 @@ class PinValidationResult {
     return const PinValidationResult._(isValid: true);
   }
 
-  factory PinValidationResult.invalid(PinValidationError error, String message) {
+  factory PinValidationResult.invalid(
+    PinValidationError error,
+    String message,
+  ) {
     return PinValidationResult._(
       isValid: false,
       error: error,
@@ -110,9 +115,21 @@ class PinGeneratorConfig {
     this.maxRetries = 10,
     this.retryDelay = const Duration(milliseconds: 100),
     this.blacklistedPins = const [
-      '000000', '111111', '222222', '333333', '444444',
-      '555555', '666666', '777777', '888888', '999999',
-      '123456', '654321', '123123', '696969', '420420',
+      '000000',
+      '111111',
+      '222222',
+      '333333',
+      '444444',
+      '555555',
+      '666666',
+      '777777',
+      '888888',
+      '999999',
+      '123456',
+      '654321',
+      '123123',
+      '696969',
+      '420420',
     ],
   });
 
@@ -123,16 +140,18 @@ class PinGeneratorConfig {
   GamePin generateSafePin() {
     GamePin pin;
     int attempts = 0;
-    
+
     do {
       pin = GamePin.generate();
       attempts++;
-      
+
       if (attempts >= maxRetries) {
-        throw Exception('Failed to generate unique PIN after $maxRetries attempts');
+        throw Exception(
+          'Failed to generate unique PIN after $maxRetries attempts',
+        );
       }
     } while (isBlacklisted(pin.value));
-    
+
     return pin;
   }
 }
@@ -142,11 +161,11 @@ class PinInputFormatter {
   /// Format partial PIN input for display
   static String format(String input) {
     final cleaned = input.replaceAll(RegExp(r'[^0-9]'), '');
-    
+
     if (cleaned.length <= 3) {
       return cleaned;
     }
-    
+
     return '${cleaned.substring(0, 3)} ${cleaned.substring(3, cleaned.length.clamp(0, 6))}';
   }
 

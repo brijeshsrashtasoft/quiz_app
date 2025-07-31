@@ -23,31 +23,27 @@ class WatchGameSession {
 /// Extended functionality for game session watching
 extension WatchGameSessionExtensions on Stream<Result<GameSessionEntity>> {
   /// Transform to player count updates only
-  Stream<int> get playerCountStream => 
-      where((result) => result.isSuccess)
-      .map((result) => result.value.playerCount)
-      .distinct();
+  Stream<int> get playerCountStream => where(
+    (result) => result.isSuccess,
+  ).map((result) => result.dataOrThrow.playerCount).distinct();
 
   /// Transform to game status updates only
-  Stream<GameSessionStatus> get statusStream =>
-      where((result) => result.isSuccess)
-      .map((result) => result.value.status)
-      .distinct();
+  Stream<GameSessionStatus> get statusStream => where(
+    (result) => result.isSuccess,
+  ).map((result) => result.dataOrThrow.status).distinct();
 
   /// Transform to current question index updates
-  Stream<int> get questionIndexStream =>
-      where((result) => result.isSuccess)
-      .map((result) => result.value.currentQuestionIndex)
-      .distinct();
+  Stream<int> get questionIndexStream => where(
+    (result) => result.isSuccess,
+  ).map((result) => result.dataOrThrow.currentQuestionIndex).distinct();
 
   /// Filter for specific player updates
-  Stream<PlayerEntity?> playerStream(String playerId) =>
-      where((result) => result.isSuccess)
-      .map((result) => result.value.getPlayer(playerId))
-      .distinct();
+  Stream<PlayerEntity?> playerStream(String playerId) => where(
+    (result) => result.isSuccess,
+  ).map((result) => result.dataOrThrow.getPlayer(playerId)).distinct();
 
   /// Transform to leaderboard updates
-  Stream<List<MapEntry<String, PlayerEntity>>> get leaderboardStream =>
-      where((result) => result.isSuccess)
-      .map((result) => result.value.leaderboard);
+  Stream<List<MapEntry<String, PlayerEntity>>> get leaderboardStream => where(
+    (result) => result.isSuccess,
+  ).map((result) => result.dataOrThrow.leaderboard);
 }

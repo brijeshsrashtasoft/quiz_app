@@ -6,6 +6,7 @@ import '../../../../core/navigation/app_router.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../../core/errors/failures.dart';
 import '../../domain/entities/user_entity.dart';
+import '../../domain/entities/auth_state.dart';
 import 'auth_providers.dart';
 
 part 'auth_navigation_providers.freezed.dart';
@@ -96,11 +97,12 @@ class AuthNavigationNotifier extends StateNotifier<AuthNavigationState> {
   void _initializeAuthListener() {
     ref.listen<AsyncValue<AuthState>>(authStateProvider, (previous, next) {
       next.whenData((authState) {
-        if (authState.isAuthenticated) {
-          _handleAuthenticationSuccess();
-        } else if (authState.hasError) {
-          _handleAuthenticationError(authState.errorMessage);
-        }
+        authState.when(
+          authenticated: (_) => _handleAuthenticationSuccess(),
+          unauthenticated: () => {}, // Do nothing on unauthenticated
+          loading: () => {}, // Do nothing on loading
+          error: (message, _) => _handleAuthenticationError(message),
+        );
       });
     });
   }
@@ -368,16 +370,17 @@ class AuthFlowController extends StateNotifier<AuthFlowState> {
       ref.listen<AsyncValue<AuthState>>(authStateProvider, (previous, next) {
         next.when(
           data: (authState) {
-            if (authState.isAuthenticated) {
-              _updateAuthenticationStatus(
+            authState.when(
+              authenticated: (user) => _updateAuthenticationStatus(
                 AuthenticationStatus.authenticated,
-                user: authState.user,
-              );
-            } else if (authState.isUnauthenticated) {
-              _updateAuthenticationStatus(AuthenticationStatus.unauthenticated);
-            } else if (authState.hasError) {
-              _updateAuthenticationError(authState.errorMessage);
-            }
+                user: user,
+              ),
+              unauthenticated: () => _updateAuthenticationStatus(
+                AuthenticationStatus.unauthenticated,
+              ),
+              loading: () => {}, // Do nothing on loading
+              error: (message, _) => _updateAuthenticationError(message),
+            );
           },
           loading: () {
             state = state.copyWith(isLoading: true);

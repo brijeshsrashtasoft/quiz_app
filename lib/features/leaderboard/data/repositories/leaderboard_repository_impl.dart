@@ -21,10 +21,14 @@ class LeaderboardRepositoryImpl implements LeaderboardRepository {
   });
 
   @override
-  Stream<Either<Failure, Leaderboard>> watchLeaderboard(String sessionId) async* {
+  Stream<Either<Failure, Leaderboard>> watchLeaderboard(
+    String sessionId,
+  ) async* {
     if (await networkInfo.isConnected) {
       try {
-        await for (final leaderboardModel in remoteDataSource.watchLeaderboard(sessionId)) {
+        await for (final leaderboardModel in remoteDataSource.watchLeaderboard(
+          sessionId,
+        )) {
           yield Right(leaderboardModel.toEntity());
         }
       } on ServerException catch (e) {
@@ -38,7 +42,10 @@ class LeaderboardRepositoryImpl implements LeaderboardRepository {
   }
 
   @override
-  Future<Either<Failure, void>> updateScore(String sessionId, ScoreEntity score) async {
+  Future<Either<Failure, void>> updateScore(
+    String sessionId,
+    ScoreEntity score,
+  ) async {
     if (await networkInfo.isConnected) {
       try {
         final scoreModel = ScoreModel.fromEntity(score);
@@ -58,7 +65,9 @@ class LeaderboardRepositoryImpl implements LeaderboardRepository {
   Future<Either<Failure, Leaderboard>> getLeaderboard(String sessionId) async {
     if (await networkInfo.isConnected) {
       try {
-        final leaderboardModel = await remoteDataSource.getLeaderboard(sessionId);
+        final leaderboardModel = await remoteDataSource.getLeaderboard(
+          sessionId,
+        );
         return Right(leaderboardModel.toEntity());
       } on ServerException catch (e) {
         return Left(ServerFailure(message: e.message));
@@ -119,7 +128,9 @@ class LeaderboardRepositoryImpl implements LeaderboardRepository {
   }
 
   @override
-  Future<Either<Failure, void>> recordFinalLeaderboard(Leaderboard leaderboard) async {
+  Future<Either<Failure, void>> recordFinalLeaderboard(
+    Leaderboard leaderboard,
+  ) async {
     if (await networkInfo.isConnected) {
       try {
         final leaderboardModel = LeaderboardModel.fromEntity(leaderboard);
@@ -136,7 +147,9 @@ class LeaderboardRepositoryImpl implements LeaderboardRepository {
   }
 
   @override
-  Future<Either<Failure, List<Leaderboard>>> getPlayerHistory(String playerId) async {
+  Future<Either<Failure, List<Leaderboard>>> getPlayerHistory(
+    String playerId,
+  ) async {
     if (await networkInfo.isConnected) {
       try {
         final leaderboards = await remoteDataSource.getPlayerHistory(playerId);

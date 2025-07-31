@@ -9,6 +9,7 @@ import '../../constants/app_animations.dart';
 import '../../constants/app_dimensions.dart';
 import '../../../core/navigation/route_constants.dart';
 import '../../../features/authentication/presentation/providers/auth_providers.dart';
+import '../../../features/authentication/domain/entities/auth_state.dart';
 
 /// App navigation bar with dynamic state based on authentication
 /// Following Material Design 3 navigation principles with Kahoot styling
@@ -32,30 +33,40 @@ class AppNavigationBar extends ConsumerWidget {
       return const SizedBox.shrink();
     }
 
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.pureWhite,
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadowLight,
-            offset: const Offset(0, -2),
-            blurRadius: 8,
-            spreadRadius: 0,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isSmallScreen = constraints.maxWidth < 400;
+        
+        return Container(
+          decoration: BoxDecoration(
+            color: AppColors.pureWhite,
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.shadowLight,
+                offset: const Offset(0, -2),
+                blurRadius: 8,
+                spreadRadius: 0,
+              ),
+            ],
           ),
-        ],
-      ),
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.spacingM,
-            vertical: AppSpacing.spacingS,
+          child: SafeArea(
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: isSmallScreen ? AppSpacing.spacingS : AppSpacing.spacingM,
+                vertical: AppSpacing.spacingS,
+              ),
+              child: IntrinsicHeight(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: _buildNavigationItems(context)
+                      .map((item) => Expanded(child: item))
+                      .toList(),
+                ),
+              ),
+            ),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: _buildNavigationItems(context),
-          ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -169,6 +180,12 @@ class _NavigationItemState extends State<_NavigationItem>
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isVerySmallScreen = screenWidth < 360;
+    final isSmallScreen = screenWidth < 400;
+    final iconSize = isVerySmallScreen ? 20.0 : 24.0;
+    final labelFontSize = isVerySmallScreen ? 10.0 : 12.0;
+    
     return Semantics(
       button: true,
       selected: widget.isActive,
@@ -186,8 +203,8 @@ class _NavigationItemState extends State<_NavigationItem>
               child: AnimatedContainer(
                 duration: AppAnimations.shortAnimation,
                 curve: AppAnimations.easeInOut,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.spacingM,
+                padding: EdgeInsets.symmetric(
+                  horizontal: isSmallScreen ? AppSpacing.spacingS : AppSpacing.spacingM,
                   vertical: AppSpacing.spacingS,
                 ),
                 decoration: BoxDecoration(
@@ -198,55 +215,65 @@ class _NavigationItemState extends State<_NavigationItem>
                     AppDimensions.buttonRadius,
                   ),
                 ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Icon with indicator
-                    Stack(
-                      children: [
-                        AnimatedSwitcher(
+                child: IntrinsicHeight(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Icon with indicator
+                      Stack(
+                        children: [
+                          AnimatedSwitcher(
+                            duration: AppAnimations.shortAnimation,
+                            child: Icon(
+                              widget.isActive ? widget.activeIcon : widget.icon,
+                              key: ValueKey(widget.isActive),
+                              color: widget.isActive
+                                  ? AppColors.vibrantPurple
+                                  : AppColors.coolGray,
+                              size: iconSize,
+                            ),
+                          ),
+                          if (widget.isActive)
+                            Positioned(
+                              top: -2,
+                              right: -2,
+                              child: Container(
+                                width: isVerySmallScreen ? 4 : 6,
+                                height: isVerySmallScreen ? 4 : 6,
+                                decoration: const BoxDecoration(
+                                  color: AppColors.vibrantPurple,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+
+                      const SizedBox(height: AppSpacing.spacingXS),
+
+                      // Label with overflow protection
+                      Flexible(
+                        child: AnimatedDefaultTextStyle(
                           duration: AppAnimations.shortAnimation,
-                          child: Icon(
-                            widget.isActive ? widget.activeIcon : widget.icon,
-                            key: ValueKey(widget.isActive),
+                          style: AppTextStyles.caption.copyWith(
                             color: widget.isActive
                                 ? AppColors.vibrantPurple
                                 : AppColors.coolGray,
-                            size: 24,
+                            fontWeight: widget.isActive
+                                ? FontWeight.w600
+                                : FontWeight.w400,
+                            fontSize: labelFontSize,
+                          ),
+                          child: Text(
+                            widget.label,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                            textAlign: TextAlign.center,
                           ),
                         ),
-                        if (widget.isActive)
-                          Positioned(
-                            top: -2,
-                            right: -2,
-                            child: Container(
-                              width: 6,
-                              height: 6,
-                              decoration: const BoxDecoration(
-                                color: AppColors.vibrantPurple,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-
-                    const SizedBox(height: AppSpacing.spacingXS),
-
-                    // Label
-                    AnimatedDefaultTextStyle(
-                      duration: AppAnimations.shortAnimation,
-                      style: AppTextStyles.caption.copyWith(
-                        color: widget.isActive
-                            ? AppColors.vibrantPurple
-                            : AppColors.coolGray,
-                        fontWeight: widget.isActive
-                            ? FontWeight.w600
-                            : FontWeight.w400,
                       ),
-                      child: Text(widget.label),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             );

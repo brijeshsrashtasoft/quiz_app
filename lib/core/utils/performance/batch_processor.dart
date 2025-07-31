@@ -8,7 +8,7 @@ class BatchProcessor<T> {
   final Duration batchDelay;
   final int maxBatchSize;
   final Future<void> Function(List<T>) processBatch;
-  
+
   final List<T> _pendingItems = [];
   Timer? _batchTimer;
   bool _isProcessing = false;
@@ -22,7 +22,7 @@ class BatchProcessor<T> {
   /// Add an item to the batch queue
   void add(T item) {
     _pendingItems.add(item);
-    
+
     // Process immediately if batch is full
     if (_pendingItems.length >= maxBatchSize) {
       _processPendingBatch();
@@ -35,12 +35,12 @@ class BatchProcessor<T> {
   /// Add multiple items to the batch queue
   void addAll(List<T> items) {
     _pendingItems.addAll(items);
-    
+
     // Process in chunks if necessary
     while (_pendingItems.length >= maxBatchSize) {
       _processPendingBatch();
     }
-    
+
     // Schedule processing for remaining items
     if (_pendingItems.isNotEmpty) {
       _scheduleBatchProcessing();
@@ -54,17 +54,17 @@ class BatchProcessor<T> {
 
   Future<void> _processPendingBatch() async {
     if (_isProcessing || _pendingItems.isEmpty) return;
-    
+
     _batchTimer?.cancel();
     _isProcessing = true;
-    
+
     try {
       // Take up to maxBatchSize items
       final batch = _pendingItems.take(maxBatchSize).toList();
       _pendingItems.removeRange(0, batch.length);
-      
+
       await processBatch(batch);
-      
+
       // Process remaining items if any
       if (_pendingItems.isNotEmpty) {
         _scheduleBatchProcessing();
@@ -100,10 +100,14 @@ class FirestoreBatchWriter {
   final List<Future<void>> _pendingCommits = [];
 
   FirestoreBatchWriter({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
+    : _firestore = firestore ?? FirebaseFirestore.instance;
 
   /// Add a set operation to the batch
-  void set(DocumentReference doc, Map<String, dynamic> data, [SetOptions? options]) {
+  void set(
+    DocumentReference doc,
+    Map<String, dynamic> data, [
+    SetOptions? options,
+  ]) {
     _ensureBatch();
     if (options != null) {
       _currentBatch!.set(doc, data, options);

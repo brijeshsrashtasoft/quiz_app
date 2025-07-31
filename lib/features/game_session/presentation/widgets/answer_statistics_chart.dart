@@ -11,11 +11,11 @@ class AnswerStatisticsChart extends StatefulWidget {
   State<AnswerStatisticsChart> createState() => _AnswerStatisticsChartState();
 }
 
-class _AnswerStatisticsChartState extends State<AnswerStatisticsChart> 
+class _AnswerStatisticsChartState extends State<AnswerStatisticsChart>
     with TickerProviderStateMixin {
   late List<AnimationController> _barControllers;
   late List<Animation<double>> _barAnimations;
-  
+
   // Mock statistics data
   final List<Map<String, dynamic>> _statistics = [
     {'answer': 'Earth', 'count': 5, 'percentage': 25, 'isCorrect': false},
@@ -30,23 +30,17 @@ class _AnswerStatisticsChartState extends State<AnswerStatisticsChart>
     _barControllers = List.generate(
       _statistics.length,
       (index) => AnimationController(
-        duration: Duration(
-          milliseconds: 800 + (index * 100),
-        ),
+        duration: Duration(milliseconds: 800 + (index * 100)),
         vsync: this,
       ),
     );
-    
+
     _barAnimations = _barControllers.map((controller) {
-      return Tween<double>(
-        begin: 0.0,
-        end: 1.0,
-      ).animate(CurvedAnimation(
-        parent: controller,
-        curve: AppAnimations.easeOut,
-      ));
+      return Tween<double>(begin: 0.0, end: 1.0).animate(
+        CurvedAnimation(parent: controller, curve: AppAnimations.easeOut),
+      );
     }).toList();
-    
+
     // Start animations
     for (int i = 0; i < _barControllers.length; i++) {
       Future.delayed(Duration(milliseconds: i * 100), () {
@@ -67,7 +61,7 @@ class _AnswerStatisticsChartState extends State<AnswerStatisticsChart>
 
   Color _getBarColor(int index, bool isCorrect) {
     if (isCorrect) return AppColors.turquoise;
-    
+
     switch (index) {
       case 0:
         return AppColors.triangleRed;
@@ -87,17 +81,14 @@ class _AnswerStatisticsChartState extends State<AnswerStatisticsChart>
     final maxPercentage = _statistics
         .map((s) => s['percentage'] as int)
         .reduce((a, b) => a > b ? a : b);
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.spacingL),
       child: Column(
         children: [
-          Text(
-            'Answer Distribution',
-            style: AppTextStyles.sectionHeader,
-          ),
+          Text('Answer Distribution', style: AppTextStyles.sectionHeader),
           const SizedBox(height: AppSpacing.spacingL),
-          
+
           // Total responses
           Container(
             padding: const EdgeInsets.symmetric(
@@ -126,9 +117,9 @@ class _AnswerStatisticsChartState extends State<AnswerStatisticsChart>
               ],
             ),
           ),
-          
+
           const SizedBox(height: AppSpacing.spacingXL),
-          
+
           // Bar chart
           Expanded(
             child: ListView.builder(
@@ -137,12 +128,14 @@ class _AnswerStatisticsChartState extends State<AnswerStatisticsChart>
                 final stat = _statistics[index];
                 final percentage = stat['percentage'] as int;
                 final isCorrect = stat['isCorrect'] as bool;
-                
+
                 return AnimatedBuilder(
                   animation: _barAnimations[index],
                   builder: (context, child) {
                     return Container(
-                      margin: const EdgeInsets.only(bottom: AppSpacing.spacingL),
+                      margin: const EdgeInsets.only(
+                        bottom: AppSpacing.spacingL,
+                      ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -156,13 +149,15 @@ class _AnswerStatisticsChartState extends State<AnswerStatisticsChart>
                                     Text(
                                       stat['answer'] as String,
                                       style: AppTextStyles.bodyText.copyWith(
-                                        fontWeight: isCorrect 
-                                            ? FontWeight.w700 
+                                        fontWeight: isCorrect
+                                            ? FontWeight.w700
                                             : FontWeight.w500,
                                       ),
                                     ),
                                     if (isCorrect) ...[
-                                      const SizedBox(width: AppSpacing.spacingS),
+                                      const SizedBox(
+                                        width: AppSpacing.spacingS,
+                                      ),
                                       Container(
                                         padding: const EdgeInsets.symmetric(
                                           horizontal: AppSpacing.spacingS,
@@ -170,7 +165,9 @@ class _AnswerStatisticsChartState extends State<AnswerStatisticsChart>
                                         ),
                                         decoration: BoxDecoration(
                                           color: AppColors.turquoise,
-                                          borderRadius: BorderRadius.circular(10),
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
                                         ),
                                         child: Text(
                                           'CORRECT',
@@ -191,9 +188,9 @@ class _AnswerStatisticsChartState extends State<AnswerStatisticsChart>
                               ),
                             ],
                           ),
-                          
+
                           const SizedBox(height: AppSpacing.spacingS),
-                          
+
                           // Progress bar
                           Stack(
                             children: [
@@ -205,22 +202,25 @@ class _AnswerStatisticsChartState extends State<AnswerStatisticsChart>
                                   borderRadius: BorderRadius.circular(16),
                                 ),
                               ),
-                              
+
                               // Filled bar
                               AnimatedContainer(
                                 duration: const Duration(milliseconds: 300),
                                 height: 32,
-                                width: MediaQuery.of(context).size.width * 
-                                    (percentage / 100) * 
-                                    _barAnimations[index].value * 
+                                width:
+                                    MediaQuery.of(context).size.width *
+                                    (percentage / 100) *
+                                    _barAnimations[index].value *
                                     0.7, // Max 70% width
                                 decoration: BoxDecoration(
                                   color: _getBarColor(index, isCorrect),
                                   borderRadius: BorderRadius.circular(16),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: _getBarColor(index, isCorrect)
-                                          .withOpacity(0.3),
+                                      color: _getBarColor(
+                                        index,
+                                        isCorrect,
+                                      ).withOpacity(0.3),
                                       blurRadius: 8,
                                       offset: const Offset(0, 2),
                                     ),

@@ -39,7 +39,7 @@ class _FormValidationFeedbackState extends State<FormValidationFeedback>
 
   void _setupAnimations() {
     _animationController = AnimationController(
-      duration: AppAnimations.mediumAnimation,
+      duration: AppAnimations.shortAnimation,
       vsync: this,
     );
 
@@ -51,7 +51,7 @@ class _FormValidationFeedbackState extends State<FormValidationFeedback>
     );
 
     _slideAnimation =
-        Tween<Offset>(begin: const Offset(0.0, -0.5), end: Offset.zero).animate(
+        Tween<Offset>(begin: const Offset(0.0, -0.2), end: Offset.zero).animate(
           CurvedAnimation(
             parent: _animationController,
             curve: AppAnimations.easeOut,
@@ -200,7 +200,7 @@ class _PasswordStrengthIndicatorState extends State<PasswordStrengthIndicator>
   void initState() {
     super.initState();
     _animationController = AnimationController(
-      duration: AppAnimations.mediumAnimation,
+      duration: AppAnimations.shortAnimation,
       vsync: this,
     );
     _progressAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(

@@ -19,7 +19,7 @@ class ScoreDisplay extends StatefulWidget {
   State<ScoreDisplay> createState() => _ScoreDisplayState();
 }
 
-class _ScoreDisplayState extends State<ScoreDisplay> 
+class _ScoreDisplayState extends State<ScoreDisplay>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
@@ -33,14 +33,13 @@ class _ScoreDisplayState extends State<ScoreDisplay>
       duration: AppAnimations.scoreUpdateDuration,
       vsync: this,
     );
-    
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 1.2,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: AppAnimations.elastic,
-    ));
+
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.2).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: AppAnimations.elastic,
+      ),
+    );
   }
 
   @override
@@ -73,15 +72,17 @@ class _ScoreDisplayState extends State<ScoreDisplay>
               vertical: AppSpacing.spacingS,
             ),
             decoration: BoxDecoration(
-              gradient: widget.score >= 10000 
-                  ? AppColors.goldGradient 
+              gradient: widget.score >= 10000
+                  ? AppColors.goldGradient
                   : AppColors.purpleGradient,
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: (widget.score >= 10000 
-                      ? AppColors.achievement 
-                      : AppColors.vibrantPurple).withOpacity(0.3),
+                  color:
+                      (widget.score >= 10000
+                              ? AppColors.achievement
+                              : AppColors.vibrantPurple)
+                          .withOpacity(0.3),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -91,8 +92,8 @@ class _ScoreDisplayState extends State<ScoreDisplay>
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  widget.score >= 10000 
-                      ? Icons.emoji_events_rounded 
+                  widget.score >= 10000
+                      ? Icons.emoji_events_rounded
                       : Icons.star_rounded,
                   color: AppColors.pureWhite,
                   size: 20,

@@ -78,14 +78,12 @@ class _QuizPublishPageState extends ConsumerState<QuizPublishPage>
             isDesktop
                 ? AppSpacing.spacingXXL
                 : isTablet
-                    ? AppSpacing.spacingXL
-                    : AppSpacing.spacingL,
+                ? AppSpacing.spacingXL
+                : AppSpacing.spacingL,
           ),
           child: AnimatedSwitcher(
             duration: AppAnimations.mediumAnimation,
-            child: _isPublished
-                ? _buildSuccessState()
-                : _buildPublishState(),
+            child: _isPublished ? _buildSuccessState() : _buildPublishState(),
           ),
         ),
       ),
@@ -164,7 +162,9 @@ class _QuizPublishPageState extends ConsumerState<QuizPublishPage>
                     child: TextButton(
                       onPressed: _isPublishing
                           ? null
-                          : () => context.go('${RouteConstants.quizCreation}/preview'),
+                          : () => context.go(
+                              '${RouteConstants.quizCreation}/preview',
+                            ),
                       child: Text(
                         'Back to Preview',
                         style: AppTextStyles.buttonMedium.copyWith(
@@ -196,9 +196,7 @@ class _QuizPublishPageState extends ConsumerState<QuizPublishPage>
       mainAxisSize: MainAxisSize.min,
       children: [
         RotationTransition(
-          turns: _animationController.drive(
-            Tween(begin: 0.0, end: 1.0),
-          ),
+          turns: _animationController.drive(Tween(begin: 0.0, end: 1.0)),
           child: Container(
             width: 100,
             height: 100,
@@ -206,27 +204,19 @@ class _QuizPublishPageState extends ConsumerState<QuizPublishPage>
               color: AppColors.success.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              Icons.check_circle,
-              size: 60,
-              color: AppColors.success,
-            ),
+            child: Icon(Icons.check_circle, size: 60, color: AppColors.success),
           ),
         ),
         const SizedBox(height: AppSpacing.spacingXL),
         Text(
           'Quiz Published Successfully!',
-          style: AppTextStyles.gameTitle.copyWith(
-            color: AppColors.success,
-          ),
+          style: AppTextStyles.gameTitle.copyWith(color: AppColors.success),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: AppSpacing.spacingM),
         Text(
           'Your quiz is now live and ready for players.',
-          style: AppTextStyles.bodyText.copyWith(
-            color: AppColors.coolGray,
-          ),
+          style: AppTextStyles.bodyText.copyWith(color: AppColors.coolGray),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: AppSpacing.spacingXXL),
@@ -239,10 +229,7 @@ class _QuizPublishPageState extends ConsumerState<QuizPublishPage>
           ),
           child: Column(
             children: [
-              Text(
-                'Share Quiz PIN',
-                style: AppTextStyles.sectionHeader,
-              ),
+              Text('Share Quiz PIN', style: AppTextStyles.sectionHeader),
               const SizedBox(height: AppSpacing.spacingM),
               Container(
                 padding: const EdgeInsets.all(AppSpacing.spacingM),
@@ -312,15 +299,11 @@ class _QuizPublishPageState extends ConsumerState<QuizPublishPage>
       children: [
         Text(
           label,
-          style: AppTextStyles.bodyText.copyWith(
-            color: AppColors.coolGray,
-          ),
+          style: AppTextStyles.bodyText.copyWith(color: AppColors.coolGray),
         ),
         Text(
           value,
-          style: AppTextStyles.bodyText.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
+          style: AppTextStyles.bodyText.copyWith(fontWeight: FontWeight.w600),
         ),
       ],
     );

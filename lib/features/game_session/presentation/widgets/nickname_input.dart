@@ -20,7 +20,7 @@ class NicknameInput extends StatefulWidget {
   State<NicknameInput> createState() => _NicknameInputState();
 }
 
-class _NicknameInputState extends State<NicknameInput> 
+class _NicknameInputState extends State<NicknameInput>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
@@ -33,14 +33,13 @@ class _NicknameInputState extends State<NicknameInput>
       duration: AppAnimations.shortAnimation,
       vsync: this,
     );
-    
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 1.02,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: AppAnimations.easeOut,
-    ));
+
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.02).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: AppAnimations.easeOut,
+      ),
+    );
   }
 
   @override
@@ -78,8 +77,8 @@ class _NicknameInputState extends State<NicknameInput>
                   ),
                   child: Center(
                     child: Text(
-                      widget.controller.text.isEmpty 
-                          ? '?' 
+                      widget.controller.text.isEmpty
+                          ? '?'
                           : widget.controller.text[0].toUpperCase(),
                       style: AppTextStyles.gameTitle.copyWith(
                         color: AppColors.pureWhite,
@@ -88,9 +87,9 @@ class _NicknameInputState extends State<NicknameInput>
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: AppSpacing.spacingL),
-                
+
                 // Nickname input field
                 AnimatedContainer(
                   duration: AppAnimations.shortAnimation,
@@ -98,8 +97,8 @@ class _NicknameInputState extends State<NicknameInput>
                     color: AppColors.pureWhite,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: _isFocused 
-                          ? AppColors.vibrantPurple 
+                      color: _isFocused
+                          ? AppColors.vibrantPurple
                           : AppColors.lightGray,
                       width: _isFocused ? 2 : 1,
                     ),
@@ -146,9 +145,9 @@ class _NicknameInputState extends State<NicknameInput>
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: AppSpacing.spacingS),
-                
+
                 // Character counter
                 Text(
                   '${widget.controller.text.length}/${widget.maxLength}',
@@ -158,9 +157,9 @@ class _NicknameInputState extends State<NicknameInput>
                         : AppColors.coolGray,
                   ),
                 ),
-                
+
                 const SizedBox(height: AppSpacing.spacingL),
-                
+
                 // Suggested nicknames
                 Wrap(
                   spacing: AppSpacing.spacingS,
@@ -193,10 +192,7 @@ class _SuggestionChip extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
 
-  const _SuggestionChip({
-    required this.label,
-    required this.onTap,
-  });
+  const _SuggestionChip({required this.label, required this.onTap});
 
   @override
   Widget build(BuildContext context) {

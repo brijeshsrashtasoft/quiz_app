@@ -6,11 +6,7 @@ class ResponsiveBuilder extends StatelessWidget {
   final Widget Function(BuildContext context, ResponsiveInfo info) builder;
   final ResponsiveBreakpoints? breakpoints;
 
-  const ResponsiveBuilder({
-    super.key,
-    required this.builder,
-    this.breakpoints,
-  });
+  const ResponsiveBuilder({super.key, required this.builder, this.breakpoints});
 
   @override
   Widget build(BuildContext context) {
@@ -172,7 +168,10 @@ class ResponsiveGrid extends StatelessWidget {
       case ScreenSize.large:
         return largeColumns ?? mediumColumns ?? smallColumns;
       case ScreenSize.extraLarge:
-        return extraLargeColumns ?? largeColumns ?? mediumColumns ?? smallColumns;
+        return extraLargeColumns ??
+            largeColumns ??
+            mediumColumns ??
+            smallColumns;
     }
   }
 }
@@ -204,10 +203,7 @@ class ResponsivePadding extends StatelessWidget {
       large: large,
       extraLarge: extraLarge,
       breakpoints: breakpoints,
-      builder: (context, padding) => Padding(
-        padding: padding,
-        child: child,
-      ),
+      builder: (context, padding) => Padding(padding: padding, child: child),
     );
   }
 }
@@ -241,12 +237,7 @@ class ResponsiveInfo {
   }
 
   /// Get responsive value based on screen size
-  T value<T>({
-    required T small,
-    T? medium,
-    T? large,
-    T? extraLarge,
-  }) {
+  T value<T>({required T small, T? medium, T? large, T? extraLarge}) {
     switch (screenSize) {
       case ScreenSize.small:
         return small;
@@ -261,12 +252,7 @@ class ResponsiveInfo {
 }
 
 /// Screen size enum
-enum ScreenSize {
-  small,
-  medium,
-  large,
-  extraLarge,
-}
+enum ScreenSize { small, medium, large, extraLarge }
 
 /// Responsive breakpoints
 class ResponsiveBreakpoints {
@@ -282,9 +268,9 @@ class ResponsiveBreakpoints {
 
   /// Default breakpoints following Material Design guidelines
   static const ResponsiveBreakpoints defaults = ResponsiveBreakpoints(
-    small: 600,    // Mobile
-    medium: 1024,  // Tablet
-    large: 1440,   // Desktop
+    small: 600, // Mobile
+    medium: 1024, // Tablet
+    large: 1440, // Desktop
   );
 
   /// Compact breakpoints for smaller screens

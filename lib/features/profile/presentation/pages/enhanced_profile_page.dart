@@ -12,6 +12,7 @@ import '../../../../core/navigation/route_constants.dart';
 import '../widgets/avatar_upload_widget.dart';
 import '../widgets/statistics_card_widget.dart';
 import '../widgets/account_action_widget.dart';
+import '../../../authentication/domain/entities/auth_state.dart';
 import '../../../authentication/presentation/providers/auth_providers.dart';
 
 /// Enhanced profile page with comprehensive user information display

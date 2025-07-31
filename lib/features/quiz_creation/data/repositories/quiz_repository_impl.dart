@@ -125,9 +125,7 @@ class QuizRepositoryImpl extends BaseRepository implements QuizRepository {
         return Result.failure(validationError.toFailure());
       }
 
-      final result = await dataSource.getPublicQuizzes(
-        limit: limit ?? 20,
-      );
+      final result = await dataSource.getPublicQuizzes(limit: limit ?? 20);
 
       return result.when(
         success: (quizModels) => Result.success(
@@ -427,7 +425,9 @@ class QuizRepositoryImpl extends BaseRepository implements QuizRepository {
         }
       }
 
-      final quizModels = quizzes.map((quiz) => QuizModel.fromEntity(quiz)).toList();
+      final quizModels = quizzes
+          .map((quiz) => QuizModel.fromEntity(quiz))
+          .toList();
 
       return await dataSource.batchCreateQuizzes(quizModels);
     } catch (e) {
@@ -488,7 +488,8 @@ class QuizRepositoryImpl extends BaseRepository implements QuizRepository {
           if (!validation.isValid) {
             return Result.failure(
               ValidationException(
-                message: 'Quiz validation failed: ${validation.errors.join(', ')}',
+                message:
+                    'Quiz validation failed: ${validation.errors.join(', ')}',
               ).toFailure(),
             );
           }
@@ -622,10 +623,13 @@ class QuizRepositoryImpl extends BaseRepository implements QuizRepository {
           }
 
           if (quiz.questions.length < 3) {
-            warnings.add('Quiz has less than 3 questions, may not be suitable for multiplayer');
+            warnings.add(
+              'Quiz has less than 3 questions, may not be suitable for multiplayer',
+            );
           }
 
-          if (quiz.metadata.coverImageUrl == null || quiz.metadata.coverImageUrl!.isEmpty) {
+          if (quiz.metadata.coverImageUrl == null ||
+              quiz.metadata.coverImageUrl!.isEmpty) {
             warnings.add('Quiz does not have a cover image');
           }
 
@@ -705,7 +709,8 @@ class QuizRepositoryImpl extends BaseRepository implements QuizRepository {
     }
 
     if (quiz.metadata.estimatedDuration != null) {
-      if (quiz.metadata.estimatedDuration! < 1 || quiz.metadata.estimatedDuration! > 1440) {
+      if (quiz.metadata.estimatedDuration! < 1 ||
+          quiz.metadata.estimatedDuration! > 1440) {
         return const ValidationException(
           message: 'Estimated duration must be between 1 and 1440 minutes',
         );
@@ -719,7 +724,7 @@ class QuizRepositoryImpl extends BaseRepository implements QuizRepository {
   ValidationException? _validateQuestion(Question question, int index) {
     // Get question options for validation
     final options = question.options;
-    
+
     if (question.questionText.isEmpty) {
       return ValidationException(
         message: 'Question $index text cannot be empty',

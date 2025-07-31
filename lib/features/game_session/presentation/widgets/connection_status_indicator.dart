@@ -15,10 +15,11 @@ class ConnectionStatusIndicator extends StatefulWidget {
   });
 
   @override
-  State<ConnectionStatusIndicator> createState() => _ConnectionStatusIndicatorState();
+  State<ConnectionStatusIndicator> createState() =>
+      _ConnectionStatusIndicatorState();
 }
 
-class _ConnectionStatusIndicatorState extends State<ConnectionStatusIndicator> 
+class _ConnectionStatusIndicatorState extends State<ConnectionStatusIndicator>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _pulseAnimation;
@@ -30,15 +31,11 @@ class _ConnectionStatusIndicatorState extends State<ConnectionStatusIndicator>
       duration: const Duration(seconds: 1),
       vsync: this,
     );
-    
-    _pulseAnimation = Tween<double>(
-      begin: 0.8,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
-    
+
+    _pulseAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+
     if (!widget.isConnected) {
       _animationController.repeat(reverse: true);
     }
@@ -76,12 +73,12 @@ class _ConnectionStatusIndicatorState extends State<ConnectionStatusIndicator>
             vertical: AppSpacing.spacingS,
           ),
           decoration: BoxDecoration(
-            color: widget.isConnected 
+            color: widget.isConnected
                 ? AppColors.turquoise.withOpacity(0.1)
                 : AppColors.coralRed.withOpacity(0.1),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: widget.isConnected 
+              color: widget.isConnected
                   ? AppColors.turquoise.withOpacity(0.3)
                   : AppColors.coralRed.withOpacity(0.3),
             ),
@@ -98,8 +95,8 @@ class _ConnectionStatusIndicatorState extends State<ConnectionStatusIndicator>
                       width: 8,
                       height: 8,
                       decoration: BoxDecoration(
-                        color: widget.isConnected 
-                            ? AppColors.turquoise 
+                        color: widget.isConnected
+                            ? AppColors.turquoise
                             : AppColors.coralRed,
                         shape: BoxShape.circle,
                       ),
@@ -111,8 +108,8 @@ class _ConnectionStatusIndicatorState extends State<ConnectionStatusIndicator>
               Text(
                 widget.isConnected ? 'Connected' : 'Reconnecting...',
                 style: AppTextStyles.caption.copyWith(
-                  color: widget.isConnected 
-                      ? AppColors.turquoise 
+                  color: widget.isConnected
+                      ? AppColors.turquoise
                       : AppColors.coralRed,
                   fontWeight: FontWeight.w500,
                 ),

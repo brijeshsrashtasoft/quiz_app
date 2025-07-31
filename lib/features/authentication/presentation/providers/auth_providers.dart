@@ -5,6 +5,7 @@ import '../../../../core/utils/result.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../../core/errors/failures.dart';
 import '../../domain/entities/user_entity.dart';
+import '../../domain/entities/auth_state.dart' as domain;
 import '../../domain/repositories/auth_repository.dart';
 import '../../data/repositories/auth_repository_impl.dart';
 import '../../data/repositories/user_repository_impl.dart';
@@ -33,13 +34,15 @@ final firebaseAuthProvider = StreamProvider<User?>((ref) {
   return AuthConfig.idTokenChanges;
 });
 
+/// Enhanced authentication state with Firebase user
+
 /// Authentication state provider - enhanced auth state with user data
-final authStateProvider = StreamProvider<AuthState>((ref) async* {
+final authStateProvider = StreamProvider<domain.AuthState>((ref) async* {
   await for (final firebaseUser
       in ref.watch(firebaseAuthProvider.future).asStream()) {
     if (firebaseUser == null) {
       AppLogger.firebase('AuthProvider', 'User not authenticated');
-      yield const AuthState.unauthenticated();
+      yield const domain.AuthState.unauthenticated();
       continue;
     }
 
@@ -48,7 +51,7 @@ final authStateProvider = StreamProvider<AuthState>((ref) async* {
       'User authenticated: ${firebaseUser.email}',
     );
 
-    // Get user data from Firestore
+    // Try to get user data from Firestore
     try {
       final getUserUseCase = ref.read(getUserByIdUseCaseProvider);
       final userResult = await getUserUseCase(
@@ -59,69 +62,58 @@ final authStateProvider = StreamProvider<AuthState>((ref) async* {
         final userEntity = userResult.dataOrNull!;
         AppLogger.firebase(
           'AuthProvider',
-          'User data loaded: ${userEntity.email}',
+          'User data loaded from Firestore: ${userEntity.email}',
         );
-        yield AuthState.authenticated(
-          firebaseUser: firebaseUser,
-          user: userEntity,
-        );
+        yield domain.AuthState.authenticated(user: userEntity);
       } else {
-        final failure = userResult.failureOrNull!;
-        AppLogger.warning(
-          'User data not found, creating new user profile',
-          failure,
+        // User doesn't exist in Firestore, create it
+        AppLogger.firebase(
+          'AuthProvider',
+          'User not found in Firestore, creating profile',
         );
 
-        // Create user profile if doesn't exist
-        try {
-          final createUserUseCase = ref.read(createUserUseCaseProvider);
-          final newUser = UserEntity(
-            id: firebaseUser.uid,
-            name:
-                firebaseUser.displayName ??
-                firebaseUser.email?.split('@').first ??
-                'User',
-            email: firebaseUser.email ?? '',
-            createdAt: DateTime.now(),
-          );
+        final createUserUseCase = ref.read(createUserUseCaseProvider);
+        final newUser = UserEntity(
+          id: firebaseUser.uid,
+          name:
+              firebaseUser.displayName ??
+              firebaseUser.email?.split('@').first ??
+              'User',
+          email: firebaseUser.email ?? '',
+          createdAt: DateTime.now(),
+        );
 
-          final createResult = await createUserUseCase(
-            CreateUserParams(user: newUser),
-          );
+        final createResult = await createUserUseCase(
+          CreateUserParams(user: newUser),
+        );
 
-          if (createResult.isSuccess) {
-            final createdUser = createResult.dataOrNull!;
-            AppLogger.firebase(
-              'AuthProvider',
-              'New user profile created: ${createdUser.email}',
-            );
-            yield AuthState.authenticated(
-              firebaseUser: firebaseUser,
-              user: createdUser,
-            );
-          } else {
-            final createFailure = createResult.failureOrNull!;
-            AppLogger.error('Failed to create user profile', createFailure);
-            yield AuthState.error(
-              firebaseUser: firebaseUser,
-              message:
-                  'Failed to create user profile: ${createFailure.userMessage}',
-            );
-          }
-        } catch (e) {
-          AppLogger.error('Error creating user profile', e);
-          yield AuthState.error(
-            firebaseUser: firebaseUser,
-            message: 'Failed to create user profile: ${e.toString()}',
+        if (createResult.isSuccess) {
+          AppLogger.firebase(
+            'AuthProvider',
+            'User profile created in Firestore',
           );
+          yield domain.AuthState.authenticated(user: newUser);
+        } else {
+          // If Firestore fails, still authenticate with basic data
+          AppLogger.warning(
+            'Failed to create Firestore profile, using basic auth data',
+          );
+          yield domain.AuthState.authenticated(user: newUser);
         }
       }
     } catch (e) {
-      AppLogger.error('Error loading user data', e);
-      yield AuthState.error(
-        firebaseUser: firebaseUser,
-        message: 'Failed to load user data: ${e.toString()}',
+      AppLogger.error('Error with Firestore user data', e);
+      // If Firestore operations fail, still authenticate with basic data
+      final basicUser = UserEntity(
+        id: firebaseUser.uid,
+        name:
+            firebaseUser.displayName ??
+            firebaseUser.email?.split('@').first ??
+            'User',
+        email: firebaseUser.email ?? '',
+        createdAt: DateTime.now(),
       );
+      yield domain.AuthState.authenticated(user: basicUser);
     }
   }
 });
@@ -134,8 +126,7 @@ final currentUserProvider = Provider<UserEntity?>((ref) {
 
 /// Current Firebase user provider - quick access to Firebase user
 final currentFirebaseUserProvider = Provider<User?>((ref) {
-  final authState = ref.watch(authStateProvider).value;
-  return authState?.firebaseUser;
+  return ref.watch(firebaseAuthProvider).value;
 });
 
 /// Authentication status provider - simple boolean for auth status
@@ -253,39 +244,6 @@ final deleteAccountUseCaseProvider = Provider<DeleteAccountUseCase>((ref) {
   final repository = ref.read(userRepositoryProvider);
   return DeleteAccountUseCase(userRepository: repository);
 });
-
-/// Authentication state model
-class AuthState {
-  final User? firebaseUser;
-  final UserEntity? user;
-  final String? errorMessage;
-  final bool isLoading;
-
-  const AuthState._({
-    this.firebaseUser,
-    this.user,
-    this.errorMessage,
-    this.isLoading = false,
-  });
-
-  const AuthState.loading() : this._(isLoading: true);
-
-  const AuthState.unauthenticated() : this._();
-
-  const AuthState.authenticated({
-    required User firebaseUser,
-    required UserEntity user,
-  }) : this._(firebaseUser: firebaseUser, user: user);
-
-  const AuthState.error({User? firebaseUser, required String message})
-    : this._(firebaseUser: firebaseUser, errorMessage: message);
-
-  bool get isAuthenticated =>
-      firebaseUser != null && user != null && errorMessage == null;
-  bool get hasError => errorMessage != null;
-  bool get isUnauthenticated =>
-      firebaseUser == null && user == null && errorMessage == null;
-}
 
 /// Form state management providers for authentication forms
 /// Following MVVM pattern with Riverpod state management

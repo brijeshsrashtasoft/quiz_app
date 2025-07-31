@@ -7,9 +7,9 @@ import '../repositories/quiz_repository.dart';
 /// Following Clean Architecture principles from CLAUDE.md
 class UpdateQuizUseCase {
   final QuizRepository _repository;
-  
+
   UpdateQuizUseCase(this._repository);
-  
+
   /// Execute the use case
   Future<Result<Quiz>> call(UpdateQuizParams params) async {
     // Check if user owns the quiz
@@ -17,11 +17,11 @@ class UpdateQuizUseCase {
       params.userId,
       params.quiz.id,
     );
-    
+
     if (ownershipResult.isFailure) {
       return Result.failure(ownershipResult.failureOrNull!);
     }
-    
+
     if (!ownershipResult.dataOrNull!) {
       return const Result.failure(
         Failure.authFailure(
@@ -30,7 +30,7 @@ class UpdateQuizUseCase {
         ),
       );
     }
-    
+
     // Validate quiz
     if (!params.quiz.isValid) {
       return const Result.failure(
@@ -39,21 +39,20 @@ class UpdateQuizUseCase {
         ),
       );
     }
-    
+
     // Check if quiz can be edited
     if (!params.quiz.canBeEditedBy(params.userId)) {
       return const Result.failure(
         ValidationFailure(
-          message: 'Published quizzes with plays cannot be edited. Clone it instead.',
+          message:
+              'Published quizzes with plays cannot be edited. Clone it instead.',
         ),
       );
     }
-    
+
     // Update quiz with modified timestamp
-    final updatedQuiz = params.quiz.copyWith(
-      updatedAt: DateTime.now(),
-    );
-    
+    final updatedQuiz = params.quiz.copyWith(updatedAt: DateTime.now());
+
     return _repository.updateQuiz(updatedQuiz);
   }
 }
@@ -62,9 +61,6 @@ class UpdateQuizUseCase {
 class UpdateQuizParams {
   final Quiz quiz;
   final String userId;
-  
-  const UpdateQuizParams({
-    required this.quiz,
-    required this.userId,
-  });
+
+  const UpdateQuizParams({required this.quiz, required this.userId});
 }

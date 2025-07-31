@@ -80,7 +80,7 @@ class _ControlButton extends StatefulWidget {
   State<_ControlButton> createState() => _ControlButtonState();
 }
 
-class _ControlButtonState extends State<_ControlButton> 
+class _ControlButtonState extends State<_ControlButton>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
@@ -93,14 +93,14 @@ class _ControlButtonState extends State<_ControlButton>
       duration: AppAnimations.buttonTapDuration,
       vsync: this,
     );
-    
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: AppAnimations.buttonPressScale,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: AppAnimations.buttonTapCurve,
-    ));
+
+    _scaleAnimation =
+        Tween<double>(begin: 1.0, end: AppAnimations.buttonPressScale).animate(
+          CurvedAnimation(
+            parent: _controller,
+            curve: AppAnimations.buttonTapCurve,
+          ),
+        );
   }
 
   @override
@@ -128,7 +128,7 @@ class _ControlButtonState extends State<_ControlButton>
   Widget build(BuildContext context) {
     final size = widget.isPrimary ? 80.0 : 64.0;
     final iconSize = widget.isPrimary ? 36.0 : 28.0;
-    
+
     return GestureDetector(
       onTapDown: widget.onPressed != null ? _handleTapDown : null,
       onTapUp: widget.onPressed != null ? _handleTapUp : null,
@@ -170,11 +170,11 @@ class _ControlButtonState extends State<_ControlButton>
                 Text(
                   widget.label,
                   style: AppTextStyles.caption.copyWith(
-                    fontWeight: widget.isPrimary 
-                        ? FontWeight.w600 
+                    fontWeight: widget.isPrimary
+                        ? FontWeight.w600
                         : FontWeight.w500,
-                    color: widget.onPressed != null 
-                        ? AppColors.charcoal 
+                    color: widget.onPressed != null
+                        ? AppColors.charcoal
                         : AppColors.coolGray,
                   ),
                 ),

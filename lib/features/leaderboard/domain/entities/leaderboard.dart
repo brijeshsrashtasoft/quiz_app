@@ -16,14 +16,12 @@ class Leaderboard with _$Leaderboard {
 
   const Leaderboard._();
 
-  List<LeaderboardEntry> get topThree => 
-      entries.take(3).toList();
+  List<LeaderboardEntry> get topThree => entries.take(3).toList();
 
-  LeaderboardEntry? getPlayerEntry(String playerId) =>
-      entries.firstWhere(
-        (entry) => entry.playerId == playerId,
-        orElse: () => throw StateError('Player not found'),
-      );
+  LeaderboardEntry? getPlayerEntry(String playerId) => entries.firstWhere(
+    (entry) => entry.playerId == playerId,
+    orElse: () => throw StateError('Player not found'),
+  );
 }
 
 enum LeaderboardType { live, finalResult, historical }

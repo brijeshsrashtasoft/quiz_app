@@ -36,16 +36,18 @@ class SubmitAnswer {
         selectedOption,
         currentQuestion,
       );
-      
+
       if (validationResult != null) {
         return Result.failure(validationResult);
       }
 
       // Calculate answer details
       final answeredAt = DateTime.now();
-      final responseTimeMs = answeredAt.difference(questionStartTime).inMilliseconds;
+      final responseTimeMs = answeredAt
+          .difference(questionStartTime)
+          .inMilliseconds;
       final isCorrect = selectedOption == currentQuestion.correctAnswerIndex;
-      
+
       // Calculate points earned
       final pointsEarned = _calculatePoints(
         isCorrect: isCorrect,
@@ -68,7 +70,7 @@ class SubmitAnswer {
       // Update player with new answer and score
       final updatedAnswers = [...player.answers, selectedOption];
       final updatedScore = player.score + pointsEarned;
-      
+
       final updatedPlayer = player.copyWith(
         answers: updatedAnswers,
         score: updatedScore,
@@ -138,14 +140,13 @@ class SubmitAnswer {
 
     // Check if answer is valid option
     if (selectedOption < 0 || selectedOption >= question.options.length) {
-      return const Failure.validationFailure(
-        message: 'Invalid answer option',
-      );
+      return const Failure.validationFailure(message: 'Invalid answer option');
     }
 
     // Check if player has already answered this question
     final player = session.getPlayer(playerId);
-    if (player != null && player.answers.length > session.currentQuestionIndex) {
+    if (player != null &&
+        player.answers.length > session.currentQuestionIndex) {
       return const Failure.sessionFailure(
         message: 'You have already answered this question',
         code: 'ALREADY_ANSWERED',
@@ -171,7 +172,8 @@ class SubmitAnswer {
     // Speed bonus (remaining 50%)
     final timeLimitMs = timeLimit * 1000;
     final speedRatio = 1 - (responseTimeMs / timeLimitMs).clamp(0.0, 1.0);
-    final speedBonus = (maxPoints * (1 - basePointsPercentage) * speedRatio).round();
+    final speedBonus = (maxPoints * (1 - basePointsPercentage) * speedRatio)
+        .round();
 
     return basePoints + speedBonus;
   }

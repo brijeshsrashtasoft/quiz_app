@@ -25,13 +25,16 @@ class ForgotPasswordPage extends ConsumerStatefulWidget {
 }
 
 class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage>
-    with SingleTickerProviderStateMixin, FormValidationMixin {
+    with TickerProviderStateMixin, FormValidationMixin {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
 
   late AnimationController _animationController;
+  late AnimationController _successAnimationController;
   late Animation<double> _fadeInAnimation;
   late Animation<Offset> _slideAnimation;
+  late Animation<double> _successScaleAnimation;
+  late Animation<double> _successRotationAnimation;
 
   bool _isLoading = false;
   bool _emailSent = false;
@@ -49,6 +52,11 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage>
       vsync: this,
     );
 
+    _successAnimationController = AnimationController(
+      duration: AppAnimations.longAnimation,
+      vsync: this,
+    );
+
     _fadeInAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _animationController,
@@ -60,9 +68,23 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage>
         Tween<Offset>(begin: const Offset(0.0, 0.3), end: Offset.zero).animate(
           CurvedAnimation(
             parent: _animationController,
-            curve: AppAnimations.easeOut,
+            curve: AppAnimations.bounce,
           ),
         );
+
+    _successScaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _successAnimationController,
+        curve: AppAnimations.elastic,
+      ),
+    );
+
+    _successRotationAnimation = Tween<double>(begin: -0.5, end: 0.0).animate(
+      CurvedAnimation(
+        parent: _successAnimationController,
+        curve: AppAnimations.bounce,
+      ),
+    );
 
     _animationController.forward();
   }
@@ -70,6 +92,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage>
   @override
   void dispose() {
     _animationController.dispose();
+    _successAnimationController.dispose();
     _emailController.dispose();
     super.dispose();
   }
@@ -93,6 +116,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage>
       result.when(
         success: (_) {
           setState(() => _emailSent = true);
+          _successAnimationController.forward();
         },
         failure: (failure) {
           setState(() => _errorMessage = failure.userMessage);
@@ -125,18 +149,30 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage>
           onPressed: () => context.pop(),
         ),
       ),
-      body: SafeArea(
-        child: AnimatedBuilder(
-          animation: _animationController,
-          builder: (context, child) {
-            return FadeTransition(
-              opacity: _fadeInAnimation,
-              child: SlideTransition(
-                position: _slideAnimation,
-                child: _buildContent(),
-              ),
-            );
-          },
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              AppColors.vibrantPurple.withValues(alpha: 0.03),
+              AppColors.turquoise.withValues(alpha: 0.03),
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: AnimatedBuilder(
+            animation: _animationController,
+            builder: (context, child) {
+              return FadeTransition(
+                opacity: _fadeInAnimation,
+                child: SlideTransition(
+                  position: _slideAnimation,
+                  child: _buildContent(),
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -212,32 +248,40 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage>
 
             const SizedBox(height: AppSpacing.spacingL),
 
-            // Error Message
-            if (_errorMessage != null) ...[
-              Container(
-                padding: const EdgeInsets.all(AppSpacing.spacingM),
-                decoration: BoxDecoration(
-                  color: AppColors.error.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: AppColors.error.withValues(alpha: 0.3),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.error_outline, color: AppColors.error, size: 20),
-                    const SizedBox(width: AppSpacing.spacingS),
-                    Expanded(
-                      child: Text(
-                        _errorMessage!,
-                        style: AppTextStyles.errorText,
+            // Error Message with animation
+            AnimatedSwitcher(
+              duration: AppAnimations.shortAnimation,
+              child: _errorMessage != null
+                  ? Container(
+                      padding: const EdgeInsets.all(AppSpacing.spacingM),
+                      decoration: BoxDecoration(
+                        color: AppColors.error.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: AppColors.error.withValues(alpha: 0.3),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.error_outline,
+                            color: AppColors.error,
+                            size: 20,
+                          ),
+                          const SizedBox(width: AppSpacing.spacingS),
+                          Expanded(
+                            child: Text(
+                              _errorMessage!,
+                              style: AppTextStyles.errorText,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : const SizedBox.shrink(),
+            ),
+            if (_errorMessage != null)
               const SizedBox(height: AppSpacing.spacingL),
-            ],
 
             // Send Reset Email Button
             PrimaryButton(
@@ -285,21 +329,46 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage>
         children: [
           const SizedBox(height: AppSpacing.spacingXXL * 2),
 
-          // Success Icon
-          Container(
-            width: 120,
-            height: 120,
-            decoration: BoxDecoration(
-              color: AppColors.success.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: AppColors.success.withValues(alpha: 0.3),
-              ),
-            ),
-            child: const Icon(
-              Icons.email_rounded,
-              size: 60,
-              color: AppColors.success,
+          // Success Icon with animation
+          Center(
+            child: AnimatedBuilder(
+              animation: _successAnimationController,
+              builder: (context, child) {
+                return Transform.scale(
+                  scale: _successScaleAnimation.value,
+                  child: Transform.rotate(
+                    angle: _successRotationAnimation.value,
+                    child: Container(
+                      width: 120,
+                      height: 120,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            AppColors.turquoise.withValues(alpha: 0.2),
+                            AppColors.mintGreen.withValues(alpha: 0.2),
+                          ],
+                        ),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: AppColors.success, width: 3),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.success.withValues(alpha: 0.3),
+                            blurRadius: 20,
+                            spreadRadius: 5,
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.email_rounded,
+                        size: 60,
+                        color: AppColors.success,
+                      ),
+                    ),
+                  ),
+                );
+              },
             ),
           ),
 

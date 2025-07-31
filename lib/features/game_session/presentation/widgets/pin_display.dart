@@ -8,17 +8,13 @@ class PinDisplay extends StatefulWidget {
   final String pin;
   final bool isLarge;
 
-  const PinDisplay({
-    super.key,
-    required this.pin,
-    this.isLarge = true,
-  });
+  const PinDisplay({super.key, required this.pin, this.isLarge = true});
 
   @override
   State<PinDisplay> createState() => _PinDisplayState();
 }
 
-class _PinDisplayState extends State<PinDisplay> 
+class _PinDisplayState extends State<PinDisplay>
     with SingleTickerProviderStateMixin {
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
@@ -30,15 +26,11 @@ class _PinDisplayState extends State<PinDisplay>
       duration: const Duration(seconds: 2),
       vsync: this,
     );
-    
-    _pulseAnimation = Tween<double>(
-      begin: 1.0,
-      end: 1.05,
-    ).animate(CurvedAnimation(
-      parent: _pulseController,
-      curve: Curves.easeInOut,
-    ));
-    
+
+    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.05).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
+
     _pulseController.repeat(reverse: true);
   }
 
