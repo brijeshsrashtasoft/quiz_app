@@ -15,7 +15,7 @@ Example: `/project:implement-ticket US-001`
 - Read ticket file from `docs/github_tickets/`
 - Parse acceptance criteria and technical requirements
 - Analyze current codebase implementation
-- Analyze test codebase implementation
+- Analyze test codebase if not create present create a implementation plan for Unit tests, Integration tests & E2E tests
 - Create implementation plan for main app and testcase
 
 ### 2. Implementation Phase
@@ -23,7 +23,7 @@ Example: `/project:implement-ticket US-001`
 - Follow existing architecture patterns
 - Implement features incrementally
 - Implement testcase suits incrementally if not present follow same main app folder structure 
-- Update ticket status in real-time by finding specific ticket in `docs/github_tickets/`
+- Update ticket status in real-time by finding specific ticket in `docs/github_tickets/`, Never create any new .md file for tracking use existing one which name contain this ticket number 
 
 ### 3. Verification Phase
 - Run static analysis (`flutter analyze`)
