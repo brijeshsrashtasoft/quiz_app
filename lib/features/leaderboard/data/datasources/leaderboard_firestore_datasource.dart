@@ -211,11 +211,11 @@ class LeaderboardFirestoreDataSource extends BaseFirebaseDataSource {
       final leaderboardResult = await getLeaderboardBySessionId(sessionId);
 
       if (leaderboardResult.isFailure) {
-        return Result.failure(leaderboardResult.failureOrThrow);
+        return Result.failure(leaderboardResult.failure!);
       }
 
-      final leaderboard = leaderboardResult.data;
-      final sortedScores = List<ScoreModel>.from(leaderboard.scores ?? []);
+      final leaderboard = leaderboardResult.data!;
+      final sortedScores = List<ScoreModel>.from(leaderboard.scores);
 
       // Sort by score (descending), then by accuracy, then by time taken
       sortedScores.sort((a, b) {
@@ -266,11 +266,11 @@ class LeaderboardFirestoreDataSource extends BaseFirebaseDataSource {
       final leaderboardResult = await getLeaderboardBySessionId(sessionId);
 
       if (leaderboardResult.isFailure) {
-        return Result.failure(leaderboardResult.failureOrThrow);
+        return Result.failure(leaderboardResult.failure!);
       }
 
-      final leaderboard = leaderboardResult.data;
-      final sortedScores = List<ScoreModel>.from(leaderboard.scores ?? []);
+      final leaderboard = leaderboardResult.data!;
+      final sortedScores = List<ScoreModel>.from(leaderboard.scores);
 
       // Sort by score (descending), then by accuracy, then by time taken
       sortedScores.sort((a, b) {
@@ -537,10 +537,10 @@ class LeaderboardFirestoreDataSource extends BaseFirebaseDataSource {
       final leaderboardResult = await getLeaderboardBySessionId(sessionId);
 
       if (leaderboardResult.isFailure) {
-        return Result.failure(leaderboardResult.failureOrThrow);
+        return Result.failure(leaderboardResult.failure!);
       }
 
-      final leaderboard = leaderboardResult.data;
+      final leaderboard = leaderboardResult.data!;
       final scores = leaderboard.scores;
 
       if (scores.isEmpty) {
