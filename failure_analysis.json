@@ -1,0 +1,34 @@
+{
+  "timestamp": "2025-07-31T14:43:01Z",
+  "retry_count": 0,
+  "failure_categories": {
+    "ui_issues": [],
+    "navigation_issues": [
+      "Route not found",
+      "Navigator errors",
+      "Context issues"
+    ],
+    "firebase_issues": [
+      "Firebase connection",
+      "Authentication errors",
+      "Firestore issues"
+    ],
+    "performance_issues": [
+      "Test timeouts",
+      "Memory issues",
+      "Performance problems"
+    ],
+    "test_framework_issues": [
+      "Test setup issues",
+      "Mock failures",
+      "Provider issues"
+    ],
+    "build_issues": [
+      "Build failures",
+      "Dependency issues",
+      "Import errors"
+    ]
+  },
+  "total_failures": 5,
+  "recommended_agents": []
+}
