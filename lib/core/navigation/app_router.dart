@@ -18,6 +18,8 @@ import '../../features/authentication/presentation/pages/profile_page.dart'
 import '../../features/home/presentation/pages/home_page.dart' as home_pages;
 import '../../features/ui_showcase/presentation/pages/ui_showcase_page.dart';
 import '../../features/ui_showcase/presentation/pages/theme_settings_page.dart';
+import '../../features/demo/presentation/pages/ui_components_demo_page.dart';
+import '../../features/ui_showcase/presentation/pages/all_components_demo_page.dart';
 import '../../shared/widgets/error/error_page_widget.dart';
 import '../../shared/widgets/deep_link/game_join_widget.dart';
 
@@ -397,6 +399,11 @@ class AppRouter {
               subtitle: 'Animated score displays and achievements',
               icon: Icons.emoji_events,
             ),
+          ),
+          GoRoute(
+            path: 'all-components',
+            name: 'ui-showcase-all',
+            builder: (context, state) => const AllComponentsDemoPage(),
           ),
         ],
       ),

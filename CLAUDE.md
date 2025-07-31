@@ -157,6 +157,8 @@ This is a Kahoot-style interactive quiz application built with Flutter, Firestor
 │   │   └── leaderboard/
 │   └── shared/              # Shared widgets and providers
 │       ├── widgets/
+│       │   └── base/        # Base widget abstractions
+│       ├── theme/           # Theme system and dark mode
 │       └── providers/
 ```
 
@@ -928,9 +930,18 @@ lib/shared/
 │   └── app_dimensions.dart     # Component sizes
 ├── theme/
 │   ├── app_theme.dart          # Material theme configuration
-│   └── dark_theme.dart         # Dark mode theme
+│   ├── dark_theme.dart         # Dark mode theme
+│   └── theme_provider.dart     # Theme switching and state management
 └── widgets/
-    └── primitives/             # Base components using constants
+    ├── primitives/             # Base components using constants
+    └── base/                   # Widget abstractions and architecture
+        ├── base_widget.dart    # Base widget abstractions
+        ├── animation_manager.dart # Centralized animation control
+        ├── animated_state_manager.dart # State management for animations
+        ├── responsive_builder.dart # Responsive design patterns
+        ├── widget_composition.dart # Component composition patterns
+        ├── performance_monitor.dart # UI performance monitoring
+        └── index.dart          # Barrel export file
 ```
 
 **Important**: All sub-agents must reference `docs/ui_guideline.md` for UI implementation details and use only the approved design system constants.

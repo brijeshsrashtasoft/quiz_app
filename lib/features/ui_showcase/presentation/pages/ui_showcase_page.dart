@@ -175,6 +175,13 @@ class UIShowcasePage extends ConsumerWidget {
         color: AppColors.achievement,
         route: '/ui-showcase/scores',
       ),
+      _ShowcaseItem(
+        title: 'All Components',
+        description: 'Complete showcase of all UI components in one view',
+        icon: Icons.dashboard_customize,
+        color: AppColors.diamondGreen,
+        route: '/ui-showcase/all-components',
+      ),
     ];
   }
 }
