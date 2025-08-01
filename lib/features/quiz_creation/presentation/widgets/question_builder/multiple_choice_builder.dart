@@ -131,7 +131,7 @@ class _MultipleChoiceBuilderState extends State<MultipleChoiceBuilder>
   @override
   Widget build(BuildContext context) {
     final isSmallScreen = MediaQuery.of(context).size.height < 700;
-    
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -142,7 +142,7 @@ class _MultipleChoiceBuilderState extends State<MultipleChoiceBuilder>
             children: [
               Expanded(
                 child: Text(
-                  'Answer Options', 
+                  'Answer Options',
                   style: AppTextStyles.inputLabel,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -152,8 +152,8 @@ class _MultipleChoiceBuilderState extends State<MultipleChoiceBuilder>
                 child: TextButton.icon(
                   onPressed: _addOption,
                   icon: Icon(
-                    Icons.add, 
-                    color: AppColors.vibrantPurple, 
+                    Icons.add,
+                    color: AppColors.vibrantPurple,
                     size: isSmallScreen ? 18 : 20,
                   ),
                   label: Text(
@@ -180,7 +180,9 @@ class _MultipleChoiceBuilderState extends State<MultipleChoiceBuilder>
                   scale: _animationControllers[index],
                   child: Padding(
                     padding: EdgeInsets.only(
-                      bottom: isSmallScreen ? AppSpacing.spacingS : AppSpacing.spacingM,
+                      bottom: isSmallScreen
+                          ? AppSpacing.spacingS
+                          : AppSpacing.spacingM,
                     ),
                     child: _buildOptionRow(index),
                   ),
@@ -217,7 +219,9 @@ class _MultipleChoiceBuilderState extends State<MultipleChoiceBuilder>
                 color: isCorrect ? color : Colors.transparent,
                 border: Border.all(
                   color: isCorrect ? color : AppColors.coolGray,
-                  width: isCorrect ? (isSmallScreen ? 2 : 3) : (isSmallScreen ? 1.5 : 2),
+                  width: isCorrect
+                      ? (isSmallScreen ? 2 : 3)
+                      : (isSmallScreen ? 1.5 : 2),
                 ),
               ),
               child: isCorrect
@@ -231,10 +235,14 @@ class _MultipleChoiceBuilderState extends State<MultipleChoiceBuilder>
                   : null,
             ),
           ),
-          SizedBox(width: isSmallScreen ? AppSpacing.spacingS : AppSpacing.spacingM),
+          SizedBox(
+            width: isSmallScreen ? AppSpacing.spacingS : AppSpacing.spacingM,
+          ),
           // Option shape icon
           Icon(icon, color: color, size: iconSize),
-          SizedBox(width: isSmallScreen ? AppSpacing.spacingS : AppSpacing.spacingM),
+          SizedBox(
+            width: isSmallScreen ? AppSpacing.spacingS : AppSpacing.spacingM,
+          ),
           // Option input
           Expanded(
             child: TextFormField(
@@ -265,8 +273,12 @@ class _MultipleChoiceBuilderState extends State<MultipleChoiceBuilder>
                   borderSide: BorderSide(color: color, width: 2),
                 ),
                 contentPadding: EdgeInsets.symmetric(
-                  horizontal: isSmallScreen ? AppSpacing.spacingS : AppSpacing.spacingM,
-                  vertical: isSmallScreen ? AppSpacing.spacingS : AppSpacing.spacingM,
+                  horizontal: isSmallScreen
+                      ? AppSpacing.spacingS
+                      : AppSpacing.spacingM,
+                  vertical: isSmallScreen
+                      ? AppSpacing.spacingS
+                      : AppSpacing.spacingM,
                 ),
                 isDense: isSmallScreen,
               ),
@@ -283,15 +295,25 @@ class _MultipleChoiceBuilderState extends State<MultipleChoiceBuilder>
                 minWidth: isSmallScreen ? 36 : 40,
                 minHeight: isSmallScreen ? 36 : 40,
               ),
-              child: IconButton(
-                onPressed: () => _removeOption(index),
-                icon: Icon(
-                  Icons.remove_circle_outline, 
-                  color: AppColors.coralRed,
-                  size: isSmallScreen ? 20 : 24,
+              child: Tooltip(
+                message: 'Remove option',
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(20),
+                    onTap: () => _removeOption(index),
+                    child: Container(
+                      width: isSmallScreen ? 40 : 48,
+                      height: isSmallScreen ? 40 : 48,
+                      alignment: Alignment.center,
+                      child: Icon(
+                        Icons.remove_circle_outline,
+                        color: AppColors.coralRed,
+                        size: isSmallScreen ? 20 : 24,
+                      ),
+                    ),
+                  ),
                 ),
-                tooltip: 'Remove option',
-                padding: EdgeInsets.all(isSmallScreen ? 4 : 8),
               ),
             ),
         ],

@@ -326,7 +326,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
                 TextButton(
                   onPressed: _navigateToRegister,
                   child: Text(
-                    'Sign Up',
+                    'Create account',
                     style: AppTextStyles.bodyText.copyWith(
                       color: AppColors.vibrantPurple,
                       fontWeight: FontWeight.w600,

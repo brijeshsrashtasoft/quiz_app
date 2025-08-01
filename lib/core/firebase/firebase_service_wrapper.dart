@@ -10,7 +10,8 @@ import 'web_firebase_config.dart';
 /// Following CLAUDE.md Firebase integration patterns
 class FirebaseServiceWrapper {
   static FirebaseServiceWrapper? _instance;
-  static FirebaseServiceWrapper get instance => _instance ??= FirebaseServiceWrapper._();
+  static FirebaseServiceWrapper get instance =>
+      _instance ??= FirebaseServiceWrapper._();
 
   FirebaseServiceWrapper._();
 
@@ -135,7 +136,9 @@ class FirebaseServiceWrapper {
   }) async {
     final storageInstance = storage;
     if (storageInstance == null) {
-      AppLogger.warning('$operationName skipped - Firebase Storage not available');
+      AppLogger.warning(
+        '$operationName skipped - Firebase Storage not available',
+      );
       return fallbackValue;
     }
 
@@ -152,11 +155,11 @@ class FirebaseServiceWrapper {
 
     final errorString = error.toString().toLowerCase();
     return errorString.contains('javascriptobject') ||
-           errorString.contains('firebase_js') ||
-           errorString.contains('firebase_core_web') ||
-           errorString.contains('js interop') ||
-           errorString.contains('dart:js_util') ||
-           errorString.contains('_jsfunction');
+        errorString.contains('firebase_js') ||
+        errorString.contains('firebase_core_web') ||
+        errorString.contains('js interop') ||
+        errorString.contains('dart:js_util') ||
+        errorString.contains('_jsfunction');
   }
 
   /// Get current user safely
@@ -195,22 +198,24 @@ class FirebaseServiceWrapper {
     buffer.writeln('Firebase Status:');
     buffer.writeln('- Initialized: ${FirebaseCoreConfig.isInitialized}');
     buffer.writeln('- Available: ${FirebaseCoreConfig.isAvailable}');
-    
+
     if (kIsWeb) {
-      buffer.writeln('- Web Firebase Available: ${WebFirebaseConfig.isWebFirebaseAvailable}');
+      buffer.writeln(
+        '- Web Firebase Available: ${WebFirebaseConfig.isWebFirebaseAvailable}',
+      );
       buffer.writeln('- Offline Mode: ${WebFirebaseConfig.isOfflineMode}');
-      
+
       final lastError = WebFirebaseConfig.lastWebError;
       if (lastError != null) {
         buffer.writeln('- Last Web Error: $lastError');
       }
     }
-    
+
     buffer.writeln('- Auth Available: ${auth != null}');
     buffer.writeln('- Firestore Available: ${firestore != null}');
     buffer.writeln('- Storage Available: ${storage != null}');
     buffer.writeln('- User Signed In: $isSignedIn');
-    
+
     return buffer.toString();
   }
 }

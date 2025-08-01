@@ -120,8 +120,18 @@ final authStateProvider = StreamProvider<domain.AuthState>((ref) async* {
 
 /// Current user provider - quick access to current user entity
 final currentUserProvider = Provider<UserEntity?>((ref) {
-  final authState = ref.watch(authStateProvider).value;
-  return authState?.user;
+  final authStateAsync = ref.watch(authStateProvider);
+  // For testing purposes, also check if we have a synchronous value
+  final syncValue = authStateAsync.value;
+  if (syncValue != null) {
+    return syncValue.user;
+  }
+
+  return authStateAsync.when(
+    data: (authState) => authState.user,
+    loading: () => null,
+    error: (_, __) => null,
+  );
 });
 
 /// Current Firebase user provider - quick access to Firebase user
@@ -131,8 +141,18 @@ final currentFirebaseUserProvider = Provider<User?>((ref) {
 
 /// Authentication status provider - simple boolean for auth status
 final isAuthenticatedProvider = Provider<bool>((ref) {
-  final authState = ref.watch(authStateProvider).value;
-  return authState?.isAuthenticated ?? false;
+  final authStateAsync = ref.watch(authStateProvider);
+  // For testing purposes, also check if we have a synchronous value
+  final syncValue = authStateAsync.value;
+  if (syncValue != null) {
+    return syncValue.isAuthenticated;
+  }
+
+  return authStateAsync.when(
+    data: (authState) => authState.isAuthenticated,
+    loading: () => false,
+    error: (_, __) => false,
+  );
 });
 
 /// User ID provider - quick access to current user ID

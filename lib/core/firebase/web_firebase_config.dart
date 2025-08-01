@@ -13,7 +13,9 @@ class WebFirebaseConfig {
   /// Initialize Firebase for web platform with enhanced error handling
   static Future<bool> initializeWeb() async {
     if (!kIsWeb) {
-      throw UnsupportedError('WebFirebaseConfig can only be used on web platform');
+      throw UnsupportedError(
+        'WebFirebaseConfig can only be used on web platform',
+      );
     }
 
     if (_webInitialized) {
@@ -22,7 +24,10 @@ class WebFirebaseConfig {
     }
 
     try {
-      AppLogger.firebase('WebInit', 'Starting web-specific Firebase initialization');
+      AppLogger.firebase(
+        'WebInit',
+        'Starting web-specific Firebase initialization',
+      );
 
       // Try to initialize Firebase with web-specific handling
       await _attemptWebInitialization();
@@ -31,9 +36,11 @@ class WebFirebaseConfig {
       _webErrorOccurred = false;
       _lastWebError = null;
 
-      AppLogger.firebase('WebInit', 'Firebase web initialization completed successfully');
+      AppLogger.firebase(
+        'WebInit',
+        'Firebase web initialization completed successfully',
+      );
       return true;
-
     } catch (e, stackTrace) {
       _webErrorOccurred = true;
       _lastWebError = e.toString();
@@ -44,7 +51,7 @@ class WebFirebaseConfig {
           'Firebase web compatibility issue detected - '
           'app will continue in offline mode. Error: ${e.toString()}',
         );
-        
+
         // Mark as initialized to prevent retry loops
         _webInitialized = true;
         return false; // Return false to indicate offline mode
@@ -62,16 +69,19 @@ class WebFirebaseConfig {
 
     for (int attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        AppLogger.firebase('WebInit', 'Initialization attempt $attempt/$maxRetries');
-
-        // Initialize Firebase with web options
-        await Firebase.initializeApp(
-          options: DefaultFirebaseOptions.web,
+        AppLogger.firebase(
+          'WebInit',
+          'Initialization attempt $attempt/$maxRetries',
         );
 
-        AppLogger.firebase('WebInit', 'Firebase web initialized on attempt $attempt');
-        return;
+        // Initialize Firebase with web options (now using real project config)
+        await Firebase.initializeApp(options: DefaultFirebaseOptions.web);
 
+        AppLogger.firebase(
+          'WebInit',
+          'Firebase web initialized on attempt $attempt',
+        );
+        return;
       } catch (e) {
         if (attempt == maxRetries) {
           throw e; // Rethrow on final attempt
@@ -94,19 +104,19 @@ class WebFirebaseConfig {
   /// Check if error is a known Firebase web compatibility issue
   static bool _isFirebaseWebCompatibilityError(dynamic error) {
     final errorString = error.toString().toLowerCase();
-    
+
     // Common Firebase web JavaScript interop errors
     return errorString.contains('javascriptobject') ||
-           errorString.contains('_jsfunction') ||
-           errorString.contains('firebase_js') ||
-           errorString.contains('firebase-app') ||
-           errorString.contains('firebase_core_web') ||
-           errorString.contains('dart:js_interop') ||
-           errorString.contains('dart:js_util') ||
-           errorString.contains('web workers') ||
-           errorString.contains('document is not defined') ||
-           errorString.contains('window is not defined') ||
-           errorString.contains('navigator is not defined');
+        errorString.contains('_jsfunction') ||
+        errorString.contains('firebase_js') ||
+        errorString.contains('firebase-app') ||
+        errorString.contains('firebase_core_web') ||
+        errorString.contains('dart:js_interop') ||
+        errorString.contains('dart:js_util') ||
+        errorString.contains('web workers') ||
+        errorString.contains('document is not defined') ||
+        errorString.contains('window is not defined') ||
+        errorString.contains('navigator is not defined');
   }
 
   /// Check if web Firebase is available and working
@@ -133,7 +143,7 @@ class WebFirebaseConfig {
   /// Check if current environment supports Firebase web features
   static bool get supportsWebFeatures {
     if (!kIsWeb) return false;
-    
+
     try {
       // Basic web environment checks
       return true; // Simplified check - in real app, check for required APIs

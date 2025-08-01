@@ -11,6 +11,7 @@ import '../../features/quiz_creation/presentation/pages/quiz_publish_page.dart';
 import 'navigation_utils.dart';
 import '../../features/authentication/presentation/pages/login_page.dart';
 import '../../features/authentication/presentation/pages/register_page.dart';
+import '../../features/authentication/presentation/pages/email_verification_page.dart';
 import '../../features/authentication/presentation/pages/forgot_password_page.dart';
 import '../../features/authentication/presentation/pages/profile_page.dart'
     as auth_pages;
@@ -95,6 +96,13 @@ class AppRouter {
         path: RouteConstants.register,
         name: 'register',
         builder: (context, state) => const RegisterPage(),
+        routes: [
+          GoRoute(
+            path: 'verify-email',
+            name: 'verify-email',
+            builder: (context, state) => const EmailVerificationPage(),
+          ),
+        ],
       ),
       GoRoute(
         path: RouteConstants.forgotPassword,

@@ -176,7 +176,9 @@ class _QuizCardState extends State<QuizCard>
                     Expanded(
                       flex: 4,
                       child: Padding(
-                        padding: EdgeInsets.all(AppSpacing.spacingS), // Reduced from spacingM
+                        padding: EdgeInsets.all(
+                          AppSpacing.spacingS,
+                        ), // Reduced from spacingM
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -209,7 +211,6 @@ class _QuizCardState extends State<QuizCard>
                             ),
 
                             const Spacer(), // Push footer to bottom
-
                             // Footer with metadata tags - single row layout
                             Row(
                               children: [
@@ -254,7 +255,9 @@ class _QuizCardState extends State<QuizCard>
                                       vertical: 2,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: _getDifficultyColor().withOpacity(0.1),
+                                      color: _getDifficultyColor().withOpacity(
+                                        0.1,
+                                      ),
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                     child: Text(

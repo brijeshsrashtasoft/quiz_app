@@ -19,47 +19,45 @@ class QuizStepperWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isSmallScreen = screenWidth < 500;
-    
+
     return LayoutBuilder(
       builder: (context, constraints) {
-        return IntrinsicHeight(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Expanded(
-                child: _buildStep(
-                  context,
-                  index: 0,
-                  title: isSmallScreen ? 'Details' : 'Quiz Details',
-                  icon: Icons.info_outline,
-                  isActive: currentStep >= 0,
-                  isCompleted: currentStep > 0,
-                ),
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Expanded(
+              child: _buildStep(
+                context,
+                index: 0,
+                title: isSmallScreen ? 'Details' : 'Quiz Details',
+                icon: Icons.info_outline,
+                isActive: currentStep >= 0,
+                isCompleted: currentStep > 0,
               ),
-              _buildConnector(isActive: currentStep >= 1, context: context),
-              Expanded(
-                child: _buildStep(
-                  context,
-                  index: 1,
-                  title: isSmallScreen ? 'Questions' : 'Add Questions',
-                  icon: Icons.quiz_outlined,
-                  isActive: currentStep >= 1,
-                  isCompleted: currentStep > 1,
-                ),
+            ),
+            _buildConnector(isActive: currentStep >= 1, context: context),
+            Expanded(
+              child: _buildStep(
+                context,
+                index: 1,
+                title: isSmallScreen ? 'Questions' : 'Add Questions',
+                icon: Icons.quiz_outlined,
+                isActive: currentStep >= 1,
+                isCompleted: currentStep > 1,
               ),
-              _buildConnector(isActive: currentStep >= 2, context: context),
-              Expanded(
-                child: _buildStep(
-                  context,
-                  index: 2,
-                  title: 'Settings',
-                  icon: Icons.settings_outlined,
-                  isActive: currentStep >= 2,
-                  isCompleted: currentStep > 2,
-                ),
+            ),
+            _buildConnector(isActive: currentStep >= 2, context: context),
+            Expanded(
+              child: _buildStep(
+                context,
+                index: 2,
+                title: 'Settings',
+                icon: Icons.settings_outlined,
+                isActive: currentStep >= 2,
+                isCompleted: currentStep > 2,
               ),
-            ],
-          ),
+            ),
+          ],
         );
       },
     );
@@ -84,68 +82,63 @@ class QuizStepperWidget extends StatelessWidget {
 
     return GestureDetector(
       onTap: () => onStepTapped(index),
-      child: AnimatedContainer(
-        duration: AppAnimations.shortAnimation,
-        curve: AppAnimations.easeInOut,
-        child: IntrinsicHeight(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AnimatedContainer(
-                duration: AppAnimations.shortAnimation,
-                curve: AppAnimations.elastic,
-                width: stepSize,
-                height: stepSize,
-                decoration: BoxDecoration(
-                  color: isCompleted ? backgroundColor : Colors.transparent,
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: color, 
-                    width: isActive ? (isSmallScreen ? 2 : 3) : (isSmallScreen ? 1.5 : 2),
-                  ),
-                ),
-                child: Center(
-                  child: isCompleted
-                      ? Icon(
-                          Icons.check,
-                          color: AppColors.pureWhite,
-                          size: iconSize,
-                        )
-                      : Icon(
-                          icon,
-                          color: isActive ? color : AppColors.coolGray,
-                          size: iconSize,
-                        ),
-                ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: stepSize,
+            height: stepSize,
+            decoration: BoxDecoration(
+              color: isCompleted ? backgroundColor : Colors.transparent,
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: color,
+                width: isActive
+                    ? (isSmallScreen ? 2 : 3)
+                    : (isSmallScreen ? 1.5 : 2),
               ),
-              const SizedBox(height: AppSpacing.spacingS),
-              Flexible(
-                child: Text(
-                  title,
-                  style: isActive
-                      ? AppTextStyles.caption.copyWith(
-                          color: AppColors.vibrantPurple,
-                          fontWeight: FontWeight.w600,
-                          fontSize: isSmallScreen ? 10 : 12,
-                        )
-                      : AppTextStyles.caption.copyWith(
-                          fontSize: isSmallScreen ? 10 : 12,
-                        ),
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
+            ),
+            child: Center(
+              child: isCompleted
+                  ? Icon(
+                      Icons.check,
+                      color: AppColors.pureWhite,
+                      size: iconSize,
+                    )
+                  : Icon(
+                      icon,
+                      color: isActive ? color : AppColors.coolGray,
+                      size: iconSize,
+                    ),
+            ),
           ),
-        ),
+          const SizedBox(height: AppSpacing.spacingS),
+          Text(
+            title,
+            style: isActive
+                ? AppTextStyles.caption.copyWith(
+                    color: AppColors.vibrantPurple,
+                    fontWeight: FontWeight.w600,
+                    fontSize: isSmallScreen ? 10 : 12,
+                  )
+                : AppTextStyles.caption.copyWith(
+                    fontSize: isSmallScreen ? 10 : 12,
+                  ),
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildConnector({required bool isActive, required BuildContext context}) {
+  Widget _buildConnector({
+    required bool isActive,
+    required BuildContext context,
+  }) {
     final isSmallScreen = MediaQuery.of(context).size.width < 500;
-    
+
     return Expanded(
       child: Container(
         height: isSmallScreen ? 1.5 : 2,

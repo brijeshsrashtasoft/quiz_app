@@ -32,8 +32,8 @@ class Email with _$Email {
 
     final trimmedInput = input.trim();
 
-    // Email format validation
-    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    // Email format validation (allows common characters including +)
+    final emailRegex = RegExp(r'^[\w\-\.+]+@([\w\-]+\.)+[\w\-]{2,4}$');
     if (!emailRegex.hasMatch(trimmedInput)) {
       return Result.failure(
         Failure.validationFailure(
@@ -56,7 +56,9 @@ class Email with _$Email {
     // Check for common invalid patterns
     if (trimmedInput.startsWith('.') ||
         trimmedInput.endsWith('.') ||
-        trimmedInput.contains('..')) {
+        trimmedInput.contains('..') ||
+        trimmedInput.contains('.@') ||
+        trimmedInput.contains('@.')) {
       return Result.failure(
         Failure.validationFailure(
           message: 'Email format is invalid',

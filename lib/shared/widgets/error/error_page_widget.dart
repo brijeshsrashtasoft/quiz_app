@@ -459,7 +459,9 @@ class _QuickNavChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.vibrantPurple.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppColors.vibrantPurple.withValues(alpha: 0.3)),
+          border: Border.all(
+            color: AppColors.vibrantPurple.withValues(alpha: 0.3),
+          ),
         ),
         child: Text(
           label,

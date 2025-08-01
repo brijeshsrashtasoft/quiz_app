@@ -397,7 +397,7 @@ class AuthConfig {
     }
   }
 
-  /// Send email verification to current user
+  /// Send email verification to current user with proper configuration
   static Future<void> sendEmailVerification() async {
     try {
       final user = currentUser;
@@ -413,15 +413,69 @@ class AuthConfig {
         return;
       }
 
-      await user.sendEmailVerification();
-      AppLogger.firebase('Auth', 'Email verification sent to: ${user.email}');
+      // Configure email verification action settings for better deliverability
+      final actionCodeSettings = ActionCodeSettings(
+        // The URL to redirect to after email verification - using Firebase default handler
+        url: 'https://quiz-app-1753821039.firebaseapp.com/__/auth/action',
+        // Handle the link in mobile app if available
+        handleCodeInApp: false, // Set to false to avoid deep link issues
+        // iOS bundle ID for mobile deep linking
+        iOSBundleId: 'com.example.quiz-app',
+        // Android package name for mobile deep linking
+        androidPackageName: 'com.example.quiz_app_1',
+        // Minimum Android version for app handling
+        androidMinimumVersion: '23',
+        // Install Android app if not available
+        androidInstallApp: false, // Set to false to avoid installation prompts
+      );
+
+      // Try with action code settings first, fallback to simple verification
+      try {
+        await user.sendEmailVerification(actionCodeSettings);
+        AppLogger.firebase(
+          'Auth',
+          'Email verification sent with action settings to: ${user.email}',
+        );
+      } catch (actionError) {
+        AppLogger.warning(
+          'Action code settings failed, trying simple verification',
+          actionError,
+        );
+        // Fallback to simple email verification without action code settings
+        await user.sendEmailVerification();
+        AppLogger.firebase(
+          'Auth',
+          'Simple email verification sent to: ${user.email}',
+        );
+      }
     } on FirebaseAuthException catch (e) {
       AppLogger.error('Email verification failed', e);
+
+      // Handle specific email verification errors
+      if (e.code == 'too-many-requests') {
+        throw AuthException(
+          message:
+              'Too many verification emails sent. Please wait before requesting another.',
+          code: e.code,
+        );
+      } else if (e.code == 'user-not-found') {
+        throw AuthException(
+          message: 'User account not found. Please sign in again.',
+          code: e.code,
+        );
+      } else if (e.code == 'invalid-email') {
+        throw AuthException(
+          message: 'Invalid email address. Please check your email.',
+          code: e.code,
+        );
+      }
+
       throw AuthException(message: _getAuthErrorMessage(e.code), code: e.code);
     } catch (e) {
       AppLogger.error('Unexpected error during email verification', e);
       throw AuthException(
-        message: 'An unexpected error occurred during email verification',
+        message:
+            'An unexpected error occurred during email verification. Please try again.',
         code: 'unknown_error',
       );
     }
@@ -464,11 +518,22 @@ class AuthConfig {
       case 'user-disabled':
         return 'This account has been disabled.';
       case 'too-many-requests':
-        return 'Too many failed attempts. Please try again later.';
+        return 'Too many requests. Please wait a moment before trying again.';
       case 'operation-not-allowed':
         return 'This sign-in method is not enabled.';
       case 'requires-recent-login':
         return 'Please sign in again to perform this action.';
+      // Email verification specific errors
+      case 'invalid-action-code':
+        return 'The verification link is invalid or has expired.';
+      case 'expired-action-code':
+        return 'The verification link has expired. Please request a new one.';
+      case 'user-mismatch':
+        return 'The verification link was not sent to this user.';
+      case 'invalid-continue-uri':
+        return 'Invalid verification link. Please try again.';
+      case 'unauthorized-continue-uri':
+        return 'The app domain is not authorized for email verification.';
       default:
         return 'Authentication failed. Please try again.';
     }

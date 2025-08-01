@@ -71,7 +71,7 @@ class _QuestionCardWidgetState extends State<QuestionCardWidget>
     final screenWidth = MediaQuery.of(context).size.width;
     final isSmallScreen = screenWidth < 600;
     final isVerySmallScreen = screenWidth < 400;
-    
+
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
@@ -117,7 +117,11 @@ class _QuestionCardWidgetState extends State<QuestionCardWidget>
                           color: AppColors.coolGray,
                           size: isSmallScreen ? 20 : 24,
                         ),
-                        SizedBox(width: isSmallScreen ? AppSpacing.spacingS : AppSpacing.spacingM),
+                        SizedBox(
+                          width: isSmallScreen
+                              ? AppSpacing.spacingS
+                              : AppSpacing.spacingM,
+                        ),
                       ],
                       // Question number
                       Container(
@@ -138,7 +142,11 @@ class _QuestionCardWidgetState extends State<QuestionCardWidget>
                           ),
                         ),
                       ),
-                      SizedBox(width: isSmallScreen ? AppSpacing.spacingS : AppSpacing.spacingM),
+                      SizedBox(
+                        width: isSmallScreen
+                            ? AppSpacing.spacingS
+                            : AppSpacing.spacingM,
+                      ),
                       // Question content
                       Expanded(
                         child: Column(
@@ -156,7 +164,9 @@ class _QuestionCardWidgetState extends State<QuestionCardWidget>
                                 Flexible(
                                   child: Text(
                                     widget.question['type'] == 'multiple_choice'
-                                        ? (isVerySmallScreen ? 'MC' : 'Multiple Choice')
+                                        ? (isVerySmallScreen
+                                              ? 'MC'
+                                              : 'Multiple Choice')
                                         : 'True/False',
                                     style: AppTextStyles.caption.copyWith(
                                       color: _getQuestionTypeColor(),
@@ -215,13 +225,22 @@ class _QuestionCardWidgetState extends State<QuestionCardWidget>
                               minWidth: isSmallScreen ? 32 : 40,
                               minHeight: isSmallScreen ? 32 : 40,
                             ),
-                            child: IconButton(
-                              onPressed: widget.onEdit,
-                              icon: const Icon(Icons.edit_outlined),
-                              color: AppColors.coolGray,
-                              tooltip: 'Edit question',
-                              iconSize: isSmallScreen ? 18 : 20,
-                              padding: EdgeInsets.all(isSmallScreen ? 4 : 8),
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(20),
+                                onTap: widget.onEdit,
+                                child: Container(
+                                  width: isSmallScreen ? 40 : 48,
+                                  height: isSmallScreen ? 40 : 48,
+                                  alignment: Alignment.center,
+                                  child: Icon(
+                                    Icons.edit_outlined,
+                                    color: AppColors.coolGray,
+                                    size: isSmallScreen ? 18 : 20,
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                           if (!isVerySmallScreen)
@@ -230,13 +249,22 @@ class _QuestionCardWidgetState extends State<QuestionCardWidget>
                                 minWidth: isSmallScreen ? 32 : 40,
                                 minHeight: isSmallScreen ? 32 : 40,
                               ),
-                              child: IconButton(
-                                onPressed: widget.onDelete,
-                                icon: const Icon(Icons.delete_outline),
-                                color: AppColors.coralRed,
-                                tooltip: 'Delete question',
-                                iconSize: isSmallScreen ? 18 : 20,
-                                padding: EdgeInsets.all(isSmallScreen ? 4 : 8),
+                              child: Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(20),
+                                  onTap: widget.onDelete,
+                                  child: Container(
+                                    width: isSmallScreen ? 40 : 48,
+                                    height: isSmallScreen ? 40 : 48,
+                                    alignment: Alignment.center,
+                                    child: Icon(
+                                      Icons.delete_outline,
+                                      color: AppColors.coralRed,
+                                      size: isSmallScreen ? 18 : 20,
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
                         ],
@@ -255,7 +283,7 @@ class _QuestionCardWidgetState extends State<QuestionCardWidget>
   Widget _buildInfoChip(IconData icon, String label, Color color) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isSmallScreen = screenWidth < 600;
-    
+
     return Container(
       padding: EdgeInsets.symmetric(
         horizontal: isSmallScreen ? AppSpacing.spacingXS : AppSpacing.spacingS,
@@ -268,11 +296,7 @@ class _QuestionCardWidgetState extends State<QuestionCardWidget>
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            icon, 
-            size: isSmallScreen ? 12 : 14, 
-            color: color,
-          ),
+          Icon(icon, size: isSmallScreen ? 12 : 14, color: color),
           const SizedBox(width: AppSpacing.spacingXS),
           Flexible(
             child: Text(

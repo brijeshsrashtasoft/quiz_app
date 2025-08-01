@@ -192,6 +192,39 @@ class _HomePageState extends ConsumerState<HomePage>
               color: AppColors.pureWhite.withOpacity(0.9),
             ),
           ),
+
+          // Show Sign Up button for unauthenticated users
+          if (user == null) ...[
+            const SizedBox(height: AppSpacing.spacingL),
+            SizedBox(
+              height: 48,
+              child: ElevatedButton(
+                onPressed: () => context.go(RouteConstants.register),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.pureWhite,
+                  foregroundColor: AppColors.vibrantPurple,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 2,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.person_add, size: 20),
+                    const SizedBox(width: AppSpacing.spacingS),
+                    Text(
+                      'Sign Up',
+                      style: AppTextStyles.buttonText.copyWith(
+                        color: AppColors.vibrantPurple,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );

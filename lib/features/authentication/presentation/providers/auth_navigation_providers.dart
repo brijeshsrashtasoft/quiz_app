@@ -269,8 +269,18 @@ class AuthNavigationNotifier extends StateNotifier<AuthNavigationState> {
 
   /// Check if user should be redirected from auth pages
   bool shouldRedirectFromAuthPages() {
-    final authState = ref.read(authStateProvider).value;
-    return authState?.isAuthenticated == true;
+    final authStateAsync = ref.read(authStateProvider);
+    // For testing purposes, also check if we have a synchronous value
+    final syncValue = authStateAsync.value;
+    if (syncValue != null) {
+      return syncValue.isAuthenticated;
+    }
+
+    return authStateAsync.when(
+      data: (authState) => authState.isAuthenticated,
+      loading: () => false,
+      error: (_, __) => false,
+    );
   }
 
   /// Get appropriate auth route based on current state

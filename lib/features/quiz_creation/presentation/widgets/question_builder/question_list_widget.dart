@@ -94,7 +94,7 @@ class _QuestionListWidgetState extends ConsumerState<QuestionListWidget>
         builder: (context, constraints) {
           final maxWidth = constraints.maxWidth * 0.9;
           final maxHeight = constraints.maxHeight * 0.8;
-          
+
           return Center(
             child: ConstrainedBox(
               constraints: BoxConstraints(
@@ -102,8 +102,13 @@ class _QuestionListWidgetState extends ConsumerState<QuestionListWidget>
                 maxHeight: maxHeight,
               ),
               child: AlertDialog(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                title: Text('Delete Question?', style: AppTextStyles.sectionHeader),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                title: Text(
+                  'Delete Question?',
+                  style: AppTextStyles.sectionHeader,
+                ),
                 content: SingleChildScrollView(
                   child: Text(
                     'Are you sure you want to delete this question?',
@@ -148,25 +153,26 @@ class _QuestionListWidgetState extends ConsumerState<QuestionListWidget>
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final isSmallScreen = screenHeight < 700;
-    final availableHeight = isSmallScreen 
-        ? screenHeight * 0.5 
+    final availableHeight = isSmallScreen
+        ? screenHeight * 0.5
         : screenHeight * 0.6;
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        return SlideTransition(
-          position: _listAnimationController.drive(
-            Tween<Offset>(
-              begin: const Offset(0, 0.05),
-              end: Offset.zero,
-            ).chain(CurveTween(curve: AppAnimations.easeOut)),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              IntrinsicHeight(
-                child: Row(
+        return SizedBox(
+          width: constraints.maxWidth,
+          child: SlideTransition(
+            position: _listAnimationController.drive(
+              Tween<Offset>(
+                begin: const Offset(0, 0.05),
+                end: Offset.zero,
+              ).chain(CurveTween(curve: AppAnimations.easeOut)),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
@@ -176,34 +182,30 @@ class _QuestionListWidgetState extends ConsumerState<QuestionListWidget>
                         children: [
                           Text('Questions', style: AppTextStyles.sectionHeader),
                           const SizedBox(height: AppSpacing.spacingXS),
-                          Flexible(
-                            child: Text(
-                              '${_questions.length} questions added',
-                              style: AppTextStyles.caption,
-                              overflow: TextOverflow.ellipsis,
-                            ),
+                          Text(
+                            '${_questions.length} questions added',
+                            style: AppTextStyles.caption,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ],
                       ),
                     ),
                     const SizedBox(width: AppSpacing.spacingM),
-                    Flexible(
-                      child: PrimaryButton(
-                        onPressed: _addQuestion,
-                        text: isSmallScreen ? 'Add' : 'Add Question',
-                        icon: Icons.add,
-                        backgroundColor: AppColors.vibrantPurple,
-                      ),
+                    PrimaryButton(
+                      onPressed: _addQuestion,
+                      text: isSmallScreen ? 'Add' : 'Add Question',
+                      icon: Icons.add,
+                      backgroundColor: AppColors.vibrantPurple,
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(height: AppSpacing.spacingL),
-              if (_questions.isEmpty) 
-                _buildEmptyState(availableHeight, constraints) 
-              else 
-                _buildQuestionList(availableHeight, constraints),
-            ],
+                const SizedBox(height: AppSpacing.spacingL),
+                if (_questions.isEmpty)
+                  _buildEmptyState(availableHeight, constraints)
+                else
+                  _buildQuestionList(availableHeight, constraints),
+              ],
+            ),
           ),
         );
       },
@@ -213,15 +215,13 @@ class _QuestionListWidgetState extends ConsumerState<QuestionListWidget>
   Widget _buildEmptyState(double availableHeight, BoxConstraints constraints) {
     final isSmallScreen = MediaQuery.of(context).size.height < 700;
     final containerHeight = availableHeight.clamp(
-      isSmallScreen ? 200.0 : 250.0, 
+      isSmallScreen ? 200.0 : 250.0,
       isSmallScreen ? 300.0 : 400.0,
     );
-    
-    return ConstrainedBox(
-      constraints: BoxConstraints(
-        maxHeight: containerHeight,
-        maxWidth: constraints.maxWidth,
-      ),
+
+    return SizedBox(
+      width: constraints.maxWidth,
+      height: containerHeight,
       child: Container(
         width: constraints.maxWidth,
         decoration: BoxDecoration(
@@ -236,47 +236,43 @@ class _QuestionListWidgetState extends ConsumerState<QuestionListWidget>
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(AppSpacing.spacingL),
-            child: IntrinsicHeight(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.quiz_outlined, 
-                    size: isSmallScreen ? 60 : 80, 
-                    color: AppColors.lightGray,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.quiz_outlined,
+                  size: isSmallScreen ? 60 : 80,
+                  color: AppColors.lightGray,
+                ),
+                const SizedBox(height: AppSpacing.spacingL),
+                Text(
+                  'No questions yet',
+                  style: AppTextStyles.sectionHeader.copyWith(
+                    color: AppColors.coolGray,
                   ),
-                  const SizedBox(height: AppSpacing.spacingL),
-                  Flexible(
-                    child: Text(
-                      'No questions yet',
-                      style: AppTextStyles.sectionHeader.copyWith(
-                        color: AppColors.coolGray,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: AppSpacing.spacingS),
+                Text(
+                  'Start building your quiz by adding questions',
+                  style: AppTextStyles.bodyText.copyWith(
+                    color: AppColors.coolGray,
                   ),
-                  const SizedBox(height: AppSpacing.spacingS),
-                  Flexible(
-                    child: Text(
-                      'Start building your quiz by adding questions',
-                      style: AppTextStyles.bodyText.copyWith(color: AppColors.coolGray),
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.spacingXL),
-                  Flexible(
-                    child: PrimaryButton(
-                      onPressed: _addQuestion,
-                      text: isSmallScreen ? 'Add Question' : 'Add Your First Question',
-                      icon: Icons.add,
-                      backgroundColor: AppColors.vibrantPurple,
-                    ),
-                  ),
-                ],
-              ),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: AppSpacing.spacingXL),
+                PrimaryButton(
+                  onPressed: _addQuestion,
+                  text: isSmallScreen
+                      ? 'Add Question'
+                      : 'Add Your First Question',
+                  icon: Icons.add,
+                  backgroundColor: AppColors.vibrantPurple,
+                ),
+              ],
             ),
           ),
         ),
@@ -284,7 +280,10 @@ class _QuestionListWidgetState extends ConsumerState<QuestionListWidget>
     );
   }
 
-  Widget _buildQuestionList(double availableHeight, BoxConstraints constraints) {
+  Widget _buildQuestionList(
+    double availableHeight,
+    BoxConstraints constraints,
+  ) {
     return ConstrainedBox(
       constraints: BoxConstraints(
         maxHeight: availableHeight,
@@ -321,9 +320,7 @@ class _QuestionListWidgetState extends ConsumerState<QuestionListWidget>
           final question = _questions[index];
           return ConstrainedBox(
             key: ValueKey('question_$index'),
-            constraints: BoxConstraints(
-              maxWidth: constraints.maxWidth,
-            ),
+            constraints: BoxConstraints(maxWidth: constraints.maxWidth),
             child: AnimatedContainer(
               duration: AppAnimations.shortAnimation,
               margin: const EdgeInsets.only(bottom: AppSpacing.spacingM),

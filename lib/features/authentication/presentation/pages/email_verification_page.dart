@@ -33,6 +33,7 @@ class _EmailVerificationPageState extends ConsumerState<EmailVerificationPage>
   bool _isCheckingVerification = false;
   String? _errorMessage;
   String? _successMessage;
+  DateTime? _lastResendTime;
 
   @override
   void initState() {
@@ -87,6 +88,19 @@ class _EmailVerificationPageState extends ConsumerState<EmailVerificationPage>
   }
 
   Future<void> _resendVerificationEmail() async {
+    // Check if enough time has passed since last resend (30 seconds minimum)
+    if (_lastResendTime != null) {
+      final timeSinceLastResend = DateTime.now().difference(_lastResendTime!);
+      if (timeSinceLastResend.inSeconds < 30) {
+        final remainingSeconds = 30 - timeSinceLastResend.inSeconds;
+        setState(
+          () => _errorMessage =
+              'Please wait $remainingSeconds seconds before resending',
+        );
+        return;
+      }
+    }
+
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -97,12 +111,16 @@ class _EmailVerificationPageState extends ConsumerState<EmailVerificationPage>
     final result = await authService.sendEmailVerification();
 
     if (mounted) {
-      setState(() => _isLoading = false);
+      setState(() {
+        _isLoading = false;
+        _lastResendTime = DateTime.now();
+      });
 
       result.when(
         success: (_) {
           setState(
-            () => _successMessage = 'Verification email sent successfully!',
+            () => _successMessage =
+                'Verification email sent successfully! Please check your inbox and spam folder.',
           );
         },
         failure: (failure) {
@@ -240,9 +258,9 @@ class _EmailVerificationPageState extends ConsumerState<EmailVerificationPage>
 
           const SizedBox(height: AppSpacing.spacingM),
 
-          // Subtitle
+          // Subtitle with better guidance
           Text(
-            'We\'ve sent a verification link to your email address. Please check your inbox and click the link to verify your account.',
+            'We\'ve sent a verification link to your email address. Please check your inbox (including spam/junk folder) and click the link to verify your account.',
             style: AppTextStyles.bodyText.copyWith(color: AppColors.coolGray),
             textAlign: TextAlign.center,
           ),
@@ -388,6 +406,47 @@ class _EmailVerificationPageState extends ConsumerState<EmailVerificationPage>
                   title: 'You\'re all set!',
                   description:
                       'Return here and you\'ll be automatically signed in',
+                ),
+                const SizedBox(height: AppSpacing.spacingL),
+                // Troubleshooting section
+                Container(
+                  padding: const EdgeInsets.all(AppSpacing.spacingM),
+                  decoration: BoxDecoration(
+                    color: AppColors.turquoise.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: AppColors.turquoise.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.lightbulb_outline,
+                            color: AppColors.turquoise,
+                            size: 20,
+                          ),
+                          const SizedBox(width: AppSpacing.spacingS),
+                          Text(
+                            'Email not arriving?',
+                            style: AppTextStyles.caption.copyWith(
+                              color: AppColors.turquoise,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.spacingS),
+                      Text(
+                        '• Check spam/junk folder\n• Wait 2-3 minutes for delivery\n• Ensure your email provider allows emails from Firebase\n• Try resending the verification email',
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppColors.turquoise,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),

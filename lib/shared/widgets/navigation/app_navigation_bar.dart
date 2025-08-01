@@ -36,7 +36,7 @@ class AppNavigationBar extends ConsumerWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isSmallScreen = constraints.maxWidth < 400;
-        
+
         return Container(
           decoration: BoxDecoration(
             color: AppColors.pureWhite,
@@ -52,15 +52,17 @@ class AppNavigationBar extends ConsumerWidget {
           child: SafeArea(
             child: Padding(
               padding: EdgeInsets.symmetric(
-                horizontal: isSmallScreen ? AppSpacing.spacingS : AppSpacing.spacingM,
+                horizontal: isSmallScreen
+                    ? AppSpacing.spacingS
+                    : AppSpacing.spacingM,
                 vertical: AppSpacing.spacingS,
               ),
               child: IntrinsicHeight(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: _buildNavigationItems(context)
-                      .map((item) => Expanded(child: item))
-                      .toList(),
+                  children: _buildNavigationItems(
+                    context,
+                  ).map((item) => Expanded(child: item)).toList(),
                 ),
               ),
             ),
@@ -185,7 +187,7 @@ class _NavigationItemState extends State<_NavigationItem>
     final isSmallScreen = screenWidth < 400;
     final iconSize = isVerySmallScreen ? 20.0 : 24.0;
     final labelFontSize = isVerySmallScreen ? 10.0 : 12.0;
-    
+
     return Semantics(
       button: true,
       selected: widget.isActive,
@@ -204,7 +206,9 @@ class _NavigationItemState extends State<_NavigationItem>
                 duration: AppAnimations.shortAnimation,
                 curve: AppAnimations.easeInOut,
                 padding: EdgeInsets.symmetric(
-                  horizontal: isSmallScreen ? AppSpacing.spacingS : AppSpacing.spacingM,
+                  horizontal: isSmallScreen
+                      ? AppSpacing.spacingS
+                      : AppSpacing.spacingM,
                   vertical: AppSpacing.spacingS,
                 ),
                 decoration: BoxDecoration(

@@ -127,9 +127,22 @@ class _RegisterPageState extends ConsumerState<RegisterPage>
       setState(() => _isLoading = false);
 
       result.when(
-        success: (_) {
-          // Navigation handled by auth state listener
-          context.go(RouteConstants.home);
+        success: (user) async {
+          // Send verification email
+          final verificationResult = await authService.sendEmailVerification();
+
+          verificationResult.when(
+            success: (_) {
+              // Navigate to verification page
+              context.go(RouteConstants.verifyEmail);
+            },
+            failure: (failure) {
+              setState(
+                () => _errorMessage =
+                    'Account created but verification email failed: ${failure.userMessage}',
+              );
+            },
+          );
         },
         failure: (failure) {
           setState(() => _errorMessage = failure.userMessage);
@@ -458,13 +471,18 @@ class _RegisterPageState extends ConsumerState<RegisterPage>
     return AnimatedBuilder(
       animation: _formFieldStaggerAnimation,
       builder: (context, _) {
-        final animationValue = Curves.easeOutBack.transform(
-          (_formFieldStaggerAnimation.value - delay).clamp(0.0, 1.0),
+        final rawAnimationValue = (_formFieldStaggerAnimation.value - delay)
+            .clamp(0.0, 1.0);
+        final curvedAnimationValue = Curves.easeOutBack.transform(
+          rawAnimationValue,
         );
+        // Clamp opacity to valid range since easeOutBack can exceed 1.0
+        final clampedOpacity = curvedAnimationValue.clamp(0.0, 1.0);
+
         return Opacity(
-          opacity: animationValue,
+          opacity: clampedOpacity,
           child: Transform.translate(
-            offset: Offset(0, 20 * (1 - animationValue)),
+            offset: Offset(0, 20 * (1 - rawAnimationValue)),
             child: child,
           ),
         );

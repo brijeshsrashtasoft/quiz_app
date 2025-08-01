@@ -10,6 +10,7 @@ class RouteConstants {
   // Authentication routes
   static const String login = '/login';
   static const String register = '/register';
+  static const String verifyEmail = '/register/verify-email';
   static const String forgotPassword = '/forgot-password';
   static const String profile = '/profile';
 

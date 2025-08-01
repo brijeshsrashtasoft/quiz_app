@@ -50,7 +50,7 @@ class _TrueFalseBuilderState extends State<TrueFalseBuilder>
   @override
   Widget build(BuildContext context) {
     final isSmallScreen = MediaQuery.of(context).size.height < 700;
-    
+
     return ScaleTransition(
       scale: _scaleAnimation,
       child: Column(
@@ -211,7 +211,9 @@ class _TrueFalseBuilderState extends State<TrueFalseBuilder>
                 opacity: isSelected ? 1.0 : 0.0,
                 child: Container(
                   padding: EdgeInsets.symmetric(
-                    horizontal: isSmallScreen ? AppSpacing.spacingS : AppSpacing.spacingM,
+                    horizontal: isSmallScreen
+                        ? AppSpacing.spacingS
+                        : AppSpacing.spacingM,
                     vertical: AppSpacing.spacingXS,
                   ),
                   decoration: BoxDecoration(

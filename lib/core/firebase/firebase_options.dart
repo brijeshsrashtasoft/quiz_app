@@ -31,51 +31,52 @@ class DefaultFirebaseOptions {
     }
   }
 
-  // Test mode Firebase configuration for development
-  // Replace with actual Firebase project configuration in production
+  // Firebase configuration for real project - Updated from google-services.json
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyTestKeyForWebPlatform123456789',
-    appId: '1:123456789:web:abcdef123456789',
-    messagingSenderId: '123456789',
-    projectId: 'quiz-app-test-project',
-    authDomain: 'quiz-app-test-project.firebaseapp.com',
-    storageBucket: 'quiz-app-test-project.appspot.com',
-    measurementId: 'G-TEST123456',
+    apiKey: 'AIzaSyBv6bPsLKZ_8Rc2KdDblD2J7aKX3gXus-A',
+    appId: '1:130579954244:web:9f0517b27f50a3b8f91a11',
+    messagingSenderId: '130579954244',
+    projectId: 'quiz-app-1753821039',
+    authDomain: 'quiz-app-1753821039.firebaseapp.com',
+    storageBucket: 'quiz-app-1753821039.firebasestorage.app',
+    measurementId:
+        'G-MEAS1234567', // Placeholder - update if web analytics enabled
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyTestKeyForAndroidPlatform123456789',
-    appId: '1:123456789:android:abcdef123456789',
-    messagingSenderId: '123456789',
-    projectId: 'quiz-app-test-project',
-    storageBucket: 'quiz-app-test-project.appspot.com',
+    apiKey: 'AIzaSyBv6bPsLKZ_8Rc2KdDblD2J7aKX3gXus-A',
+    appId: '1:130579954244:android:9f0517b27f50a3b8f91a11',
+    messagingSenderId: '130579954244',
+    projectId: 'quiz-app-1753821039',
+    storageBucket: 'quiz-app-1753821039.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyTestKeyForIOSPlatform123456789',
-    appId: '1:123456789:ios:abcdef123456789',
-    messagingSenderId: '123456789',
-    projectId: 'quiz-app-test-project',
-    storageBucket: 'quiz-app-test-project.appspot.com',
-    iosBundleId: 'com.example.quizApp',
+    apiKey: 'AIzaSyBv6bPsLKZ_8Rc2KdDblD2J7aKX3gXus-A',
+    appId: '1:130579954244:ios:9f0517b27f50a3b8f91a11',
+    messagingSenderId: '130579954244',
+    projectId: 'quiz-app-1753821039',
+    storageBucket: 'quiz-app-1753821039.firebasestorage.app',
+    iosBundleId: 'com.example.quiz-app',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyTestKeyForMacOSPlatform123456789',
-    appId: '1:123456789:ios:abcdef123456789',
-    messagingSenderId: '123456789',
-    projectId: 'quiz-app-test-project',
-    storageBucket: 'quiz-app-test-project.appspot.com',
-    iosBundleId: 'com.example.quizApp',
+    apiKey: 'AIzaSyBv6bPsLKZ_8Rc2KdDblD2J7aKX3gXus-A',
+    appId: '1:130579954244:ios:9f0517b27f50a3b8f91a11',
+    messagingSenderId: '130579954244',
+    projectId: 'quiz-app-1753821039',
+    storageBucket: 'quiz-app-1753821039.firebasestorage.app',
+    iosBundleId: 'com.example.quiz-app',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyTestKeyForWindowsPlatform123456789',
-    appId: '1:123456789:web:windowsabcdef123456789',
-    messagingSenderId: '123456789',
-    projectId: 'quiz-app-test-project',
-    authDomain: 'quiz-app-test-project.firebaseapp.com',
-    storageBucket: 'quiz-app-test-project.appspot.com',
-    measurementId: 'G-TESTWIN123',
+    apiKey: 'AIzaSyBv6bPsLKZ_8Rc2KdDblD2J7aKX3gXus-A',
+    appId: '1:130579954244:web:9f0517b27f50a3b8f91a11',
+    messagingSenderId: '130579954244',
+    projectId: 'quiz-app-1753821039',
+    authDomain: 'quiz-app-1753821039.firebaseapp.com',
+    storageBucket: 'quiz-app-1753821039.firebasestorage.app',
+    measurementId:
+        'G-MEAS1234567', // Placeholder - update if web analytics enabled
   );
 }

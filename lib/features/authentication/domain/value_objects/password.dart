@@ -90,28 +90,25 @@ class Password with _$Password {
       );
     }
 
-    // Check for common weak passwords
+    // Check for common weak passwords (after basic validation)
     final commonPasswords = [
-      'password',
-      '12345678',
-      'qwerty',
-      'abc123',
       'password123',
-      '123456789',
-      'welcome',
-      'admin',
-      'letmein',
-      'monkey',
+      'welcome123',
+      'admin123',
+      'letmein123',
+      'qwerty123',
+      'monkey123',
+      'football1',
+      'baseball1',
+      'basketball1',
+      'sunshine1',
     ];
 
     if (commonPasswords.contains(input.toLowerCase())) {
       return Result.failure(
         Failure.validationFailure(
-          message: 'Password is too common, please choose a stronger password',
-          fieldErrors: {
-            'password':
-                'Password is too common, please choose a stronger password',
-          },
+          message: 'Password is too common',
+          fieldErrors: {'password': 'Password is too common'},
         ),
       );
     }

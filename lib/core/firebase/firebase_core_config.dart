@@ -8,7 +8,8 @@ import 'web_firebase_config.dart';
 /// Following CLAUDE.md Firebase integration patterns
 class FirebaseCoreConfig {
   static bool _initialized = false;
-  static bool _isTestMode = true; // Enable test mode for development
+  static bool _isTestMode =
+      false; // Disable test mode for proper email verification
 
   /// Initialize Firebase with optimized startup and test mode support
   static Future<void> initialize() async {
@@ -58,7 +59,7 @@ class FirebaseCoreConfig {
         _initialized = true;
         return;
       }
-      
+
       AppLogger.error('Firebase initialization failed', e, stackTrace);
       // Don't rethrow in test mode - allow app to continue
       if (!_isTestMode) {
@@ -107,15 +108,15 @@ class FirebaseCoreConfig {
   /// Check if error is related to JavaScript interop issues on web platform
   static bool _isJavaScriptInteropError(dynamic error) {
     if (!kIsWeb) return false;
-    
+
     final errorString = error.toString().toLowerCase();
     return errorString.contains('javascriptobject') ||
-           errorString.contains('js interop') ||
-           errorString.contains('type \'_jsfunction\'') ||
-           errorString.contains('is not a subtype of') ||
-           errorString.contains('firebase_js') ||
-           errorString.contains('firebase-app') ||
-           errorString.contains('dart_web_workers');
+        errorString.contains('js interop') ||
+        errorString.contains('type \'_jsfunction\'') ||
+        errorString.contains('is not a subtype of') ||
+        errorString.contains('firebase_js') ||
+        errorString.contains('firebase-app') ||
+        errorString.contains('dart_web_workers');
   }
 
   /// Check if Firebase is initialized
@@ -124,12 +125,12 @@ class FirebaseCoreConfig {
   /// Check if Firebase is available for use (handles web offline mode)
   static bool get isAvailable {
     if (!_initialized) return false;
-    
+
     // For web platform, also check if Firebase web services are available
     if (kIsWeb) {
       return WebFirebaseConfig.isWebFirebaseAvailable;
     }
-    
+
     return true;
   }
 
@@ -146,14 +147,14 @@ class FirebaseCoreConfig {
         'Firebase not initialized. Call FirebaseCoreConfig.initialize() first.',
       );
     }
-    
+
     // Additional check for web platform
     if (kIsWeb && !WebFirebaseConfig.isWebFirebaseAvailable) {
       throw Exception(
         'Firebase web services are not available. App is running in offline mode.',
       );
     }
-    
+
     return Firebase.app();
   }
 

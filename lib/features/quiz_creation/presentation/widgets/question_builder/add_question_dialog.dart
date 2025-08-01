@@ -113,10 +113,15 @@ class _AddQuestionDialogState extends State<AddQuestionDialog>
         final screenWidth = constraints.maxWidth;
         final isSmallScreen = screenHeight < 700;
         final dialogWidth = (screenWidth * 0.9).clamp(320.0, 600.0);
-        final dialogHeight = (screenHeight * 0.9).clamp(400.0, screenHeight * 0.95);
-        
+        final dialogHeight = (screenHeight * 0.9).clamp(
+          400.0,
+          screenHeight * 0.95,
+        );
+
         return ScaleTransition(
-          scale: _scaleController.drive(CurveTween(curve: AppAnimations.elastic)),
+          scale: _scaleController.drive(
+            CurveTween(curve: AppAnimations.elastic),
+          ),
           child: Center(
             child: ConstrainedBox(
               constraints: BoxConstraints(
@@ -124,14 +129,18 @@ class _AddQuestionDialogState extends State<AddQuestionDialog>
                 maxHeight: dialogHeight,
               ),
               child: Dialog(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     // Header with fixed height
                     Container(
                       padding: EdgeInsets.all(
-                        isSmallScreen ? AppSpacing.spacingM : AppSpacing.spacingL,
+                        isSmallScreen
+                            ? AppSpacing.spacingM
+                            : AppSpacing.spacingL,
                       ),
                       decoration: BoxDecoration(
                         color: AppColors.vibrantPurple,
@@ -155,10 +164,22 @@ class _AddQuestionDialogState extends State<AddQuestionDialog>
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          IconButton(
-                            onPressed: () => Navigator.pop(context),
-                            icon: const Icon(Icons.close, color: AppColors.pureWhite),
-                            constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+                          Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(24),
+                              onTap: () => Navigator.pop(context),
+                              child: Container(
+                                width: 48,
+                                height: 48,
+                                alignment: Alignment.center,
+                                child: const Icon(
+                                  Icons.close,
+                                  color: AppColors.pureWhite,
+                                  size: 24,
+                                ),
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -168,7 +189,9 @@ class _AddQuestionDialogState extends State<AddQuestionDialog>
                       child: SingleChildScrollView(
                         physics: const ClampingScrollPhysics(),
                         padding: EdgeInsets.all(
-                          isSmallScreen ? AppSpacing.spacingM : AppSpacing.spacingL,
+                          isSmallScreen
+                              ? AppSpacing.spacingM
+                              : AppSpacing.spacingL,
                         ),
                         child: SlideTransition(
                           position: _slideController.drive(
@@ -242,14 +265,19 @@ class _AddQuestionDialogState extends State<AddQuestionDialog>
                                           label: 'Time (sec)',
                                           hint: '20',
                                           keyboardType: TextInputType.number,
-                                          prefixIcon: Icon(Icons.timer_outlined),
+                                          prefixIcon: Icon(
+                                            Icons.timer_outlined,
+                                          ),
                                           inputFormatters: [
-                                            FilteringTextInputFormatter.digitsOnly,
+                                            FilteringTextInputFormatter
+                                                .digitsOnly,
                                             LengthLimitingTextInputFormatter(3),
                                           ],
                                         ),
                                       ),
-                                      const SizedBox(width: AppSpacing.spacingM),
+                                      const SizedBox(
+                                        width: AppSpacing.spacingM,
+                                      ),
                                       Expanded(
                                         child: CustomTextInput(
                                           controller: _pointsController,
@@ -258,7 +286,8 @@ class _AddQuestionDialogState extends State<AddQuestionDialog>
                                           keyboardType: TextInputType.number,
                                           prefixIcon: Icon(Icons.star_outline),
                                           inputFormatters: [
-                                            FilteringTextInputFormatter.digitsOnly,
+                                            FilteringTextInputFormatter
+                                                .digitsOnly,
                                             LengthLimitingTextInputFormatter(4),
                                           ],
                                         ),
@@ -275,7 +304,9 @@ class _AddQuestionDialogState extends State<AddQuestionDialog>
                     // Footer with fixed height
                     Container(
                       padding: EdgeInsets.all(
-                        isSmallScreen ? AppSpacing.spacingM : AppSpacing.spacingL,
+                        isSmallScreen
+                            ? AppSpacing.spacingM
+                            : AppSpacing.spacingL,
                       ),
                       decoration: BoxDecoration(
                         color: AppColors.offWhite,
@@ -423,7 +454,7 @@ class _AddQuestionDialogState extends State<AddQuestionDialog>
 
   Widget _buildImageUpload() {
     final isSmallScreen = MediaQuery.of(context).size.height < 700;
-    
+
     return Container(
       padding: EdgeInsets.all(
         isSmallScreen ? AppSpacing.spacingS : AppSpacing.spacingM,
@@ -437,7 +468,7 @@ class _AddQuestionDialogState extends State<AddQuestionDialog>
         child: Row(
           children: [
             Icon(
-              Icons.image_outlined, 
+              Icons.image_outlined,
               color: AppColors.coolGray,
               size: isSmallScreen ? 20 : 24,
             ),
