@@ -66,6 +66,16 @@
 				<string>quizapp</string>
 			</array>
 		</dict>
+		<!-- Google Sign-In URL Scheme -->
+		<!-- Replace YOUR_IOS_CLIENT_ID with actual iOS Client ID from Firebase Console -->
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.googleusercontent.apps.YOUR_IOS_CLIENT_ID</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.YOUR_IOS_CLIENT_ID</string>
+			</array>
+		</dict>
 	</array>
 	<!-- Associated Domains for Universal Links -->
 	<key>com.apple.developer.associated-domains</key>

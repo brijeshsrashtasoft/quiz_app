@@ -8,6 +8,7 @@ import '../../../../shared/constants/app_spacing.dart';
 import '../../../../shared/constants/app_animations.dart';
 import '../../../../shared/widgets/navigation/app_navigation_bar.dart';
 import '../../../../shared/widgets/cards/quiz_card.dart';
+import '../../../../shared/widgets/buttons/google_signin_button.dart';
 import '../../../../core/navigation/route_constants.dart';
 import '../../../authentication/domain/entities/auth_state.dart';
 import '../../../authentication/presentation/providers/auth_providers.dart';
@@ -193,9 +194,41 @@ class _HomePageState extends ConsumerState<HomePage>
             ),
           ),
 
-          // Show Sign Up button for unauthenticated users
+          // Show authentication options for unauthenticated users
           if (user == null) ...[
             const SizedBox(height: AppSpacing.spacingL),
+            
+            // Google Sign-In Button
+            GoogleSignInButton(
+              label: 'Sign in with Google',
+              onSuccess: () {
+                // Google Sign-In handles navigation automatically
+              },
+            ),
+            
+            const SizedBox(height: AppSpacing.spacingM),
+            
+            // OR Divider
+            Row(
+              children: [
+                const Expanded(child: Divider(color: AppColors.lightGray)),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.spacingM),
+                  child: Text(
+                    'OR',
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.coolGray,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                const Expanded(child: Divider(color: AppColors.lightGray)),
+              ],
+            ),
+            
+            const SizedBox(height: AppSpacing.spacingM),
+            
+            // Traditional Sign Up Button  
             SizedBox(
               height: 48,
               child: ElevatedButton(
@@ -214,7 +247,7 @@ class _HomePageState extends ConsumerState<HomePage>
                     const Icon(Icons.person_add, size: 20),
                     const SizedBox(width: AppSpacing.spacingS),
                     Text(
-                      'Sign Up',
+                      'Sign Up with Email',
                       style: AppTextStyles.buttonText.copyWith(
                         color: AppColors.vibrantPurple,
                         fontWeight: FontWeight.w600,
