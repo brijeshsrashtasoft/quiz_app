@@ -140,7 +140,7 @@ class _GoogleSignInButtonState extends ConsumerState<GoogleSignInButton>
   @override
   Widget build(BuildContext context) {
     final height = widget.isCompact ? 44.0 : AppDimensions.buttonHeight;
-    
+
     return Semantics(
       button: true,
       enabled: !_isLoading,
@@ -163,8 +163,8 @@ class _GoogleSignInButtonState extends ConsumerState<GoogleSignInButton>
                     widget.isCompact ? 8 : AppDimensions.buttonRadius,
                   ),
                   border: Border.all(
-                    color: _isLoading 
-                        ? AppColors.lightGray 
+                    color: _isLoading
+                        ? AppColors.lightGray
                         : AppColors.lightGray.withOpacity(0.8),
                   ),
                   boxShadow: _isLoading
@@ -212,23 +212,23 @@ class _GoogleSignInButtonState extends ConsumerState<GoogleSignInButton>
                         ),
                       ),
                     ],
-                    
+
                     if (widget.showIcon && !_isLoading)
                       const SizedBox(width: AppSpacing.spacingM),
-                    
+
                     if (!widget.isCompact || !widget.showIcon)
                       Text(
                         _isLoading ? 'Signing in...' : widget.label,
-                        style: widget.isCompact 
+                        style: widget.isCompact
                             ? AppTextStyles.caption.copyWith(
-                                color: _isLoading 
-                                    ? AppColors.coolGray 
+                                color: _isLoading
+                                    ? AppColors.coolGray
                                     : AppColors.charcoal,
                                 fontWeight: FontWeight.w600,
                               )
                             : AppTextStyles.buttonText.copyWith(
-                                color: _isLoading 
-                                    ? AppColors.coolGray 
+                                color: _isLoading
+                                    ? AppColors.coolGray
                                     : AppColors.charcoal,
                               ),
                       ),
@@ -248,11 +248,7 @@ class CompactGoogleSignInButton extends StatelessWidget {
   final VoidCallback? onSuccess;
   final VoidCallback? onError;
 
-  const CompactGoogleSignInButton({
-    super.key,
-    this.onSuccess,
-    this.onError,
-  });
+  const CompactGoogleSignInButton({super.key, this.onSuccess, this.onError});
 
   @override
   Widget build(BuildContext context) {

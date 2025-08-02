@@ -9,22 +9,26 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   group('Google Sign-In Integration Tests', () {
-    
     group('Home Page Google Sign-In', () {
-      testWidgets('should show Google Sign-In button for unauthenticated users', (tester) async {
-        // Act
-        app.main();
-        await tester.pumpAndSettle();
+      testWidgets(
+        'should show Google Sign-In button for unauthenticated users',
+        (tester) async {
+          // Act
+          app.main();
+          await tester.pumpAndSettle();
 
-        // Wait for app to initialize
-        await tester.pumpAndSettle(const Duration(seconds: 3));
+          // Wait for app to initialize
+          await tester.pumpAndSettle(const Duration(seconds: 3));
 
-        // Assert - Check if Google Sign-In button is visible on home page
-        expect(find.text('Sign in with Google'), findsAtLeastNWidgets(1));
-        expect(find.byType(GoogleSignInButton), findsAtLeastNWidgets(1));
-      });
+          // Assert - Check if Google Sign-In button is visible on home page
+          expect(find.text('Sign in with Google'), findsAtLeastNWidgets(1));
+          expect(find.byType(GoogleSignInButton), findsAtLeastNWidgets(1));
+        },
+      );
 
-      testWidgets('should show loading state when Google Sign-In is tapped', (tester) async {
+      testWidgets('should show loading state when Google Sign-In is tapped', (
+        tester,
+      ) async {
         // Arrange
         app.main();
         await tester.pumpAndSettle();
@@ -33,18 +37,20 @@ void main() {
         // Act - Tap on Google Sign-In button (will fail without actual OAuth setup)
         final googleButton = find.text('Sign in with Google').first;
         expect(googleButton, findsOneWidget);
-        
+
         await tester.tap(googleButton);
         await tester.pump();
 
         // Assert - Should show loading state briefly
         expect(find.text('Signing in...'), findsAtLeastNWidgets(1));
-        
+
         // Wait for the operation to complete (will show error without real OAuth)
         await tester.pumpAndSettle(const Duration(seconds: 5));
       });
 
-      testWidgets('should show email sign-up button as alternative', (tester) async {
+      testWidgets('should show email sign-up button as alternative', (
+        tester,
+      ) async {
         // Act
         app.main();
         await tester.pumpAndSettle();
@@ -54,7 +60,9 @@ void main() {
         expect(find.text('Sign Up with Email'), findsOneWidget);
       });
 
-      testWidgets('should show OR divider between sign-in options', (tester) async {
+      testWidgets('should show OR divider between sign-in options', (
+        tester,
+      ) async {
         // Act
         app.main();
         await tester.pumpAndSettle();
@@ -66,7 +74,9 @@ void main() {
     });
 
     group('Login Page Google Sign-In', () {
-      testWidgets('should navigate to login page and show Google Sign-In', (tester) async {
+      testWidgets('should navigate to login page and show Google Sign-In', (
+        tester,
+      ) async {
         // Arrange
         app.main();
         await tester.pumpAndSettle();
@@ -114,7 +124,9 @@ void main() {
     });
 
     group('Register Page Google Sign-In', () {
-      testWidgets('should show Google Sign-In on register page', (tester) async {
+      testWidgets('should show Google Sign-In on register page', (
+        tester,
+      ) async {
         // Arrange
         app.main();
         await tester.pumpAndSettle();
@@ -131,49 +143,60 @@ void main() {
         expect(find.text('Continue with Google'), findsAtLeastNWidgets(1));
       });
 
-      testWidgets('should handle Google Sign-In error gracefully on register page', (tester) async {
-        // Arrange
-        app.main();
-        await tester.pumpAndSettle();
-        await tester.pumpAndSettle(const Duration(seconds: 3));
+      testWidgets(
+        'should handle Google Sign-In error gracefully on register page',
+        (tester) async {
+          // Arrange
+          app.main();
+          await tester.pumpAndSettle();
+          await tester.pumpAndSettle(const Duration(seconds: 3));
 
-        // Navigate to register page
-        final signUpButton = find.text('Sign Up with Email');
-        await tester.tap(signUpButton);
-        await tester.pumpAndSettle();
+          // Navigate to register page
+          final signUpButton = find.text('Sign Up with Email');
+          await tester.tap(signUpButton);
+          await tester.pumpAndSettle();
 
-        // Act - Tap Google Sign-In (will fail without proper OAuth setup)
-        final googleButton = find.text('Continue with Google').first;
-        await tester.tap(googleButton);
-        await tester.pump();
+          // Act - Tap Google Sign-In (will fail without proper OAuth setup)
+          final googleButton = find.text('Continue with Google').first;
+          await tester.tap(googleButton);
+          await tester.pump();
 
-        // Wait for error to appear
-        await tester.pumpAndSettle(const Duration(seconds: 5));
+          // Wait for error to appear
+          await tester.pumpAndSettle(const Duration(seconds: 5));
 
-        // Assert - Should show error snackbar or handle gracefully
-        // Note: Actual error depends on Firebase configuration
-        expect(find.byType(SnackBar), findsWidgets);
-      });
+          // Assert - Should show error snackbar or handle gracefully
+          // Note: Actual error depends on Firebase configuration
+          expect(find.byType(SnackBar), findsWidgets);
+        },
+      );
     });
 
     group('Navigation Flow Tests', () {
-      testWidgets('should maintain proper navigation state during Google Sign-In attempt', (tester) async {
-        // Arrange
-        app.main();
-        await tester.pumpAndSettle();
-        await tester.pumpAndSettle(const Duration(seconds: 3));
+      testWidgets(
+        'should maintain proper navigation state during Google Sign-In attempt',
+        (tester) async {
+          // Arrange
+          app.main();
+          await tester.pumpAndSettle();
+          await tester.pumpAndSettle(const Duration(seconds: 3));
 
-        // Act - Try Google Sign-In from home page
-        final googleButton = find.text('Sign in with Google').first;
-        await tester.tap(googleButton);
-        await tester.pumpAndSettle(const Duration(seconds: 5));
+          // Act - Try Google Sign-In from home page
+          final googleButton = find.text('Sign in with Google').first;
+          await tester.tap(googleButton);
+          await tester.pumpAndSettle(const Duration(seconds: 5));
 
-        // Assert - Should remain on current page after failed sign-in
-        // (since OAuth is not properly configured)
-        expect(find.text('Quiz Master'), findsAtLeastNWidgets(1)); // Home page title
-      });
+          // Assert - Should remain on current page after failed sign-in
+          // (since OAuth is not properly configured)
+          expect(
+            find.text('Quiz Master'),
+            findsAtLeastNWidgets(1),
+          ); // Home page title
+        },
+      );
 
-      testWidgets('should handle multiple Google Sign-In attempts gracefully', (tester) async {
+      testWidgets('should handle multiple Google Sign-In attempts gracefully', (
+        tester,
+      ) async {
         // Arrange
         app.main();
         await tester.pumpAndSettle();
@@ -181,11 +204,11 @@ void main() {
 
         // Act - Try multiple Google Sign-In attempts
         final googleButton = find.text('Sign in with Google').first;
-        
+
         // First attempt
         await tester.tap(googleButton);
         await tester.pumpAndSettle(const Duration(seconds: 2));
-        
+
         // Second attempt (should not crash)
         if (find.text('Sign in with Google').evaluate().isNotEmpty) {
           await tester.tap(find.text('Sign in with Google').first);
@@ -198,11 +221,13 @@ void main() {
     });
 
     group('Error Handling Tests', () {
-      testWidgets('should show appropriate error for cancelled sign-in', (tester) async {
+      testWidgets('should show appropriate error for cancelled sign-in', (
+        tester,
+      ) async {
         // Note: This test simulates user cancellation behavior
         // In a real test with mocked dependencies, we would inject a mock
         // that returns a cancellation error
-        
+
         // Arrange
         app.main();
         await tester.pumpAndSettle();
@@ -212,7 +237,7 @@ void main() {
         final googleButton = find.text('Sign in with Google').first;
         await tester.tap(googleButton);
         await tester.pump();
-        
+
         // Wait for sign-in process
         await tester.pumpAndSettle(const Duration(seconds: 5));
 
@@ -230,7 +255,7 @@ void main() {
         final googleButton = find.text('Sign in with Google').first;
         await tester.tap(googleButton);
         await tester.pump();
-        
+
         // Wait and verify app stability
         await tester.pumpAndSettle(const Duration(seconds: 3));
 
@@ -242,7 +267,9 @@ void main() {
     });
 
     group('Accessibility Tests', () {
-      testWidgets('should have proper semantics for Google Sign-In buttons', (tester) async {
+      testWidgets('should have proper semantics for Google Sign-In buttons', (
+        tester,
+      ) async {
         // Arrange
         app.main();
         await tester.pumpAndSettle();
@@ -290,7 +317,9 @@ void main() {
         expect(find.text('Sign in with Google'), findsAtLeastNWidgets(1));
       });
 
-      testWidgets('should handle rapid button presses without memory leaks', (tester) async {
+      testWidgets('should handle rapid button presses without memory leaks', (
+        tester,
+      ) async {
         // Arrange
         app.main();
         await tester.pumpAndSettle();

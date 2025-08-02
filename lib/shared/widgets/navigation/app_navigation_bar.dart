@@ -10,6 +10,7 @@ import '../../constants/app_dimensions.dart';
 import '../../../core/navigation/route_constants.dart';
 import '../../../features/authentication/presentation/providers/auth_providers.dart';
 import '../../../features/authentication/domain/entities/auth_state.dart';
+import '../../../features/notifications/presentation/providers/notification_providers.dart';
 
 /// App navigation bar with dynamic state based on authentication
 /// Following Material Design 3 navigation principles with Kahoot styling
@@ -105,6 +106,14 @@ class AppNavigationBar extends ConsumerWidget {
         route: RouteConstants.leaderboard,
         isActive: _isActiveRoute(RouteConstants.leaderboard),
         onTap: () => _handleNavigation(context, RouteConstants.leaderboard),
+      ),
+      _NavigationItem(
+        icon: Icons.notifications_outlined,
+        activeIcon: Icons.notifications,
+        label: 'Notifications',
+        route: RouteConstants.notifications,
+        isActive: _isActiveRoute(RouteConstants.notifications),
+        onTap: () => _handleNavigation(context, RouteConstants.notifications),
       ),
       _NavigationItem(
         icon: Icons.person_outlined,
@@ -360,11 +369,64 @@ class AppTopBar extends ConsumerWidget implements PreferredSizeWidget {
             )
           : null,
       actions: [
-        // Notification button
-        IconButton(
-          icon: const Icon(Icons.notifications_outlined),
-          onPressed: () {
-            // TODO: Implement notifications
+        // Notification button with badge
+        Consumer(
+          builder: (context, ref, _) {
+            return ref.watch(unreadCountProvider).when(
+              loading: () => IconButton(
+                icon: const Icon(Icons.notifications_outlined),
+                onPressed: () => context.go(RouteConstants.notifications),
+                tooltip: 'Notifications',
+              ),
+              error: (_, __) => IconButton(
+                icon: const Icon(Icons.notifications_outlined),
+                onPressed: () => context.go(RouteConstants.notifications),
+                tooltip: 'Notifications',
+              ),
+              data: (result) => result.when(
+                success: (unreadCount) => Stack(
+                  children: [
+                    IconButton(
+                      icon: Icon(unreadCount > 0 
+                          ? Icons.notifications 
+                          : Icons.notifications_outlined),
+                      onPressed: () => context.go(RouteConstants.notifications),
+                      tooltip: 'Notifications',
+                    ),
+                    if (unreadCount > 0)
+                      Positioned(
+                        right: 8,
+                        top: 8,
+                        child: Container(
+                          padding: const EdgeInsets.all(2),
+                          decoration: BoxDecoration(
+                            color: AppColors.coralRed,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          constraints: const BoxConstraints(
+                            minWidth: 16,
+                            minHeight: 16,
+                          ),
+                          child: Text(
+                            unreadCount > 99 ? '99+' : unreadCount.toString(),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                failure: (_) => IconButton(
+                  icon: const Icon(Icons.notifications_outlined),
+                  onPressed: () => context.go(RouteConstants.notifications),
+                  tooltip: 'Notifications',
+                ),
+              ),
+            );
           },
         ),
 
@@ -501,6 +563,16 @@ class AppNavigationDrawer extends ConsumerWidget {
                   onTap: () => _handleDrawerNavigation(
                     context,
                     RouteConstants.leaderboard,
+                  ),
+                ),
+                _DrawerItem(
+                  icon: Icons.notifications_outlined,
+                  title: 'Notifications',
+                  route: RouteConstants.notifications,
+                  isActive: _isActiveRoute(RouteConstants.notifications),
+                  onTap: () => _handleDrawerNavigation(
+                    context,
+                    RouteConstants.notifications,
                   ),
                 ),
 

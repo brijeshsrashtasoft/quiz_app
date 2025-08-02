@@ -22,6 +22,7 @@ import '../../features/ui_showcase/presentation/pages/all_components_demo_page.d
 import '../../shared/widgets/error/error_page_widget.dart';
 import '../../shared/widgets/deep_link/game_join_widget.dart';
 import '../../features/splash/presentation/pages/splash_redirect_page.dart';
+import '../../features/notifications/presentation/pages/notifications_page.dart';
 
 /// Global router configuration for the entire app
 /// Implements type-safe navigation with route guards and transitions
@@ -421,6 +422,13 @@ class AppRouter {
             builder: (context, state) => const AllComponentsDemoPage(),
           ),
         ],
+      ),
+
+      // Notifications routes
+      GoRoute(
+        path: RouteConstants.notifications,
+        name: 'notifications',
+        builder: (context, state) => const NotificationsPage(),
       ),
 
       // Settings and utility routes

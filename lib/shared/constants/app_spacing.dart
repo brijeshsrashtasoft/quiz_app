@@ -145,4 +145,11 @@ class AppSpacing {
   static const double verticalSpacingXXL = spacingXXL;
 
   static const double allS = spacingS;
+
+  // Additional aliases for consistency
+  static const double xs = spacingXS;
+  static const double sm = spacingS;
+  static const double md = spacingM;
+  static const double lg = spacingL;
+  static const double xl = spacingXL;
 }

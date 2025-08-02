@@ -1,7 +1,6 @@
 import 'dart:async';
-import 'package:dartz/dartz.dart';
-import '../errors/failures.dart';
+import '../utils/result.dart';
 
 abstract class StreamUseCase<Type, Params> {
-  Stream<Either<Failure, Type>> call(Params params);
+  Stream<Result<Type>> call(Params params);
 }

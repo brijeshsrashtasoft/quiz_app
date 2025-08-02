@@ -51,6 +51,9 @@ class RouteConstants {
   static const String uiShowcaseLoading = '/ui-showcase/loading';
   static const String uiShowcaseScores = '/ui-showcase/scores';
 
+  // Notifications
+  static const String notifications = '/notifications';
+
   // Settings and preferences
   static const String settings = '/settings';
   static const String about = '/about';

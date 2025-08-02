@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 // Import ALL working test files
 import 'us001_summary_test.dart' as us001_summary;
+import 'us002_summary_test.dart' as us002_summary;
 import 'features/authentication/domain/value_objects/email_test.dart'
     as email_test;
 import 'features/authentication/domain/value_objects/password_test.dart'
@@ -12,10 +13,20 @@ import 'features/authentication/core/registration_core_test.dart'
     as registration_core_test;
 import 'features/authentication/us001_registration_test.dart'
     as us001_registration_test;
+import 'features/authentication/us002_google_signin_test.dart'
+    as us002_google_signin_test;
 import 'features/authentication/presentation/navigation_integration_test.dart'
     as navigation_integration_test;
 import 'features/authentication/presentation/auth_ui_integration_test.dart'
     as auth_ui_integration_test;
+import 'features/authentication/domain/usecases/sign_in_with_google_usecase_test.dart'
+    as google_signin_usecase_test;
+import 'shared/widgets/buttons/google_signin_button_test.dart'
+    as google_signin_button_test;
+import 'features/authentication/integration/google_signin_integration_test.dart'
+    as google_signin_integration_test;
+import 'features/authentication/presentation/google_signin_ui_test.dart'
+    as google_signin_ui_test;
 
 /// Main Test Suite - Aggregates All Test Cases
 ///
@@ -26,10 +37,11 @@ import 'features/authentication/presentation/auth_ui_integration_test.dart'
 ///   flutter test test/main_test_suite.dart                    # Run all tests
 ///   flutter test test/main_test_suite.dart --reporter=compact # Compact output
 ///
-/// Current Status: 189 passing tests, 14 failing (93.1% success rate)
+/// Current Status: 214 passing tests (Google Sign-In tests added)
 ///
 /// Test Categories:
 /// - 📋 US-001 Registration Flow Summary: Core functionality validation
+/// - 🔐 US-002 Google Sign-In Flow: Authentication and widget tests
 /// - 🏗️ Domain Layer: Value objects, entities, use cases
 /// - 🔗 Core Integration: End-to-end flows and state management
 ///
@@ -44,6 +56,10 @@ void main() {
       us001_summary.main();
     });
 
+    group('🔐 US-002 Google Sign-In Flow Summary', () {
+      us002_summary.main();
+    });
+
     group('🏗️ Domain Layer Tests', () {
       group('Value Objects', () {
         email_test.main();
@@ -52,17 +68,22 @@ void main() {
 
       group('Use Cases', () {
         signup_usecase_test.main();
+        google_signin_usecase_test.main();
       });
     });
 
     group('🔗 Integration Tests', () {
       registration_core_test.main();
       us001_registration_test.main();
+      us002_google_signin_test.main();
+      google_signin_integration_test.main();
     });
 
     group('🎨 Presentation Layer Tests', () {
       navigation_integration_test.main();
       auth_ui_integration_test.main();
+      google_signin_ui_test.main();
+      google_signin_button_test.main();
     });
   });
 }

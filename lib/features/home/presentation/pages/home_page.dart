@@ -197,7 +197,7 @@ class _HomePageState extends ConsumerState<HomePage>
           // Show authentication options for unauthenticated users
           if (user == null) ...[
             const SizedBox(height: AppSpacing.spacingL),
-            
+
             // Google Sign-In Button
             GoogleSignInButton(
               label: 'Sign in with Google',
@@ -205,15 +205,17 @@ class _HomePageState extends ConsumerState<HomePage>
                 // Google Sign-In handles navigation automatically
               },
             ),
-            
+
             const SizedBox(height: AppSpacing.spacingM),
-            
+
             // OR Divider
             Row(
               children: [
                 const Expanded(child: Divider(color: AppColors.lightGray)),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.spacingM),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.spacingM,
+                  ),
                   child: Text(
                     'OR',
                     style: AppTextStyles.caption.copyWith(
@@ -225,10 +227,10 @@ class _HomePageState extends ConsumerState<HomePage>
                 const Expanded(child: Divider(color: AppColors.lightGray)),
               ],
             ),
-            
+
             const SizedBox(height: AppSpacing.spacingM),
-            
-            // Traditional Sign Up Button  
+
+            // Traditional Sign Up Button
             SizedBox(
               height: 48,
               child: ElevatedButton(

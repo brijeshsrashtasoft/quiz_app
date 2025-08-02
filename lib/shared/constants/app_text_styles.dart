@@ -382,4 +382,5 @@ class AppTextStyles {
   static const TextStyle h4 = cardTitle;
   static const TextStyle body = bodyText;
   static const TextStyle sectionSubheader = cardTitle;
+  static const TextStyle titleMedium = cardTitle;
 }

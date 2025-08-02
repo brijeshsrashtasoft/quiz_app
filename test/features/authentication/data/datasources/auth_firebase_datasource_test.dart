@@ -10,10 +10,10 @@ import 'package:quiz_app/core/errors/exceptions.dart';
 import 'auth_firebase_datasource_test.mocks.dart';
 
 @GenerateMocks([
-  FirebaseAuth, 
-  User, 
-  UserCredential, 
-  GoogleSignIn, 
+  FirebaseAuth,
+  User,
+  UserCredential,
+  GoogleSignIn,
   GoogleSignInAccount,
   GoogleSignInAuthentication,
 ])
@@ -34,46 +34,52 @@ void main() {
       mockUserCredential = MockUserCredential();
       mockGoogleSignInAccount = MockGoogleSignInAccount();
       mockGoogleSignInAuthentication = MockGoogleSignInAuthentication();
-      
+
       dataSource = AuthFirebaseDataSource();
     });
 
     group('signInWithGoogle', () {
-      test('should return UserModel when Google sign-in is successful', () async {
-        // Arrange
-        const email = 'test@gmail.com';
-        const displayName = 'Test User';
-        const uid = 'test_uid';
-        const photoUrl = 'https://example.com/photo.jpg';
-        const accessToken = 'mock_access_token';
-        const idToken = 'mock_id_token';
+      test(
+        'should return UserModel when Google sign-in is successful',
+        () async {
+          // Arrange
+          const email = 'test@gmail.com';
+          const displayName = 'Test User';
+          const uid = 'test_uid';
+          const photoUrl = 'https://example.com/photo.jpg';
+          const accessToken = 'mock_access_token';
+          const idToken = 'mock_id_token';
 
-        when(mockGoogleSignInAccount.email).thenReturn(email);
-        when(mockGoogleSignInAccount.displayName).thenReturn(displayName);
-        when(mockGoogleSignInAccount.photoUrl).thenReturn(photoUrl);
-        when(mockGoogleSignInAccount.authentication)
-            .thenAnswer((_) async => mockGoogleSignInAuthentication);
-        
-        when(mockGoogleSignInAuthentication.accessToken).thenReturn(accessToken);
-        when(mockGoogleSignInAuthentication.idToken).thenReturn(idToken);
-        
-        when(mockUser.uid).thenReturn(uid);
-        when(mockUser.email).thenReturn(email);
-        when(mockUser.displayName).thenReturn(displayName);
-        when(mockUser.photoURL).thenReturn(photoUrl);
-        when(mockUser.metadata).thenReturn(MockUserMetadata());
-        
-        when(mockUserCredential.user).thenReturn(mockUser);
+          when(mockGoogleSignInAccount.email).thenReturn(email);
+          when(mockGoogleSignInAccount.displayName).thenReturn(displayName);
+          when(mockGoogleSignInAccount.photoUrl).thenReturn(photoUrl);
+          when(
+            mockGoogleSignInAccount.authentication,
+          ).thenAnswer((_) async => mockGoogleSignInAuthentication);
 
-        // Act
-        final result = await dataSource.signInWithGoogle();
+          when(
+            mockGoogleSignInAuthentication.accessToken,
+          ).thenReturn(accessToken);
+          when(mockGoogleSignInAuthentication.idToken).thenReturn(idToken);
 
-        // Assert
-        expect(result.isSuccess, true);
-        final userModel = result.dataOrNull;
-        expect(userModel?.email, email);
-        expect(userModel?.name, displayName);
-      });
+          when(mockUser.uid).thenReturn(uid);
+          when(mockUser.email).thenReturn(email);
+          when(mockUser.displayName).thenReturn(displayName);
+          when(mockUser.photoURL).thenReturn(photoUrl);
+          when(mockUser.metadata).thenReturn(MockUserMetadata());
+
+          when(mockUserCredential.user).thenReturn(mockUser);
+
+          // Act
+          final result = await dataSource.signInWithGoogle();
+
+          // Assert
+          expect(result.isSuccess, true);
+          final userModel = result.dataOrNull;
+          expect(userModel?.email, email);
+          expect(userModel?.name, displayName);
+        },
+      );
 
       test('should return failure when user cancels Google sign-in', () async {
         // Arrange - Mock Google sign-in cancellation
@@ -87,56 +93,80 @@ void main() {
         expect(result.failureOrNull?.message, contains('cancelled'));
       });
 
-      test('should return failure when GoogleSignInAccount authentication fails', () async {
-        // Arrange
-        when(mockGoogleSignIn.signIn()).thenAnswer((_) async => mockGoogleSignInAccount);
-        when(mockGoogleSignInAccount.authentication)
-            .thenThrow(Exception('Authentication failed'));
+      test(
+        'should return failure when GoogleSignInAccount authentication fails',
+        () async {
+          // Arrange
+          when(
+            mockGoogleSignIn.signIn(),
+          ).thenAnswer((_) async => mockGoogleSignInAccount);
+          when(
+            mockGoogleSignInAccount.authentication,
+          ).thenThrow(Exception('Authentication failed'));
 
-        // Act
-        final result = await dataSource.signInWithGoogle();
+          // Act
+          final result = await dataSource.signInWithGoogle();
 
-        // Assert
-        expect(result.isFailure, true);
-        expect(result.failureOrNull?.message, contains('Google sign in'));
-      });
+          // Assert
+          expect(result.isFailure, true);
+          expect(result.failureOrNull?.message, contains('Google sign in'));
+        },
+      );
 
-      test('should return failure when Firebase Auth credential sign-in fails', () async {
-        // Arrange
-        const accessToken = 'mock_access_token';
-        const idToken = 'mock_id_token';
+      test(
+        'should return failure when Firebase Auth credential sign-in fails',
+        () async {
+          // Arrange
+          const accessToken = 'mock_access_token';
+          const idToken = 'mock_id_token';
 
-        when(mockGoogleSignIn.signIn()).thenAnswer((_) async => mockGoogleSignInAccount);
-        when(mockGoogleSignInAccount.authentication)
-            .thenAnswer((_) async => mockGoogleSignInAuthentication);
-        when(mockGoogleSignInAuthentication.accessToken).thenReturn(accessToken);
-        when(mockGoogleSignInAuthentication.idToken).thenReturn(idToken);
-        
-        when(mockFirebaseAuth.signInWithCredential(any))
-            .thenThrow(FirebaseAuthException(code: 'network-request-failed'));
+          when(
+            mockGoogleSignIn.signIn(),
+          ).thenAnswer((_) async => mockGoogleSignInAccount);
+          when(
+            mockGoogleSignInAccount.authentication,
+          ).thenAnswer((_) async => mockGoogleSignInAuthentication);
+          when(
+            mockGoogleSignInAuthentication.accessToken,
+          ).thenReturn(accessToken);
+          when(mockGoogleSignInAuthentication.idToken).thenReturn(idToken);
 
-        // Act
-        final result = await dataSource.signInWithGoogle();
+          when(
+            mockFirebaseAuth.signInWithCredential(any),
+          ).thenThrow(FirebaseAuthException(code: 'network-request-failed'));
 
-        // Assert
-        expect(result.isFailure, true);
-        expect(result.failureOrNull?.message, contains('network-request-failed'));
-      });
+          // Act
+          final result = await dataSource.signInWithGoogle();
+
+          // Assert
+          expect(result.isFailure, true);
+          expect(
+            result.failureOrNull?.message,
+            contains('network-request-failed'),
+          );
+        },
+      );
 
       test('should return failure when Firebase returns null user', () async {
         // Arrange
         const accessToken = 'mock_access_token';
         const idToken = 'mock_id_token';
 
-        when(mockGoogleSignIn.signIn()).thenAnswer((_) async => mockGoogleSignInAccount);
-        when(mockGoogleSignInAccount.authentication)
-            .thenAnswer((_) async => mockGoogleSignInAuthentication);
-        when(mockGoogleSignInAuthentication.accessToken).thenReturn(accessToken);
+        when(
+          mockGoogleSignIn.signIn(),
+        ).thenAnswer((_) async => mockGoogleSignInAccount);
+        when(
+          mockGoogleSignInAccount.authentication,
+        ).thenAnswer((_) async => mockGoogleSignInAuthentication);
+        when(
+          mockGoogleSignInAuthentication.accessToken,
+        ).thenReturn(accessToken);
         when(mockGoogleSignInAuthentication.idToken).thenReturn(idToken);
-        
+
         when(mockUserCredential.user).thenReturn(null);
-        when(mockFirebaseAuth.signInWithCredential(any))
-            .thenAnswer((_) async => mockUserCredential);
+        when(
+          mockFirebaseAuth.signInWithCredential(any),
+        ).thenAnswer((_) async => mockUserCredential);
 
         // Act
         final result = await dataSource.signInWithGoogle();
@@ -148,8 +178,7 @@ void main() {
 
       test('should handle network errors gracefully', () async {
         // Arrange
-        when(mockGoogleSignIn.signIn())
-            .thenThrow(Exception('Network error'));
+        when(mockGoogleSignIn.signIn()).thenThrow(Exception('Network error'));
 
         // Act
         final result = await dataSource.signInWithGoogle();
@@ -161,17 +190,21 @@ void main() {
 
       test('should handle account disabled errors', () async {
         // Arrange
-        when(mockGoogleSignIn.signIn()).thenAnswer((_) async => mockGoogleSignInAccount);
-        when(mockGoogleSignInAccount.authentication)
-            .thenAnswer((_) async => mockGoogleSignInAuthentication);
+        when(
+          mockGoogleSignIn.signIn(),
+        ).thenAnswer((_) async => mockGoogleSignInAccount);
+        when(
+          mockGoogleSignInAccount.authentication,
+        ).thenAnswer((_) async => mockGoogleSignInAuthentication);
         when(mockGoogleSignInAuthentication.accessToken).thenReturn('token');
         when(mockGoogleSignInAuthentication.idToken).thenReturn('id_token');
-        
-        when(mockFirebaseAuth.signInWithCredential(any))
-            .thenThrow(FirebaseAuthException(
-              code: 'user-disabled',
-              message: 'Account has been disabled',
-            ));
+
+        when(mockFirebaseAuth.signInWithCredential(any)).thenThrow(
+          FirebaseAuthException(
+            code: 'user-disabled',
+            message: 'Account has been disabled',
+          ),
+        );
 
         // Act
         final result = await dataSource.signInWithGoogle();
@@ -183,20 +216,27 @@ void main() {
     });
 
     group('signOut with Google', () {
-      test('should sign out from both Google and Firebase when Google user exists', () async {
-        // Arrange
-        when(mockGoogleSignIn.currentUser).thenReturn(mockGoogleSignInAccount);
-        when(mockGoogleSignIn.signOut()).thenAnswer((_) async => mockGoogleSignInAccount);
-        when(mockFirebaseAuth.signOut()).thenAnswer((_) async {});
+      test(
+        'should sign out from both Google and Firebase when Google user exists',
+        () async {
+          // Arrange
+          when(
+            mockGoogleSignIn.currentUser,
+          ).thenReturn(mockGoogleSignInAccount);
+          when(
+            mockGoogleSignIn.signOut(),
+          ).thenAnswer((_) async => mockGoogleSignInAccount);
+          when(mockFirebaseAuth.signOut()).thenAnswer((_) async {});
 
-        // Act
-        final result = await dataSource.signOut();
+          // Act
+          final result = await dataSource.signOut();
 
-        // Assert
-        expect(result.isSuccess, true);
-        verify(mockGoogleSignIn.signOut()).called(1);
-        verify(mockFirebaseAuth.signOut()).called(1);
-      });
+          // Assert
+          expect(result.isSuccess, true);
+          verify(mockGoogleSignIn.signOut()).called(1);
+          verify(mockFirebaseAuth.signOut()).called(1);
+        },
+      );
 
       test('should only sign out from Firebase when no Google user', () async {
         // Arrange
@@ -215,7 +255,9 @@ void main() {
       test('should handle Google sign-out errors gracefully', () async {
         // Arrange
         when(mockGoogleSignIn.currentUser).thenReturn(mockGoogleSignInAccount);
-        when(mockGoogleSignIn.signOut()).thenThrow(Exception('Google sign-out failed'));
+        when(
+          mockGoogleSignIn.signOut(),
+        ).thenThrow(Exception('Google sign-out failed'));
         when(mockFirebaseAuth.signOut()).thenAnswer((_) async {});
 
         // Act
@@ -233,7 +275,7 @@ void main() {
 class MockUserMetadata extends Mock implements UserMetadata {
   @override
   DateTime? get creationTime => DateTime.now();
-  
+
   @override
   DateTime? get lastSignInTime => DateTime.now();
 }

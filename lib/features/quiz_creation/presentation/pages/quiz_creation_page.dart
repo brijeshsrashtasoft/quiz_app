@@ -133,13 +133,15 @@ class _QuizCreationPageState extends ConsumerState<QuizCreationPage> {
                       child: ConstrainedBox(
                         constraints: BoxConstraints(
                           maxWidth: isDesktop ? 800 : double.infinity,
-                          minHeight: constraints.maxHeight - (isDesktop
-                              ? AppSpacing.spacingXXL * 2
-                              : isTablet
-                              ? AppSpacing.spacingXL * 2
-                              : isSmallScreen
-                              ? AppSpacing.spacingM * 2
-                              : AppSpacing.spacingL * 2),
+                          minHeight:
+                              constraints.maxHeight -
+                              (isDesktop
+                                  ? AppSpacing.spacingXXL * 2
+                                  : isTablet
+                                  ? AppSpacing.spacingXL * 2
+                                  : isSmallScreen
+                                  ? AppSpacing.spacingM * 2
+                                  : AppSpacing.spacingL * 2),
                         ),
                         child: _buildStepContent(),
                       ),
@@ -224,7 +226,7 @@ class _QuizCreationPageState extends ConsumerState<QuizCreationPage> {
           default:
             content = const SizedBox.shrink();
         }
-        
+
         return ConstrainedBox(
           constraints: BoxConstraints(
             minWidth: constraints.maxWidth,

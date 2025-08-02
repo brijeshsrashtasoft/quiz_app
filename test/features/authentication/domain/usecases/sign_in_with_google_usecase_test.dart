@@ -22,74 +22,90 @@ void main() {
     });
 
     group('call', () {
-      const testUser = UserEntity(
+      final testUser = UserEntity(
         id: 'test_id',
         name: 'John Doe',
         email: 'john.doe@gmail.com',
-        createdAt: null,
+        createdAt: DateTime.now(),
         profileImageUrl: 'https://example.com/photo.jpg',
       );
 
-      test('should return UserEntity when Google sign-in is successful', () async {
-        // Arrange
-        when(mockAuthRepository.signInWithGoogle())
-            .thenAnswer((_) async => const Result.success(testUser));
+      test(
+        'should return UserEntity when Google sign-in is successful',
+        () async {
+          // Arrange
+          when(
+            mockAuthRepository.signInWithGoogle(),
+          ).thenAnswer((_) async => Result.success(testUser));
 
-        // Act
-        final result = await useCase(NoParams());
+          // Act
+          final result = await useCase(NoParams());
 
-        // Assert
-        expect(result.isSuccess, true);
-        expect(result.dataOrNull, testUser);
-        verify(mockAuthRepository.signInWithGoogle()).called(1);
-      });
+          // Assert
+          expect(result.isSuccess, true);
+          expect(result.dataOrNull, testUser);
+          verify(mockAuthRepository.signInWithGoogle()).called(1);
+        },
+      );
 
-      test('should return failure when repository returns auth failure', () async {
-        // Arrange
-        const failure = Failure.authFailure(
-          message: 'Google sign-in failed',
-          code: 'google_signin_error',
-        );
-        when(mockAuthRepository.signInWithGoogle())
-            .thenAnswer((_) async => const Result.failure(failure));
+      test(
+        'should return failure when repository returns auth failure',
+        () async {
+          // Arrange
+          const failure = Failure.authFailure(
+            message: 'Google sign-in failed',
+            code: 'google_signin_error',
+          );
+          when(
+            mockAuthRepository.signInWithGoogle(),
+          ).thenAnswer((_) async => const Result.failure(failure));
 
-        // Act
-        final result = await useCase(NoParams());
+          // Act
+          final result = await useCase(NoParams());
 
-        // Assert
-        expect(result.isFailure, true);
-        expect(result.failureOrNull, failure);
-        verify(mockAuthRepository.signInWithGoogle()).called(1);
-      });
+          // Assert
+          expect(result.isFailure, true);
+          expect(result.failureOrNull, failure);
+          verify(mockAuthRepository.signInWithGoogle()).called(1);
+        },
+      );
 
-      test('should return failure when repository returns network failure', () async {
-        // Arrange
-        const failure = Failure.networkFailure(
-          message: 'No internet connection',
-        );
-        when(mockAuthRepository.signInWithGoogle())
-            .thenAnswer((_) async => const Result.failure(failure));
+      test(
+        'should return failure when repository returns network failure',
+        () async {
+          // Arrange
+          const failure = Failure.networkFailure(
+            message: 'No internet connection',
+          );
+          when(
+            mockAuthRepository.signInWithGoogle(),
+          ).thenAnswer((_) async => const Result.failure(failure));
 
-        // Act
-        final result = await useCase(NoParams());
+          // Act
+          final result = await useCase(NoParams());
 
-        // Assert
-        expect(result.isFailure, true);
-        expect(result.failureOrNull, failure);
-        verify(mockAuthRepository.signInWithGoogle()).called(1);
-      });
+          // Assert
+          expect(result.isFailure, true);
+          expect(result.failureOrNull, failure);
+          verify(mockAuthRepository.signInWithGoogle()).called(1);
+        },
+      );
 
       test('should return failure when repository throws exception', () async {
         // Arrange
-        when(mockAuthRepository.signInWithGoogle())
-            .thenThrow(Exception('Unexpected error'));
+        when(
+          mockAuthRepository.signInWithGoogle(),
+        ).thenThrow(Exception('Unexpected error'));
 
         // Act
         final result = await useCase(NoParams());
 
         // Assert
         expect(result.isFailure, true);
-        expect(result.failureOrNull?.message, contains('Google sign in failed'));
+        expect(
+          result.failureOrNull?.message,
+          contains('Google sign in failed'),
+        );
         verify(mockAuthRepository.signInWithGoogle()).called(1);
       });
 
@@ -99,8 +115,9 @@ void main() {
           message: 'Sign in cancelled',
           code: 'google_signin_cancelled',
         );
-        when(mockAuthRepository.signInWithGoogle())
-            .thenAnswer((_) async => const Result.failure(failure));
+        when(
+          mockAuthRepository.signInWithGoogle(),
+        ).thenAnswer((_) async => const Result.failure(failure));
 
         // Act
         final result = await useCase(NoParams());
@@ -117,8 +134,9 @@ void main() {
           message: 'Account has been disabled',
           code: 'user-disabled',
         );
-        when(mockAuthRepository.signInWithGoogle())
-            .thenAnswer((_) async => const Result.failure(failure));
+        when(
+          mockAuthRepository.signInWithGoogle(),
+        ).thenAnswer((_) async => const Result.failure(failure));
 
         // Act
         final result = await useCase(NoParams());
@@ -135,8 +153,9 @@ void main() {
           message: 'Email already associated with another account',
           code: 'email-already-in-use',
         );
-        when(mockAuthRepository.signInWithGoogle())
-            .thenAnswer((_) async => const Result.failure(failure));
+        when(
+          mockAuthRepository.signInWithGoogle(),
+        ).thenAnswer((_) async => const Result.failure(failure));
 
         // Act
         final result = await useCase(NoParams());
@@ -149,8 +168,9 @@ void main() {
 
       test('should measure performance and log timing', () async {
         // Arrange
-        when(mockAuthRepository.signInWithGoogle())
-            .thenAnswer((_) async => const Result.success(testUser));
+        when(
+          mockAuthRepository.signInWithGoogle(),
+        ).thenAnswer((_) async => Result.success(testUser));
 
         // Act
         final stopwatch = Stopwatch()..start();
@@ -165,14 +185,12 @@ void main() {
 
       test('should handle multiple concurrent calls', () async {
         // Arrange
-        when(mockAuthRepository.signInWithGoogle())
-            .thenAnswer((_) async => const Result.success(testUser));
+        when(
+          mockAuthRepository.signInWithGoogle(),
+        ).thenAnswer((_) async => Result.success(testUser));
 
         // Act
-        final futures = List.generate(
-          3,
-          (_) => useCase(NoParams()),
-        );
+        final futures = List.generate(3, (_) => useCase(NoParams()));
         final results = await Future.wait(futures);
 
         // Assert
