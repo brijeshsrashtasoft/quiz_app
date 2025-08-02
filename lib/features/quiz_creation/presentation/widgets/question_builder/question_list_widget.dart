@@ -8,6 +8,7 @@ import '../../../../../shared/widgets/buttons/primary_button.dart';
 import 'question_card_widget.dart';
 import 'add_question_dialog.dart';
 import '../../providers/quiz_creation_provider.dart';
+import '../../../domain/entities/question_entities.dart';
 
 /// Widget to display and manage list of questions with drag-and-drop
 class QuestionListWidget extends ConsumerStatefulWidget {
@@ -20,7 +21,6 @@ class QuestionListWidget extends ConsumerStatefulWidget {
 class _QuestionListWidgetState extends ConsumerState<QuestionListWidget>
     with TickerProviderStateMixin {
   late final AnimationController _listAnimationController;
-  final List<Map<String, dynamic>> _questions = [];
 
   @override
   void initState() {
@@ -30,26 +30,6 @@ class _QuestionListWidgetState extends ConsumerState<QuestionListWidget>
       vsync: this,
     );
     _listAnimationController.forward();
-
-    // Add sample questions for demo
-    _questions.addAll([
-      {
-        'question': 'What is the capital of France?',
-        'options': ['London', 'Berlin', 'Paris', 'Madrid'],
-        'correctAnswer': 2,
-        'timeLimit': 20,
-        'points': 100,
-        'type': 'multiple_choice',
-      },
-      {
-        'question': 'The Earth is flat.',
-        'options': ['True', 'False'],
-        'correctAnswer': 1,
-        'timeLimit': 10,
-        'points': 50,
-        'type': 'true_false',
-      },
-    ]);
   }
 
   @override
@@ -63,25 +43,88 @@ class _QuestionListWidgetState extends ConsumerState<QuestionListWidget>
       context: context,
       barrierDismissible: false,
       builder: (context) => AddQuestionDialog(
-        onQuestionAdded: (question) {
-          setState(() {
-            _questions.add(question);
-          });
+        onQuestionAdded: (questionData) {
+          // Convert Map to Question entity
+          final question = questionData['type'] == 'multiple_choice'
+              ? Question.multipleChoice(
+                  id: DateTime.now().millisecondsSinceEpoch.toString(),
+                  question: questionData['question'],
+                  options: List<String>.from(questionData['options']),
+                  correctAnswer: questionData['correctAnswer'],
+                  timeLimit: questionData['timeLimit'],
+                  points: questionData['points'],
+                )
+              : Question.trueFalse(
+                  id: DateTime.now().millisecondsSinceEpoch.toString(),
+                  question: questionData['question'],
+                  correctAnswer: questionData['correctAnswer'] == 0,
+                  timeLimit: questionData['timeLimit'],
+                  points: questionData['points'],
+                );
+          
+          ref.read(quizCreationProvider.notifier).addQuestion(question);
         },
       ),
     );
   }
 
   void _editQuestion(int index) {
+    final questions = ref.read(quizCreationProvider).questions;
+    if (index < 0 || index >= questions.length) return;
+    
+    final existingQuestion = questions[index];
+    
+    // Convert Question entity to Map format for dialog
+    final questionData = existingQuestion.when(
+      multipleChoice: (id, question, options, correctAnswer, timeLimit, points, imageUrl, explanation) => {
+        'question': question,
+        'options': options,
+        'correctAnswer': correctAnswer,
+        'timeLimit': timeLimit,
+        'points': points,
+        'type': 'multiple_choice',
+      },
+      trueFalse: (id, question, correctAnswer, timeLimit, points, imageUrl, explanation) => {
+        'question': question,
+        'options': ['True', 'False'],
+        'correctAnswer': correctAnswer ? 0 : 1,
+        'timeLimit': timeLimit,
+        'points': points,
+        'type': 'true_false',
+      },
+    );
+    
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => AddQuestionDialog(
-        existingQuestion: _questions[index],
-        onQuestionAdded: (question) {
-          setState(() {
-            _questions[index] = question;
-          });
+        existingQuestion: questionData,
+        onQuestionAdded: (updatedQuestionData) {
+          // Convert Map to Question entity
+          final question = updatedQuestionData['type'] == 'multiple_choice'
+              ? Question.multipleChoice(
+                  id: existingQuestion.when(
+                    multipleChoice: (id, _, __, ___, ____, _____, ______, _______) => id,
+                    trueFalse: (id, _, __, ___, ____, _____, ______) => id,
+                  ),
+                  question: updatedQuestionData['question'],
+                  options: List<String>.from(updatedQuestionData['options']),
+                  correctAnswer: updatedQuestionData['correctAnswer'],
+                  timeLimit: updatedQuestionData['timeLimit'],
+                  points: updatedQuestionData['points'],
+                )
+              : Question.trueFalse(
+                  id: existingQuestion.when(
+                    multipleChoice: (id, _, __, ___, ____, _____, ______, _______) => id,
+                    trueFalse: (id, _, __, ___, ____, _____, ______) => id,
+                  ),
+                  question: updatedQuestionData['question'],
+                  correctAnswer: updatedQuestionData['correctAnswer'] == 0,
+                  timeLimit: updatedQuestionData['timeLimit'],
+                  points: updatedQuestionData['points'],
+                );
+          
+          ref.read(quizCreationProvider.notifier).updateQuestion(index, question);
         },
       ),
     );
@@ -131,9 +174,7 @@ class _QuestionListWidgetState extends ConsumerState<QuestionListWidget>
                   Flexible(
                     child: PrimaryButton(
                       onPressed: () {
-                        setState(() {
-                          _questions.removeAt(index);
-                        });
+                        ref.read(quizCreationProvider.notifier).removeQuestion(index);
                         Navigator.pop(context);
                       },
                       text: 'Delete',
@@ -156,6 +197,9 @@ class _QuestionListWidgetState extends ConsumerState<QuestionListWidget>
     final availableHeight = isSmallScreen
         ? screenHeight * 0.5
         : screenHeight * 0.6;
+
+    final state = ref.watch(quizCreationProvider);
+    final questions = state.questions;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -183,7 +227,7 @@ class _QuestionListWidgetState extends ConsumerState<QuestionListWidget>
                           Text('Questions', style: AppTextStyles.sectionHeader),
                           const SizedBox(height: AppSpacing.spacingXS),
                           Text(
-                            '${_questions.length} questions added',
+                            '${questions.length} questions added',
                             style: AppTextStyles.caption,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -200,10 +244,10 @@ class _QuestionListWidgetState extends ConsumerState<QuestionListWidget>
                   ],
                 ),
                 const SizedBox(height: AppSpacing.spacingL),
-                if (_questions.isEmpty)
+                if (questions.isEmpty)
                   _buildEmptyState(availableHeight, constraints)
                 else
-                  _buildQuestionList(availableHeight, constraints),
+                  _buildQuestionList(availableHeight, constraints, questions),
               ],
             ),
           ),
@@ -283,6 +327,7 @@ class _QuestionListWidgetState extends ConsumerState<QuestionListWidget>
   Widget _buildQuestionList(
     double availableHeight,
     BoxConstraints constraints,
+    List<Question> questions,
   ) {
     return ConstrainedBox(
       constraints: BoxConstraints(
@@ -292,15 +337,9 @@ class _QuestionListWidgetState extends ConsumerState<QuestionListWidget>
       child: ReorderableListView.builder(
         shrinkWrap: true,
         physics: const ClampingScrollPhysics(),
-        itemCount: _questions.length,
+        itemCount: questions.length,
         onReorder: (oldIndex, newIndex) {
-          setState(() {
-            if (newIndex > oldIndex) {
-              newIndex -= 1;
-            }
-            final item = _questions.removeAt(oldIndex);
-            _questions.insert(newIndex, item);
-          });
+          ref.read(quizCreationProvider.notifier).reorderQuestions(oldIndex, newIndex);
         },
         proxyDecorator: (child, index, animation) {
           return AnimatedBuilder(
@@ -317,7 +356,28 @@ class _QuestionListWidgetState extends ConsumerState<QuestionListWidget>
           );
         },
         itemBuilder: (context, index) {
-          final question = _questions[index];
+          final question = questions[index];
+          
+          // Convert Question entity to Map format for QuestionCardWidget
+          final questionData = question.when(
+            multipleChoice: (id, questionText, options, correctAnswer, timeLimit, points, imageUrl, explanation) => {
+              'question': questionText,
+              'options': options,
+              'correctAnswer': correctAnswer,
+              'timeLimit': timeLimit,
+              'points': points,
+              'type': 'multiple_choice',
+            },
+            trueFalse: (id, questionText, correctAnswer, timeLimit, points, imageUrl, explanation) => {
+              'question': questionText,
+              'options': ['True', 'False'],
+              'correctAnswer': correctAnswer ? 0 : 1,
+              'timeLimit': timeLimit,
+              'points': points,
+              'type': 'true_false',
+            },
+          );
+          
           return ConstrainedBox(
             key: ValueKey('question_$index'),
             constraints: BoxConstraints(maxWidth: constraints.maxWidth),
@@ -327,7 +387,7 @@ class _QuestionListWidgetState extends ConsumerState<QuestionListWidget>
               child: IntrinsicHeight(
                 child: QuestionCardWidget(
                   index: index,
-                  question: question,
+                  question: questionData,
                   onEdit: () => _editQuestion(index),
                   onDelete: () => _deleteQuestion(index),
                 ),
