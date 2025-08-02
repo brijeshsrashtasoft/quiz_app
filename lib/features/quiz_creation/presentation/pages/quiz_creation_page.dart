@@ -38,9 +38,43 @@ class _QuizCreationPageState extends ConsumerState<QuizCreationPage> {
     }
   }
 
-  void _saveAndPreview() {
-    // Save quiz and navigate to preview
-    context.push('${RouteConstants.quizCreation}/preview');
+  void _saveAndPreview() async {
+    final notifier = ref.read(quizCreationProvider.notifier);
+    final state = ref.read(quizCreationProvider);
+    
+    // Show loading indicator
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Saving quiz...'),
+          duration: Duration(seconds: 1),
+        ),
+      );
+    }
+    
+    // Save the quiz
+    final quizId = await notifier.saveQuiz();
+    
+    if (context.mounted) {
+      if (quizId != null) {
+        // Success - navigate to preview
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Quiz saved successfully!'),
+            backgroundColor: AppColors.vibrantPurple,
+          ),
+        );
+        context.push('${RouteConstants.quizCreation}/preview?id=$quizId');
+      } else {
+        // Error - show error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(state.error ?? 'Failed to save quiz'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -77,14 +111,30 @@ class _QuizCreationPageState extends ConsumerState<QuizCreationPage> {
           ),
         ),
         actions: [
-          TextButton(
-            onPressed: _saveAndPreview,
-            child: Text(
-              'Preview',
-              style: AppTextStyles.buttonMedium.copyWith(
-                color: AppColors.vibrantPurple,
-              ),
-            ),
+          Consumer(
+            builder: (context, ref, child) {
+              final state = ref.watch(quizCreationProvider);
+              return TextButton(
+                onPressed: state.isLoading ? null : _saveAndPreview,
+                child: state.isLoading
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation(
+                            AppColors.vibrantPurple,
+                          ),
+                        ),
+                      )
+                    : Text(
+                        'Preview',
+                        style: AppTextStyles.buttonMedium.copyWith(
+                          color: AppColors.vibrantPurple,
+                        ),
+                      ),
+              );
+            },
           ),
           const SizedBox(width: AppSpacing.spacingM),
         ],
@@ -189,15 +239,25 @@ class _QuizCreationPageState extends ConsumerState<QuizCreationPage> {
                       )
                     else
                       const SizedBox.shrink(),
-                    PrimaryButton(
-                      onPressed: _currentStep == 2
-                          ? _saveAndPreview
-                          : _nextStep,
-                      text: _currentStep == 2 ? 'Save & Preview' : 'Next',
-                      icon: _currentStep == 2
-                          ? Icons.visibility
-                          : Icons.arrow_forward,
-                      backgroundColor: AppColors.vibrantPurple,
+                    Consumer(
+                      builder: (context, ref, child) {
+                        final state = ref.watch(quizCreationProvider);
+                        return PrimaryButton(
+                          onPressed: state.isLoading
+                              ? null
+                              : (_currentStep == 2 ? _saveAndPreview : _nextStep),
+                          text: state.isLoading
+                              ? 'Saving...'
+                              : (_currentStep == 2 ? 'Save & Preview' : 'Next'),
+                          icon: state.isLoading
+                              ? null
+                              : (_currentStep == 2
+                                  ? Icons.visibility
+                                  : Icons.arrow_forward),
+                          backgroundColor: AppColors.vibrantPurple,
+                          isLoading: state.isLoading,
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -282,9 +342,11 @@ class _QuizCreationPageState extends ConsumerState<QuizCreationPage> {
                           'Allow anyone to play this quiz',
                           style: AppTextStyles.caption,
                         ),
-                        value: true,
+                        value: ref.watch(quizCreationProvider).isPublic,
                         onChanged: (value) {
-                          // Handle public toggle
+                          ref.read(quizCreationProvider.notifier).updateSettings(
+                            isPublic: value,
+                          );
                         },
                         activeColor: AppColors.vibrantPurple,
                       ),
@@ -298,9 +360,11 @@ class _QuizCreationPageState extends ConsumerState<QuizCreationPage> {
                           'Show player rankings after each game',
                           style: AppTextStyles.caption,
                         ),
-                        value: true,
+                        value: ref.watch(quizCreationProvider).enableLeaderboard,
                         onChanged: (value) {
-                          // Handle leaderboard toggle
+                          ref.read(quizCreationProvider.notifier).updateSettings(
+                            enableLeaderboard: value,
+                          );
                         },
                         activeColor: AppColors.vibrantPurple,
                       ),
@@ -314,9 +378,11 @@ class _QuizCreationPageState extends ConsumerState<QuizCreationPage> {
                           'Questions appear in random order',
                           style: AppTextStyles.caption,
                         ),
-                        value: false,
+                        value: ref.watch(quizCreationProvider).randomizeQuestions,
                         onChanged: (value) {
-                          // Handle randomize toggle
+                          ref.read(quizCreationProvider.notifier).updateSettings(
+                            randomizeQuestions: value,
+                          );
                         },
                         activeColor: AppColors.vibrantPurple,
                       ),

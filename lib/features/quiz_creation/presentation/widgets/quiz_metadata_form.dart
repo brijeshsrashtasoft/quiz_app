@@ -19,6 +19,14 @@ class _QuizMetadataFormState extends ConsumerState<QuizMetadataForm> {
   final _descriptionController = TextEditingController();
   String _selectedCategory = 'General Knowledge';
 
+  @override
+  void initState() {
+    super.initState();
+    // Add listeners to update provider state when text changes
+    _titleController.addListener(_updateProviderState);
+    _descriptionController.addListener(_updateProviderState);
+  }
+
   final List<String> _categories = [
     'General Knowledge',
     'Science',
@@ -34,9 +42,20 @@ class _QuizMetadataFormState extends ConsumerState<QuizMetadataForm> {
 
   @override
   void dispose() {
+    _titleController.removeListener(_updateProviderState);
+    _descriptionController.removeListener(_updateProviderState);
     _titleController.dispose();
     _descriptionController.dispose();
     super.dispose();
+  }
+
+  /// Update provider state when form fields change
+  void _updateProviderState() {
+    ref.read(quizCreationProvider.notifier).updateMetadata(
+      title: _titleController.text,
+      description: _descriptionController.text,
+      category: _selectedCategory,
+    );
   }
 
   @override
@@ -165,6 +184,7 @@ class _QuizMetadataFormState extends ConsumerState<QuizMetadataForm> {
               setState(() {
                 _selectedCategory = value!;
               });
+              _updateProviderState(); // Update provider when category changes
             },
           ),
         ),
