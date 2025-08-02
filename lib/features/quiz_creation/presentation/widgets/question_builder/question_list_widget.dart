@@ -179,6 +179,7 @@ class _QuestionListWidgetState extends ConsumerState<QuestionListWidget>
                       },
                       text: 'Delete',
                       backgroundColor: AppColors.coralRed,
+                      width: 100, // Fixed width for dialog
                     ),
                   ),
                 ],
@@ -240,6 +241,7 @@ class _QuestionListWidgetState extends ConsumerState<QuestionListWidget>
                       text: isSmallScreen ? 'Add' : 'Add Question',
                       icon: Icons.add,
                       backgroundColor: AppColors.vibrantPurple,
+                      width: isSmallScreen ? 80 : 140, // Fixed width for row
                     ),
                   ],
                 ),

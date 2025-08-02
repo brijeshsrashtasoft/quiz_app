@@ -10,8 +10,11 @@ import '../../constants/app_animations.dart';
 import '../buttons/primary_button.dart';
 import '../inputs/text_input.dart';
 import '../layout/page_layout.dart';
-import '../feedback/loading_indicators.dart';
 import '../../../core/navigation/route_constants.dart';
+import '../../../features/game_session/presentation/providers/session_providers.dart';
+import '../../../features/authentication/presentation/providers/auth_providers.dart';
+import '../../../features/game_session/domain/entities/game_session_entity.dart';
+import '../../../core/utils/logger.dart';
 
 /// Game join widget with PIN input and deep link support
 /// Handles joining games via PIN codes and deep links
@@ -98,21 +101,160 @@ class _GameJoinWidgetState extends ConsumerState<GameJoinWidget>
   Future<void> _handleJoinGame() async {
     if (!_formKey.currentState!.validate()) return;
 
+    final currentUser = ref.read(currentUserProvider);
+    final isAuthenticated = ref.read(isAuthenticatedProvider);
+
+    if (!isAuthenticated || currentUser == null) {
+      if (mounted) {
+        setState(() {
+          _errorMessage =
+              'You must be signed in to join a game. Please sign in and try again.';
+        });
+      }
+      return;
+    }
+
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
 
-    // Simulate game join process
-    await Future.delayed(const Duration(seconds: 2));
-
-    if (mounted) {
-      setState(() => _isLoading = false);
-
-      // For demo purposes, navigate to waiting room
-      // In real implementation, this would validate the PIN and join the game
+    try {
       final gamePin = _pinController.text.trim();
-      context.go('/game/session-$gamePin/waiting');
+
+      AppLogger.firebase(
+        'GameJoinWidget',
+        'Attempting to join game with PIN: $gamePin',
+      );
+
+      // First, look up session by PIN using the optimized service
+      final sessionId = await ref.read(
+        optimizedPinLookupProvider(gamePin).future,
+      );
+
+      if (sessionId == null) {
+        // Try to provide helpful suggestions for PIN corrections
+        final pinService = ref.read(pinLookupServiceProvider);
+        final suggestions = pinService.generatePinSuggestions(gamePin);
+
+        String errorMessage = 'Invalid PIN. Please check and try again.';
+        if (suggestions.isNotEmpty) {
+          final firstSuggestion = suggestions.first;
+          errorMessage += '\n\nDid you mean: $firstSuggestion?';
+        }
+
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+            _errorMessage = errorMessage;
+          });
+        }
+        return;
+      }
+
+      AppLogger.firebase(
+        'GameJoinWidget',
+        'Found session $sessionId for PIN: $gamePin',
+      );
+
+      // Get session details to validate before joining
+      final session = await ref.read(gameSessionProvider(sessionId).future);
+
+      if (session == null) {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+            _errorMessage = 'Game session not found. It may have ended.';
+          });
+        }
+        return;
+      }
+
+      // Validate session state and user eligibility
+      if (session.hasExpired) {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+            _errorMessage = 'This game session has expired.';
+          });
+        }
+        return;
+      }
+
+      if (!session.status.canJoin) {
+        final statusMessage = session.status.isActive
+            ? 'This game is already in progress.'
+            : 'This game has ended.';
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+            _errorMessage = statusMessage;
+          });
+        }
+        return;
+      }
+
+      if (session.isFull) {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+            _errorMessage = 'This game is full. Please try another game.';
+          });
+        }
+        return;
+      }
+
+      if (session.isPlayer(currentUser.id)) {
+        // User is already in the game, navigate to waiting room
+        AppLogger.firebase(
+          'GameJoinWidget',
+          'User already in session, navigating to waiting room',
+        );
+        if (mounted) {
+          setState(() => _isLoading = false);
+          context.go(RouteConstants.gameWaitingPath(sessionId));
+        }
+        return;
+      }
+
+      // Join the session using the session state notifier
+      final sessionNotifier = ref.read(
+        sessionStateNotifierProvider(sessionId).notifier,
+      );
+
+      await sessionNotifier.joinSession(currentUser.name);
+
+      // Check the result of joining
+      final sessionState = ref.read(sessionStateNotifierProvider(sessionId));
+
+      if (sessionState.hasError) {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+            _errorMessage = sessionState.errorMessage ?? 'Failed to join game';
+          });
+        }
+        return;
+      }
+
+      AppLogger.firebase(
+        'GameJoinWidget',
+        'Successfully joined session $sessionId',
+      );
+
+      // Navigate to waiting room on successful join
+      if (mounted) {
+        setState(() => _isLoading = false);
+        context.go(RouteConstants.gameWaitingPath(sessionId));
+      }
+    } catch (e) {
+      AppLogger.error('Error joining game', e);
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = 'Failed to join game. Please try again.';
+        });
+      }
     }
   }
 
@@ -383,39 +525,49 @@ class _GameJoinWidgetState extends ConsumerState<GameJoinWidget>
   }
 
   Widget _buildRecentGames() {
-    // Mock recent games data
-    final recentGames = [
-      {'name': 'Science Quiz', 'pin': '123456', 'host': 'Teacher Smith'},
-      {'name': 'History Challenge', 'pin': '789012', 'host': 'Quiz Master'},
-    ];
+    // Get active game sessions from providers
+    final activeSessionsAsync = ref.watch(activeGameSessionsProvider);
 
-    if (recentGames.isEmpty) return const SizedBox.shrink();
+    return activeSessionsAsync.when(
+      data: (sessions) {
+        // Filter to get only a few recent sessions for display
+        final recentSessions = sessions.take(3).toList();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Recent Games',
-          style: AppTextStyles.sectionHeader.copyWith(
-            color: AppColors.charcoal,
-            fontSize: 20,
-          ),
-        ),
+        if (recentSessions.isEmpty) return const SizedBox.shrink();
 
-        const SizedBox(height: AppSpacing.spacingM),
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Active Games',
+              style: AppTextStyles.sectionHeader.copyWith(
+                color: AppColors.charcoal,
+                fontSize: 20,
+              ),
+            ),
 
-        ...recentGames.map(
-          (game) => _RecentGameTile(
-            name: game['name']!,
-            pin: game['pin']!,
-            host: game['host']!,
-            onTap: () {
-              _pinController.text = game['pin']!;
-              _handleJoinGame();
-            },
-          ),
-        ),
-      ],
+            const SizedBox(height: AppSpacing.spacingM),
+
+            ...recentSessions.map(
+              (session) => _RecentGameTile(
+                name: 'Quiz Game', // Would need quiz name from quiz data
+                pin: session.pin,
+                host:
+                    'Game ${session.pin}', // Would need host name from user data
+                playerCount: session.playerCount,
+                maxPlayers: session.settings?.maxPlayers ?? 50,
+                status: session.status,
+                onTap: () {
+                  _pinController.text = session.pin;
+                  _handleJoinGame();
+                },
+              ),
+            ),
+          ],
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
     );
   }
 
@@ -439,12 +591,18 @@ class _RecentGameTile extends StatelessWidget {
   final String pin;
   final String host;
   final VoidCallback onTap;
+  final int? playerCount;
+  final int? maxPlayers;
+  final GameSessionStatus? status;
 
   const _RecentGameTile({
     required this.name,
     required this.pin,
     required this.host,
     required this.onTap,
+    this.playerCount,
+    this.maxPlayers,
+    this.status,
   });
 
   @override
@@ -481,6 +639,52 @@ class _RecentGameTile extends StatelessWidget {
                       Text(name, style: AppTextStyles.cardTitle),
                       const SizedBox(height: AppSpacing.spacingXS),
                       Text('Hosted by $host', style: AppTextStyles.caption),
+                      if (playerCount != null && maxPlayers != null) ...[
+                        const SizedBox(height: AppSpacing.spacingXS),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.people_outline,
+                              size: 16,
+                              color: AppColors.coolGray,
+                            ),
+                            const SizedBox(width: AppSpacing.spacingXS),
+                            Text(
+                              '$playerCount/$maxPlayers players',
+                              style: AppTextStyles.caption.copyWith(
+                                color: AppColors.coolGray,
+                              ),
+                            ),
+                            if (status != null) ...[
+                              const SizedBox(width: AppSpacing.spacingS),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: _getStatusColor(
+                                    status!,
+                                  ).withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(4),
+                                  border: Border.all(
+                                    color: _getStatusColor(
+                                      status!,
+                                    ).withValues(alpha: 0.3),
+                                  ),
+                                ),
+                                child: Text(
+                                  status!.displayName,
+                                  style: AppTextStyles.caption.copyWith(
+                                    color: _getStatusColor(status!),
+                                    fontSize: 10,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -518,5 +722,16 @@ class _RecentGameTile extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Color _getStatusColor(GameSessionStatus status) {
+    switch (status) {
+      case GameSessionStatus.waiting:
+        return AppColors.mintGreen;
+      case GameSessionStatus.active:
+        return AppColors.vibrantPurple;
+      case GameSessionStatus.completed:
+        return AppColors.coolGray;
+    }
   }
 }

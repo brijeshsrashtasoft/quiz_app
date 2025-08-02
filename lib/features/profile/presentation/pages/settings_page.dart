@@ -6,7 +6,6 @@ import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/constants/app_text_styles.dart';
 import '../../../../shared/constants/app_spacing.dart';
 import '../../../../shared/constants/app_animations.dart';
-import '../../../../shared/widgets/navigation/app_navigation_bar.dart';
 import '../../../../core/navigation/route_constants.dart';
 import '../widgets/privacy_toggle_widget.dart';
 import '../widgets/account_action_widget.dart';
@@ -99,9 +98,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
             ),
           );
         },
-      ),
-      bottomNavigationBar: AppNavigationBar(
-        currentRoute: RouteConstants.settings,
       ),
     );
   }

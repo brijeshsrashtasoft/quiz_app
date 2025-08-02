@@ -16,6 +16,7 @@ import '../../features/authentication/presentation/pages/forgot_password_page.da
 import '../../features/authentication/presentation/pages/profile_page.dart'
     as auth_pages;
 import '../../features/home/presentation/pages/home_page.dart' as home_pages;
+import '../../features/game_session/presentation/pages/host_game_screen.dart';
 import '../../features/ui_showcase/presentation/pages/ui_showcase_page.dart';
 import '../../features/ui_showcase/presentation/pages/theme_settings_page.dart';
 import '../../features/ui_showcase/presentation/pages/all_components_demo_page.dart';
@@ -219,7 +220,7 @@ class AppRouter {
       GoRoute(
         path: RouteConstants.gameHost,
         name: 'game-host',
-        builder: (context, state) => const GameHostPage(),
+        builder: (context, state) => const HostGameScreen(),
         routes: [
           GoRoute(
             path: 'setup',

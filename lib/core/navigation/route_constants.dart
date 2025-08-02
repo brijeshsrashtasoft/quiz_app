@@ -23,6 +23,7 @@ class RouteConstants {
   static const String quizCreationForm = '/quiz-creation/form';
   static const String quizCreationPreview = '/quiz-creation/preview';
   static const String quizCreationPublish = '/quiz-creation/publish';
+  static const String quizManagement = '/quiz-management';
   static const String quizDetails = '/quiz/:quizId';
   static const String quizEdit = '/quiz/:quizId/edit';
 

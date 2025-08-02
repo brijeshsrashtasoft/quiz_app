@@ -69,7 +69,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
       final authService = ref.read(authServiceProvider);
       await authService.signOut();
       if (mounted) {
-        context.go(RouteConstants.login);
+        context.go(RouteConstants.home);
       }
     }
   }
@@ -127,9 +127,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
             ),
           );
         },
-      ),
-      bottomNavigationBar: AppNavigationBar(
-        currentRoute: RouteConstants.profile,
       ),
     );
   }

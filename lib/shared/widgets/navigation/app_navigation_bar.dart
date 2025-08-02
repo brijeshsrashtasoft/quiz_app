@@ -313,7 +313,7 @@ class AppFloatingActionButton extends ConsumerWidget {
     }
 
     return FloatingActionButton.extended(
-      onPressed: onPressed ?? () => context.go(RouteConstants.gameHost),
+      onPressed: onPressed ?? () => context.push(RouteConstants.gameHost),
       backgroundColor: AppColors.vibrantPurple,
       foregroundColor: AppColors.pureWhite,
       elevation: 8,
@@ -372,61 +372,69 @@ class AppTopBar extends ConsumerWidget implements PreferredSizeWidget {
         // Notification button with badge
         Consumer(
           builder: (context, ref, _) {
-            return ref.watch(unreadCountProvider).when(
-              loading: () => IconButton(
-                icon: const Icon(Icons.notifications_outlined),
-                onPressed: () => context.go(RouteConstants.notifications),
-                tooltip: 'Notifications',
-              ),
-              error: (_, __) => IconButton(
-                icon: const Icon(Icons.notifications_outlined),
-                onPressed: () => context.go(RouteConstants.notifications),
-                tooltip: 'Notifications',
-              ),
-              data: (result) => result.when(
-                success: (unreadCount) => Stack(
-                  children: [
-                    IconButton(
-                      icon: Icon(unreadCount > 0 
-                          ? Icons.notifications 
-                          : Icons.notifications_outlined),
-                      onPressed: () => context.go(RouteConstants.notifications),
+            return ref
+                .watch(unreadCountProvider)
+                .when(
+                  loading: () => IconButton(
+                    icon: const Icon(Icons.notifications_outlined),
+                    onPressed: () => context.push(RouteConstants.notifications),
+                    tooltip: 'Notifications',
+                  ),
+                  error: (_, __) => IconButton(
+                    icon: const Icon(Icons.notifications_outlined),
+                    onPressed: () => context.push(RouteConstants.notifications),
+                    tooltip: 'Notifications',
+                  ),
+                  data: (result) => result.when(
+                    success: (unreadCount) => Stack(
+                      children: [
+                        IconButton(
+                          icon: Icon(
+                            unreadCount > 0
+                                ? Icons.notifications
+                                : Icons.notifications_outlined,
+                          ),
+                          onPressed: () =>
+                              context.push(RouteConstants.notifications),
+                          tooltip: 'Notifications',
+                        ),
+                        if (unreadCount > 0)
+                          Positioned(
+                            right: 8,
+                            top: 8,
+                            child: Container(
+                              padding: const EdgeInsets.all(2),
+                              decoration: BoxDecoration(
+                                color: AppColors.coralRed,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              constraints: const BoxConstraints(
+                                minWidth: 16,
+                                minHeight: 16,
+                              ),
+                              child: Text(
+                                unreadCount > 99
+                                    ? '99+'
+                                    : unreadCount.toString(),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    failure: (_) => IconButton(
+                      icon: const Icon(Icons.notifications_outlined),
+                      onPressed: () =>
+                          context.push(RouteConstants.notifications),
                       tooltip: 'Notifications',
                     ),
-                    if (unreadCount > 0)
-                      Positioned(
-                        right: 8,
-                        top: 8,
-                        child: Container(
-                          padding: const EdgeInsets.all(2),
-                          decoration: BoxDecoration(
-                            color: AppColors.coralRed,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          constraints: const BoxConstraints(
-                            minWidth: 16,
-                            minHeight: 16,
-                          ),
-                          child: Text(
-                            unreadCount > 99 ? '99+' : unreadCount.toString(),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-                failure: (_) => IconButton(
-                  icon: const Icon(Icons.notifications_outlined),
-                  onPressed: () => context.go(RouteConstants.notifications),
-                  tooltip: 'Notifications',
-                ),
-              ),
-            );
+                  ),
+                );
           },
         ),
 
@@ -435,7 +443,7 @@ class AppTopBar extends ConsumerWidget implements PreferredSizeWidget {
           Padding(
             padding: const EdgeInsets.only(right: AppSpacing.spacingM),
             child: GestureDetector(
-              onTap: () => context.go(RouteConstants.profile),
+              onTap: () => context.push(RouteConstants.profile),
               child: CircleAvatar(
                 radius: 18,
                 backgroundColor: AppColors.vibrantPurple,
@@ -570,7 +578,7 @@ class AppNavigationDrawer extends ConsumerWidget {
                   title: 'Notifications',
                   route: RouteConstants.notifications,
                   isActive: _isActiveRoute(RouteConstants.notifications),
-                  onTap: () => _handleDrawerNavigation(
+                  onTap: () => _handleDrawerSecondaryNavigation(
                     context,
                     RouteConstants.notifications,
                   ),
@@ -583,24 +591,30 @@ class AppNavigationDrawer extends ConsumerWidget {
                   title: 'Settings',
                   route: RouteConstants.settings,
                   isActive: _isActiveRoute(RouteConstants.settings),
-                  onTap: () =>
-                      _handleDrawerNavigation(context, RouteConstants.settings),
+                  onTap: () => _handleDrawerSecondaryNavigation(
+                    context,
+                    RouteConstants.settings,
+                  ),
                 ),
                 _DrawerItem(
                   icon: Icons.help_outline,
                   title: 'Help',
                   route: RouteConstants.help,
                   isActive: _isActiveRoute(RouteConstants.help),
-                  onTap: () =>
-                      _handleDrawerNavigation(context, RouteConstants.help),
+                  onTap: () => _handleDrawerSecondaryNavigation(
+                    context,
+                    RouteConstants.help,
+                  ),
                 ),
                 _DrawerItem(
                   icon: Icons.info_outline,
                   title: 'About',
                   route: RouteConstants.about,
                   isActive: _isActiveRoute(RouteConstants.about),
-                  onTap: () =>
-                      _handleDrawerNavigation(context, RouteConstants.about),
+                  onTap: () => _handleDrawerSecondaryNavigation(
+                    context,
+                    RouteConstants.about,
+                  ),
                 ),
               ],
             ),
@@ -631,12 +645,17 @@ class AppNavigationDrawer extends ConsumerWidget {
     context.go(route);
   }
 
+  void _handleDrawerSecondaryNavigation(BuildContext context, String route) {
+    Navigator.of(context).pop(); // Close drawer
+    context.push(route);
+  }
+
   Future<void> _handleSignOut(BuildContext context, WidgetRef ref) async {
     Navigator.of(context).pop(); // Close drawer
     final authService = ref.read(authServiceProvider);
     await authService.signOut();
     if (context.mounted) {
-      context.go(RouteConstants.login);
+      context.go(RouteConstants.home);
     }
   }
 }

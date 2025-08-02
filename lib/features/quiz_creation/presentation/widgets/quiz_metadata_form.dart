@@ -51,11 +51,16 @@ class _QuizMetadataFormState extends ConsumerState<QuizMetadataForm> {
 
   /// Update provider state when form fields change
   void _updateProviderState() {
-    ref.read(quizCreationProvider.notifier).updateMetadata(
-      title: _titleController.text,
-      description: _descriptionController.text,
-      category: _selectedCategory,
-    );
+    try {
+      ref.read(quizCreationProvider.notifier).updateMetadata(
+        title: _titleController.text,
+        description: _descriptionController.text,
+        category: _selectedCategory,
+      );
+    } catch (e) {
+      // Continue without crashing the UI - log error silently
+      debugPrint('Error updating provider state: $e');
+    }
   }
 
   @override
@@ -67,85 +72,69 @@ class _QuizMetadataFormState extends ConsumerState<QuizMetadataForm> {
         ? screenHeight * 0.6
         : screenHeight * 0.7;
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return SizedBox(
-          width: constraints.maxWidth,
-          child: Card(
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-              side: const BorderSide(color: AppColors.lightGray, width: 1),
-            ),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxHeight: maxFormHeight,
-                maxWidth: constraints.maxWidth,
-                minWidth: constraints.maxWidth,
-              ),
-              child: SingleChildScrollView(
-                physics: const ClampingScrollPhysics(),
-                child: Padding(
-                  padding: EdgeInsets.all(
-                    isSmallScreen ? AppSpacing.spacingL : AppSpacing.spacingXL,
+    return Consumer(
+      builder: (context, ref, child) {
+        final quizState = ref.watch(quizCreationProvider);
+        
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            return SizedBox(
+              width: constraints.maxWidth,
+              child: Card(
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  side: const BorderSide(color: AppColors.lightGray, width: 1),
+                ),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxHeight: maxFormHeight,
+                    maxWidth: constraints.maxWidth,
+                    minWidth: constraints.maxWidth,
                   ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Quiz Information',
-                        style: AppTextStyles.sectionHeader,
+                  child: SingleChildScrollView(
+                    physics: const ClampingScrollPhysics(),
+                    child: Padding(
+                      padding: EdgeInsets.all(
+                        isSmallScreen ? AppSpacing.spacingL : AppSpacing.spacingXL,
                       ),
-                      const SizedBox(height: AppSpacing.spacingL),
-                      // Title input
-                      CustomTextInput(
-                        controller: _titleController,
-                        label: 'Quiz Title',
-                        hint: 'Enter an engaging title for your quiz',
-                        maxLength: 100,
-                        prefixIcon: const Icon(Icons.title),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter a title';
-                          }
-                          if (value.length < 3) {
-                            return 'Title must be at least 3 characters';
-                          }
-                          return null;
-                        },
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  'Quiz Information',
+                                  style: AppTextStyles.sectionHeader,
+                                ),
+                              ),
+                              _buildValidationIndicator(quizState.validation),
+                            ],
+                          ),
+                          const SizedBox(height: AppSpacing.spacingS),
+                          _buildRequirementsCard(quizState.validation),
+                          const SizedBox(height: AppSpacing.spacingL),
+                          // Title input with validation feedback
+                          _buildTitleInput(quizState.validation),
+                          const SizedBox(height: AppSpacing.spacingL),
+                          // Description input with validation feedback
+                          _buildDescriptionInput(quizState.validation, isSmallScreen),
+                          const SizedBox(height: AppSpacing.spacingL),
+                          // Category dropdown
+                          _buildCategoryDropdown(),
+                          const SizedBox(height: AppSpacing.spacingXL),
+                          // Quiz preview card
+                          _buildPreviewCard(),
+                        ],
                       ),
-                      const SizedBox(height: AppSpacing.spacingL),
-                      // Description input
-                      CustomTextInput(
-                        controller: _descriptionController,
-                        label: 'Description',
-                        hint: 'Describe what your quiz is about',
-                        maxLines: isSmallScreen ? 2 : 3,
-                        maxLength: 300,
-                        prefixIcon: const Icon(Icons.description_outlined),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter a description';
-                          }
-                          if (value.length < 10) {
-                            return 'Description must be at least 10 characters';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: AppSpacing.spacingL),
-                      // Category dropdown
-                      _buildCategoryDropdown(),
-                      const SizedBox(height: AppSpacing.spacingXL),
-                      // Quiz preview card
-                      _buildPreviewCard(),
-                    ],
+                    ),
                   ),
                 ),
               ),
-            ),
-          ),
+            );
+          },
         );
       },
     );
@@ -188,6 +177,197 @@ class _QuizMetadataFormState extends ConsumerState<QuizMetadataForm> {
             },
           ),
         ),
+      ],
+    );
+  }
+
+  /// Build validation indicator badge
+  Widget _buildValidationIndicator(validation) {
+    final isMetadataValid = validation.isMetadataValid;
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.spacingM,
+        vertical: AppSpacing.spacingXS,
+      ),
+      decoration: BoxDecoration(
+        color: isMetadataValid
+            ? AppColors.mintGreen.withOpacity(0.1)
+            : AppColors.coralRed.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isMetadataValid ? AppColors.mintGreen : AppColors.coralRed,
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            isMetadataValid ? Icons.check_circle : Icons.error,
+            size: 16,
+            color: isMetadataValid ? AppColors.mintGreen : AppColors.coralRed,
+          ),
+          const SizedBox(width: AppSpacing.spacingXS),
+          Text(
+            isMetadataValid ? 'Valid' : 'Incomplete',
+            style: AppTextStyles.caption.copyWith(
+              color: isMetadataValid ? AppColors.mintGreen : AppColors.coralRed,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Build requirements progress card
+  Widget _buildRequirementsCard(validation) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.spacingM),
+      decoration: BoxDecoration(
+        color: AppColors.offWhite,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.lightGray),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.checklist,
+                size: 16,
+                color: AppColors.vibrantPurple,
+              ),
+              const SizedBox(width: AppSpacing.spacingS),
+              Text(
+                'Requirements',
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.vibrantPurple,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.spacingS),
+          _buildRequirementItem(
+            'Quiz title (3+ characters)',
+            validation.isTitleValid,
+          ),
+          _buildRequirementItem(
+            'Description (10+ characters)',
+            validation.isDescriptionValid,
+          ),
+          _buildRequirementItem(
+            'At least 1 question',
+            validation.hasQuestions,
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Build individual requirement item
+  Widget _buildRequirementItem(String text, bool isComplete) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.spacingXS),
+      child: Row(
+        children: [
+          Icon(
+            isComplete ? Icons.check_circle : Icons.radio_button_unchecked,
+            size: 16,
+            color: isComplete ? AppColors.mintGreen : AppColors.coolGray,
+          ),
+          const SizedBox(width: AppSpacing.spacingS),
+          Expanded(
+            child: Text(
+              text,
+              style: AppTextStyles.caption.copyWith(
+                color: isComplete ? AppColors.charcoal : AppColors.coolGray,
+                decoration: isComplete ? TextDecoration.lineThrough : null,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Build title input with validation
+  Widget _buildTitleInput(validation) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        CustomTextInput(
+          controller: _titleController,
+          label: 'Quiz Title',
+          hint: 'Enter an engaging title for your quiz',
+          maxLength: 100,
+          prefixIcon: Icon(
+            Icons.title,
+            color: validation.isTitleValid ? AppColors.mintGreen : null,
+          ),
+          suffixIcon: validation.isTitleValid
+              ? Icon(
+                  Icons.check_circle,
+                  color: AppColors.mintGreen,
+                  size: 20,
+                )
+              : null,
+        ),
+        if (validation.titleError.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(
+              top: AppSpacing.spacingXS,
+              left: AppSpacing.spacingM,
+            ),
+            child: Text(
+              validation.titleError,
+              style: AppTextStyles.caption.copyWith(
+                color: AppColors.coralRed,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  /// Build description input with validation
+  Widget _buildDescriptionInput(validation, bool isSmallScreen) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        CustomTextInput(
+          controller: _descriptionController,
+          label: 'Description',
+          hint: 'Describe what your quiz is about',
+          maxLines: isSmallScreen ? 2 : 3,
+          maxLength: 300,
+          prefixIcon: Icon(
+            Icons.description_outlined,
+            color: validation.isDescriptionValid ? AppColors.mintGreen : null,
+          ),
+          suffixIcon: validation.isDescriptionValid
+              ? Icon(
+                  Icons.check_circle,
+                  color: AppColors.mintGreen,
+                  size: 20,
+                )
+              : null,
+        ),
+        if (validation.descriptionError.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(
+              top: AppSpacing.spacingXS,
+              left: AppSpacing.spacingM,
+            ),
+            child: Text(
+              validation.descriptionError,
+              style: AppTextStyles.caption.copyWith(
+                color: AppColors.coralRed,
+              ),
+            ),
+          ),
       ],
     );
   }
@@ -258,22 +438,24 @@ class _QuizMetadataFormState extends ConsumerState<QuizMetadataForm> {
               const SizedBox(height: AppSpacing.spacingM),
               Row(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.spacingM,
-                      vertical: AppSpacing.spacingXS,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.vibrantPurple.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      _selectedCategory,
-                      style: AppTextStyles.caption.copyWith(
-                        color: AppColors.vibrantPurple,
-                        fontWeight: FontWeight.w500,
+                  Flexible(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.spacingM,
+                        vertical: AppSpacing.spacingXS,
                       ),
-                      overflow: TextOverflow.ellipsis,
+                      decoration: BoxDecoration(
+                        color: AppColors.vibrantPurple.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        _selectedCategory,
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppColors.vibrantPurple,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ),
                 ],

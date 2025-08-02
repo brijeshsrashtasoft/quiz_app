@@ -134,6 +134,17 @@ class _LoginPageState extends ConsumerState<LoginPage>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.offWhite,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back_ios,
+            color: AppColors.charcoal,
+          ),
+          onPressed: () => context.go(RouteConstants.home),
+        ),
+      ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(

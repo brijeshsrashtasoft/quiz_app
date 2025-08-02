@@ -206,15 +206,15 @@ class NotificationRemoteDataSourceImpl implements NotificationRemoteDataSource {
   Stream<List<NotificationModel>> watchNotifications(String userId) {
     // Emit current data immediately and then listen for updates
     final controller = StreamController<List<NotificationModel>>();
-    
+
     // Emit current data first
     controller.add(_userNotifications[userId] ?? []);
-    
+
     // Listen to updates and emit them
     _notificationsController.stream.listen((allNotifications) {
       controller.add(allNotifications[userId] ?? []);
     });
-    
+
     return controller.stream;
   }
 
@@ -231,17 +231,17 @@ class NotificationRemoteDataSourceImpl implements NotificationRemoteDataSource {
   Stream<int> watchUnreadCount(String userId) {
     // Emit current data immediately and then listen for updates
     final controller = StreamController<int>();
-    
+
     // Emit current count first
     final currentNotifications = _userNotifications[userId] ?? [];
     controller.add(currentNotifications.where((n) => !n.isRead).length);
-    
+
     // Listen to updates and emit new counts
     _notificationsController.stream.listen((allNotifications) {
       final notifications = allNotifications[userId] ?? [];
       controller.add(notifications.where((n) => !n.isRead).length);
     });
-    
+
     return controller.stream;
   }
 

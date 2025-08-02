@@ -123,7 +123,9 @@ final recentNotificationsProvider = Provider<List<NotificationEntity>>((ref) {
 });
 
 /// Notification categories provider
-final notificationCategoriesProvider = Provider<AsyncValue<List<String>>>((ref) {
+final notificationCategoriesProvider = Provider<AsyncValue<List<String>>>((
+  ref,
+) {
   final notificationsAsync = ref.watch(notificationsProvider);
 
   return notificationsAsync.when(

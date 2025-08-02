@@ -21,8 +21,33 @@ class QuizCreationPage extends ConsumerStatefulWidget {
 
 class _QuizCreationPageState extends ConsumerState<QuizCreationPage> {
   int _currentStep = 0;
+  
+  @override
+  void initState() {
+    super.initState();
+    // Initialize validation on first load
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(quizCreationProvider.notifier).updateMetadata();
+    });
+  }
 
   void _nextStep() {
+    final notifier = ref.read(quizCreationProvider.notifier);
+    
+    // Check if user can proceed to next step
+    if (!notifier.canProceedToStep(_currentStep + 1)) {
+      // Show validation error
+      final state = ref.read(quizCreationProvider);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(state.validation.nextRequirement),
+          backgroundColor: AppColors.coralRed,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+      return;
+    }
+    
     if (_currentStep < 2) {
       setState(() {
         _currentStep++;
@@ -42,12 +67,33 @@ class _QuizCreationPageState extends ConsumerState<QuizCreationPage> {
     final notifier = ref.read(quizCreationProvider.notifier);
     final state = ref.read(quizCreationProvider);
     
+    // Check if quiz can be saved
+    if (!notifier.canSaveQuiz()) {
+      // Show detailed validation error
+      _showValidationDialog(state.validation);
+      return;
+    }
+    
     // Show loading indicator
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Saving quiz...'),
-          duration: Duration(seconds: 1),
+          content: Row(
+            children: [
+              SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation(Colors.white),
+                ),
+              ),
+              SizedBox(width: 12),
+              Text('Saving quiz...'),
+            ],
+          ),
+          backgroundColor: AppColors.vibrantPurple,
+          duration: Duration(seconds: 2),
         ),
       );
     }
@@ -60,19 +106,22 @@ class _QuizCreationPageState extends ConsumerState<QuizCreationPage> {
         // Success - navigate to preview
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Quiz saved successfully!'),
-            backgroundColor: AppColors.vibrantPurple,
+            content: Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.white, size: 20),
+                SizedBox(width: 8),
+                Text('Quiz saved successfully!'),
+              ],
+            ),
+            backgroundColor: AppColors.mintGreen,
+            duration: Duration(seconds: 2),
           ),
         );
-        context.push('${RouteConstants.quizCreation}/preview?id=$quizId');
+        // Use go instead of push for nested routes, and use the proper route constant
+        context.go('${RouteConstants.quizCreationPreview}?id=$quizId');
       } else {
-        // Error - show error message
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(state.error ?? 'Failed to save quiz'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        // Error - show detailed error message
+        _showErrorDialog(state.error ?? 'Failed to save quiz');
       }
     }
   }
@@ -114,6 +163,8 @@ class _QuizCreationPageState extends ConsumerState<QuizCreationPage> {
           Consumer(
             builder: (context, ref, child) {
               final state = ref.watch(quizCreationProvider);
+              final canSave = ref.read(quizCreationProvider.notifier).canSaveQuiz();
+              
               return TextButton(
                 onPressed: state.isLoading ? null : _saveAndPreview,
                 child: state.isLoading
@@ -127,11 +178,26 @@ class _QuizCreationPageState extends ConsumerState<QuizCreationPage> {
                           ),
                         ),
                       )
-                    : Text(
-                        'Preview',
-                        style: AppTextStyles.buttonMedium.copyWith(
-                          color: AppColors.vibrantPurple,
-                        ),
+                    : Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (!canSave) ...[
+                            Icon(
+                              Icons.error_outline,
+                              size: 16,
+                              color: AppColors.coralRed,
+                            ),
+                            const SizedBox(width: 4),
+                          ],
+                          Text(
+                            canSave ? 'Preview' : 'Incomplete',
+                            style: AppTextStyles.buttonMedium.copyWith(
+                              color: canSave 
+                                  ? AppColors.vibrantPurple 
+                                  : AppColors.coralRed,
+                            ),
+                          ),
+                        ],
                       ),
               );
             },
@@ -142,62 +208,79 @@ class _QuizCreationPageState extends ConsumerState<QuizCreationPage> {
       body: SafeArea(
         child: Column(
           children: [
-            // Progress stepper
-            Container(
-              color: AppColors.pureWhite,
-              padding: EdgeInsets.symmetric(
-                horizontal: isDesktop
-                    ? AppSpacing.spacingXXL
-                    : isSmallScreen
-                    ? AppSpacing.spacingM
-                    : AppSpacing.spacingL,
-                vertical: isSmallScreen
-                    ? AppSpacing.spacingS
-                    : AppSpacing.spacingM,
-              ),
-              child: QuizStepperWidget(
-                currentStep: _currentStep,
-                onStepTapped: (step) {
-                  setState(() {
-                    _currentStep = step;
-                  });
-                },
-              ),
-            ),
-            // Step content
-            Expanded(
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  return SingleChildScrollView(
-                    physics: const ClampingScrollPhysics(),
-                    padding: EdgeInsets.all(
-                      isDesktop
-                          ? AppSpacing.spacingXXL
-                          : isTablet
-                          ? AppSpacing.spacingXL
-                          : isSmallScreen
-                          ? AppSpacing.spacingM
-                          : AppSpacing.spacingL,
-                    ),
-                    child: Center(
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          maxWidth: isDesktop ? 800 : double.infinity,
-                          minHeight:
-                              constraints.maxHeight -
-                              (isDesktop
-                                  ? AppSpacing.spacingXXL * 2
-                                  : isTablet
-                                  ? AppSpacing.spacingXL * 2
-                                  : isSmallScreen
-                                  ? AppSpacing.spacingM * 2
-                                  : AppSpacing.spacingL * 2),
-                        ),
-                        child: _buildStepContent(),
+            // Progress stepper with validation status
+            Consumer(
+              builder: (context, ref, child) {
+                final state = ref.watch(quizCreationProvider);
+                
+                return Container(
+                  color: AppColors.pureWhite,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isDesktop
+                        ? AppSpacing.spacingXXL
+                        : isSmallScreen
+                        ? AppSpacing.spacingM
+                        : AppSpacing.spacingL,
+                    vertical: isSmallScreen
+                        ? AppSpacing.spacingS
+                        : AppSpacing.spacingM,
+                  ),
+                  child: Column(
+                    children: [
+                      QuizStepperWidget(
+                        currentStep: _currentStep,
+                        onStepTapped: (step) {
+                          final notifier = ref.read(quizCreationProvider.notifier);
+                          if (step <= _currentStep || notifier.canProceedToStep(step)) {
+                            setState(() {
+                              _currentStep = step;
+                            });
+                          } else {
+                            // Show validation message
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(state.validation.nextRequirement),
+                                backgroundColor: AppColors.coralRed,
+                                duration: const Duration(seconds: 2),
+                              ),
+                            );
+                          }
+                        },
                       ),
+                      // Add overall progress indicator
+                      if (!isSmallScreen) ...[
+                        const SizedBox(height: AppSpacing.spacingS),
+                        _buildProgressIndicator(state.validation),
+                      ],
+                    ],
+                  ),
+                );
+              },
+            ),
+            // Step content - simplified layout
+            Expanded(
+              child: Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(
+                  isDesktop
+                      ? AppSpacing.spacingXXL
+                      : isTablet
+                      ? AppSpacing.spacingXL
+                      : isSmallScreen
+                      ? AppSpacing.spacingM
+                      : AppSpacing.spacingL,
+                ),
+                child: SingleChildScrollView(
+                  physics: const ClampingScrollPhysics(),
+                  child: Center(
+                    child: Container(
+                      constraints: BoxConstraints(
+                        maxWidth: isDesktop ? 800 : double.infinity,
+                      ),
+                      child: _buildStepContent(),
                     ),
-                  );
-                },
+                  ),
+                ),
               ),
             ),
             // Navigation buttons
@@ -239,25 +322,53 @@ class _QuizCreationPageState extends ConsumerState<QuizCreationPage> {
                       )
                     else
                       const SizedBox.shrink(),
-                    Consumer(
-                      builder: (context, ref, child) {
-                        final state = ref.watch(quizCreationProvider);
-                        return PrimaryButton(
-                          onPressed: state.isLoading
-                              ? null
-                              : (_currentStep == 2 ? _saveAndPreview : _nextStep),
-                          text: state.isLoading
-                              ? 'Saving...'
-                              : (_currentStep == 2 ? 'Save & Preview' : 'Next'),
-                          icon: state.isLoading
-                              ? null
-                              : (_currentStep == 2
-                                  ? Icons.visibility
-                                  : Icons.arrow_forward),
-                          backgroundColor: AppColors.vibrantPurple,
-                          isLoading: state.isLoading,
-                        );
-                      },
+                    Flexible(
+                      child: Consumer(
+                        builder: (context, ref, child) {
+                          final state = ref.watch(quizCreationProvider);
+                          final notifier = ref.read(quizCreationProvider.notifier);
+                          
+                          bool canProceed;
+                          String buttonText;
+                          IconData? buttonIcon;
+                          Color buttonColor;
+                          
+                          if (_currentStep == 2) {
+                            // Final step - save button
+                            canProceed = notifier.canSaveQuiz() && !state.isLoading;
+                            buttonText = state.isLoading 
+                                ? 'Saving...' 
+                                : canProceed 
+                                    ? 'Save & Preview' 
+                                    : 'Add Questions First';
+                            buttonIcon = state.isLoading 
+                                ? null 
+                                : canProceed 
+                                    ? Icons.visibility 
+                                    : Icons.error_outline;
+                            buttonColor = canProceed 
+                                ? AppColors.vibrantPurple 
+                                : AppColors.coolGray;
+                          } else {
+                            // Navigation steps
+                            canProceed = notifier.canProceedToStep(_currentStep + 1) && !state.isLoading;
+                            buttonText = canProceed ? 'Next' : 'Complete This Step';
+                            buttonIcon = canProceed ? Icons.arrow_forward : Icons.warning;
+                            buttonColor = canProceed ? AppColors.vibrantPurple : AppColors.coolGray;
+                          }
+                          
+                          return PrimaryButton(
+                            onPressed: canProceed
+                                ? (_currentStep == 2 ? _saveAndPreview : _nextStep)
+                                : () => _showValidationDialog(state.validation),
+                            text: buttonText,
+                            icon: buttonIcon,
+                            backgroundColor: buttonColor,
+                            isLoading: state.isLoading,
+                            width: 160, // Slightly wider for better text
+                          );
+                        },
+                      ),
                     ),
                   ],
                 ),
@@ -270,29 +381,70 @@ class _QuizCreationPageState extends ConsumerState<QuizCreationPage> {
   }
 
   Widget _buildStepContent() {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final Widget content;
-        switch (_currentStep) {
-          case 0:
-            content = const QuizMetadataForm();
-            break;
-          case 1:
-            content = const QuestionListWidget();
-            break;
-          case 2:
-            content = _buildQuizSettings();
-            break;
-          default:
-            content = const SizedBox.shrink();
-        }
+    return Consumer(
+      builder: (context, ref, child) {
+        // Check provider state for any errors
+        final providerState = ref.watch(quizCreationProvider);
+        
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final Widget content;
+            
+            try {
+              switch (_currentStep) {
+                case 0:
+                  content = const QuizMetadataForm();
+                  break;
+                case 1:
+                  content = const QuestionListWidget();
+                  break;
+                case 2:
+                  content = _buildQuizSettings();
+                  break;
+                default:
+                  content = Container(
+                    padding: const EdgeInsets.all(AppSpacing.spacingL),
+                    child: Center(
+                      child: Text(
+                        'Invalid step: $_currentStep',
+                        style: AppTextStyles.bodyText,
+                      ),
+                    ),
+                  );
+              }
+            } catch (e) {
+              // Error fallback
+              return Container(
+                padding: const EdgeInsets.all(AppSpacing.spacingL),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        size: 48,
+                        color: AppColors.coralRed,
+                      ),
+                      const SizedBox(height: AppSpacing.spacingM),
+                      Text(
+                        'Error loading step content',
+                        style: AppTextStyles.sectionHeader,
+                      ),
+                      const SizedBox(height: AppSpacing.spacingS),
+                      Text(
+                        e.toString(),
+                        style: AppTextStyles.caption,
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
 
-        return ConstrainedBox(
-          constraints: BoxConstraints(
-            minWidth: constraints.maxWidth,
-            minHeight: constraints.minHeight,
-          ),
-          child: content,
+            // Use simplified container without complex constraints
+            return content;
+          },
         );
       },
     );
@@ -442,12 +594,209 @@ class _QuizCreationPageState extends ConsumerState<QuizCreationPage> {
                     },
                     text: 'Save & Exit',
                     backgroundColor: AppColors.vibrantPurple,
+                    width: 120, // Fixed width for dialog
                   ),
                 ],
               ),
             ),
           );
         },
+      ),
+    );
+  }
+
+  /// Build overall progress indicator
+  Widget _buildProgressIndicator(validation) {
+    final completed = [
+      validation.isTitleValid,
+      validation.isDescriptionValid,
+      validation.hasQuestions,
+    ].where((item) => item).length;
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.spacingM,
+        vertical: AppSpacing.spacingS,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.offWhite,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.checklist,
+            size: 16,
+            color: AppColors.vibrantPurple,
+          ),
+          const SizedBox(width: AppSpacing.spacingS),
+          Text(
+            'Progress: $completed/3 requirements',
+            style: AppTextStyles.caption.copyWith(
+              color: AppColors.vibrantPurple,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.spacingS),
+          Expanded(
+            child: LinearProgressIndicator(
+              value: completed / 3.0,
+              backgroundColor: AppColors.lightGray,
+              valueColor: AlwaysStoppedAnimation(
+                completed == 3 ? AppColors.mintGreen : AppColors.vibrantPurple,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Show validation dialog with detailed requirements
+  void _showValidationDialog(validation) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: Row(
+          children: [
+            Icon(
+              Icons.checklist,
+              color: AppColors.vibrantPurple,
+              size: 24,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'Quiz Requirements',
+              style: AppTextStyles.sectionHeader,
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Complete these requirements to save your quiz:',
+              style: AppTextStyles.bodyText,
+            ),
+            const SizedBox(height: AppSpacing.spacingM),
+            _buildDialogRequirement(
+              'Quiz title (3+ characters)',
+              validation.isTitleValid,
+            ),
+            _buildDialogRequirement(
+              'Description (10+ characters)',
+              validation.isDescriptionValid,
+            ),
+            _buildDialogRequirement(
+              'At least 1 question',
+              validation.hasQuestions,
+            ),
+            const SizedBox(height: AppSpacing.spacingM),
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.spacingM),
+              decoration: BoxDecoration(
+                color: AppColors.offWhite,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.lightGray),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.lightbulb_outline,
+                    color: AppColors.vibrantPurple,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      validation.nextRequirement,
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.vibrantPurple,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          PrimaryButton(
+            onPressed: () => Navigator.pop(context),
+            text: 'Got it',
+            backgroundColor: AppColors.vibrantPurple,
+            width: 80,
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Build requirement item for dialog
+  Widget _buildDialogRequirement(String text, bool isComplete) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.spacingXS),
+      child: Row(
+        children: [
+          Icon(
+            isComplete ? Icons.check_circle : Icons.radio_button_unchecked,
+            size: 20,
+            color: isComplete ? AppColors.mintGreen : AppColors.coolGray,
+          ),
+          const SizedBox(width: AppSpacing.spacingS),
+          Expanded(
+            child: Text(
+              text,
+              style: AppTextStyles.bodyText.copyWith(
+                color: isComplete ? AppColors.charcoal : AppColors.coolGray,
+                decoration: isComplete ? TextDecoration.lineThrough : null,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Show error dialog for save failures
+  void _showErrorDialog(String errorMessage) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: Row(
+          children: [
+            Icon(
+              Icons.error_outline,
+              color: AppColors.coralRed,
+              size: 24,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'Save Failed',
+              style: AppTextStyles.sectionHeader,
+            ),
+          ],
+        ),
+        content: Text(
+          errorMessage,
+          style: AppTextStyles.bodyText,
+        ),
+        actions: [
+          PrimaryButton(
+            onPressed: () => Navigator.pop(context),
+            text: 'Try Again',
+            backgroundColor: AppColors.coralRed,
+            width: 100,
+          ),
+        ],
       ),
     );
   }

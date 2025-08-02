@@ -167,7 +167,7 @@ class _EmailVerificationPageState extends ConsumerState<EmailVerificationPage>
 
   void _signOut() {
     ref.read(authServiceProvider).signOut();
-    context.go(RouteConstants.login);
+    context.go(RouteConstants.home);
   }
 
   @override

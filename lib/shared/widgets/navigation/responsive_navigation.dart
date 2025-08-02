@@ -4,7 +4,6 @@ import '../../constants/app_colors.dart';
 import '../../constants/app_text_styles.dart';
 import '../../constants/app_spacing.dart';
 import '../../constants/app_dimensions.dart';
-import 'app_navigation_bar.dart';
 import '../../../core/navigation/route_constants.dart';
 
 /// Responsive navigation that adapts to screen size
@@ -39,7 +38,6 @@ class ResponsiveNavigation extends StatelessWidget {
       backgroundColor: AppColors.offWhite,
       appBar: title != null ? AppTopBar(title: title!, actions: actions) : null,
       body: body,
-      bottomNavigationBar: AppNavigationBar(currentRoute: currentRoute),
       floatingActionButton: floatingActionButton,
     );
   }

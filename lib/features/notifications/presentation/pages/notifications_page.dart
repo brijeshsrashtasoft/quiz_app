@@ -7,8 +7,8 @@ import '../../../../shared/constants/app_spacing.dart';
 import '../../../../core/navigation/route_constants.dart';
 import '../../domain/entities/notification_entity.dart';
 import '../providers/notification_providers.dart';
-import '../widgets/notification_list_widget.dart';
 import '../widgets/notification_filter_bar_widget.dart';
+import '../widgets/notification_card_widget.dart';
 
 /// Main notifications page with beautiful Kahoot-style design
 class NotificationsPage extends ConsumerStatefulWidget {
@@ -70,14 +70,18 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage>
 
     return Scaffold(
       backgroundColor: AppColors.offWhite,
-      body: CustomScrollView(
-        slivers: [
-          _buildAnimatedAppBar(unreadCountAsync),
-          _buildFilterBar(categoriesAsync),
-          if (actionsState.error != null)
-            _buildErrorBanner(actionsState.error!),
-          _buildNotificationContent(),
-        ],
+      body: RefreshIndicator(
+        onRefresh: _refreshNotifications,
+        color: AppColors.vibrantPurple,
+        child: CustomScrollView(
+          slivers: [
+            _buildAnimatedAppBar(unreadCountAsync),
+            _buildFilterBar(categoriesAsync),
+            if (actionsState.error != null)
+              _buildErrorBanner(actionsState.error!),
+            _buildNotificationContent(),
+          ],
+        ),
       ),
       floatingActionButton: _buildFloatingActionButton(),
     );
@@ -233,7 +237,9 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage>
           height: 60,
           child: const Center(
             child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(AppColors.vibrantPurple),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                AppColors.vibrantPurple,
+              ),
             ),
           ),
         ),
@@ -242,7 +248,13 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage>
           child: NotificationFilterBarWidget(
             selectedCategory: _selectedCategory,
             showOnlyUnread: _showOnlyUnread,
-            availableCategories: const ['invites', 'social', 'achievements', 'results', 'updates'],
+            availableCategories: const [
+              'invites',
+              'social',
+              'achievements',
+              'results',
+              'updates',
+            ],
             onCategoryChanged: (category) {
               setState(() {
                 _selectedCategory = category;
@@ -315,13 +327,339 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage>
   }
 
   Widget _buildNotificationContent() {
-    return SliverFillRemaining(
-      child: NotificationListWidget(
-        categoryFilter: _selectedCategory,
-        showOnlyUnread: _showOnlyUnread,
-        onNotificationTap: _handleNotificationTap,
+    final notificationsAsync = ref.watch(notificationsProvider);
+
+    return notificationsAsync.when(
+      loading: () => const SliverFillRemaining(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  AppColors.vibrantPurple,
+                ),
+              ),
+              SizedBox(height: AppSpacing.md),
+              Text('Loading notifications...', style: AppTextStyles.bodyText),
+            ],
+          ),
+        ),
+      ),
+      error: (error, _) => SliverFillRemaining(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.error_outline, size: 64, color: AppColors.coralRed),
+                const SizedBox(height: AppSpacing.md),
+                Text(
+                  'Oops! Something went wrong',
+                  style: AppTextStyles.sectionHeader.copyWith(
+                    color: AppColors.coralRed,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  error.toString(),
+                  style: AppTextStyles.bodyText.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    ref.invalidate(notificationsProvider);
+                  },
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Try Again'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.vibrantPurple,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.lg,
+                      vertical: AppSpacing.md,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      data: (result) => result.when(
+        success: (notifications) => _buildNotificationSlivers(notifications),
+        failure: (failure) => SliverFillRemaining(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    size: 64,
+                    color: AppColors.coralRed,
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  Text(
+                    'Failed to load notifications',
+                    style: AppTextStyles.sectionHeader.copyWith(
+                      color: AppColors.coralRed,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    'Please try again later',
+                    style: AppTextStyles.bodyText.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
+  }
+
+  Widget _buildNotificationSlivers(List<NotificationEntity> notifications) {
+    // Apply filters
+    var filteredNotifications = notifications;
+
+    if (_selectedCategory != null) {
+      filteredNotifications = filteredNotifications
+          .where((n) => n.category == _selectedCategory)
+          .toList();
+    }
+
+    if (_showOnlyUnread) {
+      filteredNotifications = filteredNotifications
+          .where((n) => !n.isRead)
+          .toList();
+    }
+
+    if (filteredNotifications.isEmpty) {
+      return _buildEmptySliver();
+    }
+
+    // Group notifications by category for better organization
+    final groupedNotifications = _groupNotificationsByCategory(
+      filteredNotifications,
+    );
+
+    return SliverMainAxisGroup(
+      slivers: [
+        if (_selectedCategory == null) ...[
+          // Show grouped notifications
+          ...groupedNotifications.entries.map((entry) {
+            return _buildNotificationGroup(entry.key, entry.value);
+          }).toList(),
+        ] else ...[
+          // Show flat list for specific category
+          SliverList(
+            delegate: SliverChildBuilderDelegate((context, index) {
+              final notification = filteredNotifications[index];
+              return NotificationCardWidget(
+                notification: notification,
+                onTap: () => _handleNotificationTap(notification),
+              );
+            }, childCount: filteredNotifications.length),
+          ),
+        ],
+
+        // Add some bottom padding
+        const SliverPadding(padding: EdgeInsets.only(bottom: AppSpacing.xl)),
+      ],
+    );
+  }
+
+  Widget _buildEmptySliver() {
+    String title;
+    String message;
+    IconData icon;
+
+    if (_showOnlyUnread) {
+      title = 'All caught up!';
+      message = 'You have no unread notifications.';
+      icon = Icons.check_circle_outline;
+    } else if (_selectedCategory != null) {
+      title = 'No ${_getCategoryDisplayName(_selectedCategory!)} yet';
+      message = 'We\'ll notify you when something happens in this category.';
+      icon = Icons.inbox;
+    } else {
+      title = 'No notifications yet';
+      message = 'When you get notifications, they\'ll appear here.';
+      icon = Icons.notifications_none;
+    }
+
+    return SliverFillRemaining(
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.xl),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 96, color: AppColors.coolGray),
+              const SizedBox(height: AppSpacing.lg),
+              Text(
+                title,
+                style: AppTextStyles.sectionHeader.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                message,
+                style: AppTextStyles.bodyText.copyWith(
+                  color: AppColors.textTertiary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNotificationGroup(
+    String category,
+    List<NotificationEntity> notifications,
+  ) {
+    final categoryDisplayName = _getCategoryDisplayName(category);
+    final unreadCount = notifications.where((n) => !n.isRead).length;
+
+    return SliverMainAxisGroup(
+      slivers: [
+        // Category header
+        SliverToBoxAdapter(
+          child: Container(
+            margin: const EdgeInsets.fromLTRB(
+              AppSpacing.md,
+              AppSpacing.lg,
+              AppSpacing.md,
+              AppSpacing.sm,
+            ),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.sm,
+            ),
+            decoration: BoxDecoration(
+              color: AppColors.offWhite,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.lightGray, width: 1),
+            ),
+            child: Row(
+              children: [
+                Text(
+                  categoryDisplayName,
+                  style: AppTextStyles.cardTitle.copyWith(
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const Spacer(),
+                if (unreadCount > 0)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.sm,
+                      vertical: AppSpacing.xs,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.vibrantPurple,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      unreadCount.toString(),
+                      style: AppTextStyles.caption.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+
+        // Notifications in this category
+        SliverList(
+          delegate: SliverChildBuilderDelegate((context, index) {
+            final notification = notifications[index];
+            return NotificationCardWidget(
+              notification: notification,
+              onTap: () => _handleNotificationTap(notification),
+            );
+          }, childCount: notifications.length),
+        ),
+      ],
+    );
+  }
+
+  Map<String, List<NotificationEntity>> _groupNotificationsByCategory(
+    List<NotificationEntity> notifications,
+  ) {
+    final grouped = <String, List<NotificationEntity>>{};
+
+    for (final notification in notifications) {
+      final category = notification.category;
+      grouped.putIfAbsent(category, () => []).add(notification);
+    }
+
+    // Sort categories by priority and unread count
+    final sortedEntries = grouped.entries.toList()
+      ..sort((a, b) {
+        // First, prioritize categories with unread notifications
+        final aUnreadCount = a.value.where((n) => !n.isRead).length;
+        final bUnreadCount = b.value.where((n) => !n.isRead).length;
+
+        if (aUnreadCount > 0 && bUnreadCount == 0) return -1;
+        if (bUnreadCount > 0 && aUnreadCount == 0) return 1;
+
+        // Then sort by category priority
+        final categoryPriority = {
+          'invites': 1,
+          'achievements': 2,
+          'results': 3,
+          'social': 4,
+          'updates': 5,
+        };
+
+        final aPriority = categoryPriority[a.key] ?? 10;
+        final bPriority = categoryPriority[b.key] ?? 10;
+
+        return aPriority.compareTo(bPriority);
+      });
+
+    return Map.fromEntries(sortedEntries);
+  }
+
+  String _getCategoryDisplayName(String category) {
+    switch (category) {
+      case 'invites':
+        return 'Invitations';
+      case 'social':
+        return 'Social';
+      case 'achievements':
+        return 'Achievements';
+      case 'results':
+        return 'Game Results';
+      case 'updates':
+        return 'System Updates';
+      default:
+        return category.toUpperCase();
+    }
   }
 
   Widget _buildFloatingActionButton() {
@@ -462,19 +800,26 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage>
     }
   }
 
-  void _refreshNotifications() {
+  Future<void> _refreshNotifications() async {
     ref.invalidate(notificationsProvider);
     ref.invalidate(unreadCountProvider);
 
+    // Wait a bit for the refresh to complete
+    await Future.delayed(const Duration(milliseconds: 500));
+
     // Show feedback
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Notifications refreshed'),
-        backgroundColor: AppColors.vibrantPurple,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        duration: const Duration(seconds: 2),
-      ),
-    );
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Notifications refreshed'),
+          backgroundColor: AppColors.vibrantPurple,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
   }
 }

@@ -7,6 +7,7 @@ import '../../data/repositories/game_session_repository_impl.dart';
 import '../../data/datasources/game_session_firestore_datasource.dart';
 import '../../data/services/game_session_realtime_service.dart';
 import '../../data/services/pin_lookup_service.dart';
+import '../../domain/usecases/create_game_session.dart';
 import '../../../authentication/presentation/providers/auth_providers.dart';
 
 /// Game session data source provider
@@ -41,6 +42,12 @@ final gameSessionRealtimeServiceProvider = Provider<GameSessionRealtimeService>(
 /// PIN lookup service provider with caching
 final pinLookupServiceProvider = Provider<PinLookupService>((ref) {
   return PinLookupService();
+});
+
+/// Create game session usecase provider
+final createGameSessionUseCaseProvider = Provider<CreateGameSession>((ref) {
+  final repository = ref.read(gameSessionRepositoryProvider);
+  return CreateGameSession(repository);
 });
 
 /// Connection state stream provider
@@ -650,7 +657,7 @@ final createSessionProvider = FutureProvider.family<GameSessionEntity?, String>(
       players: {},
       currentQuestionIndex: 0,
       createdAt: DateTime.now(),
-      settings: const GameSessionSettings(),
+      settings: const GameSessionSettingsModel(),
     );
 
     final result = await dataSource.createGameSession(newSession);
@@ -718,4 +725,215 @@ class JoinSessionParams {
   final String playerName;
 
   const JoinSessionParams({required this.pin, required this.playerName});
+}
+
+/// Host session state notifier provider
+final hostSessionStateNotifierProvider =
+    StateNotifierProvider<HostSessionStateNotifier, HostSessionState>(
+      (ref) => HostSessionStateNotifier(
+        createGameSessionUseCase: ref.read(createGameSessionUseCaseProvider),
+        gameSessionRepository: ref.read(gameSessionRepositoryProvider),
+        ref: ref,
+      ),
+    );
+
+/// Host session state notifier class
+class HostSessionStateNotifier extends StateNotifier<HostSessionState> {
+  final CreateGameSession createGameSessionUseCase;
+  final GameSessionRepositoryImpl gameSessionRepository;
+  final Ref ref;
+  
+  GameSessionEntity? _currentSession;
+
+  HostSessionStateNotifier({
+    required this.createGameSessionUseCase,
+    required this.gameSessionRepository,
+    required this.ref,
+  }) : super(const HostSessionState.initial());
+
+  /// Create a new game session
+  Future<void> createSession({required String quizId}) async {
+    final currentUser = ref.read(currentUserProvider);
+    if (currentUser == null) {
+      state = const HostSessionState.error('User not authenticated');
+      return;
+    }
+
+    state = const HostSessionState.creating();
+
+    try {
+      final result = await createGameSessionUseCase.call(
+        quizId: quizId,
+        hostId: currentUser.id,
+      );
+
+      result.when(
+        success: (session) {
+          _currentSession = session;
+          state = HostSessionState.created(session);
+          _listenToSessionUpdates(session.id);
+        },
+        failure: (error) {
+          AppLogger.error('Failed to create session', error);
+          state = HostSessionState.error(error.userMessage);
+        },
+      );
+    } catch (e) {
+      AppLogger.error('Error creating session', e);
+      state = HostSessionState.error('Failed to create session: ${e.toString()}');
+    }
+  }
+
+  /// Start the game session
+  Future<void> startSession() async {
+    if (_currentSession == null) {
+      state = const HostSessionState.error('No active session');
+      return;
+    }
+
+    state = HostSessionState.starting(_currentSession!);
+
+    try {
+      final result = await gameSessionRepository.startGameSession(_currentSession!.id);
+
+      result.when(
+        success: (updatedSession) {
+          _currentSession = updatedSession;
+          state = HostSessionState.active(updatedSession);
+        },
+        failure: (error) {
+          AppLogger.error('Failed to start session', error);
+          state = HostSessionState.error(error.userMessage);
+        },
+      );
+    } catch (e) {
+      AppLogger.error('Error starting session', e);
+      state = HostSessionState.error('Failed to start session: ${e.toString()}');
+    }
+  }
+
+  /// Cancel the session
+  Future<void> cancelSession() async {
+    if (_currentSession == null) {
+      state = const HostSessionState.initial();
+      return;
+    }
+
+    try {
+      await gameSessionRepository.deleteGameSession(_currentSession!.id);
+      _currentSession = null;
+      state = const HostSessionState.initial();
+    } catch (e) {
+      AppLogger.error('Error canceling session', e);
+      // Still reset state even if deletion fails
+      _currentSession = null;
+      state = const HostSessionState.initial();
+    }
+  }
+
+  /// Listen to session updates for real-time player joins
+  void _listenToSessionUpdates(String sessionId) {
+    ref.listen(gameSessionStreamProvider(sessionId), (previous, next) {
+      next.when(
+        data: (session) {
+          if (session != null && _currentSession != null) {
+            _currentSession = session;
+            // Update state based on current session status
+            switch (session.status) {
+              case GameSessionStatus.waiting:
+                state = HostSessionState.created(session);
+                break;
+              case GameSessionStatus.active:
+                state = HostSessionState.active(session);
+                break;
+              case GameSessionStatus.completed:
+                state = HostSessionState.completed(session);
+                break;
+            }
+          }
+        },
+        loading: () {
+          // Keep current state during loading
+        },
+        error: (error, stackTrace) {
+          AppLogger.error('Session stream error', error);
+          state = HostSessionState.error(error.toString());
+        },
+      );
+    });
+  }
+
+  /// Get current session
+  GameSessionEntity? get currentSession => _currentSession;
+}
+
+/// Host session state model
+sealed class HostSessionState {
+  const HostSessionState();
+
+  const factory HostSessionState.initial() = _InitialState;
+  const factory HostSessionState.creating() = _CreatingState;
+  const factory HostSessionState.created(GameSessionEntity session) = _CreatedState;
+  const factory HostSessionState.starting(GameSessionEntity session) = _StartingState;
+  const factory HostSessionState.active(GameSessionEntity session) = _ActiveState;
+  const factory HostSessionState.completed(GameSessionEntity session) = _CompletedState;
+  const factory HostSessionState.error(String message) = _HostErrorState;
+}
+
+class _InitialState extends HostSessionState {
+  const _InitialState();
+}
+
+class _CreatingState extends HostSessionState {
+  const _CreatingState();
+}
+
+class _CreatedState extends HostSessionState {
+  final GameSessionEntity session;
+  const _CreatedState(this.session);
+}
+
+class _StartingState extends HostSessionState {
+  final GameSessionEntity session;
+  const _StartingState(this.session);
+}
+
+class _ActiveState extends HostSessionState {
+  final GameSessionEntity session;
+  const _ActiveState(this.session);
+}
+
+class _CompletedState extends HostSessionState {
+  final GameSessionEntity session;
+  const _CompletedState(this.session);
+}
+
+class _HostErrorState extends HostSessionState {
+  final String message;
+  const _HostErrorState(this.message);
+}
+
+/// Extension for host session state
+extension HostSessionStateX on HostSessionState {
+  bool get isInitial => this is _InitialState;
+  bool get isCreating => this is _CreatingState;
+  bool get isCreated => this is _CreatedState;
+  bool get isStarting => this is _StartingState;
+  bool get isActive => this is _ActiveState;
+  bool get isCompleted => this is _CompletedState;
+  bool get hasError => this is _HostErrorState;
+  bool get isLoading => isCreating || isStarting;
+
+  GameSessionEntity? get session => switch (this) {
+    _CreatedState(session: final session) => session,
+    _StartingState(session: final session) => session,
+    _ActiveState(session: final session) => session,
+    _CompletedState(session: final session) => session,
+    _ => null,
+  };
+
+  String? get errorMessage => switch (this) {
+    _HostErrorState(message: final message) => message,
+    _ => null,
+  };
 }

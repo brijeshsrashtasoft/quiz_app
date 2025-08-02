@@ -7,7 +7,6 @@ import '../../../../shared/constants/app_text_styles.dart';
 import '../../../../shared/constants/app_spacing.dart';
 import '../../../../shared/constants/app_animations.dart';
 import '../../../../shared/widgets/buttons/primary_button.dart';
-import '../../../../shared/widgets/navigation/app_navigation_bar.dart';
 import '../../../../core/navigation/route_constants.dart';
 import '../widgets/avatar_upload_widget.dart';
 import '../widgets/statistics_card_widget.dart';
@@ -89,7 +88,7 @@ class _EnhancedProfilePageState extends ConsumerState<EnhancedProfilePage>
       final authService = ref.read(authServiceProvider);
       await authService.signOut();
       if (mounted) {
-        context.go(RouteConstants.login);
+        context.go(RouteConstants.home);
       }
     }
   }
@@ -149,9 +148,6 @@ class _EnhancedProfilePageState extends ConsumerState<EnhancedProfilePage>
             ),
           );
         },
-      ),
-      bottomNavigationBar: AppNavigationBar(
-        currentRoute: RouteConstants.profile,
       ),
     );
   }

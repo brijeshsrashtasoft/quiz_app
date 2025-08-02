@@ -102,7 +102,7 @@ class _PrimaryButtonState extends State<PrimaryButton>
               onTapCancel: _handleTapCancel,
               onTap: isInteractive ? widget.onPressed : null,
               child: Container(
-                width: widget.width ?? double.infinity,
+                width: widget.width,
                 height: widget.height ?? AppDimensions.buttonHeight,
                 decoration: BoxDecoration(
                   color: widget.isDisabled

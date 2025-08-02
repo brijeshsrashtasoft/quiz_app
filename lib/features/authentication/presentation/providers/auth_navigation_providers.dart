@@ -242,7 +242,7 @@ class AuthNavigationNotifier extends StateNotifier<AuthNavigationState> {
 
   /// Handle logout navigation
   void handleLogout() {
-    AppLogger.info('AuthNavigation', 'User logged out, navigating to login');
+    AppLogger.info('AuthNavigation', 'User logged out, navigating to home');
 
     state = state.copyWith(
       currentStep: AuthFlowStep.login,
@@ -253,7 +253,7 @@ class AuthNavigationNotifier extends StateNotifier<AuthNavigationState> {
       isNavigating: true,
     );
 
-    AppRouter.clearAndGoTo(RouteConstants.login);
+    AppRouter.clearAndGoTo(RouteConstants.home);
 
     state = state.copyWith(isNavigating: false);
   }
