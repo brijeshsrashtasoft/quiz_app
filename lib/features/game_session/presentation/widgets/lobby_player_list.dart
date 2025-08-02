@@ -4,58 +4,80 @@ import '../../../../shared/constants/app_text_styles.dart';
 import '../../../../shared/constants/app_spacing.dart';
 import '../../../../shared/constants/app_animations.dart';
 import '../../../../shared/widgets/quiz/lobby_avatar.dart';
+import '../../domain/entities/game_session_entity.dart';
 
 class LobbyPlayerList extends StatelessWidget {
-  final List<Map<String, dynamic>> players;
-  final AnimationController staggerController;
+  final Map<String, PlayerEntity> players;
+  final AnimationController? staggerController;
   final bool isHost;
 
   const LobbyPlayerList({
     super.key,
     required this.players,
-    required this.staggerController,
+    this.staggerController,
     this.isHost = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final playersList = players.entries.toList();
+
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.spacingL),
-      itemCount: players.length,
+      itemCount: playersList.length,
       itemBuilder: (context, index) {
-        final player = players[index];
-        final animation = Tween<double>(begin: 0.0, end: 1.0).animate(
-          CurvedAnimation(
-            parent: staggerController,
-            curve: Interval(
-              (index / players.length) * 0.5,
-              0.5 + (index / players.length) * 0.5,
-              curve: AppAnimations.easeOut,
-            ),
-          ),
-        );
+        final playerEntry = playersList[index];
+        final playerId = playerEntry.key;
+        final player = playerEntry.value;
 
-        return FadeTransition(
-          opacity: animation,
-          child: SlideTransition(
-            position: Tween<Offset>(
-              begin: const Offset(1.0, 0.0),
-              end: Offset.zero,
-            ).animate(animation),
-            child: _PlayerCard(player: player, isHost: isHost, index: index),
-          ),
-        );
+        if (staggerController != null) {
+          final animation = Tween<double>(begin: 0.0, end: 1.0).animate(
+            CurvedAnimation(
+              parent: staggerController!,
+              curve: Interval(
+                (index / players.length) * 0.5,
+                0.5 + (index / players.length) * 0.5,
+                curve: AppAnimations.easeOut,
+              ),
+            ),
+          );
+
+          return FadeTransition(
+            opacity: animation,
+            child: SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(1.0, 0.0),
+                end: Offset.zero,
+              ).animate(animation),
+              child: _PlayerCard(
+                playerId: playerId,
+                player: player,
+                isHost: isHost,
+                index: index,
+              ),
+            ),
+          );
+        } else {
+          return _PlayerCard(
+            playerId: playerId,
+            player: player,
+            isHost: isHost,
+            index: index,
+          );
+        }
       },
     );
   }
 }
 
 class _PlayerCard extends StatefulWidget {
-  final Map<String, dynamic> player;
+  final String playerId;
+  final PlayerEntity player;
   final bool isHost;
   final int index;
 
   const _PlayerCard({
+    required this.playerId,
     required this.player,
     required this.isHost,
     required this.index,
@@ -100,8 +122,8 @@ class _PlayerCardState extends State<_PlayerCard>
 
   @override
   Widget build(BuildContext context) {
-    final isReady = widget.player['isReady'] as bool;
-    final name = widget.player['name'] as String;
+    final isReady = widget.player.isReady;
+    final name = widget.player.name;
 
     return AnimatedBuilder(
       animation: _bounceAnimation,

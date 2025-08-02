@@ -5,10 +5,12 @@ import 'package:go_router/go_router.dart';
 /// Simple test to verify the navigation issue and demonstrate the fix
 void main() {
   group('Quiz Navigation Fix Tests', () {
-    testWidgets('ISSUE REPRODUCTION: Current navigation breaks', (tester) async {
+    testWidgets('ISSUE REPRODUCTION: Current navigation breaks', (
+      tester,
+    ) async {
       bool hasNavigatedCorrectly = false;
       String? capturedQuizId;
-      
+
       final router = GoRouter(
         routes: [
           GoRoute(
@@ -21,7 +23,7 @@ void main() {
                     const quizId = 'test_quiz_123';
                     final brokenRoute = '/quiz-creation/preview?id=$quizId';
                     print('❌ BROKEN: Trying to push: $brokenRoute');
-                    
+
                     try {
                       context.push(brokenRoute);
                     } catch (e) {
@@ -41,11 +43,11 @@ void main() {
                 builder: (context, state) {
                   capturedQuizId = state.uri.queryParameters['id'];
                   hasNavigatedCorrectly = capturedQuizId != null;
-                  
+
                   print('🔍 Preview route accessed');
                   print('🔍 Quiz ID found: $capturedQuizId');
                   print('🔍 Navigation successful: $hasNavigatedCorrectly');
-                  
+
                   if (capturedQuizId == null) {
                     return const Scaffold(
                       backgroundColor: Colors.grey,
@@ -57,10 +59,12 @@ void main() {
                       ),
                     );
                   }
-                  
+
                   return Scaffold(
                     body: Center(
-                      child: Text('✅ SUCCESS: Preview for quiz $capturedQuizId'),
+                      child: Text(
+                        '✅ SUCCESS: Preview for quiz $capturedQuizId',
+                      ),
                     ),
                   );
                 },
@@ -79,7 +83,10 @@ void main() {
 
       if (hasNavigatedCorrectly) {
         print('✅ Unexpected: Navigation worked!');
-        expect(find.text('✅ SUCCESS: Preview for quiz test_quiz_123'), findsOneWidget);
+        expect(
+          find.text('✅ SUCCESS: Preview for quiz test_quiz_123'),
+          findsOneWidget,
+        );
       } else {
         print('❌ CONFIRMED: Navigation is broken - blank screen appears');
         // This should show the blank screen issue
@@ -90,7 +97,7 @@ void main() {
     testWidgets('SOLUTION: Correct navigation approach', (tester) async {
       bool hasNavigatedCorrectly = false;
       String? capturedQuizId;
-      
+
       final router = GoRouter(
         routes: [
           GoRoute(
@@ -104,7 +111,8 @@ void main() {
                       onPressed: () {
                         // SOLUTION 1: Use the constant directly
                         const quizId = 'test_quiz_123';
-                        const correctRoute = '/quiz-creation/preview?id=$quizId';
+                        const correctRoute =
+                            '/quiz-creation/preview?id=$quizId';
                         print('✅ SOLUTION 1: Trying to push: $correctRoute');
                         context.push(correctRoute);
                       },
@@ -115,7 +123,8 @@ void main() {
                       onPressed: () {
                         // SOLUTION 2: Use go instead of push for nested routes
                         const quizId = 'test_quiz_456';
-                        const alternativeRoute = '/quiz-creation/preview?id=$quizId';
+                        const alternativeRoute =
+                            '/quiz-creation/preview?id=$quizId';
                         print('✅ SOLUTION 2: Trying to go: $alternativeRoute');
                         context.go(alternativeRoute);
                       },
@@ -134,11 +143,11 @@ void main() {
                 builder: (context, state) {
                   capturedQuizId = state.uri.queryParameters['id'];
                   hasNavigatedCorrectly = capturedQuizId != null;
-                  
+
                   print('🔍 Preview route accessed');
                   print('🔍 Quiz ID found: $capturedQuizId');
                   print('🔍 Navigation successful: $hasNavigatedCorrectly');
-                  
+
                   return Scaffold(
                     body: Center(
                       child: Column(
@@ -169,7 +178,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(hasNavigatedCorrectly, isTrue);
-      expect(find.text('✅ SUCCESS: Preview for quiz test_quiz_123'), findsOneWidget);
+      expect(
+        find.text('✅ SUCCESS: Preview for quiz test_quiz_123'),
+        findsOneWidget,
+      );
 
       // Go back and test alternative
       await tester.tap(find.text('Back to Test'));
@@ -178,12 +190,15 @@ void main() {
       await tester.tap(find.text('Test Alternative Navigation'));
       await tester.pumpAndSettle();
 
-      expect(find.text('✅ SUCCESS: Preview for quiz test_quiz_456'), findsOneWidget);
+      expect(
+        find.text('✅ SUCCESS: Preview for quiz test_quiz_456'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('DEMONSTRATION: What causes the blank screen', (tester) async {
       // This test demonstrates exactly what causes the blank screen issue
-      
+
       final router = GoRouter(
         routes: [
           GoRoute(
@@ -220,12 +235,12 @@ void main() {
                 path: 'preview',
                 builder: (context, state) {
                   final quizId = state.uri.queryParameters['id'];
-                  
+
                   if (quizId == null) {
                     print('❌ BLANK SCREEN CAUSE: No quiz ID in URL parameters');
                     print('❌ URL: ${state.uri}');
                     print('❌ Query params: ${state.uri.queryParameters}');
-                    
+
                     return const Scaffold(
                       backgroundColor: Colors.grey,
                       body: Center(
@@ -252,11 +267,9 @@ void main() {
                       ),
                     );
                   }
-                  
+
                   return Scaffold(
-                    body: Center(
-                      child: Text('Preview for quiz: $quizId'),
-                    ),
+                    body: Center(child: Text('Preview for quiz: $quizId')),
                   );
                 },
               ),

@@ -76,8 +76,8 @@ class _TestQuizCreationScreenState extends State<TestQuizCreationScreen> {
                   else
                     const SizedBox.shrink(),
                   ElevatedButton(
-                    onPressed: _currentStep < 2 
-                        ? () => setState(() => _currentStep++) 
+                    onPressed: _currentStep < 2
+                        ? () => setState(() => _currentStep++)
                         : () => print('Save & Preview'),
                     child: Text(_currentStep < 2 ? 'Next' : 'Save & Preview'),
                   ),
@@ -152,16 +152,10 @@ class _TestQuizCreationScreenState extends State<TestQuizCreationScreen> {
             labelText: 'Category',
             border: OutlineInputBorder(),
           ),
-          items: [
-            'General Knowledge',
-            'Science',
-            'History',
-            'Geography',
-          ].map((String value) {
-            return DropdownMenuItem<String>(
-              value: value,
-              child: Text(value),
-            );
+          items: ['General Knowledge', 'Science', 'History', 'Geography'].map((
+            String value,
+          ) {
+            return DropdownMenuItem<String>(value: value, child: Text(value));
           }).toList(),
           onChanged: (String? newValue) {},
         ),

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../quiz_creation/domain/entities/quiz.dart';
 import '../../../quiz_creation/domain/entities/question_entities.dart';
+import '../../../quiz_creation/presentation/providers/quiz_providers.dart';
 import '../../domain/entities/game_session_entity.dart';
 import '../providers/session_providers.dart';
 import '../../../authentication/presentation/providers/auth_providers.dart';
@@ -35,63 +36,70 @@ class GamePlayPage extends ConsumerStatefulWidget {
 }
 
 class _GamePlayPageState extends ConsumerState<GamePlayPage> {
-  Quiz? _quiz;
   int _currentQuestionIndex = 0;
   bool _showingAnswerReveal = false;
   Map<String, int> _currentAnswers = {};
+  bool _hasAnsweredCurrentQuestion = false;
 
   @override
   void initState() {
     super.initState();
-    _loadQuiz();
+    // Quiz data is loaded via provider, no need for manual loading
+    _syncWithSessionQuestion();
   }
 
-  Future<void> _loadQuiz() async {
-    // TODO: Load quiz data from repository
-    // For now, using placeholder data
-    setState(() {
-      _quiz = Quiz(
-        id: widget.quizId,
-        title: 'Sample Quiz',
-        description: 'Test quiz for game play',
-        category: 'General',
-        createdBy: 'system',
-        questions: [
-          Question.multipleChoice(
-            id: '1',
-            question: 'What is the capital of France?',
-            options: ['London', 'Berlin', 'Paris', 'Madrid'],
-            correctAnswer: 2,
-            timeLimit: 20,
-            points: 100,
-          ),
-          Question.multipleChoice(
-            id: '2',
-            question: 'Which planet is known as the Red Planet?',
-            options: ['Venus', 'Mars', 'Jupiter', 'Saturn'],
-            correctAnswer: 1,
-            timeLimit: 15,
-            points: 150,
-          ),
-        ],
-        createdAt: DateTime.now(),
-        settings: const GameSessionSettings(),
-      );
+  /// Sync local question index with session current question
+  void _syncWithSessionQuestion() {
+    final sessionAsync = ref.read(
+      optimizedSessionStreamProvider(widget.sessionId),
+    );
+    
+    sessionAsync.whenData((session) {
+      if (session != null && session.currentQuestionIndex != _currentQuestionIndex) {
+        setState(() {
+          _currentQuestionIndex = session.currentQuestionIndex;
+          _showingAnswerReveal = false;
+          _currentAnswers.clear();
+          _hasAnsweredCurrentQuestion = false;
+        });
+      }
     });
   }
 
   void _handleAnswerSubmit(int answerIndex) {
     final userId = ref.read(currentUserProvider)?.id;
-    if (userId == null) return;
+    if (userId == null || _hasAnsweredCurrentQuestion) return;
+
+    final quizAsync = ref.read(quizByIdProvider(widget.quizId));
+    if (quizAsync.value == null) return;
+
+    final quiz = quizAsync.value!;
+    if (_currentQuestionIndex >= quiz.questions.length) return;
+
+    final currentQuestion = quiz.questions[_currentQuestionIndex];
+    
+    // Calculate score based on correct answer
+    int score = 0;
+    if (currentQuestion is MultipleChoiceQuestion) {
+      if (answerIndex == currentQuestion.correctAnswer) {
+        score = currentQuestion.questionPoints;
+      }
+    } else if (currentQuestion is TrueFalseQuestion) {
+      if ((answerIndex == 0 && currentQuestion.correctAnswer) ||
+          (answerIndex == 1 && !currentQuestion.correctAnswer)) {
+        score = currentQuestion.questionPoints;
+      }
+    }
 
     setState(() {
       _currentAnswers[userId] = answerIndex;
+      _hasAnsweredCurrentQuestion = true;
     });
 
-    // Submit answer to backend
+    // Submit answer to backend with calculated score
     ref
         .read(sessionStateNotifierProvider(widget.sessionId).notifier)
-        .updatePlayerScore(100, [answerIndex]); // TODO: Calculate actual score
+        .updatePlayerScore(score, [answerIndex]);
   }
 
   void _handleTimeUp() {
@@ -113,27 +121,26 @@ class _GamePlayPageState extends ConsumerState<GamePlayPage> {
   }
 
   void _nextQuestion() {
-    if (_quiz == null) return;
+    final quizAsync = ref.read(quizByIdProvider(widget.quizId));
+    if (quizAsync.value == null) return;
 
-    setState(() {
-      if (_currentQuestionIndex < _quiz!.questions.length - 1) {
-        _currentQuestionIndex++;
-        _showingAnswerReveal = false;
-        _currentAnswers.clear();
-      } else {
-        // Game finished
-        context.go('/game/${widget.sessionId}/results');
-      }
-    });
+    final quiz = quizAsync.value!;
+    final isHost = ref.read(userSessionRoleProvider(widget.sessionId)).value == UserSessionRole.host;
+    
+    if (!isHost) return; // Only host can advance questions
 
-    // Update backend
-    final isHost =
-        ref.read(userSessionRoleProvider(widget.sessionId)).value ==
-        UserSessionRole.host;
-    if (isHost) {
+    if (_currentQuestionIndex < quiz.questions.length - 1) {
+      final nextQuestionIndex = _currentQuestionIndex + 1;
+      
+      // Update backend first - this will trigger real-time sync for all players
       ref
           .read(sessionStateNotifierProvider(widget.sessionId).notifier)
-          .updateCurrentQuestion(_currentQuestionIndex);
+          .updateCurrentQuestion(nextQuestionIndex);
+      
+      // Local state will be updated via real-time listener
+    } else {
+      // Game finished - navigate to results
+      context.go('/game/${widget.sessionId}/results');
     }
   }
 
@@ -142,43 +149,86 @@ class _GamePlayPageState extends ConsumerState<GamePlayPage> {
     final sessionAsync = ref.watch(
       optimizedSessionStreamProvider(widget.sessionId),
     );
+    final quizAsync = ref.watch(quizByIdProvider(widget.quizId));
     final connectionState = ref.watch(connectionStateProvider);
     final userRole = ref.watch(userSessionRoleProvider(widget.sessionId));
+
+    // Listen for session question changes for real-time sync
+    ref.listen(
+      optimizedSessionStreamProvider(widget.sessionId),
+      (previous, next) {
+        next.whenData((session) {
+          if (session != null && session.currentQuestionIndex != _currentQuestionIndex) {
+            setState(() {
+              _currentQuestionIndex = session.currentQuestionIndex;
+              _showingAnswerReveal = false;
+              _currentAnswers.clear();
+              _hasAnsweredCurrentQuestion = false;
+            });
+          }
+        });
+      },
+    );
 
     return AppScaffold(
       backgroundColor: AppColors.backgroundPrimary,
       body: sessionAsync.when(
         data: (session) {
-          if (session == null || _quiz == null) {
-            return Center(
+          return quizAsync.when(
+            data: (quiz) {
+              if (session == null || quiz == null) {
+                return Center(
+                  child: AppErrorWidget(
+                    title: 'Game data not found',
+                    message: 'The game session or quiz could not be loaded.',
+                    onRetry: () {
+                      ref.refresh(optimizedSessionStreamProvider(widget.sessionId));
+                      ref.refresh(quizByIdProvider(widget.quizId));
+                    },
+                  ),
+                );
+              }
+
+              return Stack(
+                children: [
+                  _buildGameContent(
+                    session,
+                    quiz,
+                    userRole.value ?? UserSessionRole.player,
+                  ),
+
+                  // Connection status overlay
+                  Positioned(
+                    top: MediaQuery.of(context).padding.top + 8,
+                    right: 16,
+                    child: ConnectionStatusIndicator(
+                      isConnected: connectionState.value == ConnectionState.active,
+                    ),
+                  ),
+                ],
+              );
+            },
+            loading: () => const Center(
+              child: LoadingOverlay(
+                child: CircularProgressIndicator(),
+                isLoading: true,
+              ),
+            ),
+            error: (error, _) => Center(
               child: AppErrorWidget(
-                title: 'Session not found',
-                message: 'The game session could not be loaded.',
-                onRetry: () => context.go('/'),
+                title: 'Error loading quiz',
+                message: error.toString(),
+                onRetry: () => ref.refresh(quizByIdProvider(widget.quizId)),
               ),
-            );
-          }
-
-          return Stack(
-            children: [
-              _buildGameContent(
-                session,
-                userRole.value ?? UserSessionRole.player,
-              ),
-
-              // Connection status overlay
-              Positioned(
-                top: MediaQuery.of(context).padding.top + 8,
-                right: 16,
-                child: ConnectionStatusIndicator(
-                  connectionState:
-                      connectionState.value ?? ConnectionState.disconnected,
-                ),
-              ),
-            ],
+            ),
           );
         },
-        loading: () => const Center(child: LoadingOverlay()),
+        loading: () => const Center(
+          child: LoadingOverlay(
+            child: CircularProgressIndicator(),
+            isLoading: true,
+          ),
+        ),
         error: (error, _) => Center(
           child: AppErrorWidget(
             title: 'Error loading session',
@@ -191,12 +241,12 @@ class _GamePlayPageState extends ConsumerState<GamePlayPage> {
     );
   }
 
-  Widget _buildGameContent(GameSessionEntity session, UserSessionRole role) {
-    if (_quiz == null || _currentQuestionIndex >= _quiz!.questions.length) {
+  Widget _buildGameContent(GameSessionEntity session, Quiz quiz, UserSessionRole role) {
+    if (_currentQuestionIndex >= quiz.questions.length) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    final currentQuestion = _quiz!.questions[_currentQuestionIndex];
+    final currentQuestion = quiz.questions[_currentQuestionIndex];
     final isHost = role == UserSessionRole.host;
 
     return LayoutBuilder(
@@ -205,11 +255,11 @@ class _GamePlayPageState extends ConsumerState<GamePlayPage> {
         final isDesktop = constraints.maxWidth > 1200;
 
         if (isDesktop) {
-          return _buildDesktopLayout(session, currentQuestion, isHost);
+          return _buildDesktopLayout(session, quiz, currentQuestion, isHost);
         } else if (isTablet) {
-          return _buildTabletLayout(session, currentQuestion, isHost);
+          return _buildTabletLayout(session, quiz, currentQuestion, isHost);
         } else {
-          return _buildMobileLayout(session, currentQuestion, isHost);
+          return _buildMobileLayout(session, quiz, currentQuestion, isHost);
         }
       },
     );
@@ -217,6 +267,7 @@ class _GamePlayPageState extends ConsumerState<GamePlayPage> {
 
   Widget _buildMobileLayout(
     GameSessionEntity session,
+    Quiz quiz,
     Question currentQuestion,
     bool isHost,
   ) {
@@ -232,7 +283,7 @@ class _GamePlayPageState extends ConsumerState<GamePlayPage> {
                 child: QuestionDisplay(
                   question: currentQuestion,
                   questionNumber: _currentQuestionIndex + 1,
-                  totalQuestions: _quiz!.questions.length,
+                  totalQuestions: quiz.questions.length,
                   timeLimit: Duration(
                     seconds: currentQuestion.questionTimeLimit,
                   ),
@@ -241,7 +292,7 @@ class _GamePlayPageState extends ConsumerState<GamePlayPage> {
               ),
             ),
 
-            AppSpacing.verticalSpacingM,
+            SizedBox(height: AppSpacing.spacingM),
 
             // Answer section
             Expanded(
@@ -256,13 +307,10 @@ class _GamePlayPageState extends ConsumerState<GamePlayPage> {
                     )
                   : AnswerSubmissionPanel(
                       question: currentQuestion,
-                      onAnswerSubmit: _handleAnswerSubmit,
-                      isSubmitted: _currentAnswers.containsKey(
-                        ref.read(currentUserProvider)?.id,
-                      ),
+                      onAnswerSubmit: _hasAnsweredCurrentQuestion ? null : _handleAnswerSubmit,
+                      isSubmitted: _hasAnsweredCurrentQuestion,
                       selectedAnswer:
-                          _currentAnswers[ref.read(currentUserProvider)?.id ??
-                              ''],
+                          _currentAnswers[ref.read(currentUserProvider)?.id ?? ''],
                       showCorrectAnswer: false,
                     ),
             ),
@@ -274,6 +322,7 @@ class _GamePlayPageState extends ConsumerState<GamePlayPage> {
 
   Widget _buildTabletLayout(
     GameSessionEntity session,
+    Quiz quiz,
     Question currentQuestion,
     bool isHost,
   ) {
@@ -288,13 +337,13 @@ class _GamePlayPageState extends ConsumerState<GamePlayPage> {
               child: QuestionDisplay(
                 question: currentQuestion,
                 questionNumber: _currentQuestionIndex + 1,
-                totalQuestions: _quiz!.questions.length,
+                totalQuestions: quiz.questions.length,
                 timeLimit: Duration(seconds: currentQuestion.questionTimeLimit),
                 onTimeUp: _handleTimeUp,
               ),
             ),
 
-            AppSpacing.horizontalSpacingL,
+            SizedBox(width: AppSpacing.spacingL),
 
             // Right side - Answers
             Expanded(
@@ -312,13 +361,10 @@ class _GamePlayPageState extends ConsumerState<GamePlayPage> {
                   : Center(
                       child: AnswerSubmissionPanel(
                         question: currentQuestion,
-                        onAnswerSubmit: _handleAnswerSubmit,
-                        isSubmitted: _currentAnswers.containsKey(
-                          ref.read(currentUserProvider)?.id,
-                        ),
+                        onAnswerSubmit: _hasAnsweredCurrentQuestion ? null : _handleAnswerSubmit,
+                        isSubmitted: _hasAnsweredCurrentQuestion,
                         selectedAnswer:
-                            _currentAnswers[ref.read(currentUserProvider)?.id ??
-                                ''],
+                            _currentAnswers[ref.read(currentUserProvider)?.id ?? ''],
                         showCorrectAnswer: false,
                       ),
                     ),
@@ -331,6 +377,7 @@ class _GamePlayPageState extends ConsumerState<GamePlayPage> {
 
   Widget _buildDesktopLayout(
     GameSessionEntity session,
+    Quiz quiz,
     Question currentQuestion,
     bool isHost,
   ) {
@@ -340,15 +387,9 @@ class _GamePlayPageState extends ConsumerState<GamePlayPage> {
         child: Row(
           children: [
             // Left sidebar - Leaderboard
-            SizedBox(
-              width: 300,
-              child: LeaderboardPreview(
-                players: session.players,
-                maxPlayersToShow: 10,
-              ),
-            ),
+            SizedBox(width: 300, child: const LeaderboardPreview()),
 
-            AppSpacing.horizontalSpacingXL,
+            SizedBox(width: AppSpacing.spacingXL),
 
             // Center - Main game content
             Expanded(
@@ -360,7 +401,7 @@ class _GamePlayPageState extends ConsumerState<GamePlayPage> {
                     child: QuestionDisplay(
                       question: currentQuestion,
                       questionNumber: _currentQuestionIndex + 1,
-                      totalQuestions: _quiz!.questions.length,
+                      totalQuestions: quiz.questions.length,
                       timeLimit: Duration(
                         seconds: currentQuestion.questionTimeLimit,
                       ),
@@ -368,7 +409,7 @@ class _GamePlayPageState extends ConsumerState<GamePlayPage> {
                     ),
                   ),
 
-                  AppSpacing.verticalSpacingL,
+                  SizedBox(height: AppSpacing.spacingL),
 
                   // Answers
                   Expanded(
@@ -377,7 +418,7 @@ class _GamePlayPageState extends ConsumerState<GamePlayPage> {
                         ? SingleChildScrollView(
                             child: AnswerRevealDisplay(
                               question: currentQuestion,
-                              players: session.players,
+                              players: const <String, PlayerEntity>{},
                               playerAnswers: _currentAnswers,
                               onContinue: isHost ? _nextQuestion : null,
                               isHost: isHost,
@@ -385,15 +426,12 @@ class _GamePlayPageState extends ConsumerState<GamePlayPage> {
                           )
                         : AnswerSubmissionPanel(
                             question: currentQuestion,
-                            onAnswerSubmit: _handleAnswerSubmit,
-                            isSubmitted: _currentAnswers.containsKey(
-                              ref.read(currentUserProvider)?.id,
-                            ),
+                            onAnswerSubmit: _hasAnsweredCurrentQuestion ? null : _handleAnswerSubmit,
+                            isSubmitted: _hasAnsweredCurrentQuestion,
                             selectedAnswer:
                                 _currentAnswers[ref
                                         .read(currentUserProvider)
-                                        ?.id ??
-                                    ''],
+                                        ?.id ?? ''],
                             showCorrectAnswer: false,
                           ),
                   ),
@@ -403,8 +441,8 @@ class _GamePlayPageState extends ConsumerState<GamePlayPage> {
 
             // Right sidebar - Game info
             if (isHost) ...[
-              AppSpacing.horizontalSpacingXL,
-              SizedBox(width: 250, child: _buildHostControls(session)),
+              SizedBox(width: AppSpacing.spacingXL),
+              SizedBox(width: 250, child: _buildHostControls(session, quiz)),
             ],
           ],
         ),
@@ -412,7 +450,7 @@ class _GamePlayPageState extends ConsumerState<GamePlayPage> {
     );
   }
 
-  Widget _buildHostControls(GameSessionEntity session) {
+  Widget _buildHostControls(GameSessionEntity session, Quiz quiz) {
     return Card(
       elevation: 2,
       child: Padding(
@@ -421,17 +459,17 @@ class _GamePlayPageState extends ConsumerState<GamePlayPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Host Controls', style: AppTextStyles.sectionSubheader),
-            AppSpacing.verticalSpacingM,
+            SizedBox(height: AppSpacing.spacingM),
 
             // Session info
             _buildInfoRow('PIN', session.pin),
             _buildInfoRow('Players', '${session.playerCount}'),
             _buildInfoRow(
               'Question',
-              '${_currentQuestionIndex + 1}/${_quiz!.questions.length}',
+              '${_currentQuestionIndex + 1}/${quiz.questions.length}',
             ),
 
-            AppSpacing.verticalSpacingL,
+            SizedBox(height: AppSpacing.spacingL),
 
             // Control buttons
             if (_showingAnswerReveal) ...[
@@ -445,7 +483,7 @@ class _GamePlayPageState extends ConsumerState<GamePlayPage> {
               ),
             ],
 
-            AppSpacing.verticalSpacingM,
+            SizedBox(height: AppSpacing.spacingM),
 
             SizedBox(
               width: double.infinity,
@@ -475,9 +513,7 @@ class _GamePlayPageState extends ConsumerState<GamePlayPage> {
         children: [
           Text(
             label,
-            style: AppTextStyles.labelMedium.copyWith(
-              color: AppColors.coolGray,
-            ),
+            style: AppTextStyles.caption.copyWith(color: AppColors.coolGray),
           ),
           Text(
             value,

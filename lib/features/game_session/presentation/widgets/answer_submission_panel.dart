@@ -14,7 +14,7 @@ import '../../../../shared/widgets/buttons/answer_button.dart';
 /// Following design system from docs/ui_guideline.md
 class AnswerSubmissionPanel extends ConsumerStatefulWidget {
   final Question question;
-  final Function(int answerIndex) onAnswerSubmit;
+  final Function(int answerIndex)? onAnswerSubmit;
   final bool isSubmitted;
   final int? selectedAnswer;
   final int? correctAnswer;
@@ -23,7 +23,7 @@ class AnswerSubmissionPanel extends ConsumerStatefulWidget {
   const AnswerSubmissionPanel({
     super.key,
     required this.question,
-    required this.onAnswerSubmit,
+    this.onAnswerSubmit,
     this.isSubmitted = false,
     this.selectedAnswer,
     this.correctAnswer,
@@ -54,7 +54,7 @@ class _AnswerSubmissionPanelState extends ConsumerState<AnswerSubmissionPanel> {
   }
 
   void _handleAnswerTap(int index) {
-    if (widget.isSubmitted) return;
+    if (widget.isSubmitted || widget.onAnswerSubmit == null) return;
 
     setState(() {
       _selectedIndex = index;
@@ -64,7 +64,7 @@ class _AnswerSubmissionPanelState extends ConsumerState<AnswerSubmissionPanel> {
     HapticFeedback.lightImpact();
 
     // Submit answer
-    widget.onAnswerSubmit(index);
+    widget.onAnswerSubmit!(index);
   }
 
   @override
@@ -122,7 +122,7 @@ class _AnswerSubmissionPanelState extends ConsumerState<AnswerSubmissionPanel> {
                     text: options[index],
                     shape: shape,
                     color: _getButtonColor(index, color, isCorrect, isWrong),
-                    onPressed: widget.isSubmitted
+                    onPressed: (widget.isSubmitted || widget.onAnswerSubmit == null)
                         ? null
                         : () => _handleAnswerTap(index),
                     isSelected: isSelected,
@@ -143,10 +143,15 @@ class _AnswerSubmissionPanelState extends ConsumerState<AnswerSubmissionPanel> {
                     duration: AppAnimations.mediumAnimation,
                   )
                   .scale(
-                    begin: _hoveredIndex == index && !widget.isSubmitted
-                        ? 1.05
-                        : 1.0,
-                    end: 1.0,
+                    begin: Offset(
+                      _hoveredIndex == index && !widget.isSubmitted
+                          ? 1.05
+                          : 1.0,
+                      _hoveredIndex == index && !widget.isSubmitted
+                          ? 1.05
+                          : 1.0,
+                    ),
+                    end: const Offset(1.0, 1.0),
                     duration: AppAnimations.shortAnimation,
                   )
                   .then()
@@ -158,8 +163,8 @@ class _AnswerSubmissionPanelState extends ConsumerState<AnswerSubmissionPanel> {
                     },
                   )
                   .scale(
-                    begin: 1.0,
-                    end: isCorrect ? 1.05 : 1.0,
+                    begin: const Offset(1.0, 1.0),
+                    end: Offset(isCorrect ? 1.05 : 1.0, isCorrect ? 1.05 : 1.0),
                     duration: AppAnimations.correctAnswerDuration,
                     curve: AppAnimations.correctAnswerCurve,
                   )
@@ -196,7 +201,7 @@ class _AnswerSubmissionPanelState extends ConsumerState<AnswerSubmissionPanel> {
             correctIndex: correctIndex,
           ),
         ),
-        AppSpacing.horizontalSpacingM,
+        SizedBox(width: AppSpacing.spacingM),
         Expanded(
           child: _buildTrueFalseButton(
             text: 'False',
@@ -230,7 +235,7 @@ class _AnswerSubmissionPanelState extends ConsumerState<AnswerSubmissionPanel> {
                 text: text,
                 shape: shape,
                 color: _getButtonColor(index, color, isCorrect, isWrong),
-                onPressed: widget.isSubmitted
+                onPressed: (widget.isSubmitted || widget.onAnswerSubmit == null)
                     ? null
                     : () => _handleAnswerTap(index),
                 isSelected: isSelected,
@@ -241,8 +246,8 @@ class _AnswerSubmissionPanelState extends ConsumerState<AnswerSubmissionPanel> {
               )
               .animate()
               .scale(
-                begin: 0.9,
-                end: 1.0,
+                begin: const Offset(0.9, 0.9),
+                end: const Offset(1.0, 1.0),
                 duration: AppAnimations.mediumAnimation,
                 curve: AppAnimations.easeOut,
               )
@@ -318,13 +323,13 @@ class AnswerFeedbackOverlay extends StatelessWidget {
                       size: 80,
                       color: AppColors.pureWhite,
                     ).animate().scale(
-                      begin: 0,
-                      end: 1,
+                      begin: const Offset(0.0, 0.0),
+                      end: const Offset(1.0, 1.0),
                       duration: AppAnimations.correctAnswerDuration,
                       curve: AppAnimations.correctAnswerCurve,
                     ),
 
-                    AppSpacing.verticalSpacingM,
+                    SizedBox(height: AppSpacing.spacingM),
 
                     Text(
                       isCorrect ? 'Correct!' : 'Incorrect',
@@ -338,10 +343,10 @@ class AnswerFeedbackOverlay extends StatelessWidget {
                     ),
 
                     if (isCorrect && points != null) ...[
-                      AppSpacing.verticalSpacingS,
+                      SizedBox(height: AppSpacing.spacingS),
                       Text(
                             '+$points points',
-                            style: AppTextStyles.bodyLarge.copyWith(
+                            style: AppTextStyles.bodyText.copyWith(
                               color: AppColors.pureWhite,
                               fontWeight: FontWeight.w600,
                             ),
@@ -363,17 +368,14 @@ class AnswerFeedbackOverlay extends StatelessWidget {
               )
               .animate()
               .scale(
-                begin: 0.8,
-                end: 1.0,
+                begin: const Offset(0.8, 0.8),
+                end: const Offset(1.0, 1.0),
                 duration: AppAnimations.mediumAnimation,
                 curve: AppAnimations.easeOut,
               )
               .fadeIn(duration: AppAnimations.shortAnimation)
               .then(delay: const Duration(seconds: 2))
-              .fadeOut(
-                duration: AppAnimations.shortAnimation,
-                onComplete: (_) => onAnimationComplete?.call(),
-              ),
+              .fadeOut(duration: AppAnimations.shortAnimation),
     );
   }
 }

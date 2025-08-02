@@ -15,9 +15,7 @@ class TestFormApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Quiz Form Test',
         home: Scaffold(
-          appBar: AppBar(
-            title: const Text('Quiz Form Test'),
-          ),
+          appBar: AppBar(title: const Text('Quiz Form Test')),
           body: const SafeArea(
             child: Padding(
               padding: EdgeInsets.all(16.0),

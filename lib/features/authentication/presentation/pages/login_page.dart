@@ -138,10 +138,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back_ios,
-            color: AppColors.charcoal,
-          ),
+          icon: Icon(Icons.arrow_back_ios, color: AppColors.charcoal),
           onPressed: () => context.go(RouteConstants.home),
         ),
       ),

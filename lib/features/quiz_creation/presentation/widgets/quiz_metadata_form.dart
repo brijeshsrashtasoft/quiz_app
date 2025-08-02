@@ -52,11 +52,13 @@ class _QuizMetadataFormState extends ConsumerState<QuizMetadataForm> {
   /// Update provider state when form fields change
   void _updateProviderState() {
     try {
-      ref.read(quizCreationProvider.notifier).updateMetadata(
-        title: _titleController.text,
-        description: _descriptionController.text,
-        category: _selectedCategory,
-      );
+      ref
+          .read(quizCreationProvider.notifier)
+          .updateMetadata(
+            title: _titleController.text,
+            description: _descriptionController.text,
+            category: _selectedCategory,
+          );
     } catch (e) {
       // Continue without crashing the UI - log error silently
       debugPrint('Error updating provider state: $e');
@@ -75,7 +77,7 @@ class _QuizMetadataFormState extends ConsumerState<QuizMetadataForm> {
     return Consumer(
       builder: (context, ref, child) {
         final quizState = ref.watch(quizCreationProvider);
-        
+
         return LayoutBuilder(
           builder: (context, constraints) {
             return SizedBox(
@@ -96,7 +98,9 @@ class _QuizMetadataFormState extends ConsumerState<QuizMetadataForm> {
                     physics: const ClampingScrollPhysics(),
                     child: Padding(
                       padding: EdgeInsets.all(
-                        isSmallScreen ? AppSpacing.spacingL : AppSpacing.spacingXL,
+                        isSmallScreen
+                            ? AppSpacing.spacingL
+                            : AppSpacing.spacingXL,
                       ),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
@@ -120,7 +124,10 @@ class _QuizMetadataFormState extends ConsumerState<QuizMetadataForm> {
                           _buildTitleInput(quizState.validation),
                           const SizedBox(height: AppSpacing.spacingL),
                           // Description input with validation feedback
-                          _buildDescriptionInput(quizState.validation, isSmallScreen),
+                          _buildDescriptionInput(
+                            quizState.validation,
+                            isSmallScreen,
+                          ),
                           const SizedBox(height: AppSpacing.spacingL),
                           // Category dropdown
                           _buildCategoryDropdown(),
@@ -234,11 +241,7 @@ class _QuizMetadataFormState extends ConsumerState<QuizMetadataForm> {
         children: [
           Row(
             children: [
-              Icon(
-                Icons.checklist,
-                size: 16,
-                color: AppColors.vibrantPurple,
-              ),
+              Icon(Icons.checklist, size: 16, color: AppColors.vibrantPurple),
               const SizedBox(width: AppSpacing.spacingS),
               Text(
                 'Requirements',
@@ -258,10 +261,7 @@ class _QuizMetadataFormState extends ConsumerState<QuizMetadataForm> {
             'Description (10+ characters)',
             validation.isDescriptionValid,
           ),
-          _buildRequirementItem(
-            'At least 1 question',
-            validation.hasQuestions,
-          ),
+          _buildRequirementItem('At least 1 question', validation.hasQuestions),
         ],
       ),
     );
@@ -308,11 +308,7 @@ class _QuizMetadataFormState extends ConsumerState<QuizMetadataForm> {
             color: validation.isTitleValid ? AppColors.mintGreen : null,
           ),
           suffixIcon: validation.isTitleValid
-              ? Icon(
-                  Icons.check_circle,
-                  color: AppColors.mintGreen,
-                  size: 20,
-                )
+              ? Icon(Icons.check_circle, color: AppColors.mintGreen, size: 20)
               : null,
         ),
         if (validation.titleError.isNotEmpty)
@@ -323,9 +319,7 @@ class _QuizMetadataFormState extends ConsumerState<QuizMetadataForm> {
             ),
             child: Text(
               validation.titleError,
-              style: AppTextStyles.caption.copyWith(
-                color: AppColors.coralRed,
-              ),
+              style: AppTextStyles.caption.copyWith(color: AppColors.coralRed),
             ),
           ),
       ],
@@ -348,11 +342,7 @@ class _QuizMetadataFormState extends ConsumerState<QuizMetadataForm> {
             color: validation.isDescriptionValid ? AppColors.mintGreen : null,
           ),
           suffixIcon: validation.isDescriptionValid
-              ? Icon(
-                  Icons.check_circle,
-                  color: AppColors.mintGreen,
-                  size: 20,
-                )
+              ? Icon(Icons.check_circle, color: AppColors.mintGreen, size: 20)
               : null,
         ),
         if (validation.descriptionError.isNotEmpty)
@@ -363,9 +353,7 @@ class _QuizMetadataFormState extends ConsumerState<QuizMetadataForm> {
             ),
             child: Text(
               validation.descriptionError,
-              style: AppTextStyles.caption.copyWith(
-                color: AppColors.coralRed,
-              ),
+              style: AppTextStyles.caption.copyWith(color: AppColors.coralRed),
             ),
           ),
       ],

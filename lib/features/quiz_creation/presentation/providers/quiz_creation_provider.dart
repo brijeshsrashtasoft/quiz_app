@@ -13,7 +13,7 @@ part 'quiz_creation_provider.freezed.dart';
 @freezed
 class ValidationState with _$ValidationState {
   const ValidationState._();
-  
+
   const factory ValidationState({
     @Default(false) bool isTitleValid,
     @Default(false) bool isDescriptionValid,
@@ -25,10 +25,10 @@ class ValidationState with _$ValidationState {
 
   /// Check if basic metadata is valid (for navigation)
   bool get isMetadataValid => isTitleValid && isDescriptionValid;
-  
+
   /// Check if entire quiz is valid for saving
   bool get isQuizComplete => isMetadataValid && hasQuestions;
-  
+
   /// Get the next required step message
   String get nextRequirement {
     if (!isTitleValid) return 'Add a quiz title (3+ characters)';
@@ -42,7 +42,7 @@ class ValidationState with _$ValidationState {
 @freezed
 class QuizCreationState with _$QuizCreationState {
   const QuizCreationState._();
-  
+
   const factory QuizCreationState({
     @Default('') String title,
     @Default('') String description,
@@ -99,23 +99,24 @@ class QuizCreationNotifier extends StateNotifier<QuizCreationState> {
   }) {
     final newTitle = title ?? state.title;
     final newDescription = description ?? state.description;
-    
+
     // Validate title
     final isTitleValid = newTitle.isNotEmpty && newTitle.length >= 3;
-    final titleError = newTitle.isEmpty 
+    final titleError = newTitle.isEmpty
         ? 'Title is required'
-        : newTitle.length < 3 
-            ? 'Title must be at least 3 characters'
-            : '';
-    
+        : newTitle.length < 3
+        ? 'Title must be at least 3 characters'
+        : '';
+
     // Validate description
-    final isDescriptionValid = newDescription.isNotEmpty && newDescription.length >= 10;
-    final descriptionError = newDescription.isEmpty 
+    final isDescriptionValid =
+        newDescription.isNotEmpty && newDescription.length >= 10;
+    final descriptionError = newDescription.isEmpty
         ? 'Description is required'
-        : newDescription.length < 10 
-            ? 'Description must be at least 10 characters'
-            : '';
-    
+        : newDescription.length < 10
+        ? 'Description must be at least 10 characters'
+        : '';
+
     // Update validation state
     final newValidation = state.validation.copyWith(
       isTitleValid: isTitleValid,
@@ -123,7 +124,7 @@ class QuizCreationNotifier extends StateNotifier<QuizCreationState> {
       titleError: titleError,
       descriptionError: descriptionError,
     );
-    
+
     state = state.copyWith(
       title: newTitle,
       description: newDescription,
@@ -138,7 +139,7 @@ class QuizCreationNotifier extends StateNotifier<QuizCreationState> {
   void addQuestion(Question question) {
     final newQuestions = [...state.questions, question];
     final hasQuestions = newQuestions.isNotEmpty;
-    
+
     state = state.copyWith(
       questions: newQuestions,
       validation: state.validation.copyWith(
@@ -154,12 +155,14 @@ class QuizCreationNotifier extends StateNotifier<QuizCreationState> {
     if (index >= 0 && index < updatedQuestions.length) {
       updatedQuestions[index] = question;
       final hasQuestions = updatedQuestions.isNotEmpty;
-      
+
       state = state.copyWith(
         questions: updatedQuestions,
         validation: state.validation.copyWith(
           hasQuestions: hasQuestions,
-          questionsError: hasQuestions ? '' : 'At least one question is required',
+          questionsError: hasQuestions
+              ? ''
+              : 'At least one question is required',
         ),
       );
     }
@@ -171,12 +174,14 @@ class QuizCreationNotifier extends StateNotifier<QuizCreationState> {
     if (index >= 0 && index < updatedQuestions.length) {
       updatedQuestions.removeAt(index);
       final hasQuestions = updatedQuestions.isNotEmpty;
-      
+
       state = state.copyWith(
         questions: updatedQuestions,
         validation: state.validation.copyWith(
           hasQuestions: hasQuestions,
-          questionsError: hasQuestions ? '' : 'At least one question is required',
+          questionsError: hasQuestions
+              ? ''
+              : 'At least one question is required',
         ),
       );
     }
@@ -215,7 +220,7 @@ class QuizCreationNotifier extends StateNotifier<QuizCreationState> {
   void reset() {
     state = const QuizCreationState();
   }
-  
+
   /// Get current validation summary for UI display
   String getValidationSummary() {
     if (state.validation.isQuizComplete) {
@@ -223,7 +228,7 @@ class QuizCreationNotifier extends StateNotifier<QuizCreationState> {
     }
     return state.validation.nextRequirement;
   }
-  
+
   /// Check if user can proceed to next step
   bool canProceedToStep(int targetStep) {
     switch (targetStep) {
@@ -235,7 +240,7 @@ class QuizCreationNotifier extends StateNotifier<QuizCreationState> {
         return true;
     }
   }
-  
+
   /// Check if user can save quiz
   bool canSaveQuiz() {
     return state.validation.isQuizComplete;
@@ -244,11 +249,8 @@ class QuizCreationNotifier extends StateNotifier<QuizCreationState> {
   /// Validate quiz before saving - now uses validation state
   bool validateQuiz() {
     // Force re-validation to ensure current state
-    updateMetadata(
-      title: state.title,
-      description: state.description,
-    );
-    
+    updateMetadata(title: state.title, description: state.description);
+
     // Check if quiz is complete
     if (!state.validation.isQuizComplete) {
       // Set a user-friendly error message
@@ -256,7 +258,7 @@ class QuizCreationNotifier extends StateNotifier<QuizCreationState> {
       state = state.copyWith(error: errorMessage);
       return false;
     }
-    
+
     state = state.copyWith(error: null);
     return true;
   }
@@ -264,13 +266,16 @@ class QuizCreationNotifier extends StateNotifier<QuizCreationState> {
   /// Save quiz with Firebase integration
   Future<String?> saveQuiz() async {
     if (!validateQuiz()) return null;
-    
+
     // For development mode, use fallback user ID if null
-    final userId = _currentUserId ?? 'dev_user_${DateTime.now().millisecondsSinceEpoch}';
-    
+    final userId =
+        _currentUserId ?? 'dev_user_${DateTime.now().millisecondsSinceEpoch}';
+
     if (_currentUserId == null) {
       // Allow saving in development mode
-      debugPrint('Warning: Saving quiz without authenticated user (development mode)');
+      debugPrint(
+        'Warning: Saving quiz without authenticated user (development mode)',
+      );
     }
 
     state = state.copyWith(isLoading: true, error: null);
@@ -299,17 +304,11 @@ class QuizCreationNotifier extends StateNotifier<QuizCreationState> {
 
       return result.when(
         success: (createdQuiz) {
-          state = state.copyWith(
-            isLoading: false,
-            error: null,
-          );
+          state = state.copyWith(isLoading: false, error: null);
           return createdQuiz.id;
         },
         failure: (failure) {
-          state = state.copyWith(
-            isLoading: false,
-            error: failure.message,
-          );
+          state = state.copyWith(isLoading: false, error: failure.message);
           return null;
         },
       );
@@ -325,12 +324,12 @@ class QuizCreationNotifier extends StateNotifier<QuizCreationState> {
   /// Calculate estimated duration based on questions
   int _calculateEstimatedDuration() {
     if (state.questions.isEmpty) return 5; // Default 5 minutes
-    
+
     final totalSeconds = state.questions.fold<int>(
       0,
       (sum, question) => sum + question.questionTimeLimit,
     );
-    
+
     // Add buffer time (30% extra) and convert to minutes
     final totalMinutes = ((totalSeconds * 1.3) / 60).ceil();
     return totalMinutes.clamp(1, 180); // Between 1 and 180 minutes

@@ -16,7 +16,9 @@ import 'package:quiz_app_1/shared/constants/app_colors.dart';
 
 // Create mock classes manually to avoid build_runner issues
 class MockCreateQuizUseCase extends Mock implements CreateQuizUseCase {}
+
 class MockGoRouter extends Mock implements GoRouter {}
+
 void main() {
   group('Quiz Creation Flow Tests', () {
     late MockCreateQuizUseCase mockCreateUseCase;
@@ -26,13 +28,15 @@ void main() {
     setUp(() {
       mockCreateUseCase = MockCreateQuizUseCase();
       mockRouter = MockGoRouter();
-      
+
       container = ProviderContainer(
         overrides: [
-          quizCreationProvider.overrideWith((ref) => QuizCreationNotifier(
-            createUseCase: mockCreateUseCase,
-            currentUserId: 'test_user_123',
-          )),
+          quizCreationProvider.overrideWith(
+            (ref) => QuizCreationNotifier(
+              createUseCase: mockCreateUseCase,
+              currentUserId: 'test_user_123',
+            ),
+          ),
         ],
       );
     });
@@ -42,27 +46,31 @@ void main() {
     });
 
     group('Quiz Submission Flow Tests', () {
-      testWidgets('should show loading state during quiz submission', (tester) async {
+      testWidgets('should show loading state during quiz submission', (
+        tester,
+      ) async {
         // Setup - Mock delayed response
         when(mockCreateUseCase.call(any)).thenAnswer((_) async {
           await Future.delayed(const Duration(seconds: 1));
-          return const Result.success(Quiz(
-            id: 'test_quiz_123',
-            title: 'Test Quiz',
-            description: 'Test Description',
-            createdBy: 'test_user_123',
-            questions: [],
-            isPublic: true,
-            createdAt: null,
-            metadata: QuizMetadata(
-              category: 'General',
-              tags: [],
-              difficulty: 'medium',
-              language: 'en',
-              estimatedDuration: 5,
+          return const Result.success(
+            Quiz(
+              id: 'test_quiz_123',
+              title: 'Test Quiz',
+              description: 'Test Description',
+              createdBy: 'test_user_123',
+              questions: [],
+              isPublic: true,
+              createdAt: null,
+              metadata: QuizMetadata(
+                category: 'General',
+                tags: [],
+                difficulty: 'medium',
+                language: 'en',
+                estimatedDuration: 5,
+              ),
+              isDraft: true,
             ),
-            isDraft: true,
-          ));
+          );
         });
 
         await tester.pumpWidget(
@@ -83,7 +91,7 @@ void main() {
 
         // Fill in quiz metadata
         await _fillQuizMetadata(tester);
-        
+
         // Navigate to final step (step 2)
         await _navigateToStep(tester, 2);
 
@@ -103,7 +111,9 @@ void main() {
         await tester.pumpAndSettle();
       });
 
-      testWidgets('should navigate to preview page on successful quiz save', (tester) async {
+      testWidgets('should navigate to preview page on successful quiz save', (
+        tester,
+      ) async {
         // Setup successful save
         final mockQuiz = Quiz(
           id: 'saved_quiz_123',
@@ -138,7 +148,7 @@ void main() {
 
         // Track navigation calls
         final List<String> navigationCalls = [];
-        
+
         await tester.pumpWidget(
           UncontrolledProviderScope(
             container: container,
@@ -184,21 +194,23 @@ void main() {
         expect(navigationCalls.last, contains('id=saved_quiz_123'));
       });
 
-      testWidgets('should show error message when quiz save fails', (tester) async {
+      testWidgets('should show error message when quiz save fails', (
+        tester,
+      ) async {
         // Setup failed save
         when(mockCreateUseCase.call(any)).thenAnswer((_) async {
-          return const Result.failure(Failure(
-            code: 'SAVE_ERROR',
-            message: 'Failed to save quiz to database',
-          ));
+          return const Result.failure(
+            Failure(
+              code: 'SAVE_ERROR',
+              message: 'Failed to save quiz to database',
+            ),
+          );
         });
 
         await tester.pumpWidget(
           UncontrolledProviderScope(
             container: container,
-            child: MaterialApp(
-              home: const QuizCreationPage(),
-            ),
+            child: MaterialApp(home: const QuizCreationPage()),
           ),
         );
 
@@ -219,13 +231,13 @@ void main() {
         expect(find.byType(QuizCreationPage), findsOneWidget);
       });
 
-      testWidgets('should handle validation errors during save', (tester) async {
+      testWidgets('should handle validation errors during save', (
+        tester,
+      ) async {
         await tester.pumpWidget(
           UncontrolledProviderScope(
             container: container,
-            child: MaterialApp(
-              home: const QuizCreationPage(),
-            ),
+            child: MaterialApp(home: const QuizCreationPage()),
           ),
         );
 
@@ -238,7 +250,10 @@ void main() {
         await tester.pump();
 
         // Should show validation error
-        expect(find.textContaining('Quiz title must be at least 3 characters'), findsOneWidget);
+        expect(
+          find.textContaining('Quiz title must be at least 3 characters'),
+          findsOneWidget,
+        );
 
         // Should not call the use case
         verifyNever(mockCreateUseCase.call(any));
@@ -246,7 +261,9 @@ void main() {
     });
 
     group('Navigation Issue Investigation', () {
-      testWidgets('should correctly construct preview route URL', (tester) async {
+      testWidgets('should correctly construct preview route URL', (
+        tester,
+      ) async {
         final mockQuiz = Quiz(
           id: 'test_quiz_navigation',
           title: 'Navigation Test Quiz',
@@ -270,7 +287,7 @@ void main() {
         });
 
         final List<String> pushedRoutes = [];
-        
+
         await tester.pumpWidget(
           UncontrolledProviderScope(
             container: container,
@@ -300,17 +317,24 @@ void main() {
         // Verify the exact route that was pushed
         expect(pushedRoutes, isNotEmpty);
         final pushedRoute = pushedRoutes.last;
-        
+
         // Check the route construction
-        expect(pushedRoute, startsWith('${RouteConstants.quizCreation}/preview'));
+        expect(
+          pushedRoute,
+          startsWith('${RouteConstants.quizCreation}/preview'),
+        );
         expect(pushedRoute, contains('?id=test_quiz_navigation'));
-        
+
         // Log the actual route for debugging
         print('DEBUG: Pushed route: $pushedRoute');
-        print('DEBUG: Expected pattern: ${RouteConstants.quizCreation}/preview?id=test_quiz_navigation');
+        print(
+          'DEBUG: Expected pattern: ${RouteConstants.quizCreation}/preview?id=test_quiz_navigation',
+        );
       });
 
-      testWidgets('should handle blank screen navigation issue', (tester) async {
+      testWidgets('should handle blank screen navigation issue', (
+        tester,
+      ) async {
         // This test specifically looks for the blank screen issue
         final mockQuiz = Quiz(
           id: 'blank_screen_test',
@@ -384,27 +408,34 @@ void main() {
         await tester.pumpAndSettle();
 
         // Check if we ended up with a blank/gray screen
-        final greyScaffolds = find.byWidgetPredicate((widget) => 
-          widget is Scaffold && widget.backgroundColor == Colors.grey);
-        
+        final greyScaffolds = find.byWidgetPredicate(
+          (widget) =>
+              widget is Scaffold && widget.backgroundColor == Colors.grey,
+        );
+
         if (greyScaffolds.evaluate().isNotEmpty) {
-          print('FOUND ISSUE: Grey screen detected - likely navigation problem');
+          print(
+            'FOUND ISSUE: Grey screen detected - likely navigation problem',
+          );
           expect(find.text('ERROR: No quiz ID found'), findsOneWidget);
         } else {
           // Should show the preview page
-          expect(find.text('Preview for quiz: blank_screen_test'), findsOneWidget);
+          expect(
+            find.text('Preview for quiz: blank_screen_test'),
+            findsOneWidget,
+          );
         }
       });
     });
 
     group('Form Validation Tests', () {
-      testWidgets('should validate required fields before saving', (tester) async {
+      testWidgets('should validate required fields before saving', (
+        tester,
+      ) async {
         await tester.pumpWidget(
           UncontrolledProviderScope(
             container: container,
-            child: MaterialApp(
-              home: const QuizCreationPage(),
-            ),
+            child: MaterialApp(home: const QuizCreationPage()),
           ),
         );
 
@@ -414,16 +445,19 @@ void main() {
         await tester.pump();
 
         // Should show validation errors
-        expect(find.textContaining('Quiz title must be at least 3 characters'), findsOneWidget);
+        expect(
+          find.textContaining('Quiz title must be at least 3 characters'),
+          findsOneWidget,
+        );
       });
 
-      testWidgets('should validate questions exist before saving', (tester) async {
+      testWidgets('should validate questions exist before saving', (
+        tester,
+      ) async {
         await tester.pumpWidget(
           UncontrolledProviderScope(
             container: container,
-            child: MaterialApp(
-              home: const QuizCreationPage(),
-            ),
+            child: MaterialApp(home: const QuizCreationPage()),
           ),
         );
 
@@ -434,31 +468,38 @@ void main() {
         await tester.pump();
 
         // Should show question validation error
-        expect(find.textContaining('Quiz must have at least one question'), findsOneWidget);
+        expect(
+          find.textContaining('Quiz must have at least one question'),
+          findsOneWidget,
+        );
       });
     });
 
     group('Provider State Tests', () {
-      testWidgets('should update loading state correctly during save', (tester) async {
+      testWidgets('should update loading state correctly during save', (
+        tester,
+      ) async {
         when(mockCreateUseCase.call(any)).thenAnswer((_) async {
           await Future.delayed(const Duration(milliseconds: 100));
-          return const Result.success(Quiz(
-            id: 'test_id',
-            title: 'Test',
-            description: 'Test desc',
-            createdBy: 'user',
-            questions: [],
-            isPublic: true,
-            createdAt: null,
-            metadata: QuizMetadata(
-              category: 'Test',
-              tags: [],
-              difficulty: 'easy',
-              language: 'en',
-              estimatedDuration: 5,
+          return const Result.success(
+            Quiz(
+              id: 'test_id',
+              title: 'Test',
+              description: 'Test desc',
+              createdBy: 'user',
+              questions: [],
+              isPublic: true,
+              createdAt: null,
+              metadata: QuizMetadata(
+                category: 'Test',
+                tags: [],
+                difficulty: 'easy',
+                language: 'en',
+                estimatedDuration: 5,
+              ),
+              isDraft: true,
             ),
-            isDraft: true,
-          ));
+          );
         });
 
         await tester.pumpWidget(
@@ -505,13 +546,13 @@ void main() {
     });
 
     group('Step Navigation Tests', () {
-      testWidgets('should enable next button only when current step is valid', (tester) async {
+      testWidgets('should enable next button only when current step is valid', (
+        tester,
+      ) async {
         await tester.pumpWidget(
           UncontrolledProviderScope(
             container: container,
-            child: MaterialApp(
-              home: const QuizCreationPage(),
-            ),
+            child: MaterialApp(home: const QuizCreationPage()),
           ),
         );
 
@@ -538,17 +579,20 @@ Future<void> _fillQuizMetadata(WidgetTester tester) async {
   // Fill in title
   final titleField = find.byType(TextFormField).first;
   await tester.enterText(titleField, 'Test Quiz Title');
-  
+
   // Fill in description
   final descriptionField = find.byType(TextFormField).at(1);
-  await tester.enterText(descriptionField, 'This is a test quiz description for testing purposes');
-  
+  await tester.enterText(
+    descriptionField,
+    'This is a test quiz description for testing purposes',
+  );
+
   await tester.pump();
 }
 
 Future<void> _fillCompleteQuizData(WidgetTester tester) async {
   await _fillQuizMetadata(tester);
-  
+
   // Add a test question
   // Note: This would need to be implemented based on your question builder UI
   // For now, we'll simulate it by directly updating the provider
@@ -569,10 +613,7 @@ class _NavigationWrapper extends StatefulWidget {
   final Widget child;
   final Function(String) onNavigate;
 
-  const _NavigationWrapper({
-    required this.child,
-    required this.onNavigate,
-  });
+  const _NavigationWrapper({required this.child, required this.onNavigate});
 
   @override
   State<_NavigationWrapper> createState() => _NavigationWrapperState();
@@ -591,10 +632,8 @@ class _NavigationWrapperState extends State<_NavigationWrapper> {
 class _NavigationCapture extends InheritedWidget {
   final Function(String) onNavigate;
 
-  const _NavigationCapture({
-    required this.onNavigate,
-    required Widget child,
-  }) : super(child: child);
+  const _NavigationCapture({required this.onNavigate, required Widget child})
+    : super(child: child);
 
   @override
   bool updateShouldNotify(_NavigationCapture oldWidget) {

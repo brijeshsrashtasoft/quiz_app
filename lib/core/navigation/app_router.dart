@@ -17,6 +17,8 @@ import '../../features/authentication/presentation/pages/profile_page.dart'
     as auth_pages;
 import '../../features/home/presentation/pages/home_page.dart' as home_pages;
 import '../../features/game_session/presentation/pages/host_game_screen.dart';
+import '../../features/game_session/presentation/pages/game_session_router.dart';
+import '../../features/game_session/presentation/pages/answer_reveal_screen.dart';
 import '../../features/ui_showcase/presentation/pages/ui_showcase_page.dart';
 import '../../features/ui_showcase/presentation/pages/theme_settings_page.dart';
 import '../../features/ui_showcase/presentation/pages/all_components_demo_page.dart';
@@ -245,7 +247,7 @@ class AppRouter {
             );
           }
 
-          return GameSessionPage(sessionId: sessionId);
+          return GameSessionRouter(sessionId: sessionId);
         },
         routes: [
           GoRoute(
@@ -257,12 +259,14 @@ class AppRouter {
               // Validate session ID parameter
               if (sessionId == null ||
                   !NavigationUtils.isValidSessionId(sessionId)) {
-                return const ErrorPage(
-                  error: 'Invalid session ID for waiting room',
+                return const ErrorPageWidget(
+                  title: 'Invalid Session',
+                  message: 'Invalid session ID for waiting room',
+                  errorCode: 'INVALID_WAITING_SESSION_ID',
                 );
               }
 
-              return GameWaitingPage(sessionId: sessionId);
+              return GameSessionRouter(sessionId: sessionId);
             },
           ),
           GoRoute(
@@ -275,8 +279,10 @@ class AppRouter {
               // Validate session ID and question index
               if (sessionId == null ||
                   !NavigationUtils.isValidSessionId(sessionId)) {
-                return const ErrorPage(
-                  error: 'Invalid session ID for question',
+                return const ErrorPageWidget(
+                  title: 'Invalid Session',
+                  message: 'Invalid session ID for question',
+                  errorCode: 'INVALID_QUESTION_SESSION_ID',
                 );
               }
 
@@ -285,7 +291,11 @@ class AppRouter {
               );
               if (questionIndex == null ||
                   !NavigationUtils.isValidQuestionIndex(questionIndex)) {
-                return const ErrorPage(error: 'Invalid question index');
+                return const ErrorPageWidget(
+                  title: 'Invalid Question',
+                  message: 'Invalid question index',
+                  errorCode: 'INVALID_QUESTION_INDEX',
+                );
               }
 
               return GameQuestionPage(
@@ -303,10 +313,17 @@ class AppRouter {
               // Validate session ID parameter
               if (sessionId == null ||
                   !NavigationUtils.isValidSessionId(sessionId)) {
-                return const ErrorPage(error: 'Invalid session ID for results');
+                return const ErrorPageWidget(
+                  title: 'Invalid Session',
+                  message: 'Invalid session ID for results',
+                  errorCode: 'INVALID_RESULTS_SESSION_ID',
+                );
               }
 
-              return GameResultsPage(sessionId: sessionId);
+              return AnswerRevealScreen(
+                correctAnswer: "Sample Answer", // TODO: Get from session data
+                isHost: false, // TODO: Determine if user is host
+              );
             },
           ),
         ],
@@ -332,8 +349,10 @@ class AppRouter {
               // Validate session ID parameter
               if (sessionId == null ||
                   !NavigationUtils.isValidSessionId(sessionId)) {
-                return const ErrorPage(
-                  error: 'Invalid session ID for leaderboard',
+                return const ErrorPageWidget(
+                  title: 'Invalid Session',
+                  message: 'Invalid session ID for leaderboard',
+                  errorCode: 'INVALID_LEADERBOARD_SESSION_ID',
                 );
               }
 

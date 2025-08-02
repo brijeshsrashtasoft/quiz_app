@@ -742,7 +742,7 @@ class HostSessionStateNotifier extends StateNotifier<HostSessionState> {
   final CreateGameSession createGameSessionUseCase;
   final GameSessionRepositoryImpl gameSessionRepository;
   final Ref ref;
-  
+
   GameSessionEntity? _currentSession;
 
   HostSessionStateNotifier({
@@ -780,7 +780,9 @@ class HostSessionStateNotifier extends StateNotifier<HostSessionState> {
       );
     } catch (e) {
       AppLogger.error('Error creating session', e);
-      state = HostSessionState.error('Failed to create session: ${e.toString()}');
+      state = HostSessionState.error(
+        'Failed to create session: ${e.toString()}',
+      );
     }
   }
 
@@ -794,7 +796,9 @@ class HostSessionStateNotifier extends StateNotifier<HostSessionState> {
     state = HostSessionState.starting(_currentSession!);
 
     try {
-      final result = await gameSessionRepository.startGameSession(_currentSession!.id);
+      final result = await gameSessionRepository.startGameSession(
+        _currentSession!.id,
+      );
 
       result.when(
         success: (updatedSession) {
@@ -808,7 +812,9 @@ class HostSessionStateNotifier extends StateNotifier<HostSessionState> {
       );
     } catch (e) {
       AppLogger.error('Error starting session', e);
-      state = HostSessionState.error('Failed to start session: ${e.toString()}');
+      state = HostSessionState.error(
+        'Failed to start session: ${e.toString()}',
+      );
     }
   }
 
@@ -873,10 +879,14 @@ sealed class HostSessionState {
 
   const factory HostSessionState.initial() = _InitialState;
   const factory HostSessionState.creating() = _CreatingState;
-  const factory HostSessionState.created(GameSessionEntity session) = _CreatedState;
-  const factory HostSessionState.starting(GameSessionEntity session) = _StartingState;
-  const factory HostSessionState.active(GameSessionEntity session) = _ActiveState;
-  const factory HostSessionState.completed(GameSessionEntity session) = _CompletedState;
+  const factory HostSessionState.created(GameSessionEntity session) =
+      _CreatedState;
+  const factory HostSessionState.starting(GameSessionEntity session) =
+      _StartingState;
+  const factory HostSessionState.active(GameSessionEntity session) =
+      _ActiveState;
+  const factory HostSessionState.completed(GameSessionEntity session) =
+      _CompletedState;
   const factory HostSessionState.error(String message) = _HostErrorState;
 }
 

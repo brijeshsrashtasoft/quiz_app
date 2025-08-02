@@ -15,20 +15,24 @@ import 'package:quiz_app_1/core/navigation/route_constants.dart';
 /// Debug tests to identify the blank screen navigation issue
 void main() {
   group('Quiz Creation Navigation Debug Tests', () {
-    testWidgets('NAVIGATION DEBUG: Test the exact route navigation issue', (tester) async {
+    testWidgets('NAVIGATION DEBUG: Test the exact route navigation issue', (
+      tester,
+    ) async {
       // Track all navigation calls
       final List<String> navigationLog = [];
       final List<String> routeBuilds = [];
-      
+
       // Mock successful quiz save
       final mockCreateUseCase = _MockCreateQuizUseCase();
 
       final container = ProviderContainer(
         overrides: [
-          quizCreationProvider.overrideWith((ref) => QuizCreationNotifier(
-            createUseCase: mockCreateUseCase,
-            currentUserId: 'debug_user',
-          )),
+          quizCreationProvider.overrideWith(
+            (ref) => QuizCreationNotifier(
+              createUseCase: mockCreateUseCase,
+              currentUserId: 'debug_user',
+            ),
+          ),
         ],
       );
 
@@ -53,7 +57,7 @@ void main() {
                 builder: (context, state) {
                   final quizId = state.uri.queryParameters['id'];
                   routeBuilds.add('preview: ${state.uri}, quizId: $quizId');
-                  
+
                   if (quizId == null) {
                     // This is likely causing the blank screen!
                     return const Scaffold(
@@ -74,7 +78,7 @@ void main() {
                       ),
                     );
                   }
-                  
+
                   return const QuizPreviewPage();
                 },
               ),
@@ -140,7 +144,11 @@ void main() {
 
       // Find and tap the save button
       final saveButton = find.text('Save & Preview');
-      expect(saveButton, findsOneWidget, reason: 'Save button should be visible');
+      expect(
+        saveButton,
+        findsOneWidget,
+        reason: 'Save button should be visible',
+      );
 
       await tester.tap(saveButton);
       await tester.pump(); // Process the tap
@@ -157,28 +165,34 @@ void main() {
       print('Route builds: $routeBuilds');
 
       // Check what's currently on screen
-      final currentWidgets = tester.allWidgets.map((w) => w.runtimeType.toString()).toList();
+      final currentWidgets = tester.allWidgets
+          .map((w) => w.runtimeType.toString())
+          .toList();
       print('Current widgets: $currentWidgets');
 
       // Look for signs of blank screen
-      final greyScreens = find.byWidgetPredicate((widget) => 
-        widget is Scaffold && widget.backgroundColor == Colors.grey);
-      
-      final orangeScreens = find.byWidgetPredicate((widget) => 
-        widget is Scaffold && widget.backgroundColor == Colors.orange);
+      final greyScreens = find.byWidgetPredicate(
+        (widget) => widget is Scaffold && widget.backgroundColor == Colors.grey,
+      );
+
+      final orangeScreens = find.byWidgetPredicate(
+        (widget) =>
+            widget is Scaffold && widget.backgroundColor == Colors.orange,
+      );
 
       if (greyScreens.evaluate().isNotEmpty) {
         print('🚨 FOUND THE ISSUE: Grey screen detected!');
-        expect(find.text('BLANK SCREEN CAUSE: No quiz ID in URL'), findsOneWidget);
-        
+        expect(
+          find.text('BLANK SCREEN CAUSE: No quiz ID in URL'),
+          findsOneWidget,
+        );
+
         // Log the exact navigation that caused this
         print('Navigation that led to blank screen: $navigationLog');
         print('Route builds that led to blank screen: $routeBuilds');
-        
       } else if (orangeScreens.evaluate().isNotEmpty) {
         print('🚨 FOUND THE ISSUE: Unhandled route detected!');
         expect(find.text('UNHANDLED ROUTE:'), findsOneWidget);
-        
       } else {
         print('✅ Navigation successful - preview page should be showing');
         expect(find.byType(QuizPreviewPage), findsOneWidget);
@@ -187,11 +201,13 @@ void main() {
       container.dispose();
     });
 
-    testWidgets('NAVIGATION DEBUG: Test correct route format expectations', (tester) async {
+    testWidgets('NAVIGATION DEBUG: Test correct route format expectations', (
+      tester,
+    ) async {
       // Test what the router actually expects vs what we're pushing
-      
+
       final List<RouteMatch> routeMatches = [];
-      
+
       final router = GoRouter(
         routes: [
           GoRoute(
@@ -202,7 +218,7 @@ void main() {
                 builder: (context, state) {
                   routeMatches.add(state);
                   final quizId = state.uri.queryParameters['id'];
-                  
+
                   return Scaffold(
                     body: Center(
                       child: Column(
@@ -222,9 +238,7 @@ void main() {
         ],
       );
 
-      await tester.pumpWidget(
-        MaterialApp.router(routerConfig: router),
-      );
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
 
       // Test different route formats that might be attempted
       final testRoutes = [
@@ -235,31 +249,34 @@ void main() {
 
       for (final route in testRoutes) {
         print('Testing route: $route');
-        
+
         try {
           router.go(route);
           await tester.pumpAndSettle();
-          
+
           final uriText = find.textContaining('Full URI:');
           if (uriText.evaluate().isNotEmpty) {
             final widget = tester.widget<Text>(uriText);
             print('  Result: ${widget.data}');
           }
-          
         } catch (e) {
           print('  Error: $e');
         }
       }
     });
 
-    testWidgets('PROVIDER DEBUG: Test quiz creation provider state during save', (tester) async {
+    testWidgets('PROVIDER DEBUG: Test quiz creation provider state during save', (
+      tester,
+    ) async {
       final mockCreateUseCase = _MockCreateQuizUseCase();
       final container = ProviderContainer(
         overrides: [
-          quizCreationProvider.overrideWith((ref) => QuizCreationNotifier(
-            createUseCase: mockCreateUseCase,
-            currentUserId: 'debug_user',
-          )),
+          quizCreationProvider.overrideWith(
+            (ref) => QuizCreationNotifier(
+              createUseCase: mockCreateUseCase,
+              currentUserId: 'debug_user',
+            ),
+          ),
         ],
       );
 
@@ -281,25 +298,32 @@ void main() {
                       ElevatedButton(
                         onPressed: () async {
                           // Set basic data
-                          ref.read(quizCreationProvider.notifier).updateMetadata(
-                            title: 'Debug Test Quiz',
-                            description: 'This is a debug test quiz with sufficient length',
-                          );
-                          
+                          ref
+                              .read(quizCreationProvider.notifier)
+                              .updateMetadata(
+                                title: 'Debug Test Quiz',
+                                description:
+                                    'This is a debug test quiz with sufficient length',
+                              );
+
                           // Add a question
-                          ref.read(quizCreationProvider.notifier).addQuestion(
-                            MultipleChoiceQuestion(
-                              id: 'debug_q1',
-                              questionText: 'Debug question?',
-                              options: ['A', 'B', 'C', 'D'],
-                              correctAnswerIndex: 0,
-                              questionTimeLimit: 30,
-                              points: 100,
-                            ),
-                          );
-                          
+                          ref
+                              .read(quizCreationProvider.notifier)
+                              .addQuestion(
+                                MultipleChoiceQuestion(
+                                  id: 'debug_q1',
+                                  questionText: 'Debug question?',
+                                  options: ['A', 'B', 'C', 'D'],
+                                  correctAnswerIndex: 0,
+                                  questionTimeLimit: 30,
+                                  points: 100,
+                                ),
+                              );
+
                           // Try to save
-                          final result = await ref.read(quizCreationProvider.notifier).saveQuiz();
+                          final result = await ref
+                              .read(quizCreationProvider.notifier)
+                              .saveQuiz();
                           print('Save result: $result');
                         },
                         child: const Text('Test Save'),
@@ -340,25 +364,33 @@ void main() {
 }
 
 // Helper functions
-Future<void> _fillBasicQuizData(WidgetTester tester, ProviderContainer container) async {
+Future<void> _fillBasicQuizData(
+  WidgetTester tester,
+  ProviderContainer container,
+) async {
   // Use the provider directly to set data
-  container.read(quizCreationProvider.notifier).updateMetadata(
-    title: 'Debug Quiz Title',
-    description: 'This is a debug quiz description that is long enough to pass validation',
-  );
-  
+  container
+      .read(quizCreationProvider.notifier)
+      .updateMetadata(
+        title: 'Debug Quiz Title',
+        description:
+            'This is a debug quiz description that is long enough to pass validation',
+      );
+
   // Add a test question
-  container.read(quizCreationProvider.notifier).addQuestion(
-    MultipleChoiceQuestion(
-      id: 'debug_q1',
-      questionText: 'What is the capital of France?',
-      options: ['London', 'Berlin', 'Paris', 'Madrid'],
-      correctAnswerIndex: 2,
-      questionTimeLimit: 30,
-      points: 100,
-    ),
-  );
-  
+  container
+      .read(quizCreationProvider.notifier)
+      .addQuestion(
+        MultipleChoiceQuestion(
+          id: 'debug_q1',
+          questionText: 'What is the capital of France?',
+          options: ['London', 'Berlin', 'Paris', 'Madrid'],
+          correctAnswerIndex: 2,
+          questionTimeLimit: 30,
+          points: 100,
+        ),
+      );
+
   await tester.pump();
 }
 
@@ -368,7 +400,7 @@ class _MockCreateQuizUseCase implements CreateQuizUseCase {
   Future<Result<Quiz, Failure>> call(CreateQuizParams params) async {
     // Simulate network delay
     await Future.delayed(const Duration(milliseconds: 100));
-    
+
     // Return success with the quiz including an ID
     final quizWithId = Quiz(
       id: 'debug_quiz_123',
@@ -381,7 +413,7 @@ class _MockCreateQuizUseCase implements CreateQuizUseCase {
       metadata: params.quiz.metadata,
       isDraft: params.quiz.isDraft,
     );
-    
+
     return Result.success(quizWithId);
   }
 }
@@ -398,10 +430,7 @@ class _DebugNavigationWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _NavigationInterceptor(
-      onNavigate: onNavigate,
-      child: child,
-    );
+    return _NavigationInterceptor(onNavigate: onNavigate, child: child);
   }
 }
 
@@ -409,10 +438,7 @@ class _NavigationInterceptor extends StatefulWidget {
   final Widget child;
   final Function(String) onNavigate;
 
-  const _NavigationInterceptor({
-    required this.child,
-    required this.onNavigate,
-  });
+  const _NavigationInterceptor({required this.child, required this.onNavigate});
 
   @override
   State<_NavigationInterceptor> createState() => _NavigationInterceptorState();

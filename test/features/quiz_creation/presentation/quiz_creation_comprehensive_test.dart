@@ -16,7 +16,7 @@ class MockCreateQuizUseCase extends Mock implements CreateQuizUseCase {
   Future<Result<Quiz, Failure>> call(CreateQuizParams params) async {
     // Simulate successful save
     await Future.delayed(const Duration(milliseconds: 50));
-    
+
     final quizWithId = Quiz(
       id: 'mock_quiz_123',
       title: params.quiz.title,
@@ -28,7 +28,7 @@ class MockCreateQuizUseCase extends Mock implements CreateQuizUseCase {
       metadata: params.quiz.metadata,
       isDraft: params.quiz.isDraft,
     );
-    
+
     return Result.success(quizWithId);
   }
 }
@@ -37,17 +37,17 @@ class MockCreateQuizUseCase extends Mock implements CreateQuizUseCase {
 class NavigationTracker {
   static final List<String> pushCalls = [];
   static final List<String> goCalls = [];
-  
+
   static void clear() {
     pushCalls.clear();
     goCalls.clear();
   }
-  
+
   static void trackPush(String route) {
     pushCalls.add(route);
     print('📍 PUSH tracked: $route');
   }
-  
+
   static void trackGo(String route) {
     goCalls.add(route);
     print('📍 GO tracked: $route');
@@ -62,13 +62,15 @@ void main() {
     setUp(() {
       mockCreateUseCase = MockCreateQuizUseCase();
       NavigationTracker.clear();
-      
+
       container = ProviderContainer(
         overrides: [
-          quizCreationProvider.overrideWith((ref) => QuizCreationNotifier(
-            createUseCase: mockCreateUseCase,
-            currentUserId: 'test_user_123',
-          )),
+          quizCreationProvider.overrideWith(
+            (ref) => QuizCreationNotifier(
+              createUseCase: mockCreateUseCase,
+              currentUserId: 'test_user_123',
+            ),
+          ),
         ],
       );
     });
@@ -78,13 +80,13 @@ void main() {
     });
 
     group('Quiz Creation Flow Tests', () {
-      testWidgets('should complete quiz creation and save successfully', (tester) async {
+      testWidgets('should complete quiz creation and save successfully', (
+        tester,
+      ) async {
         await tester.pumpWidget(
           UncontrolledProviderScope(
             container: container,
-            child: MaterialApp(
-              home: const QuizCreationPage(),
-            ),
+            child: MaterialApp(home: const QuizCreationPage()),
           ),
         );
 
@@ -96,21 +98,26 @@ void main() {
         expect(find.text('Preview'), findsOneWidget);
 
         // Fill in quiz data using the provider directly
-        container.read(quizCreationProvider.notifier).updateMetadata(
-          title: 'Test Quiz Title',
-          description: 'This is a comprehensive test quiz description that meets the minimum length requirement',
-        );
+        container
+            .read(quizCreationProvider.notifier)
+            .updateMetadata(
+              title: 'Test Quiz Title',
+              description:
+                  'This is a comprehensive test quiz description that meets the minimum length requirement',
+            );
 
-        container.read(quizCreationProvider.notifier).addQuestion(
-          MultipleChoiceQuestion(
-            id: 'test_q1',
-            questionText: 'What is the capital of France?',
-            options: ['London', 'Berlin', 'Paris', 'Madrid'],
-            correctAnswerIndex: 2,
-            questionTimeLimit: 30,
-            points: 100,
-          ),
-        );
+        container
+            .read(quizCreationProvider.notifier)
+            .addQuestion(
+              MultipleChoiceQuestion(
+                id: 'test_q1',
+                questionText: 'What is the capital of France?',
+                options: ['London', 'Berlin', 'Paris', 'Madrid'],
+                correctAnswerIndex: 2,
+                questionTimeLimit: 30,
+                points: 100,
+              ),
+            );
 
         await tester.pump();
 
@@ -125,7 +132,7 @@ void main() {
 
         // Should be on settings step now
         expect(find.text('Save & Preview'), findsOneWidget);
-        
+
         // Check the provider state before saving
         final stateBefore = container.read(quizCreationProvider);
         expect(stateBefore.title, 'Test Quiz Title');
@@ -159,9 +166,7 @@ void main() {
         await tester.pumpWidget(
           UncontrolledProviderScope(
             container: container,
-            child: MaterialApp(
-              home: const QuizCreationPage(),
-            ),
+            child: MaterialApp(home: const QuizCreationPage()),
           ),
         );
 
@@ -183,7 +188,10 @@ void main() {
         // Should show validation error
         final state = container.read(quizCreationProvider);
         expect(state.error, isNotNull);
-        expect(state.error, contains('Quiz title must be at least 3 characters'));
+        expect(
+          state.error,
+          contains('Quiz title must be at least 3 characters'),
+        );
 
         // Use case should not be called for invalid data
         verifyNever(mockCreateUseCase.call(any));
@@ -192,39 +200,44 @@ void main() {
       testWidgets('should handle save failure correctly', (tester) async {
         // Override the mock to return failure
         when(mockCreateUseCase.call(any)).thenAnswer((_) async {
-          return const Result.failure(Failure(
-            code: 'SAVE_ERROR',
-            message: 'Failed to save quiz to database',
-          ));
+          return const Result.failure(
+            Failure(
+              code: 'SAVE_ERROR',
+              message: 'Failed to save quiz to database',
+            ),
+          );
         });
 
         await tester.pumpWidget(
           UncontrolledProviderScope(
             container: container,
-            child: MaterialApp(
-              home: const QuizCreationPage(),
-            ),
+            child: MaterialApp(home: const QuizCreationPage()),
           ),
         );
 
         await tester.pumpAndSettle();
 
         // Fill valid data
-        container.read(quizCreationProvider.notifier).updateMetadata(
-          title: 'Valid Quiz Title',
-          description: 'This is a valid quiz description with sufficient length',
-        );
+        container
+            .read(quizCreationProvider.notifier)
+            .updateMetadata(
+              title: 'Valid Quiz Title',
+              description:
+                  'This is a valid quiz description with sufficient length',
+            );
 
-        container.read(quizCreationProvider.notifier).addQuestion(
-          MultipleChoiceQuestion(
-            id: 'test_q1',
-            questionText: 'Test question?',
-            options: ['A', 'B', 'C', 'D'],
-            correctAnswerIndex: 0,
-            questionTimeLimit: 30,
-            points: 100,
-          ),
-        );
+        container
+            .read(quizCreationProvider.notifier)
+            .addQuestion(
+              MultipleChoiceQuestion(
+                id: 'test_q1',
+                questionText: 'Test question?',
+                options: ['A', 'B', 'C', 'D'],
+                correctAnswerIndex: 0,
+                questionTimeLimit: 30,
+                points: 100,
+              ),
+            );
 
         await tester.pump();
 
@@ -252,9 +265,11 @@ void main() {
     });
 
     group('Navigation Analysis Tests', () {
-      testWidgets('should analyze navigation behavior after save', (tester) async {
+      testWidgets('should analyze navigation behavior after save', (
+        tester,
+      ) async {
         // This test focuses on understanding what happens after a successful save
-        
+
         await tester.pumpWidget(
           UncontrolledProviderScope(
             container: container,
@@ -268,14 +283,17 @@ void main() {
                         ElevatedButton(
                           onPressed: () async {
                             // Simulate the save operation from QuizCreationPage
-                            final notifier = container.read(quizCreationProvider.notifier);
-                            
+                            final notifier = container.read(
+                              quizCreationProvider.notifier,
+                            );
+
                             // Set up valid data
                             notifier.updateMetadata(
                               title: 'Navigation Test Quiz',
-                              description: 'Testing navigation after quiz save operation',
+                              description:
+                                  'Testing navigation after quiz save operation',
                             );
-                            
+
                             notifier.addQuestion(
                               MultipleChoiceQuestion(
                                 id: 'nav_q1',
@@ -291,13 +309,14 @@ void main() {
                             final quizId = await notifier.saveQuiz();
                             print('📊 Save operation completed');
                             print('📊 Returned quiz ID: $quizId');
-                            
+
                             if (quizId != null) {
                               // This is what QuizCreationPage does on line 67
-                              final navigationRoute = '/quiz-creation/preview?id=$quizId';
+                              final navigationRoute =
+                                  '/quiz-creation/preview?id=$quizId';
                               print('📊 Would navigate to: $navigationRoute');
                               NavigationTracker.trackPush(navigationRoute);
-                              
+
                               // Try to understand if the route is valid
                               print('📊 Route analysis:');
                               print('   - Base route: /quiz-creation');
@@ -325,10 +344,10 @@ void main() {
         // Verify the navigation was tracked
         expect(NavigationTracker.pushCalls, isNotEmpty);
         final navigationRoute = NavigationTracker.pushCalls.first;
-        
+
         expect(navigationRoute, startsWith('/quiz-creation/preview?id='));
         expect(navigationRoute, contains('mock_quiz_123'));
-        
+
         print('✅ Navigation route successfully generated: $navigationRoute');
       });
     });
@@ -350,27 +369,36 @@ void main() {
                         Text('Title: "${state.title}"'),
                         Text('Questions: ${state.questions.length}'),
                         ElevatedButton(
-                          onPressed: state.isLoading ? null : () async {
-                            // Set up data
-                            ref.read(quizCreationProvider.notifier).updateMetadata(
-                              title: 'State Test Quiz',
-                              description: 'Testing state management during save operations',
-                            );
-                            
-                            ref.read(quizCreationProvider.notifier).addQuestion(
-                              MultipleChoiceQuestion(
-                                id: 'state_q1',
-                                questionText: 'State test question?',
-                                options: ['A', 'B', 'C', 'D'],
-                                correctAnswerIndex: 0,
-                                questionTimeLimit: 30,
-                                points: 100,
-                              ),
-                            );
-                            
-                            // Save quiz
-                            await ref.read(quizCreationProvider.notifier).saveQuiz();
-                          },
+                          onPressed: state.isLoading
+                              ? null
+                              : () async {
+                                  // Set up data
+                                  ref
+                                      .read(quizCreationProvider.notifier)
+                                      .updateMetadata(
+                                        title: 'State Test Quiz',
+                                        description:
+                                            'Testing state management during save operations',
+                                      );
+
+                                  ref
+                                      .read(quizCreationProvider.notifier)
+                                      .addQuestion(
+                                        MultipleChoiceQuestion(
+                                          id: 'state_q1',
+                                          questionText: 'State test question?',
+                                          options: ['A', 'B', 'C', 'D'],
+                                          correctAnswerIndex: 0,
+                                          questionTimeLimit: 30,
+                                          points: 100,
+                                        ),
+                                      );
+
+                                  // Save quiz
+                                  await ref
+                                      .read(quizCreationProvider.notifier)
+                                      .saveQuiz();
+                                },
                           child: const Text('Test Save'),
                         ),
                       ],
@@ -423,24 +451,31 @@ void main() {
                         ElevatedButton(
                           onPressed: () async {
                             // Set up valid data
-                            ref.read(quizCreationProvider.notifier).updateMetadata(
-                              title: 'Error Test Quiz',
-                              description: 'Testing error handling during save operations',
-                            );
-                            
-                            ref.read(quizCreationProvider.notifier).addQuestion(
-                              MultipleChoiceQuestion(
-                                id: 'error_q1',
-                                questionText: 'Error test question?',
-                                options: ['A', 'B', 'C', 'D'],
-                                correctAnswerIndex: 0,
-                                questionTimeLimit: 30,
-                                points: 100,
-                              ),
-                            );
-                            
+                            ref
+                                .read(quizCreationProvider.notifier)
+                                .updateMetadata(
+                                  title: 'Error Test Quiz',
+                                  description:
+                                      'Testing error handling during save operations',
+                                );
+
+                            ref
+                                .read(quizCreationProvider.notifier)
+                                .addQuestion(
+                                  MultipleChoiceQuestion(
+                                    id: 'error_q1',
+                                    questionText: 'Error test question?',
+                                    options: ['A', 'B', 'C', 'D'],
+                                    correctAnswerIndex: 0,
+                                    questionTimeLimit: 30,
+                                    points: 100,
+                                  ),
+                                );
+
                             // This should trigger an error
-                            await ref.read(quizCreationProvider.notifier).saveQuiz();
+                            await ref
+                                .read(quizCreationProvider.notifier)
+                                .saveQuiz();
                           },
                           child: const Text('Trigger Error'),
                         ),
@@ -464,22 +499,30 @@ void main() {
 }
 
 // Helper function to simulate form filling
-Future<void> fillQuizForm(WidgetTester tester, ProviderContainer container) async {
-  container.read(quizCreationProvider.notifier).updateMetadata(
-    title: 'Test Quiz Title',
-    description: 'This is a test quiz description with sufficient length to pass validation',
-  );
+Future<void> fillQuizForm(
+  WidgetTester tester,
+  ProviderContainer container,
+) async {
+  container
+      .read(quizCreationProvider.notifier)
+      .updateMetadata(
+        title: 'Test Quiz Title',
+        description:
+            'This is a test quiz description with sufficient length to pass validation',
+      );
 
-  container.read(quizCreationProvider.notifier).addQuestion(
-    MultipleChoiceQuestion(
-      id: 'test_question_1',
-      questionText: 'What is 2 + 2?',
-      options: ['3', '4', '5', '6'],
-      correctAnswerIndex: 1,
-      questionTimeLimit: 30,
-      points: 100,
-    ),
-  );
+  container
+      .read(quizCreationProvider.notifier)
+      .addQuestion(
+        MultipleChoiceQuestion(
+          id: 'test_question_1',
+          questionText: 'What is 2 + 2?',
+          options: ['3', '4', '5', '6'],
+          correctAnswerIndex: 1,
+          questionTimeLimit: 30,
+          points: 100,
+        ),
+      );
 
   await tester.pump();
 }

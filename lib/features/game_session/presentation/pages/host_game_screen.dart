@@ -53,7 +53,8 @@ class _HostGameScreenState extends ConsumerState<HostGameScreen>
     // Create game session when screen loads
     // TODO: Replace with actual quiz selection - using test quiz for now
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(hostSessionStateNotifierProvider.notifier)
+      ref
+          .read(hostSessionStateNotifierProvider.notifier)
           .createSession(quizId: 'test-quiz-id');
     });
   }
@@ -94,7 +95,7 @@ class _HostGameScreenState extends ConsumerState<HostGameScreen>
 
   Widget _buildSessionWaitingScreen(GameSessionEntity session) {
     final playerCount = session.playerCount;
-    
+
     return FadeTransition(
       opacity: _fadeAnimation,
       child: Column(
@@ -163,7 +164,8 @@ class _HostGameScreenState extends ConsumerState<HostGameScreen>
           PrimaryButton(
             onPressed: playerCount > 0
                 ? () {
-                    ref.read(hostSessionStateNotifierProvider.notifier)
+                    ref
+                        .read(hostSessionStateNotifierProvider.notifier)
                         .startSession();
                   }
                 : null,
@@ -174,15 +176,14 @@ class _HostGameScreenState extends ConsumerState<HostGameScreen>
           const SizedBox(height: AppSpacing.spacingM),
           TextButton(
             onPressed: () {
-              ref.read(hostSessionStateNotifierProvider.notifier)
+              ref
+                  .read(hostSessionStateNotifierProvider.notifier)
                   .cancelSession();
               context.pop();
             },
             child: Text(
               'Cancel Game',
-              style: AppTextStyles.bodyText.copyWith(
-                color: AppColors.coolGray,
-              ),
+              style: AppTextStyles.bodyText.copyWith(color: AppColors.coolGray),
             ),
           ),
 
@@ -313,11 +314,7 @@ class _HostGameScreenState extends ConsumerState<HostGameScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
-            Icons.error_outline,
-            size: 80,
-            color: AppColors.error,
-          ),
+          const Icon(Icons.error_outline, size: 80, color: AppColors.error),
           const SizedBox(height: AppSpacing.spacingL),
           Text(
             'Error Creating Game',
@@ -334,7 +331,8 @@ class _HostGameScreenState extends ConsumerState<HostGameScreen>
           PrimaryButton(
             onPressed: () {
               // Try creating session again
-              ref.read(hostSessionStateNotifierProvider.notifier)
+              ref
+                  .read(hostSessionStateNotifierProvider.notifier)
                   .createSession(quizId: 'test-quiz-id');
             },
             text: 'Try Again',
@@ -345,9 +343,7 @@ class _HostGameScreenState extends ConsumerState<HostGameScreen>
             onPressed: () => context.pop(),
             child: Text(
               'Go Back',
-              style: AppTextStyles.bodyText.copyWith(
-                color: AppColors.coolGray,
-              ),
+              style: AppTextStyles.bodyText.copyWith(color: AppColors.coolGray),
             ),
           ),
         ],

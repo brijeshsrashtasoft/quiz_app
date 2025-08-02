@@ -7,7 +7,7 @@ void main() {
     testWidgets('should navigate to preview page correctly', (tester) async {
       // Track navigation calls
       String? lastRoute;
-      
+
       // Create a mock navigation context
       final router = GoRouter(
         routes: [
@@ -33,9 +33,7 @@ void main() {
                 path: 'preview',
                 builder: (context, state) {
                   final id = state.uri.queryParameters['id'];
-                  return Scaffold(
-                    body: Text('Preview for quiz: $id'),
-                  );
+                  return Scaffold(body: Text('Preview for quiz: $id'));
                 },
               ),
             ],
@@ -44,11 +42,7 @@ void main() {
         ],
       );
 
-      await tester.pumpWidget(
-        MaterialApp.router(
-          routerConfig: router,
-        ),
-      );
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
 
       // Find and tap the button to simulate quiz creation
       await tester.tap(find.text('Save & Preview'));
@@ -56,12 +50,14 @@ void main() {
 
       // Verify navigation occurred with correct route
       expect(lastRoute, equals('/quiz-creation/preview?id=test-quiz-123'));
-      
+
       // Verify we're on the preview page
       expect(find.text('Preview for quiz: test-quiz-123'), findsOneWidget);
     });
 
-    testWidgets('should handle quiz preview route with parameters', (tester) async {
+    testWidgets('should handle quiz preview route with parameters', (
+      tester,
+    ) async {
       final router = GoRouter(
         initialLocation: '/quiz-creation/preview?id=sample-quiz',
         routes: [
@@ -77,7 +73,8 @@ void main() {
                     body: Column(
                       children: [
                         Text('Quiz ID: ${id ?? "No ID"}'),
-                        if (id != null) const Text('Preview loaded successfully'),
+                        if (id != null)
+                          const Text('Preview loaded successfully'),
                       ],
                     ),
                   );
@@ -89,11 +86,7 @@ void main() {
         ],
       );
 
-      await tester.pumpWidget(
-        MaterialApp.router(
-          routerConfig: router,
-        ),
-      );
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
 
       await tester.pumpAndSettle();
 

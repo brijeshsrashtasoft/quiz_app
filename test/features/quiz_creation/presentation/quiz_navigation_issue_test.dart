@@ -8,15 +8,16 @@ const String kQuizCreationRoute = '/quiz-creation';
 /// Test to identify the exact navigation issue causing blank screen
 void main() {
   group('Navigation Issue Investigation', () {
-    
-    testWidgets('Reproduce the exact navigation issue from QuizCreationPage', (tester) async {
+    testWidgets('Reproduce the exact navigation issue from QuizCreationPage', (
+      tester,
+    ) async {
       // This test reproduces the exact problem from the quiz creation page
-      
+
       // Track what happens with different route formats
       final List<String> attemptedRoutes = [];
       final List<String> builtRoutes = [];
       final List<String> errors = [];
-      
+
       final router = GoRouter(
         initialLocation: '/test',
         routes: [
@@ -33,7 +34,7 @@ void main() {
               },
             ),
           ),
-          
+
           // This mimics the actual router configuration
           GoRoute(
             path: kQuizCreationRoute, // '/quiz-creation'
@@ -44,14 +45,14 @@ void main() {
                 builder: (context, state) {
                   final quizId = state.uri.queryParameters['id'];
                   builtRoutes.add('Built preview route with ID: $quizId');
-                  
+
                   if (quizId == null) {
                     return const Scaffold(
                       backgroundColor: Colors.grey,
                       body: Center(child: Text('BLANK SCREEN: No quiz ID')),
                     );
                   }
-                  
+
                   return Scaffold(
                     body: Center(child: Text('Preview for quiz: $quizId')),
                   );
@@ -62,16 +63,14 @@ void main() {
         ],
       );
 
-      await tester.pumpWidget(
-        MaterialApp.router(routerConfig: router),
-      );
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
 
       await tester.pumpAndSettle();
 
       // Test the exact route format from QuizCreationPage line 67
       final problematicRoute = '$kQuizCreationRoute/preview?id=test_quiz_123';
       print('Testing problematic route: $problematicRoute');
-      
+
       await tester.tap(find.text('Test Navigation'));
       await tester.pumpAndSettle();
 
@@ -82,10 +81,12 @@ void main() {
       // Check if we got a blank screen
       final blankScreen = find.text('BLANK SCREEN: No quiz ID');
       final successScreen = find.text('Preview for quiz: test_quiz_123');
-      
+
       if (blankScreen.evaluate().isNotEmpty) {
         print('🚨 CONFIRMED: Blank screen issue reproduced!');
-        print('The route $kQuizCreationRoute/preview?id=test_quiz_123 is not working correctly');
+        print(
+          'The route $kQuizCreationRoute/preview?id=test_quiz_123 is not working correctly',
+        );
       } else if (successScreen.evaluate().isNotEmpty) {
         print('✅ Navigation worked correctly');
       } else {
@@ -93,9 +94,11 @@ void main() {
       }
     });
 
-    testWidgets('Test different route formats to find the working one', (tester) async {
+    testWidgets('Test different route formats to find the working one', (
+      tester,
+    ) async {
       final Map<String, String> routeResults = {};
-      
+
       final router = GoRouter(
         routes: [
           GoRoute(
@@ -119,13 +122,11 @@ void main() {
                 path: 'preview',
                 builder: (context, state) {
                   final quizId = state.uri.queryParameters['id'];
-                  final result = quizId != null 
-                    ? 'SUCCESS: Found quiz ID $quizId'
-                    : 'FAIL: No quiz ID found';
-                  
-                  return Scaffold(
-                    body: Center(child: Text(result)),
-                  );
+                  final result = quizId != null
+                      ? 'SUCCESS: Found quiz ID $quizId'
+                      : 'FAIL: No quiz ID found';
+
+                  return Scaffold(body: Center(child: Text(result)));
                 },
               ),
             ],
@@ -133,25 +134,23 @@ void main() {
         ],
       );
 
-      await tester.pumpWidget(
-        MaterialApp.router(routerConfig: router),
-      );
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
 
       final routesToTest = [
-        '/quiz-creation/preview?id=123',      // Expected working format
-        '/quiz-creation/preview/123',         // Alternative format
-        '/quiz-creation/preview',             // Without ID
+        '/quiz-creation/preview?id=123', // Expected working format
+        '/quiz-creation/preview/123', // Alternative format
+        '/quiz-creation/preview', // Without ID
       ];
 
       for (final route in routesToTest) {
         print('Testing route format: $route');
-        
+
         router.go(route);
         await tester.pumpAndSettle();
-        
+
         final successText = find.textContaining('SUCCESS:');
         final failText = find.textContaining('FAIL:');
-        
+
         if (successText.evaluate().isNotEmpty) {
           print('  ✅ SUCCESS: Route $route works correctly');
         } else if (failText.evaluate().isNotEmpty) {
@@ -162,13 +161,15 @@ void main() {
       }
     });
 
-    testWidgets('Test the exact line 67 navigation from QuizCreationPage', (tester) async {
+    testWidgets('Test the exact line 67 navigation from QuizCreationPage', (
+      tester,
+    ) async {
       // This simulates the exact code from line 67 in quiz_creation_page.dart
       // context.push('${RouteConstants.quizCreation}/preview?id=$quizId');
-      
+
       String? navigationResult;
       String? errorResult;
-      
+
       final router = GoRouter(
         routes: [
           GoRoute(
@@ -180,10 +181,10 @@ void main() {
                     // Simulate the exact line from QuizCreationPage
                     const quizId = 'saved_quiz_123';
                     final route = '$kQuizCreationRoute/preview?id=$quizId';
-                    
+
                     print('Attempting to push: $route');
                     print('kQuizCreationRoute = $kQuizCreationRoute');
-                    
+
                     try {
                       context.push(route);
                       navigationResult = 'Push succeeded';
@@ -208,7 +209,7 @@ void main() {
                   print('Full URI: ${state.uri}');
                   print('Path: ${state.path}');
                   print('Matched location: ${state.matchedLocation}');
-                  
+
                   return Scaffold(
                     body: Center(
                       child: Column(
@@ -233,9 +234,7 @@ void main() {
         ],
       );
 
-      await tester.pumpWidget(
-        MaterialApp.router(routerConfig: router),
-      );
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
 
       await tester.tap(find.text('Simulate Line 67'));
       await tester.pumpAndSettle();

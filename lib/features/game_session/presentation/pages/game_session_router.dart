@@ -2,15 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/session_providers.dart';
+import '../../domain/entities/game_session_entity.dart';
 import '../widgets/pin_display.dart';
-import '../widgets/pin_entry_widget.dart';
-import '../widgets/host_control_panel.dart';
 import '../widgets/lobby_player_list.dart';
-import '../widgets/connection_status_indicator.dart';
+import '../widgets/host_control_panel.dart';
 import 'game_play_page.dart';
 import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/constants/app_spacing.dart';
-import '../../../../shared/widgets/layouts/app_scaffold.dart';
+import '../../../../shared/widgets/layout/app_scaffold.dart';
 import '../../../../shared/widgets/loading/loading_overlay.dart';
 import '../../../../shared/widgets/error/error_widget.dart';
 
@@ -42,7 +41,14 @@ class GameSessionRouter extends ConsumerWidget {
             return _buildCompletedState(context, session);
         }
       },
-      loading: () => const Scaffold(body: Center(child: LoadingOverlay())),
+      loading: () => const Scaffold(
+        body: Center(
+          child: LoadingOverlay(
+            child: CircularProgressIndicator(),
+            isLoading: true,
+          ),
+        ),
+      ),
       error: (error, _) => _buildErrorState(context, error.toString()),
     );
   }
@@ -70,27 +76,44 @@ class GameSessionRouter extends ConsumerWidget {
               // PIN Display
               PinDisplay(pin: session.pin),
 
-              AppSpacing.verticalSpacingXL,
+              SizedBox(height: AppSpacing.spacingXL),
 
               // Player List
               Expanded(
                 child: LobbyPlayerList(
                   players: session.players,
-                  hostId: session.hostId,
+                  isHost: isHost,
                 ),
               ),
 
               // Host Controls
               if (isHost) ...[
-                AppSpacing.verticalSpacingL,
-                HostControlPanel(
-                  sessionId: sessionId,
-                  canStart: session.playerCount >= 2,
-                  onStart: () {
-                    ref
-                        .read(sessionStateNotifierProvider(sessionId).notifier)
-                        .startSession();
-                  },
+                SizedBox(height: AppSpacing.spacingL),
+                ElevatedButton(
+                  onPressed: session.playerCount >= 2
+                      ? () {
+                          ref
+                              .read(
+                                sessionStateNotifierProvider(
+                                  sessionId,
+                                ).notifier,
+                              )
+                              .startSession();
+                        }
+                      : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.turquoise,
+                    foregroundColor: AppColors.pureWhite,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.spacingXL,
+                      vertical: AppSpacing.spacingL,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    minimumSize: const Size(double.infinity, 56),
+                  ),
+                  child: const Text('Start Game'),
                 ),
               ],
             ],
@@ -112,7 +135,7 @@ class GameSessionRouter extends ConsumerWidget {
               size: 100,
               color: AppColors.warmYellow,
             ),
-            AppSpacing.verticalSpacingL,
+            SizedBox(height: AppSpacing.spacingL),
             Text(
               'Game Completed!',
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
@@ -120,7 +143,7 @@ class GameSessionRouter extends ConsumerWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            AppSpacing.verticalSpacingM,
+            SizedBox(height: AppSpacing.spacingM),
             ElevatedButton(
               onPressed: () => context.go('/'),
               child: const Text('Back to Home'),

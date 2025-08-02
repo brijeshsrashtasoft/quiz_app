@@ -40,14 +40,14 @@ class AnswerRevealDisplay extends ConsumerWidget {
         _buildCorrectAnswerCard(context)
             .animate()
             .scale(
-              begin: 0.9,
-              end: 1.0,
+              begin: const Offset(0.9, 0.9),
+              end: const Offset(1.0, 1.0),
               duration: AppAnimations.mediumAnimation,
               curve: AppAnimations.elastic,
             )
             .fadeIn(duration: AppAnimations.mediumAnimation),
 
-        AppSpacing.verticalSpacingL,
+        SizedBox(height: AppSpacing.spacingL),
 
         // Answer statistics
         _buildStatisticsSection(answerStats)
@@ -64,7 +64,7 @@ class AnswerRevealDisplay extends ConsumerWidget {
               duration: AppAnimations.mediumAnimation,
             ),
 
-        AppSpacing.verticalSpacingL,
+        SizedBox(height: AppSpacing.spacingL),
 
         // Top scorers
         _buildTopScorersSection()
@@ -82,10 +82,10 @@ class AnswerRevealDisplay extends ConsumerWidget {
             ),
 
         if (isHost && onContinue != null) ...[
-          AppSpacing.verticalSpacingXL,
+          SizedBox(height: AppSpacing.spacingXL),
           _buildContinueButton().animate().scale(
-            begin: 0,
-            end: 1,
+            begin: const Offset(0.0, 0.0),
+            end: const Offset(1.0, 1.0),
             delay: const Duration(seconds: 2),
             duration: AppAnimations.mediumAnimation,
             curve: AppAnimations.bounce,
@@ -105,7 +105,7 @@ class AnswerRevealDisplay extends ConsumerWidget {
     );
 
     return AppCard(
-      color: AppColors.correctAnswer,
+      backgroundColor: AppColors.turquoise,
       padding: EdgeInsets.all(AppSpacing.spacingXL),
       child: Column(
         children: [
@@ -121,12 +121,12 @@ class AnswerRevealDisplay extends ConsumerWidget {
                     onPlay: (controller) => controller.repeat(reverse: true),
                   )
                   .scale(
-                    begin: 1.0,
-                    end: 1.1,
+                    begin: const Offset(1.0, 1.0),
+                    end: const Offset(1.1, 1.1),
                     duration: AppAnimations.longAnimation,
                     curve: AppAnimations.easeInOut,
                   ),
-              AppSpacing.horizontalSpacingM,
+              SizedBox(width: AppSpacing.spacingM),
               Text(
                 'Correct Answer',
                 style: AppTextStyles.sectionHeader.copyWith(
@@ -135,7 +135,7 @@ class AnswerRevealDisplay extends ConsumerWidget {
               ),
             ],
           ),
-          AppSpacing.verticalSpacingM,
+          SizedBox(height: AppSpacing.spacingM),
           Text(
             correctAnswerText,
             style: AppTextStyles.questionText.copyWith(
@@ -145,7 +145,7 @@ class AnswerRevealDisplay extends ConsumerWidget {
             textAlign: TextAlign.center,
           ),
           if (question.questionExplanation != null) ...[
-            AppSpacing.verticalSpacingM,
+            SizedBox(height: AppSpacing.spacingM),
             Container(
               padding: EdgeInsets.all(AppSpacing.spacingM),
               decoration: BoxDecoration(
@@ -162,7 +162,7 @@ class AnswerRevealDisplay extends ConsumerWidget {
                     color: AppColors.pureWhite,
                     size: 20,
                   ),
-                  AppSpacing.horizontalSpacingS,
+                  SizedBox(width: AppSpacing.spacingS),
                   Expanded(
                     child: Text(
                       question.questionExplanation!,
@@ -187,13 +187,8 @@ class AnswerRevealDisplay extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('Answer Distribution', style: AppTextStyles.sectionSubheader),
-          AppSpacing.verticalSpacingM,
-          AnswerStatisticsChart(
-            question: question,
-            answerCounts: answerStats,
-            totalResponses: playerAnswers.length,
-            animateOnLoad: true,
-          ),
+          SizedBox(height: AppSpacing.spacingM),
+          const AnswerStatisticsChart(),
         ],
       ),
     );
@@ -219,10 +214,10 @@ class AnswerRevealDisplay extends ConsumerWidget {
                 size: 48,
                 color: AppColors.coolGray,
               ),
-              AppSpacing.verticalSpacingM,
+              SizedBox(height: AppSpacing.spacingM),
               Text(
                 'No one got it right!',
-                style: AppTextStyles.bodyLarge.copyWith(
+                style: AppTextStyles.bodyText.copyWith(
                   color: AppColors.coolGray,
                 ),
               ),
@@ -249,14 +244,14 @@ class AnswerRevealDisplay extends ConsumerWidget {
                 color: AppColors.warmYellow,
                 size: 24,
               ),
-              AppSpacing.horizontalSpacingS,
+              SizedBox(width: AppSpacing.spacingS),
               Text(
                 'Fastest Correct Answers',
                 style: AppTextStyles.sectionSubheader,
               ),
             ],
           ),
-          AppSpacing.verticalSpacingM,
+          SizedBox(height: AppSpacing.spacingM),
           ...correctPlayers.take(5).mapIndexed((index, entry) {
             final player = entry.value!;
             final delay = Duration(milliseconds: 100 * index);
@@ -328,12 +323,12 @@ class AnswerRevealDisplay extends ConsumerWidget {
               ),
               child: Text(
                 rank.toString(),
-                style: AppTextStyles.labelSmall.copyWith(
+                style: AppTextStyles.caption.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
               ),
             ),
-          AppSpacing.horizontalSpacingM,
+          SizedBox(width: AppSpacing.spacingM),
           Expanded(
             child: Text(
               playerName,
@@ -372,7 +367,7 @@ class AnswerRevealDisplay extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text('Next Question', style: AppTextStyles.buttonLarge),
-          AppSpacing.horizontalSpacingS,
+          SizedBox(width: AppSpacing.spacingS),
           Icon(Icons.arrow_forward_rounded),
         ],
       ),

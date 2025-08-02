@@ -57,7 +57,9 @@ void main() {
         child: MaterialApp(
           home: const QuizCreationPage(),
           theme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(seedColor: AppColors.vibrantPurple),
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: AppColors.vibrantPurple,
+            ),
             useMaterial3: true,
           ),
         ),
@@ -71,36 +73,41 @@ void main() {
 
         // Verify scaffold exists
         expect(find.byType(Scaffold), findsOneWidget);
-        
+
         // Verify app bar exists and is configured correctly
         expect(find.byType(AppBar), findsOneWidget);
         expect(find.text('Create New Quiz'), findsOneWidget);
-        
+
         // Verify background color
         final scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
         expect(scaffold.backgroundColor, AppColors.backgroundPrimary);
       });
 
-      testWidgets('should render app bar with close button and preview button', (tester) async {
-        await tester.pumpWidget(createTestWidget());
-        await tester.pump();
+      testWidgets(
+        'should render app bar with close button and preview button',
+        (tester) async {
+          await tester.pumpWidget(createTestWidget());
+          await tester.pump();
 
-        // Verify close button exists
-        expect(find.byIcon(Icons.close), findsOneWidget);
-        
-        // Verify preview button exists
-        expect(find.text('Preview'), findsOneWidget);
-        expect(find.byType(TextButton), findsOneWidget);
-      });
+          // Verify close button exists
+          expect(find.byIcon(Icons.close), findsOneWidget);
 
-      testWidgets('should render body with SafeArea and Column', (tester) async {
+          // Verify preview button exists
+          expect(find.text('Preview'), findsOneWidget);
+          expect(find.byType(TextButton), findsOneWidget);
+        },
+      );
+
+      testWidgets('should render body with SafeArea and Column', (
+        tester,
+      ) async {
         await tester.pumpWidget(createTestWidget());
         await tester.pump();
 
         // Verify SafeArea exists in body
         final scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
         expect(scaffold.body, isA<SafeArea>());
-        
+
         // Verify Column structure in body
         expect(find.byType(SafeArea), findsWidgets);
         expect(find.byType(Column), findsWidgets);
@@ -112,52 +119,64 @@ void main() {
 
         // Verify stepper widget exists
         expect(find.byType(QuizStepperWidget), findsOneWidget);
-        
+
         // Verify stepper is properly configured
-        final stepperWidget = tester.widget<QuizStepperWidget>(find.byType(QuizStepperWidget));
+        final stepperWidget = tester.widget<QuizStepperWidget>(
+          find.byType(QuizStepperWidget),
+        );
         expect(stepperWidget.currentStep, 0);
         expect(stepperWidget.onStepTapped, isNotNull);
       });
     });
 
     group('Body Content Rendering', () {
-      testWidgets('should render Expanded widget containing step content', (tester) async {
+      testWidgets('should render Expanded widget containing step content', (
+        tester,
+      ) async {
         await tester.pumpWidget(createTestWidget());
         await tester.pumpAndSettle();
 
         // Find all Expanded widgets
         final expandedWidgets = find.byType(Expanded);
         expect(expandedWidgets, findsWidgets);
-        
+
         // Verify at least one Expanded widget contains our content
-        final expandedWidgetsList = tester.widgetList<Expanded>(expandedWidgets);
+        final expandedWidgetsList = tester.widgetList<Expanded>(
+          expandedWidgets,
+        );
         expect(expandedWidgetsList.length, greaterThan(0));
       });
 
-      testWidgets('should render Container with proper constraints for step content', (tester) async {
-        await tester.pumpWidget(createTestWidget());
-        await tester.pumpAndSettle();
+      testWidgets(
+        'should render Container with proper constraints for step content',
+        (tester) async {
+          await tester.pumpWidget(createTestWidget());
+          await tester.pumpAndSettle();
 
-        // Verify Container with step content exists
-        expect(find.byType(Container), findsWidgets);
-        
-        // Verify SingleChildScrollView exists for step content
-        expect(find.byType(SingleChildScrollView), findsWidgets);
-      });
+          // Verify Container with step content exists
+          expect(find.byType(Container), findsWidgets);
 
-      testWidgets('should render step 0 content (QuizMetadataForm) by default', (tester) async {
-        await tester.pumpWidget(createTestWidget());
-        await tester.pumpAndSettle();
+          // Verify SingleChildScrollView exists for step content
+          expect(find.byType(SingleChildScrollView), findsWidgets);
+        },
+      );
 
-        // Verify metadata form is rendered
-        expect(find.byType(QuizMetadataForm), findsOneWidget);
-        
-        // Verify form elements are present
-        expect(find.text('Quiz Information'), findsOneWidget);
-        expect(find.text('Quiz Title'), findsOneWidget);
-        expect(find.text('Description'), findsOneWidget);
-        expect(find.text('Category'), findsOneWidget);
-      });
+      testWidgets(
+        'should render step 0 content (QuizMetadataForm) by default',
+        (tester) async {
+          await tester.pumpWidget(createTestWidget());
+          await tester.pumpAndSettle();
+
+          // Verify metadata form is rendered
+          expect(find.byType(QuizMetadataForm), findsOneWidget);
+
+          // Verify form elements are present
+          expect(find.text('Quiz Information'), findsOneWidget);
+          expect(find.text('Quiz Title'), findsOneWidget);
+          expect(find.text('Description'), findsOneWidget);
+          expect(find.text('Category'), findsOneWidget);
+        },
+      );
 
       testWidgets('should show proper sizing and constraints', (tester) async {
         await tester.pumpWidget(createTestWidget());
@@ -185,7 +204,9 @@ void main() {
         expect(find.byType(QuestionListWidget), findsNothing);
       });
 
-      testWidgets('should display QuestionListWidget for step 1', (tester) async {
+      testWidgets('should display QuestionListWidget for step 1', (
+        tester,
+      ) async {
         await tester.pumpWidget(createTestWidget());
         await tester.pumpAndSettle();
 
@@ -206,11 +227,11 @@ void main() {
         // Navigate to step 2 by tapping next twice
         final nextButton = find.text('Next');
         expect(nextButton, findsOneWidget);
-        
+
         // Go to step 1
         await tester.tap(nextButton);
         await tester.pumpAndSettle();
-        
+
         // Go to step 2
         await tester.tap(find.text('Next'));
         await tester.pumpAndSettle();
@@ -224,7 +245,9 @@ void main() {
     });
 
     group('Error Handling and Edge Cases', () {
-      testWidgets('should handle provider state errors gracefully', (tester) async {
+      testWidgets('should handle provider state errors gracefully', (
+        tester,
+      ) async {
         // Create widget with error provider
         container = ProviderContainer(
           overrides: [
@@ -239,9 +262,7 @@ void main() {
 
         final widget = UncontrolledProviderScope(
           container: container,
-          child: MaterialApp(
-            home: const QuizCreationPage(),
-          ),
+          child: MaterialApp(home: const QuizCreationPage()),
         );
 
         await tester.pumpWidget(widget);
@@ -262,14 +283,16 @@ void main() {
         expect(find.byType(QuizMetadataForm), findsOneWidget);
       });
 
-      testWidgets('should render error fallback for step content failures', (tester) async {
+      testWidgets('should render error fallback for step content failures', (
+        tester,
+      ) async {
         await tester.pumpWidget(createTestWidget());
         await tester.pumpAndSettle();
 
         // The buildStepContent method has try-catch that should render error UI
         // if widgets fail to render. This verifies the error handling exists.
         expect(find.byType(QuizMetadataForm), findsOneWidget);
-        
+
         // If there was an error, we'd see error text
         expect(find.text('Error loading step content'), findsNothing);
       });
@@ -279,13 +302,13 @@ void main() {
       testWidgets('should handle small screen layout', (tester) async {
         // Set small screen size
         await tester.binding.setSurfaceSize(const Size(350, 600));
-        
+
         await tester.pumpWidget(createTestWidget());
         await tester.pumpAndSettle();
 
         expect(find.byType(QuizMetadataForm), findsOneWidget);
         expect(find.byType(QuizStepperWidget), findsOneWidget);
-        
+
         // Reset to default size
         await tester.binding.setSurfaceSize(null);
       });
@@ -293,13 +316,13 @@ void main() {
       testWidgets('should handle tablet layout', (tester) async {
         // Set tablet screen size
         await tester.binding.setSurfaceSize(const Size(800, 1024));
-        
+
         await tester.pumpWidget(createTestWidget());
         await tester.pumpAndSettle();
 
         expect(find.byType(QuizMetadataForm), findsOneWidget);
         expect(find.byType(QuizStepperWidget), findsOneWidget);
-        
+
         // Reset to default size
         await tester.binding.setSurfaceSize(null);
       });
@@ -307,13 +330,13 @@ void main() {
       testWidgets('should handle desktop layout', (tester) async {
         // Set desktop screen size
         await tester.binding.setSurfaceSize(const Size(1400, 900));
-        
+
         await tester.pumpWidget(createTestWidget());
         await tester.pumpAndSettle();
 
         expect(find.byType(QuizMetadataForm), findsOneWidget);
         expect(find.byType(QuizStepperWidget), findsOneWidget);
-        
+
         // Reset to default size
         await tester.binding.setSurfaceSize(null);
       });
@@ -326,13 +349,15 @@ void main() {
 
         // Verify navigation buttons container exists
         expect(find.byType(PrimaryButton), findsWidgets);
-        
+
         // On step 0, should only show Next button
         expect(find.text('Next'), findsOneWidget);
         expect(find.text('Previous'), findsNothing);
       });
 
-      testWidgets('should show both Previous and Next on middle steps', (tester) async {
+      testWidgets('should show both Previous and Next on middle steps', (
+        tester,
+      ) async {
         await tester.pumpWidget(createTestWidget());
         await tester.pumpAndSettle();
 
@@ -374,7 +399,7 @@ void main() {
 
         // Initially should not be loading
         expect(find.byType(CircularProgressIndicator), findsNothing);
-        
+
         // Verify preview button is enabled
         final previewButton = find.text('Preview');
         expect(previewButton, findsOneWidget);
@@ -382,7 +407,9 @@ void main() {
     });
 
     group('Body Visibility Specific Tests', () {
-      testWidgets('should have visible body content with proper opacity', (tester) async {
+      testWidgets('should have visible body content with proper opacity', (
+        tester,
+      ) async {
         await tester.pumpWidget(createTestWidget());
         await tester.pumpAndSettle();
 
@@ -406,7 +433,9 @@ void main() {
         expect(contentSize.height, greaterThan(0));
       });
 
-      testWidgets('should render step content with proper constraints', (tester) async {
+      testWidgets('should render step content with proper constraints', (
+        tester,
+      ) async {
         await tester.pumpWidget(createTestWidget());
         await tester.pumpAndSettle();
 
@@ -420,10 +449,15 @@ void main() {
         // Verify the expanded widget takes available space
         final expandedWidget = expandedFinder.first;
         final expandedSize = tester.getSize(expandedWidget);
-        expect(expandedSize.height, greaterThan(200)); // Should have reasonable height
+        expect(
+          expandedSize.height,
+          greaterThan(200),
+        ); // Should have reasonable height
       });
 
-      testWidgets('should show content even with different screen sizes', (tester) async {
+      testWidgets('should show content even with different screen sizes', (
+        tester,
+      ) async {
         // Test various screen sizes to ensure content is always visible
         final testSizes = [
           const Size(320, 568), // iPhone SE
@@ -452,32 +486,35 @@ void main() {
         await tester.binding.setSurfaceSize(null);
       });
 
-      testWidgets('should maintain content visibility during step transitions', (tester) async {
-        await tester.pumpWidget(createTestWidget());
-        await tester.pumpAndSettle();
+      testWidgets(
+        'should maintain content visibility during step transitions',
+        (tester) async {
+          await tester.pumpWidget(createTestWidget());
+          await tester.pumpAndSettle();
 
-        // Step 0 - Verify content is visible
-        expect(find.byType(QuizMetadataForm), findsOneWidget);
-        final step0Size = tester.getSize(find.byType(QuizMetadataForm));
-        expect(step0Size.height, greaterThan(0));
+          // Step 0 - Verify content is visible
+          expect(find.byType(QuizMetadataForm), findsOneWidget);
+          final step0Size = tester.getSize(find.byType(QuizMetadataForm));
+          expect(step0Size.height, greaterThan(0));
 
-        // Transition to Step 1
-        await tester.tap(find.text('Next'));
-        await tester.pumpAndSettle();
+          // Transition to Step 1
+          await tester.tap(find.text('Next'));
+          await tester.pumpAndSettle();
 
-        // Step 1 - Verify content is visible
-        expect(find.byType(QuestionListWidget), findsOneWidget);
-        final step1Size = tester.getSize(find.byType(QuestionListWidget));
-        expect(step1Size.height, greaterThan(0));
+          // Step 1 - Verify content is visible
+          expect(find.byType(QuestionListWidget), findsOneWidget);
+          final step1Size = tester.getSize(find.byType(QuestionListWidget));
+          expect(step1Size.height, greaterThan(0));
 
-        // Transition to Step 2
-        await tester.tap(find.text('Next'));
-        await tester.pumpAndSettle();
+          // Transition to Step 2
+          await tester.tap(find.text('Next'));
+          await tester.pumpAndSettle();
 
-        // Step 2 - Verify content is visible
-        expect(find.text('Quiz Settings'), findsOneWidget);
-        expect(find.byType(SwitchListTile), findsWidgets);
-      });
+          // Step 2 - Verify content is visible
+          expect(find.text('Quiz Settings'), findsOneWidget);
+          expect(find.byType(SwitchListTile), findsWidgets);
+        },
+      );
     });
   });
 }

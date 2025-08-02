@@ -21,7 +21,7 @@ class QuizCreationPage extends ConsumerStatefulWidget {
 
 class _QuizCreationPageState extends ConsumerState<QuizCreationPage> {
   int _currentStep = 0;
-  
+
   @override
   void initState() {
     super.initState();
@@ -33,7 +33,7 @@ class _QuizCreationPageState extends ConsumerState<QuizCreationPage> {
 
   void _nextStep() {
     final notifier = ref.read(quizCreationProvider.notifier);
-    
+
     // Check if user can proceed to next step
     if (!notifier.canProceedToStep(_currentStep + 1)) {
       // Show validation error
@@ -47,7 +47,7 @@ class _QuizCreationPageState extends ConsumerState<QuizCreationPage> {
       );
       return;
     }
-    
+
     if (_currentStep < 2) {
       setState(() {
         _currentStep++;
@@ -66,14 +66,14 @@ class _QuizCreationPageState extends ConsumerState<QuizCreationPage> {
   void _saveAndPreview() async {
     final notifier = ref.read(quizCreationProvider.notifier);
     final state = ref.read(quizCreationProvider);
-    
+
     // Check if quiz can be saved
     if (!notifier.canSaveQuiz()) {
       // Show detailed validation error
       _showValidationDialog(state.validation);
       return;
     }
-    
+
     // Show loading indicator
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -97,10 +97,10 @@ class _QuizCreationPageState extends ConsumerState<QuizCreationPage> {
         ),
       );
     }
-    
+
     // Save the quiz
     final quizId = await notifier.saveQuiz();
-    
+
     if (context.mounted) {
       if (quizId != null) {
         // Success - navigate to preview
@@ -163,8 +163,10 @@ class _QuizCreationPageState extends ConsumerState<QuizCreationPage> {
           Consumer(
             builder: (context, ref, child) {
               final state = ref.watch(quizCreationProvider);
-              final canSave = ref.read(quizCreationProvider.notifier).canSaveQuiz();
-              
+              final canSave = ref
+                  .read(quizCreationProvider.notifier)
+                  .canSaveQuiz();
+
               return TextButton(
                 onPressed: state.isLoading ? null : _saveAndPreview,
                 child: state.isLoading
@@ -192,8 +194,8 @@ class _QuizCreationPageState extends ConsumerState<QuizCreationPage> {
                           Text(
                             canSave ? 'Preview' : 'Incomplete',
                             style: AppTextStyles.buttonMedium.copyWith(
-                              color: canSave 
-                                  ? AppColors.vibrantPurple 
+                              color: canSave
+                                  ? AppColors.vibrantPurple
                                   : AppColors.coralRed,
                             ),
                           ),
@@ -212,7 +214,7 @@ class _QuizCreationPageState extends ConsumerState<QuizCreationPage> {
             Consumer(
               builder: (context, ref, child) {
                 final state = ref.watch(quizCreationProvider);
-                
+
                 return Container(
                   color: AppColors.pureWhite,
                   padding: EdgeInsets.symmetric(
@@ -230,8 +232,11 @@ class _QuizCreationPageState extends ConsumerState<QuizCreationPage> {
                       QuizStepperWidget(
                         currentStep: _currentStep,
                         onStepTapped: (step) {
-                          final notifier = ref.read(quizCreationProvider.notifier);
-                          if (step <= _currentStep || notifier.canProceedToStep(step)) {
+                          final notifier = ref.read(
+                            quizCreationProvider.notifier,
+                          );
+                          if (step <= _currentStep ||
+                              notifier.canProceedToStep(step)) {
                             setState(() {
                               _currentStep = step;
                             });
@@ -326,40 +331,53 @@ class _QuizCreationPageState extends ConsumerState<QuizCreationPage> {
                       child: Consumer(
                         builder: (context, ref, child) {
                           final state = ref.watch(quizCreationProvider);
-                          final notifier = ref.read(quizCreationProvider.notifier);
-                          
+                          final notifier = ref.read(
+                            quizCreationProvider.notifier,
+                          );
+
                           bool canProceed;
                           String buttonText;
                           IconData? buttonIcon;
                           Color buttonColor;
-                          
+
                           if (_currentStep == 2) {
                             // Final step - save button
-                            canProceed = notifier.canSaveQuiz() && !state.isLoading;
-                            buttonText = state.isLoading 
-                                ? 'Saving...' 
-                                : canProceed 
-                                    ? 'Save & Preview' 
-                                    : 'Add Questions First';
-                            buttonIcon = state.isLoading 
-                                ? null 
-                                : canProceed 
-                                    ? Icons.visibility 
-                                    : Icons.error_outline;
-                            buttonColor = canProceed 
-                                ? AppColors.vibrantPurple 
+                            canProceed =
+                                notifier.canSaveQuiz() && !state.isLoading;
+                            buttonText = state.isLoading
+                                ? 'Saving...'
+                                : canProceed
+                                ? 'Save & Preview'
+                                : 'Add Questions First';
+                            buttonIcon = state.isLoading
+                                ? null
+                                : canProceed
+                                ? Icons.visibility
+                                : Icons.error_outline;
+                            buttonColor = canProceed
+                                ? AppColors.vibrantPurple
                                 : AppColors.coolGray;
                           } else {
                             // Navigation steps
-                            canProceed = notifier.canProceedToStep(_currentStep + 1) && !state.isLoading;
-                            buttonText = canProceed ? 'Next' : 'Complete This Step';
-                            buttonIcon = canProceed ? Icons.arrow_forward : Icons.warning;
-                            buttonColor = canProceed ? AppColors.vibrantPurple : AppColors.coolGray;
+                            canProceed =
+                                notifier.canProceedToStep(_currentStep + 1) &&
+                                !state.isLoading;
+                            buttonText = canProceed
+                                ? 'Next'
+                                : 'Complete This Step';
+                            buttonIcon = canProceed
+                                ? Icons.arrow_forward
+                                : Icons.warning;
+                            buttonColor = canProceed
+                                ? AppColors.vibrantPurple
+                                : AppColors.coolGray;
                           }
-                          
+
                           return PrimaryButton(
                             onPressed: canProceed
-                                ? (_currentStep == 2 ? _saveAndPreview : _nextStep)
+                                ? (_currentStep == 2
+                                      ? _saveAndPreview
+                                      : _nextStep)
                                 : () => _showValidationDialog(state.validation),
                             text: buttonText,
                             icon: buttonIcon,
@@ -385,11 +403,11 @@ class _QuizCreationPageState extends ConsumerState<QuizCreationPage> {
       builder: (context, ref, child) {
         // Check provider state for any errors
         final providerState = ref.watch(quizCreationProvider);
-        
+
         return LayoutBuilder(
           builder: (context, constraints) {
             final Widget content;
-            
+
             try {
               switch (_currentStep) {
                 case 0:
@@ -496,9 +514,9 @@ class _QuizCreationPageState extends ConsumerState<QuizCreationPage> {
                         ),
                         value: ref.watch(quizCreationProvider).isPublic,
                         onChanged: (value) {
-                          ref.read(quizCreationProvider.notifier).updateSettings(
-                            isPublic: value,
-                          );
+                          ref
+                              .read(quizCreationProvider.notifier)
+                              .updateSettings(isPublic: value);
                         },
                         activeColor: AppColors.vibrantPurple,
                       ),
@@ -512,11 +530,13 @@ class _QuizCreationPageState extends ConsumerState<QuizCreationPage> {
                           'Show player rankings after each game',
                           style: AppTextStyles.caption,
                         ),
-                        value: ref.watch(quizCreationProvider).enableLeaderboard,
+                        value: ref
+                            .watch(quizCreationProvider)
+                            .enableLeaderboard,
                         onChanged: (value) {
-                          ref.read(quizCreationProvider.notifier).updateSettings(
-                            enableLeaderboard: value,
-                          );
+                          ref
+                              .read(quizCreationProvider.notifier)
+                              .updateSettings(enableLeaderboard: value);
                         },
                         activeColor: AppColors.vibrantPurple,
                       ),
@@ -530,11 +550,13 @@ class _QuizCreationPageState extends ConsumerState<QuizCreationPage> {
                           'Questions appear in random order',
                           style: AppTextStyles.caption,
                         ),
-                        value: ref.watch(quizCreationProvider).randomizeQuestions,
+                        value: ref
+                            .watch(quizCreationProvider)
+                            .randomizeQuestions,
                         onChanged: (value) {
-                          ref.read(quizCreationProvider.notifier).updateSettings(
-                            randomizeQuestions: value,
-                          );
+                          ref
+                              .read(quizCreationProvider.notifier)
+                              .updateSettings(randomizeQuestions: value);
                         },
                         activeColor: AppColors.vibrantPurple,
                       ),
@@ -612,7 +634,7 @@ class _QuizCreationPageState extends ConsumerState<QuizCreationPage> {
       validation.isDescriptionValid,
       validation.hasQuestions,
     ].where((item) => item).length;
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.spacingM,
@@ -624,11 +646,7 @@ class _QuizCreationPageState extends ConsumerState<QuizCreationPage> {
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.checklist,
-            size: 16,
-            color: AppColors.vibrantPurple,
-          ),
+          Icon(Icons.checklist, size: 16, color: AppColors.vibrantPurple),
           const SizedBox(width: AppSpacing.spacingS),
           Text(
             'Progress: $completed/3 requirements',
@@ -657,21 +675,12 @@ class _QuizCreationPageState extends ConsumerState<QuizCreationPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
           children: [
-            Icon(
-              Icons.checklist,
-              color: AppColors.vibrantPurple,
-              size: 24,
-            ),
+            Icon(Icons.checklist, color: AppColors.vibrantPurple, size: 24),
             const SizedBox(width: 8),
-            Text(
-              'Quiz Requirements',
-              style: AppTextStyles.sectionHeader,
-            ),
+            Text('Quiz Requirements', style: AppTextStyles.sectionHeader),
           ],
         ),
         content: Column(
@@ -768,27 +777,15 @@ class _QuizCreationPageState extends ConsumerState<QuizCreationPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
           children: [
-            Icon(
-              Icons.error_outline,
-              color: AppColors.coralRed,
-              size: 24,
-            ),
+            Icon(Icons.error_outline, color: AppColors.coralRed, size: 24),
             const SizedBox(width: 8),
-            Text(
-              'Save Failed',
-              style: AppTextStyles.sectionHeader,
-            ),
+            Text('Save Failed', style: AppTextStyles.sectionHeader),
           ],
         ),
-        content: Text(
-          errorMessage,
-          style: AppTextStyles.bodyText,
-        ),
+        content: Text(errorMessage, style: AppTextStyles.bodyText),
         actions: [
           PrimaryButton(
             onPressed: () => Navigator.pop(context),

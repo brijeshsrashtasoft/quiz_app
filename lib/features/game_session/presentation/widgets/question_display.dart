@@ -34,7 +34,7 @@ class QuestionDisplay extends ConsumerWidget {
       children: [
         // Progress indicator
         _buildProgressIndicator(),
-        AppSpacing.verticalSpacingM,
+        SizedBox(height: AppSpacing.spacingM),
 
         // Question card with animation
         _buildQuestionCard(context)
@@ -47,7 +47,7 @@ class QuestionDisplay extends ConsumerWidget {
             )
             .fadeIn(duration: AppAnimations.newQuestionDuration),
 
-        AppSpacing.verticalSpacingM,
+        SizedBox(height: AppSpacing.spacingM),
 
         // Timer display
         _buildTimerDisplay(context),
@@ -105,14 +105,14 @@ class QuestionDisplay extends ConsumerWidget {
             ),
             child: Text(
               'Question $questionNumber of $totalQuestions',
-              style: AppTextStyles.labelMedium.copyWith(
+              style: AppTextStyles.caption.copyWith(
                 color: AppColors.pureWhite,
                 fontWeight: FontWeight.w600,
               ),
             ),
           ),
 
-          AppSpacing.verticalSpacingL,
+          SizedBox(height: AppSpacing.spacingL),
 
           // Question image if available
           if (question.questionImageUrl != null) ...[
@@ -125,7 +125,7 @@ class QuestionDisplay extends ConsumerWidget {
                 fit: BoxFit.cover,
               ),
             ),
-            AppSpacing.verticalSpacingM,
+            SizedBox(height: AppSpacing.spacingM),
           ],
 
           // Question text
@@ -136,12 +136,12 @@ class QuestionDisplay extends ConsumerWidget {
           ),
 
           // Points indicator
-          AppSpacing.verticalSpacingM,
+          SizedBox(height: AppSpacing.spacingM),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(Icons.star_rounded, color: AppColors.warmYellow, size: 20),
-              AppSpacing.horizontalSpacingXS,
+              SizedBox(width: AppSpacing.spacingXS),
               Text(
                 '${question.questionPoints} points',
                 style: AppTextStyles.bodyMedium.copyWith(
@@ -264,8 +264,8 @@ class _TimerDisplayState extends State<TimerDisplay>
                 },
               )
               .scale(
-                begin: 1.0,
-                end: _isWarning ? 1.1 : 1.0,
+                begin: const Offset(1.0, 1.0),
+                end: Offset(_isWarning ? 1.1 : 1.0, _isWarning ? 1.1 : 1.0),
                 duration: AppAnimations.timerWarningDuration,
                 curve: AppAnimations.timerWarningCurve,
               ),

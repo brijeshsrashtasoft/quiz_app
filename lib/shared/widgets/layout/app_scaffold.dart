@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/gestures.dart';
 import '../../constants/app_colors.dart';
 
 /// Custom app scaffold that provides consistent layout structure

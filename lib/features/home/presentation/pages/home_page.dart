@@ -244,7 +244,10 @@ class _HomePageState extends ConsumerState<HomePage>
                       style: OutlinedButton.styleFrom(
                         backgroundColor: Colors.transparent,
                         foregroundColor: AppColors.pureWhite,
-                        side: const BorderSide(color: AppColors.pureWhite, width: 2),
+                        side: const BorderSide(
+                          color: AppColors.pureWhite,
+                          width: 2,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -412,7 +415,7 @@ class _HomePageState extends ConsumerState<HomePage>
               if (quizzes.isEmpty) {
                 return _buildEmptyState();
               }
-              
+
               return ListView.builder(
                 scrollDirection: Axis.horizontal,
                 itemCount: quizzes.length,
@@ -448,10 +451,12 @@ class _HomePageState extends ConsumerState<HomePage>
   /// Helper method to calculate difficulty from quiz questions
   String _getDifficultyFromQuiz(Quiz quiz) {
     if (quiz.questions.isEmpty) return 'Easy';
-    
+
     // Calculate average time limit
-    final avgTimeLimit = quiz.questions.fold(0, (sum, q) => sum + q.questionTimeLimit) / quiz.questions.length;
-    
+    final avgTimeLimit =
+        quiz.questions.fold(0, (sum, q) => sum + q.questionTimeLimit) /
+        quiz.questions.length;
+
     if (avgTimeLimit <= 10) return 'Hard'; // Quick questions = harder
     if (avgTimeLimit <= 20) return 'Medium';
     return 'Easy'; // More time = easier
@@ -465,9 +470,7 @@ class _HomePageState extends ConsumerState<HomePage>
       itemBuilder: (context, index) {
         return Container(
           width: 280,
-          margin: EdgeInsets.only(
-            right: index < 2 ? AppSpacing.spacingM : 0,
-          ),
+          margin: EdgeInsets.only(right: index < 2 ? AppSpacing.spacingM : 0),
           child: Container(
             decoration: BoxDecoration(
               color: AppColors.lightGray.withOpacity(0.3),
@@ -478,7 +481,9 @@ class _HomePageState extends ConsumerState<HomePage>
               children: [
                 const CircularProgressIndicator(
                   strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.vibrantPurple),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    AppColors.vibrantPurple,
+                  ),
                 ),
                 const SizedBox(height: AppSpacing.spacingM),
                 Text(
@@ -510,11 +515,7 @@ class _HomePageState extends ConsumerState<HomePage>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.error_outline,
-            size: 48,
-            color: AppColors.coralRed,
-          ),
+          Icon(Icons.error_outline, size: 48, color: AppColors.coralRed),
           const SizedBox(height: AppSpacing.spacingM),
           Text(
             'Failed to load quizzes',
@@ -526,9 +527,7 @@ class _HomePageState extends ConsumerState<HomePage>
           const SizedBox(height: AppSpacing.spacingS),
           Text(
             'Please check your connection and try again',
-            style: AppTextStyles.caption.copyWith(
-              color: AppColors.coolGray,
-            ),
+            style: AppTextStyles.caption.copyWith(color: AppColors.coolGray),
             textAlign: TextAlign.center,
           ),
         ],
@@ -543,19 +542,12 @@ class _HomePageState extends ConsumerState<HomePage>
       decoration: BoxDecoration(
         color: AppColors.offWhite,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: AppColors.lightGray,
-          width: 1,
-        ),
+        border: Border.all(color: AppColors.lightGray, width: 1),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.quiz_outlined,
-            size: 48,
-            color: AppColors.coolGray,
-          ),
+          Icon(Icons.quiz_outlined, size: 48, color: AppColors.coolGray),
           const SizedBox(height: AppSpacing.spacingM),
           Text(
             'No quizzes available',
@@ -567,9 +559,7 @@ class _HomePageState extends ConsumerState<HomePage>
           const SizedBox(height: AppSpacing.spacingS),
           Text(
             'Be the first to create a quiz!',
-            style: AppTextStyles.caption.copyWith(
-              color: AppColors.coolGray,
-            ),
+            style: AppTextStyles.caption.copyWith(color: AppColors.coolGray),
           ),
         ],
       ),
@@ -579,14 +569,12 @@ class _HomePageState extends ConsumerState<HomePage>
   /// Show join game dialog with PIN input
   void _showJoinGameDialog(BuildContext context) {
     final TextEditingController pinController = TextEditingController();
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.pureWhite,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           'Join Game',
           style: AppTextStyles.sectionHeader.copyWith(
@@ -598,9 +586,7 @@ class _HomePageState extends ConsumerState<HomePage>
           children: [
             Text(
               'Enter the game PIN to join a live quiz session',
-              style: AppTextStyles.bodyText.copyWith(
-                color: AppColors.coolGray,
-              ),
+              style: AppTextStyles.bodyText.copyWith(color: AppColors.coolGray),
             ),
             const SizedBox(height: AppSpacing.spacingL),
             TextField(
@@ -627,16 +613,14 @@ class _HomePageState extends ConsumerState<HomePage>
             onPressed: () => Navigator.of(context).pop(),
             child: Text(
               'Cancel',
-              style: AppTextStyles.bodyText.copyWith(
-                color: AppColors.coolGray,
-              ),
+              style: AppTextStyles.bodyText.copyWith(color: AppColors.coolGray),
             ),
           ),
           ElevatedButton(
             onPressed: () {
               final pin = pinController.text.trim();
               Navigator.of(context).pop();
-              
+
               if (pin.isNotEmpty) {
                 // Navigate to game join page with PIN
                 if (pin.length == 6 && RegExp(r'^\d+$').hasMatch(pin)) {

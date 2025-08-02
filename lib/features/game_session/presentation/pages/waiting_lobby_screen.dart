@@ -81,7 +81,7 @@ class _WaitingLobbyScreenState extends ConsumerState<WaitingLobbyScreen>
       actions: [
         ConnectionStatusIndicator(isConnected: true, onReconnect: () {}),
       ],
-      child: Column(
+      body: Column(
         children: [
           // Game info header
           Container(

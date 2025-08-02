@@ -14,9 +14,7 @@ class TestApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('Test')),
-        body: const Center(
-          child: Text('Test: Body content should be visible'),
-        ),
+        body: const Center(child: Text('Test: Body content should be visible')),
       ),
     );
   }

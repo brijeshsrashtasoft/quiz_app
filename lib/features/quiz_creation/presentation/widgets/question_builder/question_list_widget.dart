@@ -61,7 +61,7 @@ class _QuestionListWidgetState extends ConsumerState<QuestionListWidget>
                   timeLimit: questionData['timeLimit'],
                   points: questionData['points'],
                 );
-          
+
           ref.read(quizCreationProvider.notifier).addQuestion(question);
         },
       ),
@@ -71,29 +71,48 @@ class _QuestionListWidgetState extends ConsumerState<QuestionListWidget>
   void _editQuestion(int index) {
     final questions = ref.read(quizCreationProvider).questions;
     if (index < 0 || index >= questions.length) return;
-    
+
     final existingQuestion = questions[index];
-    
+
     // Convert Question entity to Map format for dialog
     final questionData = existingQuestion.when(
-      multipleChoice: (id, question, options, correctAnswer, timeLimit, points, imageUrl, explanation) => {
-        'question': question,
-        'options': options,
-        'correctAnswer': correctAnswer,
-        'timeLimit': timeLimit,
-        'points': points,
-        'type': 'multiple_choice',
-      },
-      trueFalse: (id, question, correctAnswer, timeLimit, points, imageUrl, explanation) => {
-        'question': question,
-        'options': ['True', 'False'],
-        'correctAnswer': correctAnswer ? 0 : 1,
-        'timeLimit': timeLimit,
-        'points': points,
-        'type': 'true_false',
-      },
+      multipleChoice:
+          (
+            id,
+            question,
+            options,
+            correctAnswer,
+            timeLimit,
+            points,
+            imageUrl,
+            explanation,
+          ) => {
+            'question': question,
+            'options': options,
+            'correctAnswer': correctAnswer,
+            'timeLimit': timeLimit,
+            'points': points,
+            'type': 'multiple_choice',
+          },
+      trueFalse:
+          (
+            id,
+            question,
+            correctAnswer,
+            timeLimit,
+            points,
+            imageUrl,
+            explanation,
+          ) => {
+            'question': question,
+            'options': ['True', 'False'],
+            'correctAnswer': correctAnswer ? 0 : 1,
+            'timeLimit': timeLimit,
+            'points': points,
+            'type': 'true_false',
+          },
     );
-    
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -104,7 +123,8 @@ class _QuestionListWidgetState extends ConsumerState<QuestionListWidget>
           final question = updatedQuestionData['type'] == 'multiple_choice'
               ? Question.multipleChoice(
                   id: existingQuestion.when(
-                    multipleChoice: (id, _, __, ___, ____, _____, ______, _______) => id,
+                    multipleChoice:
+                        (id, _, __, ___, ____, _____, ______, _______) => id,
                     trueFalse: (id, _, __, ___, ____, _____, ______) => id,
                   ),
                   question: updatedQuestionData['question'],
@@ -115,7 +135,8 @@ class _QuestionListWidgetState extends ConsumerState<QuestionListWidget>
                 )
               : Question.trueFalse(
                   id: existingQuestion.when(
-                    multipleChoice: (id, _, __, ___, ____, _____, ______, _______) => id,
+                    multipleChoice:
+                        (id, _, __, ___, ____, _____, ______, _______) => id,
                     trueFalse: (id, _, __, ___, ____, _____, ______) => id,
                   ),
                   question: updatedQuestionData['question'],
@@ -123,8 +144,10 @@ class _QuestionListWidgetState extends ConsumerState<QuestionListWidget>
                   timeLimit: updatedQuestionData['timeLimit'],
                   points: updatedQuestionData['points'],
                 );
-          
-          ref.read(quizCreationProvider.notifier).updateQuestion(index, question);
+
+          ref
+              .read(quizCreationProvider.notifier)
+              .updateQuestion(index, question);
         },
       ),
     );
@@ -174,7 +197,9 @@ class _QuestionListWidgetState extends ConsumerState<QuestionListWidget>
                   Flexible(
                     child: PrimaryButton(
                       onPressed: () {
-                        ref.read(quizCreationProvider.notifier).removeQuestion(index);
+                        ref
+                            .read(quizCreationProvider.notifier)
+                            .removeQuestion(index);
                         Navigator.pop(context);
                       },
                       text: 'Delete',
@@ -341,7 +366,9 @@ class _QuestionListWidgetState extends ConsumerState<QuestionListWidget>
         physics: const ClampingScrollPhysics(),
         itemCount: questions.length,
         onReorder: (oldIndex, newIndex) {
-          ref.read(quizCreationProvider.notifier).reorderQuestions(oldIndex, newIndex);
+          ref
+              .read(quizCreationProvider.notifier)
+              .reorderQuestions(oldIndex, newIndex);
         },
         proxyDecorator: (child, index, animation) {
           return AnimatedBuilder(
@@ -359,27 +386,46 @@ class _QuestionListWidgetState extends ConsumerState<QuestionListWidget>
         },
         itemBuilder: (context, index) {
           final question = questions[index];
-          
+
           // Convert Question entity to Map format for QuestionCardWidget
           final questionData = question.when(
-            multipleChoice: (id, questionText, options, correctAnswer, timeLimit, points, imageUrl, explanation) => {
-              'question': questionText,
-              'options': options,
-              'correctAnswer': correctAnswer,
-              'timeLimit': timeLimit,
-              'points': points,
-              'type': 'multiple_choice',
-            },
-            trueFalse: (id, questionText, correctAnswer, timeLimit, points, imageUrl, explanation) => {
-              'question': questionText,
-              'options': ['True', 'False'],
-              'correctAnswer': correctAnswer ? 0 : 1,
-              'timeLimit': timeLimit,
-              'points': points,
-              'type': 'true_false',
-            },
+            multipleChoice:
+                (
+                  id,
+                  questionText,
+                  options,
+                  correctAnswer,
+                  timeLimit,
+                  points,
+                  imageUrl,
+                  explanation,
+                ) => {
+                  'question': questionText,
+                  'options': options,
+                  'correctAnswer': correctAnswer,
+                  'timeLimit': timeLimit,
+                  'points': points,
+                  'type': 'multiple_choice',
+                },
+            trueFalse:
+                (
+                  id,
+                  questionText,
+                  correctAnswer,
+                  timeLimit,
+                  points,
+                  imageUrl,
+                  explanation,
+                ) => {
+                  'question': questionText,
+                  'options': ['True', 'False'],
+                  'correctAnswer': correctAnswer ? 0 : 1,
+                  'timeLimit': timeLimit,
+                  'points': points,
+                  'type': 'true_false',
+                },
           );
-          
+
           return ConstrainedBox(
             key: ValueKey('question_$index'),
             constraints: BoxConstraints(maxWidth: constraints.maxWidth),
