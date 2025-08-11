@@ -156,7 +156,7 @@ class _AnswerRevealScreenState extends ConsumerState<AnswerRevealScreen>
                         opacity: _leaderboardController,
                         child: widget.isHost
                             ? const AnswerStatisticsChart()
-                            : const LeaderboardPreview(),
+                            : const LeaderboardPreview(entries: []),
                       ),
                     );
                   },

@@ -3,9 +3,21 @@ import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/constants/app_text_styles.dart';
 import '../../../../shared/constants/app_spacing.dart';
 import '../../../../shared/constants/app_animations.dart';
+import '../providers/game_play_providers.dart';
 
 class LeaderboardPreview extends StatefulWidget {
-  const LeaderboardPreview({super.key});
+  final List<LeaderboardEntry> entries;
+  final int maxVisible;
+  final bool showFinalResults;
+  final String? currentUserId;
+
+  const LeaderboardPreview({
+    super.key,
+    required this.entries,
+    this.maxVisible = 5,
+    this.showFinalResults = false,
+    this.currentUserId,
+  });
 
   @override
   State<LeaderboardPreview> createState() => _LeaderboardPreviewState();
@@ -16,26 +28,20 @@ class _LeaderboardPreviewState extends State<LeaderboardPreview>
   late List<AnimationController> _animationControllers;
   late List<Animation<double>> _slideAnimations;
 
-  // Mock leaderboard data
-  final List<Map<String, dynamic>> _topPlayers = [
-    {'name': 'Quiz Master', 'score': 5200, 'position': 1, 'change': 0},
-    {'name': 'Brain Storm', 'score': 4800, 'position': 2, 'change': 1},
-    {'name': 'Smart Cookie', 'score': 4500, 'position': 3, 'change': -1},
-    {
-      'name': 'You',
-      'score': 4200,
-      'position': 4,
-      'change': 2,
-      'isCurrentPlayer': true,
-    },
-    {'name': 'Quick Think', 'score': 3900, 'position': 5, 'change': 0},
-  ];
+  List<LeaderboardEntry> get _displayEntries {
+    final entries = widget.entries.take(widget.maxVisible).toList();
+    return entries;
+  }
 
   @override
   void initState() {
     super.initState();
+    _initializeAnimations();
+  }
+
+  void _initializeAnimations() {
     _animationControllers = List.generate(
-      _topPlayers.length,
+      _displayEntries.length,
       (index) => AnimationController(
         duration: Duration(
           milliseconds:
@@ -62,6 +68,19 @@ class _LeaderboardPreviewState extends State<LeaderboardPreview>
   }
 
   @override
+  void didUpdateWidget(LeaderboardPreview oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.entries.length != widget.entries.length) {
+      // Dispose old controllers
+      for (var controller in _animationControllers) {
+        controller.dispose();
+      }
+      // Reinitialize with new data
+      _initializeAnimations();
+    }
+  }
+
+  @override
   void dispose() {
     for (var controller in _animationControllers) {
       controller.dispose();
@@ -79,24 +98,38 @@ class _LeaderboardPreviewState extends State<LeaderboardPreview>
           const SizedBox(height: AppSpacing.spacingL),
 
           Expanded(
-            child: ListView.builder(
-              itemCount: _topPlayers.length,
-              itemBuilder: (context, index) {
-                final player = _topPlayers[index];
-                return AnimatedBuilder(
-                  animation: _animationControllers[index],
-                  builder: (context, child) {
-                    return Transform.translate(
-                      offset: Offset(0, _slideAnimations[index].value),
-                      child: FadeTransition(
-                        opacity: _animationControllers[index],
-                        child: _LeaderboardItem(player: player, index: index),
+            child: _displayEntries.isEmpty
+                ? Center(
+                    child: Text(
+                      'No players yet',
+                      style: AppTextStyles.bodyText.copyWith(
+                        color: AppColors.coolGray,
                       ),
-                    );
-                  },
-                );
-              },
-            ),
+                    ),
+                  )
+                : ListView.builder(
+                    itemCount: _displayEntries.length,
+                    itemBuilder: (context, index) {
+                      final entry = _displayEntries[index];
+                      return AnimatedBuilder(
+                        animation: _animationControllers[index],
+                        builder: (context, child) {
+                          return Transform.translate(
+                            offset: Offset(0, _slideAnimations[index].value),
+                            child: FadeTransition(
+                              opacity: _animationControllers[index],
+                              child: _LeaderboardItem(
+                                entry: entry,
+                                index: index,
+                                currentUserId: widget.currentUserId,
+                                showFinalResults: widget.showFinalResults,
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
           ),
         ],
       ),
@@ -105,17 +138,24 @@ class _LeaderboardPreviewState extends State<LeaderboardPreview>
 }
 
 class _LeaderboardItem extends StatelessWidget {
-  final Map<String, dynamic> player;
+  final LeaderboardEntry entry;
   final int index;
+  final String? currentUserId;
+  final bool showFinalResults;
 
-  const _LeaderboardItem({required this.player, required this.index});
+  const _LeaderboardItem({
+    required this.entry,
+    required this.index,
+    this.currentUserId,
+    this.showFinalResults = false,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final position = player['position'] as int;
+    final position = entry.rank;
     final isTopThree = position <= 3;
-    final isCurrentPlayer = player['isCurrentPlayer'] ?? false;
-    final change = player['change'] as int;
+    final isCurrentPlayer = entry.isCurrentUser(currentUserId);
+    final change = 0; // TODO: Implement position change tracking
 
     return Container(
       margin: const EdgeInsets.only(bottom: AppSpacing.spacingM),
@@ -172,12 +212,27 @@ class _LeaderboardItem extends StatelessWidget {
 
           // Player name
           Expanded(
-            child: Text(
-              player['name'] as String,
-              style: AppTextStyles.bodyText.copyWith(
-                fontWeight: isCurrentPlayer ? FontWeight.w700 : FontWeight.w500,
-                color: isTopThree ? AppColors.pureWhite : AppColors.charcoal,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  entry.playerName,
+                  style: AppTextStyles.bodyText.copyWith(
+                    fontWeight: isCurrentPlayer ? FontWeight.w700 : FontWeight.w500,
+                    color: isTopThree ? AppColors.pureWhite : AppColors.charcoal,
+                  ),
+                ),
+                if (showFinalResults && entry.answersCorrect > 0) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    '${entry.answersCorrect} correct',
+                    style: AppTextStyles.caption.copyWith(
+                      color: isTopThree ? AppColors.pureWhite.withValues(alpha: 0.8) : AppColors.coolGray,
+                    ),
+                  ),
+                ],
+              ],
             ),
           ),
 
@@ -224,7 +279,7 @@ class _LeaderboardItem extends StatelessWidget {
 
           // Score
           Text(
-            '${player['score']}',
+            '${entry.score}',
             style: AppTextStyles.scoreDisplay.copyWith(
               fontSize: 20,
               color: isTopThree ? AppColors.pureWhite : AppColors.vibrantPurple,

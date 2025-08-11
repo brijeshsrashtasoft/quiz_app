@@ -35,6 +35,7 @@ class RouteConstants {
   static const String gameResults = '/game/:sessionId/results';
   static const String gameHost = '/game/host';
   static const String gameHostSetup = '/game/host/setup';
+  static const String quizSelection = '/quiz-selection';
 
   // Leaderboard
   static const String leaderboard = '/leaderboard';

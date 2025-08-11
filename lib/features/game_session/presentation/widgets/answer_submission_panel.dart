@@ -122,7 +122,8 @@ class _AnswerSubmissionPanelState extends ConsumerState<AnswerSubmissionPanel> {
                     text: options[index],
                     shape: shape,
                     color: _getButtonColor(index, color, isCorrect, isWrong),
-                    onPressed: (widget.isSubmitted || widget.onAnswerSubmit == null)
+                    onPressed:
+                        (widget.isSubmitted || widget.onAnswerSubmit == null)
                         ? null
                         : () => _handleAnswerTap(index),
                     isSelected: isSelected,

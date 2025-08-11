@@ -165,6 +165,38 @@
           "order": "DESCENDING"
         }
       ]
+    },
+    {
+      "collectionGroup": "quizzes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "isDraft",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdBy",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "updatedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "quizzes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "createdBy",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "lastModified",
+          "order": "DESCENDING"
+        }
+      ]
     }
   ],
   "fieldOverrides": [
@@ -186,6 +218,104 @@
           "fields": [
             {
               "fieldPath": "stats.averageScore",
+              "order": "DESCENDING"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "collectionGroup": "game_sessions",
+      "fieldPath": "players",
+      "indexes": [
+        {
+          "queryScope": "COLLECTION",
+          "fields": [
+            {
+              "fieldPath": "players",
+              "arrayConfig": "CONTAINS"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "collectionGroup": "leaderboards",
+      "fieldPath": "scores",
+      "indexes": [
+        {
+          "queryScope": "COLLECTION",
+          "fields": [
+            {
+              "fieldPath": "scores",
+              "arrayConfig": "CONTAINS"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "fieldOverrides": [
+    {
+      "collectionGroup": "users",
+      "fieldPath": "stats",
+      "indexes": [
+        {
+          "queryScope": "COLLECTION",
+          "fields": [
+            {
+              "fieldPath": "stats.totalGamesPlayed",
+              "order": "DESCENDING"
+            }
+          ]
+        },
+        {
+          "queryScope": "COLLECTION",
+          "fields": [
+            {
+              "fieldPath": "stats.averageScore",
+              "order": "DESCENDING"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "collectionGroup": "quizzes",
+      "fieldPath": "isDraft",
+      "indexes": [
+        {
+          "queryScope": "COLLECTION",
+          "fields": [
+            {
+              "fieldPath": "isDraft",
+              "order": "ASCENDING"
+            },
+            {
+              "fieldPath": "createdBy",
+              "order": "ASCENDING"
+            },
+            {
+              "fieldPath": "updatedAt",
+              "order": "DESCENDING"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "collectionGroup": "quizzes",
+      "fieldPath": "lastModified",
+      "indexes": [
+        {
+          "queryScope": "COLLECTION",
+          "fields": [
+            {
+              "fieldPath": "createdBy",
+              "order": "ASCENDING"
+            },
+            {
+              "fieldPath": "lastModified",
               "order": "DESCENDING"
             }
           ]

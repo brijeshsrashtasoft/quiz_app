@@ -101,7 +101,10 @@ class _GamePlayScreenState extends ConsumerState<GamePlayScreen>
       if (mounted) {
         setState(() {
           _showResults = true;
-          if (_currentQuestion['answers'][index]['isCorrect'] as bool) {
+          final answers = _currentQuestion['answers'] as List;
+          if (index >= 0 &&
+              index < answers.length &&
+              answers[index]['isCorrect'] as bool) {
             _currentScore += _currentQuestion['points'] as int;
           }
         });
@@ -121,7 +124,7 @@ class _GamePlayScreenState extends ConsumerState<GamePlayScreen>
         const SizedBox(width: AppSpacing.spacingM),
         ConnectionStatusIndicator(isConnected: true, onReconnect: () {}),
       ],
-      child: AnimatedBuilder(
+      body: AnimatedBuilder(
         animation: _questionTransitionController,
         builder: (context, child) {
           return Transform.translate(
@@ -134,8 +137,10 @@ class _GamePlayScreenState extends ConsumerState<GamePlayScreen>
                   Container(
                     margin: const EdgeInsets.only(bottom: AppSpacing.spacingL),
                     child: CountdownTimer(
-                      duration: Duration(seconds: timeLimit),
-                      onComplete: () {
+                      totalSeconds: timeLimit,
+                      currentSeconds:
+                          timeLimit, // TODO: Connect to actual timer state
+                      onFinished: () {
                         if (_selectedAnswer == null) {
                           // Auto-submit no answer
                           _submitAnswer(-1);
@@ -148,7 +153,7 @@ class _GamePlayScreenState extends ConsumerState<GamePlayScreen>
                   Expanded(
                     child: Center(
                       child: QuestionDisplay(
-                        question: _currentQuestion['text'] as String,
+                        questionText: _currentQuestion['text'] as String,
                         questionNumber: 1,
                         totalQuestions: 10,
                       ),
@@ -180,7 +185,7 @@ class _GamePlayScreenState extends ConsumerState<GamePlayScreen>
                       child: Column(
                         children: [
                           Text(
-                            '${_showResults ? "Results" : "Waiting for answers..."}',
+                            _showResults ? "Results" : "Waiting for answers...",
                             style: AppTextStyles.sectionHeader,
                           ),
                           const SizedBox(height: AppSpacing.spacingL),
@@ -217,7 +222,7 @@ class _GamePlayScreenState extends ConsumerState<GamePlayScreen>
           padding: AppSpacing.allM,
           decoration: BoxDecoration(
             color: isCorrect
-                ? AppColors.turquoise.withOpacity(0.1)
+                ? AppColors.turquoise.withValues(alpha: 0.1)
                 : AppColors.pureWhite,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
@@ -237,7 +242,7 @@ class _GamePlayScreenState extends ConsumerState<GamePlayScreen>
               ),
               Text('${stat['count']} players', style: AppTextStyles.caption),
               const SizedBox(width: AppSpacing.spacingM),
-              Container(
+              SizedBox(
                 width: 60,
                 child: Text(
                   '${stat['percentage']}%',

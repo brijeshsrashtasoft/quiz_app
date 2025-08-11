@@ -7,9 +7,11 @@ import '../../../../shared/constants/app_spacing.dart';
 import '../../../../shared/constants/app_animations.dart';
 import '../../../../shared/widgets/buttons/primary_button.dart';
 import '../../../../shared/widgets/layout/page_layout.dart';
-import '../../../../shared/widgets/inputs/text_input.dart';
 import '../widgets/pin_entry_widget.dart';
 import '../widgets/nickname_input.dart';
+import '../providers/session_providers.dart';
+import '../../../authentication/presentation/providers/auth_providers.dart';
+import '../../../../core/utils/logger.dart';
 
 class PlayerJoinScreen extends ConsumerStatefulWidget {
   const PlayerJoinScreen({super.key});
@@ -28,6 +30,8 @@ class _PlayerJoinScreenState extends ConsumerState<PlayerJoinScreen>
   final _nicknameController = TextEditingController();
   bool _showNicknameInput = false;
   bool _isJoining = false;
+  String? _errorMessage;
+  String? _currentSessionId;
 
   @override
   void initState() {
@@ -62,28 +66,175 @@ class _PlayerJoinScreenState extends ConsumerState<PlayerJoinScreen>
     super.dispose();
   }
 
-  void _handlePinSubmit() {
+  void _handlePinSubmit() async {
     if (_pinController.text.length == 6) {
+      final pin = _pinController.text.trim();
+
       setState(() {
-        _showNicknameInput = true;
+        _isJoining = true;
+        _errorMessage = null;
       });
-      _animationController.reset();
-      _animationController.forward();
+
+      try {
+        AppLogger.firebase('PlayerJoin', 'Looking up session for PIN: $pin');
+
+        // Look up session by PIN
+        final sessionId = await ref.read(
+          optimizedPinLookupProvider(pin).future,
+        );
+
+        if (sessionId != null) {
+          // PIN is valid, get session details to validate
+          final session = await ref.read(gameSessionProvider(sessionId).future);
+
+          if (session != null) {
+            final currentUser = ref.read(currentUserProvider);
+            if (currentUser == null) {
+              setState(() {
+                _isJoining = false;
+                _errorMessage = 'Please sign in to join the game';
+              });
+              return;
+            }
+
+            // Validate if user can join
+            if (!session.canUserJoin(currentUser.id)) {
+              String errorMsg;
+              if (session.isFull) {
+                errorMsg =
+                    'Game is full (${session.playerCount}/${session.settings?.maxPlayers ?? 50} players)';
+              } else if (!session.status.canJoin) {
+                errorMsg = 'Game is already in progress or completed';
+              } else if (session.isPlayer(currentUser.id)) {
+                errorMsg = 'You have already joined this game';
+              } else {
+                errorMsg = 'Cannot join this game';
+              }
+
+              setState(() {
+                _isJoining = false;
+                _errorMessage = errorMsg;
+              });
+              return;
+            }
+
+            // PIN is valid and user can join - store session ID and show nickname input
+            _currentSessionId = sessionId;
+            setState(() {
+              _showNicknameInput = true;
+              _isJoining = false;
+              _errorMessage = null;
+            });
+            _animationController.reset();
+            _animationController.forward();
+
+            AppLogger.firebase('PlayerJoin', 'Valid session found: $sessionId');
+          } else {
+            setState(() {
+              _isJoining = false;
+              _errorMessage = 'Game session not found or expired';
+            });
+          }
+        } else {
+          setState(() {
+            _isJoining = false;
+            _errorMessage = 'Invalid game PIN. Please check and try again.';
+          });
+        }
+      } catch (e) {
+        AppLogger.error('PIN validation failed', e);
+        setState(() {
+          _isJoining = false;
+          _errorMessage = 'Failed to validate PIN. Please try again.';
+        });
+      }
     }
   }
 
-  void _handleJoinGame() {
-    if (_nicknameController.text.trim().isNotEmpty) {
+  void _handleJoinGame() async {
+    if (_nicknameController.text.trim().isNotEmpty &&
+        _currentSessionId != null) {
+      final nickname = _nicknameController.text.trim();
+
       setState(() {
         _isJoining = true;
+        _errorMessage = null;
       });
 
-      // TODO: Implement actual join logic
-      Future.delayed(const Duration(seconds: 2), () {
-        if (mounted) {
-          context.push('/game/lobby');
+      try {
+        AppLogger.firebase(
+          'PlayerJoin',
+          'Attempting to join session: $_currentSessionId with nickname: $nickname',
+        );
+
+        // Check authentication one more time
+        final currentUser = ref.read(currentUserProvider);
+        if (currentUser == null) {
+          setState(() {
+            _isJoining = false;
+            _errorMessage = 'Please sign in to join the game';
+          });
+          return;
         }
-      });
+
+        // Use the session state notifier to join the game
+        final sessionNotifier = ref.read(
+          sessionStateNotifierProvider(_currentSessionId!).notifier,
+        );
+
+        await sessionNotifier.joinSession(nickname);
+
+        // Wait a moment for the state to update
+        await Future.delayed(const Duration(milliseconds: 500));
+
+        // Check the session state after joining
+        final sessionState = ref.read(
+          sessionStateNotifierProvider(_currentSessionId!),
+        );
+
+        if (sessionState.hasError) {
+          setState(() {
+            _isJoining = false;
+            _errorMessage = sessionState.errorMessage ?? 'Failed to join game';
+          });
+          AppLogger.error('Join game failed', sessionState.errorMessage);
+          return;
+        }
+
+        if (sessionState.isLoaded && sessionState.session != null) {
+          final session = sessionState.session!;
+
+          // Verify the user actually joined
+          if (session.isPlayer(currentUser.id)) {
+            AppLogger.firebase(
+              'PlayerJoin',
+              'Successfully joined session: $_currentSessionId',
+            );
+
+            // Navigate to the game session waiting lobby
+            if (mounted) {
+              context.go('/game/$_currentSessionId/waiting');
+            }
+          } else {
+            setState(() {
+              _isJoining = false;
+              _errorMessage =
+                  'Failed to join game - player not found in session';
+            });
+          }
+        } else {
+          setState(() {
+            _isJoining = false;
+            _errorMessage = 'Failed to join game - session state invalid';
+          });
+        }
+      } catch (e) {
+        AppLogger.error('Join game error', e);
+        setState(() {
+          _isJoining = false;
+          _errorMessage = 'Failed to join game: ${e.toString()}';
+        });
+      }
     }
   }
 
@@ -91,7 +242,7 @@ class _PlayerJoinScreenState extends ConsumerState<PlayerJoinScreen>
   Widget build(BuildContext context) {
     return PageLayout(
       title: 'Join Game',
-      child: AnimatedBuilder(
+      body: AnimatedBuilder(
         animation: _animationController,
         builder: (context, child) {
           return Transform.translate(
@@ -111,7 +262,7 @@ class _PlayerJoinScreenState extends ConsumerState<PlayerJoinScreen>
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.vibrantPurple.withOpacity(0.3),
+                          color: AppColors.vibrantPurple.withValues(alpha: 0.3),
                           blurRadius: 20,
                           offset: const Offset(0, 10),
                         ),
@@ -170,13 +321,50 @@ class _PlayerJoinScreenState extends ConsumerState<PlayerJoinScreen>
 
                   const SizedBox(height: AppSpacing.spacingM),
 
+                  // Error message display
+                  if (_errorMessage != null) ...[
+                    Container(
+                      margin: const EdgeInsets.only(top: AppSpacing.spacingM),
+                      padding: AppSpacing.allM,
+                      decoration: BoxDecoration(
+                        color: AppColors.error.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: AppColors.error.withValues(alpha: 0.3),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.error_outline,
+                            color: AppColors.error,
+                            size: 20,
+                          ),
+                          const SizedBox(width: AppSpacing.spacingS),
+                          Expanded(
+                            child: Text(
+                              _errorMessage!,
+                              style: AppTextStyles.bodyText.copyWith(
+                                color: AppColors.error,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.spacingM),
+                  ],
+
                   // Back button
                   if (_showNicknameInput && !_isJoining)
                     TextButton(
                       onPressed: () {
                         setState(() {
                           _showNicknameInput = false;
+                          _errorMessage = null;
+                          _currentSessionId = null;
                           _pinController.clear();
+                          _nicknameController.clear();
                         });
                         _animationController.reset();
                         _animationController.forward();

@@ -103,7 +103,10 @@
       "Bash(timeout:*)",
       "Bash(/Users/brijeshsakariya/AndroidStudioProjects/quiz_app/scripts/quality-check.sh:*)",
       "Bash(scripts/quality-check.sh:*)",
-      "Bash(awk:*)"
+      "Bash(awk:*)",
+      "Bash(./run_integration_tests.sh:*)",
+      "Bash(./check_integration_tests.sh:*)",
+      "Bash(/dev/null)"
     ],
     "deny": [
       "Bash(sudo:*)",

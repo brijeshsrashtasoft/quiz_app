@@ -10,7 +10,9 @@ import '../../domain/usecases/get_quiz_by_id_usecase.dart';
 import '../../domain/usecases/get_public_quizzes_usecase.dart';
 import '../../domain/usecases/get_popular_quizzes_usecase.dart';
 import '../../domain/usecases/get_recent_quizzes_usecase.dart';
+import '../../domain/usecases/get_user_quizzes_usecase.dart';
 import '../../domain/entities/quiz.dart';
+import '../../../authentication/presentation/providers/auth_providers.dart';
 
 /// Quiz feature dependency injection providers
 /// Following CLAUDE.md Clean Architecture and Riverpod patterns
@@ -66,6 +68,11 @@ final getRecentQuizzesUseCaseProvider = Provider<GetRecentQuizzesUseCase>((
 ) {
   final repository = ref.watch(quizRepositoryProvider);
   return GetRecentQuizzesUseCase(repository);
+});
+
+final getUserQuizzesUseCaseProvider = Provider<GetUserQuizzesUseCase>((ref) {
+  final repository = ref.watch(quizRepositoryProvider);
+  return GetUserQuizzesUseCase(repository);
 });
 
 /// Provider to fetch a quiz by ID for preview/editing
@@ -143,6 +150,78 @@ final recentQuizzesProvider = FutureProvider<List<Quiz>>((ref) async {
     failure: (error) {
       // Log error for debugging
       debugPrint('Failed to fetch recent quizzes: ${error.message}');
+      return [];
+    },
+  );
+});
+
+/// Provider to fetch user's created quizzes for hosting/management
+final userQuizzesProvider = FutureProvider<List<Quiz>>((ref) async {
+  final currentUserId = ref.watch(currentUserIdProvider);
+
+  if (currentUserId == null) {
+    debugPrint('No user authenticated, returning empty quiz list');
+    return [];
+  }
+
+  debugPrint('Fetching quizzes for user: $currentUserId');
+
+  final useCase = ref.watch(getUserQuizzesUseCaseProvider);
+  final result = await useCase.call(
+    GetUserQuizzesParams(
+      userId: currentUserId,
+      limit: 50,
+      includeDrafts: false, // Only published quizzes for hosting
+      sortBy: QuizSortOption.updatedAt,
+    ),
+  );
+
+  return result.when(
+    success: (quizzes) {
+      debugPrint('Successfully fetched ${quizzes.length} user quizzes');
+      // Filter only quizzes suitable for multiplayer hosting
+      final suitableQuizzes = quizzes
+          .where((quiz) => quiz.isMultiplayerSuitable)
+          .toList();
+      debugPrint('${suitableQuizzes.length} quizzes suitable for hosting');
+      return suitableQuizzes;
+    },
+    failure: (error) {
+      debugPrint('Failed to fetch user quizzes: ${error.message}');
+      return [];
+    },
+  );
+});
+
+/// Provider to fetch user's draft quizzes
+final userDraftQuizzesProvider = FutureProvider<List<Quiz>>((ref) async {
+  final currentUserId = ref.watch(currentUserIdProvider);
+
+  if (currentUserId == null) {
+    debugPrint('No user authenticated, returning empty draft quiz list');
+    return [];
+  }
+
+  debugPrint('Fetching draft quizzes for user: $currentUserId');
+
+  final useCase = ref.watch(getUserQuizzesUseCaseProvider);
+  final result = await useCase.call(
+    GetUserQuizzesParams(
+      userId: currentUserId,
+      limit: 20,
+      includeDrafts: true, // Only drafts
+      sortBy: QuizSortOption.updatedAt,
+    ),
+  );
+
+  return result.when(
+    success: (quizzes) {
+      final drafts = quizzes.where((quiz) => quiz.isDraft).toList();
+      debugPrint('Successfully fetched ${drafts.length} draft quizzes');
+      return drafts;
+    },
+    failure: (error) {
+      debugPrint('Failed to fetch draft quizzes: ${error.message}');
       return [];
     },
   );

@@ -356,8 +356,8 @@ class _HomePageState extends ConsumerState<HomePage>
               subtitle: 'Start a session',
               color: AppColors.coralRed,
               onTap: () {
-                // Navigate to game host page to start hosting
-                context.push(RouteConstants.gameHost);
+                // Navigate to quiz selection page first
+                context.push(RouteConstants.quizSelection);
               },
             ),
             _QuickActionCard(

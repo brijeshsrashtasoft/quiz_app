@@ -867,4 +867,149 @@ class GameSessionRepositoryImpl extends BaseRepository
   String _generateRandomPin() {
     return List.generate(6, (_) => _random.nextInt(10)).join();
   }
+
+  // ===========================================
+  // REAL-TIME ANSWER INTEGRATION METHODS
+  // ===========================================
+
+  @override
+  Future<Result<GameSessionEntity>> submitPlayerAnswer({
+    required String sessionId,
+    required String playerId,
+    required String playerName,
+    required int selectedOption,
+    required DateTime answeredAt,
+    required int responseTimeMs,
+    required bool isCorrect,
+    required int pointsEarned,
+    required int questionIndex,
+  }) async {
+    try {
+      final result = await dataSource.submitPlayerAnswer(
+        sessionId: sessionId,
+        playerId: playerId,
+        playerName: playerName,
+        selectedOption: selectedOption,
+        answeredAt: answeredAt,
+        responseTimeMs: responseTimeMs,
+        isCorrect: isCorrect,
+        pointsEarned: pointsEarned,
+        questionIndex: questionIndex,
+      );
+
+      return result.when(
+        success: (sessionModel) => Result.success(sessionModel.toEntity()),
+        failure: (error) => Result.failure(error),
+      );
+    } catch (e) {
+      return Result.failure(
+        ServerException(
+          message: 'Failed to submit player answer: ${e.toString()}',
+          code: 'submit_player_answer_error',
+        ).toFailure(),
+      );
+    }
+  }
+
+  @override
+  Stream<Result<Map<String, dynamic>>> watchQuestionAnswers(
+    String sessionId,
+    int questionIndex,
+  ) {
+    try {
+      return dataSource.watchQuestionAnswers(sessionId, questionIndex);
+    } catch (e) {
+      return Stream.value(
+        Result.failure(
+          ServerException(
+            message: 'Failed to watch question answers: ${e.toString()}',
+            code: 'watch_question_answers_error',
+          ).toFailure(),
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<Result<Map<String, dynamic>>> getQuestionStatistics({
+    required String sessionId,
+    required int questionIndex,
+  }) async {
+    try {
+      return await dataSource.getQuestionStatistics(
+        sessionId: sessionId,
+        questionIndex: questionIndex,
+      );
+    } catch (e) {
+      return Result.failure(
+        ServerException(
+          message: 'Failed to get question statistics: ${e.toString()}',
+          code: 'get_question_statistics_error',
+        ).toFailure(),
+      );
+    }
+  }
+
+  @override
+  Future<Result<GameSessionEntity>> updateQuestionPhase({
+    required String sessionId,
+    required int questionIndex,
+    required String phase,
+    required DateTime phaseStartTime,
+    required int phaseDurationSeconds,
+  }) async {
+    try {
+      final result = await dataSource.updateQuestionPhase(
+        sessionId: sessionId,
+        questionIndex: questionIndex,
+        phase: phase,
+        phaseStartTime: phaseStartTime,
+        phaseDurationSeconds: phaseDurationSeconds,
+      );
+
+      return result.when(
+        success: (sessionModel) => Result.success(sessionModel.toEntity()),
+        failure: (error) => Result.failure(error),
+      );
+    } catch (e) {
+      return Result.failure(
+        ServerException(
+          message: 'Failed to update question phase: ${e.toString()}',
+          code: 'update_question_phase_error',
+        ).toFailure(),
+      );
+    }
+  }
+
+  @override
+  Stream<Result<Map<String, dynamic>>> watchGamePhase(String sessionId) {
+    try {
+      return dataSource.watchGamePhase(sessionId);
+    } catch (e) {
+      return Stream.value(
+        Result.failure(
+          ServerException(
+            message: 'Failed to watch game phase: ${e.toString()}',
+            code: 'watch_game_phase_error',
+          ).toFailure(),
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<Result<List<Map<String, dynamic>>>> getSessionAnswers(
+    String sessionId,
+  ) async {
+    try {
+      return await dataSource.getSessionAnswers(sessionId);
+    } catch (e) {
+      return Result.failure(
+        ServerException(
+          message: 'Failed to get session answers: ${e.toString()}',
+          code: 'get_session_answers_error',
+        ).toFailure(),
+      );
+    }
+  }
 }

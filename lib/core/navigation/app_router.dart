@@ -17,6 +17,7 @@ import '../../features/authentication/presentation/pages/profile_page.dart'
     as auth_pages;
 import '../../features/home/presentation/pages/home_page.dart' as home_pages;
 import '../../features/game_session/presentation/pages/host_game_screen.dart';
+import '../../features/game_session/presentation/pages/quiz_selection_screen.dart';
 import '../../features/game_session/presentation/pages/game_session_router.dart';
 import '../../features/game_session/presentation/pages/answer_reveal_screen.dart';
 import '../../features/ui_showcase/presentation/pages/ui_showcase_page.dart';
@@ -220,9 +221,20 @@ class AppRouter {
         },
       ),
       GoRoute(
+        path: RouteConstants.quizSelection,
+        name: 'quiz-selection',
+        builder: (context, state) => const QuizSelectionScreen(),
+      ),
+      GoRoute(
         path: RouteConstants.gameHost,
         name: 'game-host',
-        builder: (context, state) => const HostGameScreen(),
+        builder: (context, state) {
+          // Get optional quiz ID parameter from query params
+          final queryParams = NavigationUtils.getQueryParameters(state);
+          final quizId = queryParams['quizId'];
+
+          return HostGameScreen(selectedQuizId: quizId);
+        },
         routes: [
           GoRoute(
             path: 'setup',

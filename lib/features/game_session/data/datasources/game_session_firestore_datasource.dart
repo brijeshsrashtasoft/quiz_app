@@ -1194,4 +1194,429 @@ class GameSessionFirestoreDataSource extends BaseFirebaseDataSource {
       );
     }
   }
+
+  // ===========================================
+  // REAL-TIME PLAYER ANSWERS INTEGRATION
+  // ===========================================
+
+  /// Submit player answer to game session with real-time updates
+  Future<Result<GameSessionModel>> submitPlayerAnswer({
+    required String sessionId,
+    required String playerId,
+    required String playerName,
+    required int selectedOption,
+    required DateTime answeredAt,
+    required int responseTimeMs,
+    required bool isCorrect,
+    required int pointsEarned,
+    required int questionIndex,
+  }) async {
+    try {
+      final startTime = DateTime.now();
+
+      // Use transaction to ensure atomic answer submission and score update
+      final result = await FirestoreConfig.runTransaction<GameSessionModel>((
+        transaction,
+      ) async {
+        final sessionRef = FirestoreConfig.getDocument(_collection, sessionId);
+        final sessionDoc = await transaction.get(sessionRef);
+
+        if (!sessionDoc.exists) {
+          throw const FirestoreException(
+            message: 'Game session not found',
+            code: 'game_session_not_found',
+          );
+        }
+
+        final sessionData = sessionDoc.data()!;
+        sessionData['id'] = sessionDoc.id;
+        final gameSession = GameSessionModel.fromFirestore(sessionData);
+
+        // Validate answer submission
+        if (gameSession.status != GameSessionStatus.active) {
+          throw const FirestoreException(
+            message: 'Game session is not active',
+            code: 'game_session_not_active',
+          );
+        }
+
+        if (!gameSession.players.containsKey(playerId)) {
+          throw const FirestoreException(
+            message: 'Player not in session',
+            code: 'player_not_in_session',
+          );
+        }
+
+        // Create player answer document in subcollection
+        final answerRef = sessionRef
+            .collection('player_answers')
+            .doc('${playerId}_q$questionIndex');
+
+        final answerData = {
+          'playerId': playerId,
+          'playerName': playerName,
+          'selectedOption': selectedOption,
+          'answeredAt': Timestamp.fromDate(answeredAt),
+          'responseTimeMs': responseTimeMs,
+          'isCorrect': isCorrect,
+          'pointsEarned': pointsEarned,
+          'questionIndex': questionIndex,
+          'sessionId': sessionId,
+        };
+
+        transaction.set(answerRef, answerData);
+
+        // Update player score in main session document
+        final updatedPlayers = Map<String, PlayerModel>.from(
+          gameSession.players,
+        );
+        final currentPlayer = updatedPlayers[playerId]!;
+        final newAnswers = [...currentPlayer.answers, selectedOption];
+        final newScore = currentPlayer.score + pointsEarned;
+
+        updatedPlayers[playerId] = currentPlayer.copyWith(
+          answers: newAnswers,
+          score: newScore,
+        );
+
+        final updatedSession = gameSession.copyWith(players: updatedPlayers);
+        final updateData = updatedSession.toFirestore();
+        updateData.remove('id');
+        updateData.remove('createdAt');
+
+        transaction.update(sessionRef, updateData);
+
+        return updatedSession;
+      });
+
+      final duration = DateTime.now().difference(startTime);
+      AppLogger.performance('Submit player answer', duration);
+
+      AppLogger.firebase(
+        'GameSessionDataSource',
+        'Answer submitted for player $playerId in session $sessionId: '
+        '${isCorrect ? "Correct" : "Incorrect"} (+$pointsEarned pts)',
+      );
+
+      return Result.success(result);
+    } catch (e, stackTrace) {
+      AppLogger.error(
+        'Failed to submit player answer: $sessionId',
+        e,
+        stackTrace,
+      );
+      return Result.failure(
+        FirestoreException(
+          message: 'Failed to submit answer: ${e.toString()}',
+          code: 'submit_answer_error',
+        ).toFailure(),
+      );
+    }
+  }
+
+  /// Get real-time player answers for a specific question
+  Stream<Result<Map<String, dynamic>>> watchQuestionAnswers(
+    String sessionId,
+    int questionIndex,
+  ) {
+    try {
+      return FirestoreConfig.getDocument(_collection, sessionId)
+          .collection('player_answers')
+          .where('questionIndex', isEqualTo: questionIndex)
+          .snapshots()
+          .map<Result<Map<String, dynamic>>>((snapshot) {
+            final answers = <String, Map<String, dynamic>>{};
+            final answerCounts = <int, int>{};
+            int totalAnswers = 0;
+            int correctAnswers = 0;
+
+            for (final doc in snapshot.docs) {
+              final data = doc.data();
+              final playerId = data['playerId'] as String;
+              answers[playerId] = data;
+
+              // Aggregate answer statistics
+              final selectedOption = data['selectedOption'] as int;
+              answerCounts[selectedOption] = 
+                  (answerCounts[selectedOption] ?? 0) + 1;
+              
+              totalAnswers++;
+              if (data['isCorrect'] as bool) {
+                correctAnswers++;
+              }
+            }
+
+            return Result.success({
+              'answers': answers,
+              'answerCounts': answerCounts,
+              'totalAnswers': totalAnswers,
+              'correctAnswers': correctAnswers,
+              'accuracy': totalAnswers > 0 ? correctAnswers / totalAnswers : 0.0,
+            });
+          })
+          .handleError((error, stackTrace) {
+            AppLogger.error(
+              'Error watching question answers: $sessionId q$questionIndex',
+              error,
+              stackTrace,
+            );
+          });
+    } catch (e, stackTrace) {
+      AppLogger.error(
+        'Failed to setup question answers watch: $sessionId',
+        e,
+        stackTrace,
+      );
+      return Stream.value(
+        Result.failure(
+          FirestoreException(
+            message: 'Failed to watch question answers: ${e.toString()}',
+            code: 'watch_answers_error',
+          ).toFailure(),
+        ),
+      );
+    }
+  }
+
+  /// Get all player answers for the entire game session
+  Future<Result<List<Map<String, dynamic>>>> getSessionAnswers(
+    String sessionId,
+  ) async {
+    try {
+      final startTime = DateTime.now();
+
+      final query = await FirestoreConfig.getDocument(_collection, sessionId)
+          .collection('player_answers')
+          .orderBy('questionIndex')
+          .orderBy('answeredAt')
+          .get();
+
+      final duration = DateTime.now().difference(startTime);
+      AppLogger.performance('Get session answers', duration);
+
+      final answers = query.docs.map((doc) => doc.data()).toList();
+      return Result.success(answers);
+    } catch (e, stackTrace) {
+      AppLogger.error(
+        'Failed to get session answers: $sessionId',
+        e,
+        stackTrace,
+      );
+      return Result.failure(
+        FirestoreException(
+          message: 'Failed to get session answers: ${e.toString()}',
+          code: 'get_session_answers_error',
+        ).toFailure(),
+      );
+    }
+  }
+
+  /// Update question timing and phase for real-time progression
+  Future<Result<GameSessionModel>> updateQuestionPhase({
+    required String sessionId,
+    required int questionIndex,
+    required String phase, // 'display', 'active', 'reveal', 'leaderboard'
+    required DateTime phaseStartTime,
+    required int phaseDurationSeconds,
+  }) async {
+    try {
+      final startTime = DateTime.now();
+
+      // Use transaction for atomic phase update
+      final result = await FirestoreConfig.runTransaction<GameSessionModel>((
+        transaction,
+      ) async {
+        final sessionRef = FirestoreConfig.getDocument(_collection, sessionId);
+        final sessionDoc = await transaction.get(sessionRef);
+
+        if (!sessionDoc.exists) {
+          throw const FirestoreException(
+            message: 'Game session not found',
+            code: 'game_session_not_found',
+          );
+        }
+
+        final sessionData = sessionDoc.data()!;
+        sessionData['id'] = sessionDoc.id;
+        final gameSession = GameSessionModel.fromFirestore(sessionData);
+
+        // Update session with current phase timing
+        final phaseEndTime = phaseStartTime.add(
+          Duration(seconds: phaseDurationSeconds),
+        );
+
+        final updateData = {
+          'currentQuestionIndex': questionIndex,
+          'currentPhase': phase,
+          'phaseStartTime': Timestamp.fromDate(phaseStartTime),
+          'phaseEndTime': Timestamp.fromDate(phaseEndTime),
+          'updatedAt': FieldValue.serverTimestamp(),
+        };
+
+        transaction.update(sessionRef, updateData);
+
+        // Return updated session (approximation for immediate use)
+        final updatedSession = gameSession.copyWith(
+          currentQuestionIndex: questionIndex,
+        );
+
+        return updatedSession;
+      });
+
+      final duration = DateTime.now().difference(startTime);
+      AppLogger.performance('Update question phase', duration);
+
+      AppLogger.firebase(
+        'GameSessionDataSource',
+        'Updated phase for session $sessionId: q$questionIndex -> $phase',
+      );
+
+      return Result.success(result);
+    } catch (e, stackTrace) {
+      AppLogger.error(
+        'Failed to update question phase: $sessionId',
+        e,
+        stackTrace,
+      );
+      return Result.failure(
+        FirestoreException(
+          message: 'Failed to update question phase: ${e.toString()}',
+          code: 'update_phase_error',
+        ).toFailure(),
+      );
+    }
+  }
+
+  /// Stream real-time game phase updates
+  Stream<Result<Map<String, dynamic>>> watchGamePhase(String sessionId) {
+    try {
+      return FirestoreConfig.getDocument(_collection, sessionId)
+          .snapshots()
+          .map<Result<Map<String, dynamic>>>((doc) {
+            if (!doc.exists) {
+              return Result.failure(
+                const FirestoreException(
+                  message: 'Game session not found',
+                  code: 'game_session_not_found',
+                ).toFailure(),
+              );
+            }
+
+            final data = doc.data()!;
+            
+            final phaseData = {
+              'currentQuestionIndex': data['currentQuestionIndex'] ?? 0,
+              'currentPhase': data['currentPhase'] ?? 'waiting',
+              'phaseStartTime': data['phaseStartTime'],
+              'phaseEndTime': data['phaseEndTime'],
+              'status': data['status'],
+            };
+
+            return Result.success(phaseData);
+          })
+          .handleError((error, stackTrace) {
+            AppLogger.error(
+              'Error watching game phase: $sessionId',
+              error,
+              stackTrace,
+            );
+          });
+    } catch (e, stackTrace) {
+      AppLogger.error(
+        'Failed to setup game phase watch: $sessionId',
+        e,
+        stackTrace,
+      );
+      return Stream.value(
+        Result.failure(
+          FirestoreException(
+            message: 'Failed to watch game phase: ${e.toString()}',
+            code: 'watch_phase_error',
+          ).toFailure(),
+        ),
+      );
+    }
+  }
+
+  /// Get question statistics for host dashboard
+  Future<Result<Map<String, dynamic>>> getQuestionStatistics({
+    required String sessionId,
+    required int questionIndex,
+  }) async {
+    try {
+      final startTime = DateTime.now();
+
+      // Get all answers for this question
+      final answersQuery = await FirestoreConfig.getDocument(_collection, sessionId)
+          .collection('player_answers')
+          .where('questionIndex', isEqualTo: questionIndex)
+          .get();
+
+      // Get session data for total players
+      final sessionDoc = await FirestoreConfig.getDocument(_collection, sessionId).get();
+      if (!sessionDoc.exists) {
+        return Result.failure(
+          const FirestoreException(
+            message: 'Game session not found',
+            code: 'game_session_not_found',
+          ).toFailure(),
+        );
+      }
+
+      final sessionData = sessionDoc.data()!;
+      final gameSession = GameSessionModel.fromFirestore({...sessionData, 'id': sessionDoc.id});
+      final totalPlayers = gameSession.players.length;
+
+      // Calculate statistics
+      final answerCounts = <int, int>{};
+      final responseTimes = <int>[];
+      int correctAnswers = 0;
+      int totalAnswers = answersQuery.docs.length;
+
+      for (final doc in answersQuery.docs) {
+        final data = doc.data();
+        final selectedOption = data['selectedOption'] as int;
+        final isCorrect = data['isCorrect'] as bool;
+        final responseTime = data['responseTimeMs'] as int;
+
+        answerCounts[selectedOption] = (answerCounts[selectedOption] ?? 0) + 1;
+        responseTimes.add(responseTime);
+        
+        if (isCorrect) correctAnswers++;
+      }
+
+      // Calculate average response time
+      final averageResponseTime = responseTimes.isEmpty 
+          ? 0.0 
+          : responseTimes.reduce((a, b) => a + b) / responseTimes.length;
+
+      final duration = DateTime.now().difference(startTime);
+      AppLogger.performance('Get question statistics', duration);
+
+      final statistics = {
+        'questionIndex': questionIndex,
+        'totalPlayers': totalPlayers,
+        'totalAnswers': totalAnswers,
+        'correctAnswers': correctAnswers,
+        'accuracy': totalAnswers > 0 ? correctAnswers / totalAnswers : 0.0,
+        'answerCounts': answerCounts,
+        'averageResponseTime': averageResponseTime,
+        'participationRate': totalPlayers > 0 ? totalAnswers / totalPlayers : 0.0,
+      };
+
+      return Result.success(statistics);
+    } catch (e, stackTrace) {
+      AppLogger.error(
+        'Failed to get question statistics: $sessionId q$questionIndex',
+        e,
+        stackTrace,
+      );
+      return Result.failure(
+        FirestoreException(
+          message: 'Failed to get question statistics: ${e.toString()}',
+          code: 'get_question_stats_error',
+        ).toFailure(),
+      );
+    }
+  }
 }

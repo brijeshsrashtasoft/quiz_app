@@ -14,7 +14,9 @@ import '../providers/session_providers.dart';
 import '../../domain/entities/game_session_entity.dart';
 
 class HostGameScreen extends ConsumerStatefulWidget {
-  const HostGameScreen({super.key});
+  final String? selectedQuizId;
+
+  const HostGameScreen({super.key, this.selectedQuizId});
 
   @override
   ConsumerState<HostGameScreen> createState() => _HostGameScreenState();
@@ -50,12 +52,17 @@ class _HostGameScreenState extends ConsumerState<HostGameScreen>
 
     _animationController.forward();
 
-    // Create game session when screen loads
-    // TODO: Replace with actual quiz selection - using test quiz for now
+    // Create game session when screen loads, or redirect to quiz selection
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref
-          .read(hostSessionStateNotifierProvider.notifier)
-          .createSession(quizId: 'test-quiz-id');
+      if (widget.selectedQuizId != null && widget.selectedQuizId!.isNotEmpty) {
+        // Create session with the selected quiz
+        ref
+            .read(hostSessionStateNotifierProvider.notifier)
+            .createSession(quizId: widget.selectedQuizId!);
+      } else {
+        // No quiz selected, redirect to quiz selection
+        context.go('/quiz-selection');
+      }
     });
   }
 
@@ -330,12 +337,17 @@ class _HostGameScreenState extends ConsumerState<HostGameScreen>
           const SizedBox(height: AppSpacing.spacingXL),
           PrimaryButton(
             onPressed: () {
-              // Try creating session again
-              ref
-                  .read(hostSessionStateNotifierProvider.notifier)
-                  .createSession(quizId: 'test-quiz-id');
+              // Try creating session again with selected quiz ID or go back to selection
+              if (widget.selectedQuizId != null &&
+                  widget.selectedQuizId!.isNotEmpty) {
+                ref
+                    .read(hostSessionStateNotifierProvider.notifier)
+                    .createSession(quizId: widget.selectedQuizId!);
+              } else {
+                context.go('/quiz-selection');
+              }
             },
-            text: 'Try Again',
+            text: widget.selectedQuizId != null ? 'Try Again' : 'Select Quiz',
             width: double.infinity,
           ),
           const SizedBox(height: AppSpacing.spacingM),

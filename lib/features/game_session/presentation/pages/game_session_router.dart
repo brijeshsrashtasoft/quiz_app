@@ -3,13 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/session_providers.dart';
 import '../../domain/entities/game_session_entity.dart';
-import '../widgets/pin_display.dart';
-import '../widgets/lobby_player_list.dart';
-import '../widgets/host_control_panel.dart';
+import 'waiting_lobby_screen.dart';
 import 'game_play_page.dart';
 import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/constants/app_spacing.dart';
-import '../../../../shared/widgets/layout/app_scaffold.dart';
 import '../../../../shared/widgets/loading/loading_overlay.dart';
 import '../../../../shared/widgets/error/error_widget.dart';
 
@@ -31,21 +28,34 @@ class GameSessionRouter extends ConsumerWidget {
           return _buildErrorState(context, 'Session not found');
         }
 
-        // Route based on session status
-        switch (session.status) {
-          case GameSessionStatus.waiting:
-            return _buildWaitingLobby(context, ref, session);
-          case GameSessionStatus.active:
-            return GamePlayPage(sessionId: sessionId, quizId: session.quizId);
-          case GameSessionStatus.completed:
-            return _buildCompletedState(context, session);
-        }
+        return userRole.when(
+          data: (role) {
+            final isHost = role == UserSessionRole.host;
+            
+            // Route based on session status
+            switch (session.status) {
+              case GameSessionStatus.waiting:
+                return WaitingLobbyScreen(
+                  sessionId: sessionId,
+                  isHost: isHost,
+                );
+              case GameSessionStatus.active:
+                return GamePlayPage(sessionId: sessionId, quizId: session.quizId);
+              case GameSessionStatus.completed:
+                return _buildCompletedState(context, session);
+            }
+          },
+          loading: () => const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          ),
+          error: (error, _) => _buildErrorState(context, error.toString()),
+        );
       },
       loading: () => const Scaffold(
         body: Center(
           child: LoadingOverlay(
-            child: CircularProgressIndicator(),
             isLoading: true,
+            child: CircularProgressIndicator(),
           ),
         ),
       ),
@@ -53,78 +63,9 @@ class GameSessionRouter extends ConsumerWidget {
     );
   }
 
-  Widget _buildWaitingLobby(
-    BuildContext context,
-    WidgetRef ref,
-    dynamic session,
-  ) {
-    final userRole = ref.watch(userSessionRoleProvider(sessionId)).value;
-    final isHost = userRole == UserSessionRole.host;
-
-    return AppScaffold(
-      backgroundColor: AppColors.backgroundPrimary,
-      appBar: AppBar(
-        title: const Text('Waiting Lobby'),
-        backgroundColor: AppColors.vibrantPurple,
-        foregroundColor: AppColors.pureWhite,
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.all(AppSpacing.spacingL),
-          child: Column(
-            children: [
-              // PIN Display
-              PinDisplay(pin: session.pin),
-
-              SizedBox(height: AppSpacing.spacingXL),
-
-              // Player List
-              Expanded(
-                child: LobbyPlayerList(
-                  players: session.players,
-                  isHost: isHost,
-                ),
-              ),
-
-              // Host Controls
-              if (isHost) ...[
-                SizedBox(height: AppSpacing.spacingL),
-                ElevatedButton(
-                  onPressed: session.playerCount >= 2
-                      ? () {
-                          ref
-                              .read(
-                                sessionStateNotifierProvider(
-                                  sessionId,
-                                ).notifier,
-                              )
-                              .startSession();
-                        }
-                      : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.turquoise,
-                    foregroundColor: AppColors.pureWhite,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.spacingXL,
-                      vertical: AppSpacing.spacingL,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    minimumSize: const Size(double.infinity, 56),
-                  ),
-                  child: const Text('Start Game'),
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 
   Widget _buildCompletedState(BuildContext context, dynamic session) {
-    return AppScaffold(
+    return Scaffold(
       backgroundColor: AppColors.backgroundPrimary,
       body: Center(
         child: Column(

@@ -99,6 +99,47 @@ abstract class GameSessionRepository {
   /// Analytics methods
   Future<Result<GameSessionAnalytics>> getSessionAnalytics(String sessionId);
   Future<Result<List<GameSessionAnalytics>>> getHostAnalytics(String hostId);
+
+  // Real-time answer collection methods
+  /// Submit player answer with real-time integration
+  Future<Result<GameSessionEntity>> submitPlayerAnswer({
+    required String sessionId,
+    required String playerId,
+    required String playerName,
+    required int selectedOption,
+    required DateTime answeredAt,
+    required int responseTimeMs,
+    required bool isCorrect,
+    required int pointsEarned,
+    required int questionIndex,
+  });
+
+  /// Stream real-time answers for a specific question
+  Stream<Result<Map<String, dynamic>>> watchQuestionAnswers(
+    String sessionId,
+    int questionIndex,
+  );
+
+  /// Get question statistics for host dashboard
+  Future<Result<Map<String, dynamic>>> getQuestionStatistics({
+    required String sessionId,
+    required int questionIndex,
+  });
+
+  /// Update game phase with timing information
+  Future<Result<GameSessionEntity>> updateQuestionPhase({
+    required String sessionId,
+    required int questionIndex,
+    required String phase,
+    required DateTime phaseStartTime,
+    required int phaseDurationSeconds,
+  });
+
+  /// Stream real-time game phase updates
+  Stream<Result<Map<String, dynamic>>> watchGamePhase(String sessionId);
+
+  /// Get all answers for the entire session
+  Future<Result<List<Map<String, dynamic>>>> getSessionAnswers(String sessionId);
 }
 
 /// Game session analytics data model

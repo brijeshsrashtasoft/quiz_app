@@ -53,7 +53,20 @@ service cloud.firestore {
              (!('category' in data) || (data.category is string && data.category.size() <= 50)) &&
              (!('estimatedDuration' in data) || (data.estimatedDuration is number && data.estimatedDuration > 0)) &&
              (!('isDraft' in data) || data.isDraft is bool) &&
-             (!('lastModified' in data) || data.lastModified is timestamp);
+             (!('lastModified' in data) || data.lastModified is timestamp) &&
+             (!('metadata' in data) || validateQuizMetadata(data.metadata));
+    }
+
+    // Validate quiz metadata object
+    function validateQuizMetadata(metadata) {
+      return metadata is map &&
+             (metadata.keys().hasAny(['category', 'tags', 'difficulty', 'language']) || true) &&
+             (!('category' in metadata) || (metadata.category is string && metadata.category.size() <= 100)) &&
+             (!('tags' in metadata) || (metadata.tags is list && metadata.tags.size() <= 10)) &&
+             (!('difficulty' in metadata) || metadata.difficulty in ['easy', 'medium', 'hard', 'expert']) &&
+             (!('language' in metadata) || (metadata.language is string && metadata.language.size() <= 10)) &&
+             (!('coverImageUrl' in metadata) || (metadata.coverImageUrl is string && metadata.coverImageUrl.size() <= 2000)) &&
+             (!('estimatedDuration' in metadata) || (metadata.estimatedDuration is number && metadata.estimatedDuration > 0 && metadata.estimatedDuration <= 1440));
     }
     
     // Validate questions array with detailed validation
@@ -132,6 +145,20 @@ service cloud.firestore {
              score.correctAnswers <= score.totalAnswers &&
              (!('rank' in score) || score.rank is number) &&
              (!('timeTaken' in score) || score.timeTaken is number);
+    }
+
+    // Validate player answer data for real-time game play
+    function validatePlayerAnswer(data) {
+      return data.keys().hasAll(['playerId', 'playerName', 'selectedOption', 'answeredAt', 'responseTimeMs', 'isCorrect', 'pointsEarned', 'questionIndex', 'sessionId']) &&
+             data.playerId is string && data.playerId.size() > 0 &&
+             data.playerName is string && data.playerName.size() > 0 && data.playerName.size() <= 100 &&
+             data.selectedOption is number && data.selectedOption >= 0 && data.selectedOption <= 5 &&
+             data.answeredAt is timestamp &&
+             data.responseTimeMs is number && data.responseTimeMs > 0 && data.responseTimeMs <= 300000 &&
+             data.isCorrect is bool &&
+             data.pointsEarned is number && data.pointsEarned >= 0 && data.pointsEarned <= 1000 &&
+             data.questionIndex is number && data.questionIndex >= 0 &&
+             data.sessionId is string && data.sessionId.size() > 0;
     }
     
     // ============================
@@ -367,6 +394,35 @@ service cloud.firestore {
       // Host can delete their game sessions
       allow delete: if isAuthenticated() && 
                        request.auth.uid == resource.data.hostId;
+
+      // ============================
+      // PLAYER ANSWERS SUBCOLLECTION
+      // ============================
+      match /player_answers/{answerId} {
+        // Players can create their own answers only during active game
+        allow create: if isAuthenticated() &&
+                         resource.data.status == 'active' &&
+                         request.resource.data.playerId == request.auth.uid &&
+                         request.auth.uid in resource.data.players.keys() &&
+                         validatePlayerAnswer(request.resource.data);
+        
+        // Host can read all answers for game management
+        allow read: if isAuthenticated() &&
+                       request.auth.uid == resource.data.hostId;
+        
+        // Players can read their own answers and results
+        allow read: if isAuthenticated() &&
+                       request.resource.data.playerId == request.auth.uid &&
+                       request.auth.uid in resource.data.players.keys();
+        
+        // Players can read answer statistics after answer phase
+        allow read: if isAuthenticated() &&
+                       request.auth.uid in resource.data.players.keys() &&
+                       resource.data.currentPhase in ['reveal', 'leaderboard', 'completed'];
+        
+        // No updates or deletes allowed - answers are immutable
+        allow update, delete: if false;
+      }
     }
     
     // ============================

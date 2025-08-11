@@ -5,22 +5,24 @@ import '../entities/game_state.dart';
 import '../repositories/game_session_repository.dart';
 import '../../../quiz_creation/domain/entities/question_entities.dart';
 
-/// Use case for submitting an answer to current question
-/// Handles answer validation, scoring, and player updates
-class SubmitAnswer {
+/// Enhanced use case for submitting answers with real-time Firebase integration
+/// Handles answer validation, scoring, real-time persistence, and player updates
+class SubmitAnswerRealtime {
   final GameSessionRepository _repository;
 
-  const SubmitAnswer(this._repository);
+  const SubmitAnswerRealtime(this._repository);
 
-  Future<Result<SubmitAnswerResult>> call({
+  Future<Result<SubmitAnswerRealtimeResult>> call({
     required String sessionId,
     required String playerId,
+    required String playerName,
     required int selectedOption,
     required Question currentQuestion,
     required DateTime questionStartTime,
+    required int questionIndex,
   }) async {
     try {
-      // Get current session
+      // Get current session for validation
       final sessionResult = await _repository.getGameSessionById(sessionId);
 
       if (sessionResult.isFailure) {
@@ -35,6 +37,7 @@ class SubmitAnswer {
         playerId,
         selectedOption,
         currentQuestion,
+        questionIndex,
       );
 
       if (validationResult != null) {
@@ -56,45 +59,41 @@ class SubmitAnswer {
         timeLimit: currentQuestion.questionTimeLimit,
       );
 
-      // Get current player
-      final player = session.getPlayer(playerId);
-      if (player == null) {
+      // Submit answer with real-time Firebase integration
+      final submitResult = await _repository.submitPlayerAnswer(
+        sessionId: sessionId,
+        playerId: playerId,
+        playerName: playerName,
+        selectedOption: selectedOption,
+        answeredAt: answeredAt,
+        responseTimeMs: responseTimeMs,
+        isCorrect: isCorrect,
+        pointsEarned: pointsEarned,
+        questionIndex: questionIndex,
+      );
+
+      if (submitResult.isFailure) {
+        return Result.failure(submitResult.failureOrNull!);
+      }
+
+      final updatedSession = submitResult.dataOrNull!;
+      final updatedPlayer = updatedSession.getPlayer(playerId);
+
+      if (updatedPlayer == null) {
         return Result.failure(
-          const Failure.sessionFailure(
-            message: 'Player not found in session',
-            code: 'PLAYER_NOT_FOUND',
+          const Failure.serverFailure(
+            message: 'Failed to retrieve updated player data',
+            code: 'PLAYER_UPDATE_ERROR',
           ),
         );
       }
 
-      // Update player with new answer and score
-      final updatedAnswers = [...player.answers, selectedOption];
-      final updatedScore = player.score + pointsEarned;
-
-      final updatedPlayer = player.copyWith(
-        answers: updatedAnswers,
-        score: updatedScore,
-      );
-
-      // Submit answer with real-time Firebase integration
-      // Note: This now uses the Firebase datasource directly for better performance
-      // TODO: Refactor to use repository pattern with new submitPlayerAnswer method
-      final updateResult = await _repository.updatePlayerInSession(
-        sessionId,
-        playerId,
-        updatedPlayer,
-      );
-
-      if (updateResult.isFailure) {
-        return Result.failure(updateResult.failureOrNull!);
-      }
-
-      // Create answer result
-      final answerResult = SubmitAnswerResult(
+      // Create enhanced answer result
+      final answerResult = SubmitAnswerRealtimeResult(
         isCorrect: isCorrect,
         pointsEarned: pointsEarned,
         responseTimeMs: responseTimeMs,
-        newTotalScore: updatedScore,
+        newTotalScore: updatedPlayer.score,
         correctAnswer: currentQuestion.correctAnswerIndex,
         playerAnswer: PlayerAnswer(
           playerId: playerId,
@@ -104,6 +103,8 @@ class SubmitAnswer {
           isCorrect: isCorrect,
           pointsEarned: pointsEarned,
         ),
+        updatedSession: updatedSession,
+        rank: _calculatePlayerRank(updatedSession, playerId),
       );
 
       return Result.success(answerResult);
@@ -111,18 +112,19 @@ class SubmitAnswer {
       return Result.failure(
         Failure.serverFailure(
           message: 'Failed to submit answer: ${e.toString()}',
-          code: 'SUBMIT_ANSWER_ERROR',
+          code: 'SUBMIT_ANSWER_REALTIME_ERROR',
         ),
       );
     }
   }
 
-  /// Validate answer submission
+  /// Validate answer submission with enhanced checks
   Failure? _validateSubmission(
     GameSessionEntity session,
     String playerId,
     int selectedOption,
     Question question,
+    int questionIndex,
   ) {
     // Check if session is active
     if (!session.status.isActive) {
@@ -145,10 +147,18 @@ class SubmitAnswer {
       return const Failure.validationFailure(message: 'Invalid answer option');
     }
 
+    // Check if it's the correct question index
+    if (session.currentQuestionIndex != questionIndex) {
+      return const Failure.sessionFailure(
+        message: 'Question index mismatch - game may have progressed',
+        code: 'QUESTION_INDEX_MISMATCH',
+      );
+    }
+
     // Check if player has already answered this question
     final player = session.getPlayer(playerId);
     if (player != null &&
-        player.answers.length > session.currentQuestionIndex) {
+        player.answers.length > questionIndex) {
       return const Failure.sessionFailure(
         message: 'You have already answered this question',
         code: 'ALREADY_ANSWERED',
@@ -158,7 +168,7 @@ class SubmitAnswer {
     return null;
   }
 
-  /// Calculate points based on correctness and speed
+  /// Calculate points based on correctness and speed with enhanced algorithm
   int _calculatePoints({
     required bool isCorrect,
     required int responseTimeMs,
@@ -167,49 +177,84 @@ class SubmitAnswer {
   }) {
     if (!isCorrect) return 0;
 
-    // Base points for correct answer
-    const basePointsPercentage = 0.5; // 50% for being correct
+    // Base points for correct answer (50%)
+    const basePointsPercentage = 0.5;
     final basePoints = (maxPoints * basePointsPercentage).round();
 
-    // Speed bonus (remaining 50%)
+    // Speed bonus (50% scaled by remaining time)
     final timeLimitMs = timeLimit * 1000;
     final speedRatio = 1 - (responseTimeMs / timeLimitMs).clamp(0.0, 1.0);
-    final speedBonus = (maxPoints * (1 - basePointsPercentage) * speedRatio)
+    
+    // Apply speed bonus curve (faster answers get exponentially more points)
+    final speedMultiplier = speedRatio * speedRatio; // Quadratic curve
+    final speedBonus = (maxPoints * (1 - basePointsPercentage) * speedMultiplier)
         .round();
 
     return basePoints + speedBonus;
   }
+
+  /// Calculate player's current rank in the session
+  int _calculatePlayerRank(GameSessionEntity session, String playerId) {
+    final player = session.getPlayer(playerId);
+    if (player == null) return session.players.length;
+
+    final sortedPlayers = session.players.values.toList()
+      ..sort((a, b) => b.score.compareTo(a.score));
+
+    for (int i = 0; i < sortedPlayers.length; i++) {
+      if (sortedPlayers[i].score == player.score) {
+        // Find the first player with this score for consistent ranking
+        int rank = i + 1;
+        while (rank > 1 && sortedPlayers[rank - 2].score == player.score) {
+          rank--;
+        }
+        return rank;
+      }
+    }
+
+    return session.players.length;
+  }
 }
 
-/// Result of submitting an answer
-class SubmitAnswerResult {
+/// Enhanced result of submitting an answer with real-time updates
+class SubmitAnswerRealtimeResult {
   final bool isCorrect;
   final int pointsEarned;
   final int responseTimeMs;
   final int newTotalScore;
   final int correctAnswer;
   final PlayerAnswer playerAnswer;
+  final GameSessionEntity updatedSession;
+  final int rank;
 
-  const SubmitAnswerResult({
+  const SubmitAnswerRealtimeResult({
     required this.isCorrect,
     required this.pointsEarned,
     required this.responseTimeMs,
     required this.newTotalScore,
     required this.correctAnswer,
     required this.playerAnswer,
+    required this.updatedSession,
+    required this.rank,
   });
 
   /// Get feedback message for player
   String get feedbackMessage {
     if (isCorrect) {
       if (playerAnswer.isFastAnswer) {
-        return 'Correct! Lightning fast! +$pointsEarned points';
+        return 'Correct! Lightning fast! +$pointsEarned points (Rank #$rank)';
       }
-      return 'Correct! +$pointsEarned points';
+      return 'Correct! +$pointsEarned points (Rank #$rank)';
     }
-    return 'Incorrect. Better luck next time!';
+    return 'Incorrect. Better luck next time! (Rank #$rank)';
   }
 
   /// Get response time in seconds
   double get responseTimeSeconds => responseTimeMs / 1000.0;
+
+  /// Check if this was a perfect score
+  bool get isPerfectScore => isCorrect && playerAnswer.isFastAnswer;
+
+  /// Get score improvement from previous total
+  int get scoreIncrease => pointsEarned;
 }
