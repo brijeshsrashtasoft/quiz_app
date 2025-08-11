@@ -8,14 +8,16 @@ import '../../domain/entities/game_session_entity.dart';
 
 class LobbyPlayerList extends StatelessWidget {
   final Map<String, PlayerEntity> players;
+  final String? hostId;
   final AnimationController? staggerController;
-  final bool isHost;
+  final bool isCurrentUserHost;
 
   const LobbyPlayerList({
     super.key,
     required this.players,
+    this.hostId,
     this.staggerController,
-    this.isHost = false,
+    this.isCurrentUserHost = false,
   });
 
   @override
@@ -52,8 +54,8 @@ class LobbyPlayerList extends StatelessWidget {
               child: _PlayerCard(
                 playerId: playerId,
                 player: player,
-                isHost: isHost,
-                index: index,
+                isPlayerHost: hostId == playerId,
+                isCurrentUserHost: isCurrentUserHost,
               ),
             ),
           );
@@ -61,8 +63,8 @@ class LobbyPlayerList extends StatelessWidget {
           return _PlayerCard(
             playerId: playerId,
             player: player,
-            isHost: isHost,
-            index: index,
+            isPlayerHost: hostId == playerId,
+            isCurrentUserHost: isCurrentUserHost,
           );
         }
       },
@@ -73,14 +75,14 @@ class LobbyPlayerList extends StatelessWidget {
 class _PlayerCard extends StatefulWidget {
   final String playerId;
   final PlayerEntity player;
-  final bool isHost;
-  final int index;
+  final bool isPlayerHost;
+  final bool isCurrentUserHost;
 
   const _PlayerCard({
     required this.playerId,
     required this.player,
-    required this.isHost,
-    required this.index,
+    required this.isPlayerHost,
+    required this.isCurrentUserHost,
   });
 
   @override
@@ -104,8 +106,9 @@ class _PlayerCardState extends State<_PlayerCard>
       CurvedAnimation(parent: _bounceController, curve: AppAnimations.bounce),
     );
 
-    // Bounce animation on join
-    Future.delayed(Duration(milliseconds: widget.index * 100), () {
+    // Bounce animation on join - delay based on hash of playerId for consistent ordering
+    final delay = widget.playerId.hashCode.abs() % 500;
+    Future.delayed(Duration(milliseconds: delay), () {
       if (mounted) {
         _bounceController.forward().then((_) {
           _bounceController.reverse();
@@ -199,7 +202,7 @@ class _PlayerCardState extends State<_PlayerCard>
                 ),
 
                 // Host badge or kick button
-                if (widget.index == 0)
+                if (widget.isPlayerHost)
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: AppSpacing.spacingM,
@@ -228,7 +231,7 @@ class _PlayerCardState extends State<_PlayerCard>
                       ],
                     ),
                   )
-                else if (widget.isHost)
+                else if (widget.isCurrentUserHost && !widget.isPlayerHost)
                   IconButton(
                     icon: const Icon(
                       Icons.close_rounded,

@@ -106,7 +106,9 @@
       "Bash(awk:*)",
       "Bash(./run_integration_tests.sh:*)",
       "Bash(./check_integration_tests.sh:*)",
-      "Bash(/dev/null)"
+      "Bash(/dev/null)",
+      "Bash(adb logcat:*)",
+      "Bash(r)"
     ],
     "deny": [
       "Bash(sudo:*)",

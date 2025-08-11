@@ -31,23 +31,22 @@ class GameSessionRouter extends ConsumerWidget {
         return userRole.when(
           data: (role) {
             final isHost = role == UserSessionRole.host;
-            
+
             // Route based on session status
             switch (session.status) {
               case GameSessionStatus.waiting:
-                return WaitingLobbyScreen(
-                  sessionId: sessionId,
-                  isHost: isHost,
-                );
+                return WaitingLobbyScreen(sessionId: sessionId, isHost: isHost);
               case GameSessionStatus.active:
-                return GamePlayPage(sessionId: sessionId, quizId: session.quizId);
+                return GamePlayPage(
+                  sessionId: sessionId,
+                  quizId: session.quizId,
+                );
               case GameSessionStatus.completed:
                 return _buildCompletedState(context, session);
             }
           },
-          loading: () => const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          ),
+          loading: () =>
+              const Scaffold(body: Center(child: CircularProgressIndicator())),
           error: (error, _) => _buildErrorState(context, error.toString()),
         );
       },
@@ -62,7 +61,6 @@ class GameSessionRouter extends ConsumerWidget {
       error: (error, _) => _buildErrorState(context, error.toString()),
     );
   }
-
 
   Widget _buildCompletedState(BuildContext context, dynamic session) {
     return Scaffold(

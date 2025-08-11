@@ -219,8 +219,12 @@ class _LeaderboardItem extends StatelessWidget {
                 Text(
                   entry.playerName,
                   style: AppTextStyles.bodyText.copyWith(
-                    fontWeight: isCurrentPlayer ? FontWeight.w700 : FontWeight.w500,
-                    color: isTopThree ? AppColors.pureWhite : AppColors.charcoal,
+                    fontWeight: isCurrentPlayer
+                        ? FontWeight.w700
+                        : FontWeight.w500,
+                    color: isTopThree
+                        ? AppColors.pureWhite
+                        : AppColors.charcoal,
                   ),
                 ),
                 if (showFinalResults && entry.answersCorrect > 0) ...[
@@ -228,7 +232,9 @@ class _LeaderboardItem extends StatelessWidget {
                   Text(
                     '${entry.answersCorrect} correct',
                     style: AppTextStyles.caption.copyWith(
-                      color: isTopThree ? AppColors.pureWhite.withValues(alpha: 0.8) : AppColors.coolGray,
+                      color: isTopThree
+                          ? AppColors.pureWhite.withValues(alpha: 0.8)
+                          : AppColors.coolGray,
                     ),
                   ),
                 ],

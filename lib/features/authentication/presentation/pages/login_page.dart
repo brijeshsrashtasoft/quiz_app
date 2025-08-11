@@ -277,21 +277,12 @@ class _LoginPageState extends ConsumerState<LoginPage>
             if (_errorMessage != null)
               const SizedBox(height: AppSpacing.spacingL),
 
-            // Login Button with bounce animation
-            AnimatedBuilder(
-              animation: _buttonBounceAnimation,
-              builder: (context, child) {
-                return Transform.scale(
-                  scale: _buttonBounceAnimation.value,
-                  child: PrimaryButton(
-                    text: 'Sign In',
-                    onPressed: _isLoading ? null : _handleLogin,
-                    isLoading: _isLoading,
-                    icon: Icons.login,
-                    backgroundColor: AppColors.vibrantPurple,
-                  ),
-                );
-              },
+            PrimaryButton(
+              text: 'Sign In',
+              onPressed: _isLoading ? null : _handleLogin,
+              isLoading: _isLoading,
+              icon: Icons.login,
+              backgroundColor: AppColors.vibrantPurple,
             ),
 
             const SizedBox(height: AppSpacing.spacingL),

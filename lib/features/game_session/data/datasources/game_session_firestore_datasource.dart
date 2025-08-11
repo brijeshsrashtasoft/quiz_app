@@ -221,10 +221,11 @@ class GameSessionFirestoreDataSource extends BaseFirebaseDataSource {
           );
         }
 
-        // Add player
+        // Add player - automatically set as ready when joining
         final newPlayer = PlayerModel(
           name: playerName,
           joinedAt: DateTime.now(),
+          isReady: true, // Automatically ready when joining
         );
 
         final updatedPlayers = Map<String, PlayerModel>.from(
@@ -688,6 +689,78 @@ class GameSessionFirestoreDataSource extends BaseFirebaseDataSource {
     PlayerModel player,
   ) async {
     return updatePlayerScore(sessionId, playerId, player.score, player.answers);
+  }
+
+  /// Set player ready status
+  Future<Result<GameSessionModel>> setPlayerReady(
+    String sessionId,
+    String playerId,
+    bool isReady,
+  ) async {
+    try {
+      final startTime = DateTime.now();
+
+      // Use transaction to ensure atomic update
+      final result = await FirestoreConfig.runTransaction<GameSessionModel>((
+        transaction,
+      ) async {
+        final docRef = FirestoreConfig.getDocument(_collection, sessionId);
+        final doc = await transaction.get(docRef);
+
+        if (!doc.exists) {
+          throw const FirestoreException(
+            message: 'Game session not found',
+            code: 'game_session_not_found',
+          );
+        }
+
+        final data = doc.data()!;
+        data['id'] = doc.id;
+        final gameSession = GameSessionModel.fromFirestore(data);
+
+        if (!gameSession.players.containsKey(playerId)) {
+          throw const FirestoreException(
+            message: 'Player not in session',
+            code: 'player_not_in_session',
+          );
+        }
+
+        // Update player ready status
+        final currentPlayer = gameSession.players[playerId]!;
+        final updatedPlayer = currentPlayer.copyWith(isReady: isReady);
+        
+        final updatedPlayers = Map<String, PlayerModel>.from(
+          gameSession.players,
+        );
+        updatedPlayers[playerId] = updatedPlayer;
+
+        final updatedSession = gameSession.copyWith(players: updatedPlayers);
+        final updateData = updatedSession.toFirestore();
+        updateData.remove('id');
+        updateData.remove('createdAt');
+
+        transaction.update(docRef, updateData);
+
+        return updatedSession;
+      });
+
+      final duration = DateTime.now().difference(startTime);
+      AppLogger.performance('Set player ready', duration);
+
+      AppLogger.firebase(
+        'GameSessionDataSource',
+        'Player $playerId ready status set to $isReady in session: $sessionId',
+      );
+      return Result.success(result);
+    } catch (e, stackTrace) {
+      AppLogger.error('Failed to set player ready: $sessionId', e, stackTrace);
+      return Result.failure(
+        FirestoreException(
+          message: 'Failed to set player ready: ${e.toString()}',
+          code: 'set_player_ready_error',
+        ).toFailure(),
+      );
+    }
   }
 
   /// Start game session
@@ -1295,7 +1368,7 @@ class GameSessionFirestoreDataSource extends BaseFirebaseDataSource {
       AppLogger.firebase(
         'GameSessionDataSource',
         'Answer submitted for player $playerId in session $sessionId: '
-        '${isCorrect ? "Correct" : "Incorrect"} (+$pointsEarned pts)',
+            '${isCorrect ? "Correct" : "Incorrect"} (+$pointsEarned pts)',
       );
 
       return Result.success(result);
@@ -1337,9 +1410,9 @@ class GameSessionFirestoreDataSource extends BaseFirebaseDataSource {
 
               // Aggregate answer statistics
               final selectedOption = data['selectedOption'] as int;
-              answerCounts[selectedOption] = 
+              answerCounts[selectedOption] =
                   (answerCounts[selectedOption] ?? 0) + 1;
-              
+
               totalAnswers++;
               if (data['isCorrect'] as bool) {
                 correctAnswers++;
@@ -1351,7 +1424,9 @@ class GameSessionFirestoreDataSource extends BaseFirebaseDataSource {
               'answerCounts': answerCounts,
               'totalAnswers': totalAnswers,
               'correctAnswers': correctAnswers,
-              'accuracy': totalAnswers > 0 ? correctAnswers / totalAnswers : 0.0,
+              'accuracy': totalAnswers > 0
+                  ? correctAnswers / totalAnswers
+                  : 0.0,
             });
           })
           .handleError((error, stackTrace) {
@@ -1503,7 +1578,7 @@ class GameSessionFirestoreDataSource extends BaseFirebaseDataSource {
             }
 
             final data = doc.data()!;
-            
+
             final phaseData = {
               'currentQuestionIndex': data['currentQuestionIndex'] ?? 0,
               'currentPhase': data['currentPhase'] ?? 'waiting',
@@ -1547,13 +1622,17 @@ class GameSessionFirestoreDataSource extends BaseFirebaseDataSource {
       final startTime = DateTime.now();
 
       // Get all answers for this question
-      final answersQuery = await FirestoreConfig.getDocument(_collection, sessionId)
-          .collection('player_answers')
-          .where('questionIndex', isEqualTo: questionIndex)
-          .get();
+      final answersQuery =
+          await FirestoreConfig.getDocument(_collection, sessionId)
+              .collection('player_answers')
+              .where('questionIndex', isEqualTo: questionIndex)
+              .get();
 
       // Get session data for total players
-      final sessionDoc = await FirestoreConfig.getDocument(_collection, sessionId).get();
+      final sessionDoc = await FirestoreConfig.getDocument(
+        _collection,
+        sessionId,
+      ).get();
       if (!sessionDoc.exists) {
         return Result.failure(
           const FirestoreException(
@@ -1564,7 +1643,10 @@ class GameSessionFirestoreDataSource extends BaseFirebaseDataSource {
       }
 
       final sessionData = sessionDoc.data()!;
-      final gameSession = GameSessionModel.fromFirestore({...sessionData, 'id': sessionDoc.id});
+      final gameSession = GameSessionModel.fromFirestore({
+        ...sessionData,
+        'id': sessionDoc.id,
+      });
       final totalPlayers = gameSession.players.length;
 
       // Calculate statistics
@@ -1581,13 +1663,13 @@ class GameSessionFirestoreDataSource extends BaseFirebaseDataSource {
 
         answerCounts[selectedOption] = (answerCounts[selectedOption] ?? 0) + 1;
         responseTimes.add(responseTime);
-        
+
         if (isCorrect) correctAnswers++;
       }
 
       // Calculate average response time
-      final averageResponseTime = responseTimes.isEmpty 
-          ? 0.0 
+      final averageResponseTime = responseTimes.isEmpty
+          ? 0.0
           : responseTimes.reduce((a, b) => a + b) / responseTimes.length;
 
       final duration = DateTime.now().difference(startTime);
@@ -1601,7 +1683,9 @@ class GameSessionFirestoreDataSource extends BaseFirebaseDataSource {
         'accuracy': totalAnswers > 0 ? correctAnswers / totalAnswers : 0.0,
         'answerCounts': answerCounts,
         'averageResponseTime': averageResponseTime,
-        'participationRate': totalPlayers > 0 ? totalAnswers / totalPlayers : 0.0,
+        'participationRate': totalPlayers > 0
+            ? totalAnswers / totalPlayers
+            : 0.0,
       };
 
       return Result.success(statistics);

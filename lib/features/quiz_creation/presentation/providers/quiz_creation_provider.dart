@@ -54,6 +54,7 @@ class QuizCreationState with _$QuizCreationState {
     @Default(false) bool isLoading,
     String? error,
     String? imageUrl,
+    String? editingQuizId, // Track the quiz ID when in edit mode
     @Default(0) int currentStep,
     @Default(ValidationState()) ValidationState validation,
   }) = _QuizCreationState;
@@ -221,6 +222,40 @@ class QuizCreationNotifier extends StateNotifier<QuizCreationState> {
     state = const QuizCreationState();
   }
 
+  /// Load existing quiz data for editing mode
+  void loadExistingQuiz(Quiz quiz) {
+    // Pre-populate all fields with existing quiz data
+    final isTitleValid = quiz.title.isNotEmpty && quiz.title.length >= 3;
+    final isDescriptionValid =
+        quiz.description.isNotEmpty && quiz.description.length >= 10;
+    final hasQuestions = quiz.questions.isNotEmpty;
+
+    // Create validation state
+    final validation = ValidationState(
+      isTitleValid: isTitleValid,
+      isDescriptionValid: isDescriptionValid,
+      hasQuestions: hasQuestions,
+      titleError: isTitleValid ? '' : 'Title must be at least 3 characters',
+      descriptionError: isDescriptionValid
+          ? ''
+          : 'Description must be at least 10 characters',
+      questionsError: hasQuestions ? '' : 'At least one question is required',
+    );
+
+    // Update state with existing quiz data
+    state = state.copyWith(
+      title: quiz.title,
+      description: quiz.description,
+      category: quiz.metadata.category,
+      questions: quiz.questions,
+      isPublic: quiz.isPublic,
+      imageUrl: quiz.metadata.coverImageUrl,
+      editingQuizId: quiz.id, // Store the quiz ID for editing
+      validation: validation,
+      error: null,
+    );
+  }
+
   /// Get current validation summary for UI display
   String getValidationSummary() {
     if (state.validation.isQuizComplete) {
@@ -263,8 +298,8 @@ class QuizCreationNotifier extends StateNotifier<QuizCreationState> {
     return true;
   }
 
-  /// Save quiz with Firebase integration
-  Future<String?> saveQuiz() async {
+  /// Save quiz with Firebase integration (supports both create and update)
+  Future<String?> saveQuiz({String? existingQuizId}) async {
     if (!validateQuiz()) return null;
 
     // For development mode, use fallback user ID if null
@@ -282,13 +317,14 @@ class QuizCreationNotifier extends StateNotifier<QuizCreationState> {
     try {
       // Create Quiz entity from current state
       final quiz = Quiz(
-        id: '', // Will be set by Firestore
+        id: existingQuizId ?? '', // Use existing ID for updates, empty for new
         title: state.title,
         description: state.description,
         createdBy: userId,
         questions: state.questions,
         isPublic: state.isPublic,
-        createdAt: DateTime.now(),
+        createdAt: DateTime.now(), // Always set creation date
+        updatedAt: DateTime.now(), // Always update the modified time
         metadata: QuizMetadata(
           category: state.category,
           tags: [state.category], // Default to category as tag
@@ -303,9 +339,9 @@ class QuizCreationNotifier extends StateNotifier<QuizCreationState> {
       final result = await _createUseCase(CreateQuizParams(quiz: quiz));
 
       return result.when(
-        success: (createdQuiz) {
+        success: (savedQuiz) {
           state = state.copyWith(isLoading: false, error: null);
-          return createdQuiz.id;
+          return savedQuiz.id;
         },
         failure: (failure) {
           state = state.copyWith(isLoading: false, error: failure.message);

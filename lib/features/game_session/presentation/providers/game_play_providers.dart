@@ -24,7 +24,9 @@ final submitAnswerUseCaseProvider = Provider<SubmitAnswer>((ref) {
 });
 
 /// Enhanced submit answer use case with real-time Firebase integration
-final submitAnswerRealtimeUseCaseProvider = Provider<SubmitAnswerRealtime>((ref) {
+final submitAnswerRealtimeUseCaseProvider = Provider<SubmitAnswerRealtime>((
+  ref,
+) {
   final repository = ref.read(gameSessionRepositoryProvider);
   return SubmitAnswerRealtime(repository);
 });
@@ -43,17 +45,19 @@ final startGameUseCaseProvider = Provider<StartGame>((ref) {
 });
 
 /// Current game quiz provider - loads quiz data for active session
-final currentGameQuizProvider =
-    FutureProvider.family<Quiz?, String>((ref, sessionId) async {
+final currentGameQuizProvider = FutureProvider.family<Quiz?, String>((
+  ref,
+  sessionId,
+) async {
   final session = await ref.read(gameSessionProvider(sessionId).future);
-  
+
   if (session == null) {
     AppLogger.error('No session found for game quiz: $sessionId');
     return null;
   }
 
   AppLogger.firebase('GamePlayProvider', 'Loading quiz: ${session.quizId}');
-  
+
   final quiz = await ref.read(quizByIdProvider(session.quizId).future);
   return quiz;
 });
@@ -65,7 +69,7 @@ final currentQuestionProvider = FutureProvider.family<Question?, String>((
 ) async {
   final session = await ref.read(gameSessionProvider(sessionId).future);
   final quiz = await ref.read(currentGameQuizProvider(sessionId).future);
-  
+
   if (session == null || quiz == null) {
     return null;
   }
@@ -78,26 +82,28 @@ final currentQuestionProvider = FutureProvider.family<Question?, String>((
 });
 
 /// Game state provider - tracks real-time game state
-final gameStateProvider =
-    FutureProvider.family<GameState?, String>((ref, sessionId) async {
+final gameStateProvider = FutureProvider.family<GameState?, String>((
+  ref,
+  sessionId,
+) async {
   final session = await ref.read(gameSessionProvider(sessionId).future);
-  
+
   if (session == null) {
     return null;
   }
-  
+
   final quiz = await ref.read(currentGameQuizProvider(sessionId).future);
   if (quiz == null) {
     return null;
   }
-  
+
   if (session.currentQuestionIndex >= quiz.questions.length) {
     // Game completed
     return null;
   }
-  
+
   final currentQuestion = quiz.questions[session.currentQuestionIndex];
-  
+
   return GameState(
     sessionId: sessionId,
     currentQuestion: currentQuestion,
@@ -109,13 +115,15 @@ final gameStateProvider =
 });
 
 /// Game state stream provider for real-time updates
-final gameStateStreamProvider =
-    StreamProvider.family<GameState?, String>((ref, sessionId) {
+final gameStateStreamProvider = StreamProvider.family<GameState?, String>((
+  ref,
+  sessionId,
+) {
   // Watch the session stream and transform it
   ref.listen(gameSessionStreamProvider(sessionId), (previous, next) {
     // This will trigger rebuilds when session changes
   });
-  
+
   return Stream.fromFuture(ref.watch(gameStateProvider(sessionId).future));
 });
 
@@ -134,14 +142,14 @@ GamePhase _getGamePhase(GameSessionStatus status) {
 /// Game play state notifier for managing game flow
 final gamePlayStateNotifierProvider =
     StateNotifierProvider.family<GamePlayStateNotifier, GamePlayState, String>(
-  (ref, sessionId) => GamePlayStateNotifier(
-    sessionId: sessionId,
-    submitAnswerUseCase: ref.read(submitAnswerUseCaseProvider),
-    nextQuestionUseCase: ref.read(nextQuestionUseCaseProvider),
-    startGameUseCase: ref.read(startGameUseCaseProvider),
-    ref: ref,
-  ),
-);
+      (ref, sessionId) => GamePlayStateNotifier(
+        sessionId: sessionId,
+        submitAnswerUseCase: ref.read(submitAnswerUseCaseProvider),
+        nextQuestionUseCase: ref.read(nextQuestionUseCaseProvider),
+        startGameUseCase: ref.read(startGameUseCaseProvider),
+        ref: ref,
+      ),
+    );
 
 /// Game play state notifier implementation
 class GamePlayStateNotifier extends StateNotifier<GamePlayState> {
@@ -150,7 +158,7 @@ class GamePlayStateNotifier extends StateNotifier<GamePlayState> {
   final NextQuestion nextQuestionUseCase;
   final StartGame startGameUseCase;
   final Ref ref;
-  
+
   DateTime? _questionStartTime;
   Question? _currentQuestion;
   bool _hasSubmittedAnswer = false;
@@ -174,12 +182,12 @@ class GamePlayStateNotifier extends StateNotifier<GamePlayState> {
             state = const GamePlayState.gameEnded();
             return;
           }
-          
+
           _currentQuestion = gameState.currentQuestion;
           _questionStartTime = gameState.questionStartTime;
-          
+
           // Reset answer submission for new question
-          if (previous?.value?.currentQuestionIndex != 
+          if (previous?.value?.currentQuestionIndex !=
               gameState.currentQuestionIndex) {
             _hasSubmittedAnswer = false;
             AppLogger.firebase(
@@ -187,7 +195,7 @@ class GamePlayStateNotifier extends StateNotifier<GamePlayState> {
               'New question ${gameState.currentQuestionIndex + 1}: ${gameState.currentQuestion.question}',
             );
           }
-          
+
           state = GamePlayState.playing(gameState);
         },
         loading: () => state = const GamePlayState.loading(),
@@ -204,7 +212,9 @@ class GamePlayStateNotifier extends StateNotifier<GamePlayState> {
     }
 
     if (_currentQuestion == null || _questionStartTime == null) {
-      AppLogger.error('No current question data available for answer submission');
+      AppLogger.error(
+        'No current question data available for answer submission',
+      );
       return;
     }
 
@@ -220,7 +230,7 @@ class GamePlayStateNotifier extends StateNotifier<GamePlayState> {
       // Use enhanced real-time submit answer use case
       final realtimeUseCase = ref.read(submitAnswerRealtimeUseCaseProvider);
       final session = await ref.read(gameSessionProvider(sessionId).future);
-      
+
       if (session == null) {
         state = const GamePlayState.error('Session not found');
         return;
@@ -239,7 +249,7 @@ class GamePlayStateNotifier extends StateNotifier<GamePlayState> {
       result.when(
         success: (realtimeResult) {
           _hasSubmittedAnswer = true;
-          
+
           // Convert to standard answer result for compatibility
           final answerResult = SubmitAnswerResult(
             isCorrect: realtimeResult.isCorrect,
@@ -249,13 +259,13 @@ class GamePlayStateNotifier extends StateNotifier<GamePlayState> {
             correctAnswer: realtimeResult.correctAnswer,
             playerAnswer: realtimeResult.playerAnswer,
           );
-          
+
           state = GamePlayState.answerSubmitted(answerResult);
-          
+
           AppLogger.firebase(
             'GamePlayNotifier',
             'Real-time answer submitted: ${realtimeResult.isCorrect ? "Correct" : "Incorrect"} '
-            '+${realtimeResult.pointsEarned} points (Rank #${realtimeResult.rank})',
+                '+${realtimeResult.pointsEarned} points (Rank #${realtimeResult.rank})',
           );
         },
         failure: (error) {
@@ -305,7 +315,9 @@ class GamePlayStateNotifier extends StateNotifier<GamePlayState> {
       );
     } catch (e) {
       AppLogger.error('Error advancing question', e);
-      state = GamePlayState.error('Failed to advance question: ${e.toString()}');
+      state = GamePlayState.error(
+        'Failed to advance question: ${e.toString()}',
+      );
     }
   }
 
@@ -345,7 +357,7 @@ class GamePlayStateNotifier extends StateNotifier<GamePlayState> {
   bool get isHost {
     final currentUser = ref.read(currentUserProvider);
     final session = ref.read(gameSessionProvider(sessionId)).value;
-    
+
     if (currentUser == null || session == null) return false;
     return session.isHost(currentUser.id);
   }
@@ -361,8 +373,8 @@ sealed class GamePlayState {
   const factory GamePlayState.loading() = _LoadingGamePlayState;
   const factory GamePlayState.playing(GameState gameState) = _PlayingState;
   const factory GamePlayState.submittingAnswer() = _SubmittingAnswerState;
-  const factory GamePlayState.answerSubmitted(SubmitAnswerResult result) = 
-    _AnswerSubmittedState;
+  const factory GamePlayState.answerSubmitted(SubmitAnswerResult result) =
+      _AnswerSubmittedState;
   const factory GamePlayState.gameEnded() = _GameEndedState;
   const factory GamePlayState.error(String message) = _ErrorGamePlayState;
 }
@@ -424,20 +436,25 @@ extension GamePlayStateX on GamePlayState {
 // ===========================================
 
 /// Stream provider for watching real-time question answers
-final questionAnswersStreamProvider = StreamProvider.family<
-    Map<String, dynamic>?, QuestionAnswersParams>((ref, params) {
-  final repository = ref.read(gameSessionRepositoryProvider);
-  
-  return repository
-      .watchQuestionAnswers(params.sessionId, params.questionIndex)
-      .map((result) => result.when(
-            success: (data) => data,
-            failure: (error) {
-              AppLogger.error('Question answers stream error', error);
-              return null;
-            },
-          ));
-});
+final questionAnswersStreamProvider =
+    StreamProvider.family<Map<String, dynamic>?, QuestionAnswersParams>((
+      ref,
+      params,
+    ) {
+      final repository = ref.read(gameSessionRepositoryProvider);
+
+      return repository
+          .watchQuestionAnswers(params.sessionId, params.questionIndex)
+          .map(
+            (result) => result.when(
+              success: (data) => data,
+              failure: (error) {
+                AppLogger.error('Question answers stream error', error);
+                return null;
+              },
+            ),
+          );
+    });
 
 /// Parameters for question answers stream
 class QuestionAnswersParams {
@@ -462,123 +479,140 @@ class QuestionAnswersParams {
 }
 
 /// Stream provider for watching game phase updates
-final gamePhaseStreamProvider = 
+final gamePhaseStreamProvider =
     StreamProvider.family<Map<String, dynamic>?, String>((ref, sessionId) {
-  final repository = ref.read(gameSessionRepositoryProvider);
-  
-  return repository
-      .watchGamePhase(sessionId)
-      .map((result) => result.when(
-            success: (data) => data,
-            failure: (error) {
-              AppLogger.error('Game phase stream error', error);
-              return null;
-            },
-          ));
-});
+      final repository = ref.read(gameSessionRepositoryProvider);
+
+      return repository
+          .watchGamePhase(sessionId)
+          .map(
+            (result) => result.when(
+              success: (data) => data,
+              failure: (error) {
+                AppLogger.error('Game phase stream error', error);
+                return null;
+              },
+            ),
+          );
+    });
 
 /// Provider for getting question statistics
-final questionStatisticsProvider = FutureProvider.family<
-    Map<String, dynamic>?, QuestionAnswersParams>((ref, params) async {
-  final repository = ref.read(gameSessionRepositoryProvider);
-  
-  final result = await repository.getQuestionStatistics(
-    sessionId: params.sessionId,
-    questionIndex: params.questionIndex,
-  );
-  
-  return result.when(
-    success: (data) => data,
-    failure: (error) {
-      AppLogger.error('Failed to get question statistics', error);
-      return null;
-    },
-  );
-});
+final questionStatisticsProvider =
+    FutureProvider.family<Map<String, dynamic>?, QuestionAnswersParams>((
+      ref,
+      params,
+    ) async {
+      final repository = ref.read(gameSessionRepositoryProvider);
+
+      final result = await repository.getQuestionStatistics(
+        sessionId: params.sessionId,
+        questionIndex: params.questionIndex,
+      );
+
+      return result.when(
+        success: (data) => data,
+        failure: (error) {
+          AppLogger.error('Failed to get question statistics', error);
+          return null;
+        },
+      );
+    });
 
 /// Provider for getting session answers (final results)
-final sessionAnswersProvider = FutureProvider.family<
-    List<Map<String, dynamic>>?, String>((ref, sessionId) async {
-  final repository = ref.read(gameSessionRepositoryProvider);
-  
-  final result = await repository.getSessionAnswers(sessionId);
-  
-  return result.when(
-    success: (data) => data,
-    failure: (error) {
-      AppLogger.error('Failed to get session answers', error);
-      return null;
-    },
-  );
-});
+final sessionAnswersProvider =
+    FutureProvider.family<List<Map<String, dynamic>>?, String>((
+      ref,
+      sessionId,
+    ) async {
+      final repository = ref.read(gameSessionRepositoryProvider);
+
+      final result = await repository.getSessionAnswers(sessionId);
+
+      return result.when(
+        success: (data) => data,
+        failure: (error) {
+          AppLogger.error('Failed to get session answers', error);
+          return null;
+        },
+      );
+    });
 
 /// Enhanced real-time game state stream provider
-final realtimeGameStateStreamProvider =
-    StreamProvider.family<GameState?, String>((ref, sessionId) {
+final realtimeGameStateStreamProvider = StreamProvider.family<GameState?, String>((
+  ref,
+  sessionId,
+) {
   // Combine session stream with phase stream for comprehensive real-time updates
   final sessionStream = ref.watch(gameSessionStreamProvider(sessionId));
   final phaseStream = ref.watch(gamePhaseStreamProvider(sessionId));
-  
-  // Return the game state based on session data
-  return sessionStream.when(
-    data: (session) async* {
-      if (session == null) {
-        yield null;
-        return;
-      }
-      
-      final quiz = await ref.read(currentGameQuizProvider(sessionId).future);
-      if (quiz == null || session.currentQuestionIndex >= quiz.questions.length) {
-        yield null;
-        return;
-      }
 
-      final currentQuestion = quiz.questions[session.currentQuestionIndex];
-      
-      // Get real-time answer data for current question
-      final answersStream = ref.watch(questionAnswersStreamProvider(
-        QuestionAnswersParams(
-          sessionId: sessionId,
-          questionIndex: session.currentQuestionIndex,
-        ),
-      ));
-      
-      await for (final answersData in answersStream.when(
-        data: (data) => Stream.value(data),
-        loading: () => Stream.value(null),
-        error: (_, __) => Stream.value(null),
-      )) {
-        final playerAnswers = <String, PlayerAnswer>{};
-        
-        if (answersData?['answers'] != null) {
-          final answers = answersData!['answers'] as Map<String, dynamic>;
-          for (final entry in answers.entries) {
-            final answerData = entry.value as Map<String, dynamic>;
-            playerAnswers[entry.key] = PlayerAnswer(
-              playerId: answerData['playerId'] as String,
-              selectedOption: answerData['selectedOption'] as int,
-              answeredAt: (answerData['answeredAt'] as Timestamp).toDate(),
-              responseTimeMs: answerData['responseTimeMs'] as int,
-              isCorrect: answerData['isCorrect'] as bool,
-              pointsEarned: answerData['pointsEarned'] as int,
+  // Return the game state based on session data
+  return sessionStream
+      .when(
+        data: (session) async* {
+          if (session == null) {
+            yield null;
+            return;
+          }
+
+          final quiz = await ref.read(
+            currentGameQuizProvider(sessionId).future,
+          );
+          if (quiz == null ||
+              session.currentQuestionIndex >= quiz.questions.length) {
+            yield null;
+            return;
+          }
+
+          final currentQuestion = quiz.questions[session.currentQuestionIndex];
+
+          // Get real-time answer data for current question
+          final answersStream = ref.watch(
+            questionAnswersStreamProvider(
+              QuestionAnswersParams(
+                sessionId: sessionId,
+                questionIndex: session.currentQuestionIndex,
+              ),
+            ),
+          );
+
+          await for (final answersData in answersStream.when(
+            data: (data) => Stream.value(data),
+            loading: () => Stream.value(null),
+            error: (_, __) => Stream.value(null),
+          )) {
+            final playerAnswers = <String, PlayerAnswer>{};
+
+            if (answersData?['answers'] != null) {
+              final answers = answersData!['answers'] as Map<String, dynamic>;
+              for (final entry in answers.entries) {
+                final answerData = entry.value as Map<String, dynamic>;
+                playerAnswers[entry.key] = PlayerAnswer(
+                  playerId: answerData['playerId'] as String,
+                  selectedOption: answerData['selectedOption'] as int,
+                  answeredAt: (answerData['answeredAt'] as Timestamp).toDate(),
+                  responseTimeMs: answerData['responseTimeMs'] as int,
+                  isCorrect: answerData['isCorrect'] as bool,
+                  pointsEarned: answerData['pointsEarned'] as int,
+                );
+              }
+            }
+
+            yield GameState(
+              sessionId: sessionId,
+              currentQuestion: currentQuestion,
+              currentQuestionIndex: session.currentQuestionIndex,
+              questionStartTime: DateTime.now(), // TODO: Get from phase data
+              playerAnswers: playerAnswers,
+              phase: _getGamePhase(session.status),
+              answerCounts: answersData?['answerCounts'] as Map<String, int>?,
             );
           }
-        }
-
-        yield GameState(
-          sessionId: sessionId,
-          currentQuestion: currentQuestion,
-          currentQuestionIndex: session.currentQuestionIndex,
-          questionStartTime: DateTime.now(), // TODO: Get from phase data
-          playerAnswers: playerAnswers,
-          phase: _getGamePhase(session.status),
-          answerCounts: answersData?['answerCounts'] as Map<String, int>?,
-        );
-      }
-    },
-    loading: () => const Stream.empty(),
-    error: (error, _) => Stream.value(null),
-  ).asyncExpand((stream) => stream);
+        },
+        loading: () => const Stream.empty(),
+        error: (error, _) => Stream.value(null),
+      )
+      .asyncExpand((stream) => stream);
 });
 
 /// Player score provider - tracks live scores
@@ -587,9 +621,9 @@ final playerScoreProvider = FutureProvider.family<int, PlayerScoreParams>((
   params,
 ) async {
   final session = await ref.read(gameSessionProvider(params.sessionId).future);
-  
+
   if (session == null) return 0;
-  
+
   final player = session.getPlayer(params.playerId);
   return player?.score ?? 0;
 });
@@ -598,19 +632,16 @@ final playerScoreProvider = FutureProvider.family<int, PlayerScoreParams>((
 class PlayerScoreParams {
   final String sessionId;
   final String playerId;
-  
-  const PlayerScoreParams({
-    required this.sessionId,
-    required this.playerId,
-  });
-  
+
+  const PlayerScoreParams({required this.sessionId, required this.playerId});
+
   @override
   bool operator ==(Object other) =>
-    identical(this, other) ||
-    other is PlayerScoreParams &&
-    runtimeType == other.runtimeType &&
-    sessionId == other.sessionId &&
-    playerId == other.playerId;
+      identical(this, other) ||
+      other is PlayerScoreParams &&
+          runtimeType == other.runtimeType &&
+          sessionId == other.sessionId &&
+          playerId == other.playerId;
 
   @override
   int get hashCode => sessionId.hashCode ^ playerId.hashCode;
@@ -623,36 +654,38 @@ final currentUserScoreProvider = FutureProvider.family<int, String>((
 ) async {
   final currentUser = ref.read(currentUserProvider);
   if (currentUser == null) return 0;
-  
-  return ref.read(playerScoreProvider(PlayerScoreParams(
-    sessionId: sessionId,
-    playerId: currentUser.id,
-  )).future);
+
+  return ref.read(
+    playerScoreProvider(
+      PlayerScoreParams(sessionId: sessionId, playerId: currentUser.id),
+    ).future,
+  );
 });
 
 /// Leaderboard provider - live ranking of players
-final leaderboardProvider = FutureProvider.family<List<LeaderboardEntry>, String>((
-  ref,
-  sessionId,
-) async {
-  final session = await ref.read(gameSessionProvider(sessionId).future);
-  
-  if (session == null) return [];
-  
-  final leaderboard = session.leaderboard;
-  return leaderboard.asMap().entries.map((entry) {
-    final rank = entry.key + 1;
-    final playerEntry = entry.value;
-    
-    return LeaderboardEntry(
-      rank: rank,
-      playerId: playerEntry.key,
-      playerName: playerEntry.value.name,
-      score: playerEntry.value.score,
-      answersCorrect: _countCorrectAnswers(playerEntry.value, session),
-    );
-  }).toList();
-});
+final leaderboardProvider =
+    FutureProvider.family<List<LeaderboardEntry>, String>((
+      ref,
+      sessionId,
+    ) async {
+      final session = await ref.read(gameSessionProvider(sessionId).future);
+
+      if (session == null) return [];
+
+      final leaderboard = session.leaderboard;
+      return leaderboard.asMap().entries.map((entry) {
+        final rank = entry.key + 1;
+        final playerEntry = entry.value;
+
+        return LeaderboardEntry(
+          rank: rank,
+          playerId: playerEntry.key,
+          playerName: playerEntry.value.name,
+          score: playerEntry.value.score,
+          answersCorrect: _countCorrectAnswers(playerEntry.value, session),
+        );
+      }).toList();
+    });
 
 /// Helper function to count correct answers
 int _countCorrectAnswers(PlayerEntity player, GameSessionEntity session) {
@@ -668,7 +701,7 @@ class LeaderboardEntry {
   final String playerName;
   final int score;
   final int answersCorrect;
-  
+
   const LeaderboardEntry({
     required this.rank,
     required this.playerId,
@@ -676,12 +709,12 @@ class LeaderboardEntry {
     required this.score,
     required this.answersCorrect,
   });
-  
+
   /// Check if this is the current user
   bool isCurrentUser(String? currentUserId) {
     return currentUserId != null && playerId == currentUserId;
   }
-  
+
   /// Get rank suffix (1st, 2nd, 3rd, etc.)
   String get rankSuffix {
     if (rank % 100 >= 11 && rank % 100 <= 13) {

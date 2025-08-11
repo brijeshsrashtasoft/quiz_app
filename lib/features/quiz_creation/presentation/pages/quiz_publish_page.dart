@@ -7,6 +7,7 @@ import '../../../../shared/constants/app_text_styles.dart';
 import '../../../../shared/constants/app_animations.dart';
 import '../../../../shared/widgets/buttons/primary_button.dart';
 import '../../../../core/navigation/route_constants.dart';
+import '../providers/quiz_providers.dart';
 
 /// Quiz publish confirmation page
 class QuizPublishPage extends ConsumerStatefulWidget {
@@ -19,8 +20,6 @@ class QuizPublishPage extends ConsumerStatefulWidget {
 class _QuizPublishPageState extends ConsumerState<QuizPublishPage>
     with SingleTickerProviderStateMixin {
   late final AnimationController _animationController;
-  bool _isPublishing = false;
-  bool _isPublished = false;
 
   @override
   void initState() {
@@ -39,20 +38,32 @@ class _QuizPublishPageState extends ConsumerState<QuizPublishPage>
   }
 
   Future<void> _publishQuiz() async {
-    setState(() {
-      _isPublishing = true;
-    });
+    // Get quiz ID from route parameters
+    final routerState = GoRouterState.of(context);
+    final quizId = routerState.uri.queryParameters['id'];
 
-    // Simulate publishing
-    await Future.delayed(const Duration(seconds: 2));
+    if (quizId == null || quizId.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Error: No quiz ID provided'),
+            backgroundColor: AppColors.coralRed,
+          ),
+        );
+      }
+      return;
+    }
 
-    setState(() {
-      _isPublishing = false;
-      _isPublished = true;
-    });
+    // Get the publish notifier and trigger publish
+    final publishNotifier = ref.read(quizPublishProvider(quizId).notifier);
+    final success = await publishNotifier.publishQuiz();
 
-    // Show success animation
-    _animationController.repeat(count: 2);
+    if (success) {
+      // Show success animation
+      _animationController.repeat(count: 2);
+    } else {
+      // Error will be shown by watching the provider state
+    }
   }
 
   @override
@@ -61,36 +72,150 @@ class _QuizPublishPageState extends ConsumerState<QuizPublishPage>
     final isTablet = size.width > 600;
     final isDesktop = size.width > 1200;
 
+    // Get quiz ID from route parameters
+    final routerState = GoRouterState.of(context);
+    final quizId = routerState.uri.queryParameters['id'];
+
+    if (quizId == null || quizId.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(
+          backgroundColor: AppColors.pureWhite,
+          elevation: 0,
+          title: Text('Publish Quiz', style: AppTextStyles.sectionHeader),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.error_outline, size: 64, color: AppColors.coolGray),
+              const SizedBox(height: AppSpacing.spacingL),
+              Text('No quiz ID provided', style: AppTextStyles.sectionHeader),
+              const SizedBox(height: AppSpacing.spacingM),
+              PrimaryButton(
+                onPressed: () => context.go(RouteConstants.quizCreation),
+                text: 'Back to Quiz Creation',
+                icon: Icons.arrow_back,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Watch quiz data and publish state
+    final quizAsyncValue = ref.watch(quizByIdProvider(quizId));
+    final publishState = ref.watch(quizPublishProvider(quizId));
+
     return Scaffold(
       backgroundColor: AppColors.backgroundPrimary,
       appBar: AppBar(
         backgroundColor: AppColors.pureWhite,
         elevation: 0,
         title: Text(
-          _isPublished ? 'Quiz Published!' : 'Publish Quiz',
+          publishState.isPublished ? 'Quiz Published!' : 'Publish Quiz',
           style: AppTextStyles.sectionHeader,
         ),
       ),
-      body: Center(
-        child: Container(
-          constraints: BoxConstraints(maxWidth: 600),
-          padding: EdgeInsets.all(
-            isDesktop
-                ? AppSpacing.spacingXXL
-                : isTablet
-                ? AppSpacing.spacingXL
-                : AppSpacing.spacingL,
-          ),
-          child: AnimatedSwitcher(
-            duration: AppAnimations.mediumAnimation,
-            child: _isPublished ? _buildSuccessState() : _buildPublishState(),
-          ),
-        ),
+      body: quizAsyncValue.when(
+        loading: () => _buildLoadingState(),
+        error: (error, stackTrace) => _buildErrorState(error),
+        data: (quiz) {
+          if (quiz == null) {
+            return _buildNotFoundState();
+          }
+
+          return Center(
+            child: Container(
+              constraints: BoxConstraints(maxWidth: 600),
+              padding: EdgeInsets.all(
+                isDesktop
+                    ? AppSpacing.spacingXXL
+                    : isTablet
+                    ? AppSpacing.spacingXL
+                    : AppSpacing.spacingL,
+              ),
+              child: AnimatedSwitcher(
+                duration: AppAnimations.mediumAnimation,
+                child: publishState.isPublished
+                    ? _buildSuccessState(quiz)
+                    : _buildPublishState(quiz, publishState),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildPublishState() {
+  Widget _buildLoadingState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(AppColors.vibrantPurple),
+          ),
+          const SizedBox(height: AppSpacing.spacingL),
+          Text(
+            'Loading quiz data...',
+            style: AppTextStyles.bodyText.copyWith(color: AppColors.coolGray),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState(Object error) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.error_outline, size: 64, color: AppColors.timeWarning),
+          const SizedBox(height: AppSpacing.spacingL),
+          Text('Failed to load quiz', style: AppTextStyles.sectionHeader),
+          const SizedBox(height: AppSpacing.spacingM),
+          Text(
+            'Please check your connection and try again.',
+            style: AppTextStyles.bodyText.copyWith(color: AppColors.coolGray),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: AppSpacing.spacingL),
+          PrimaryButton(
+            onPressed: () => context.go(RouteConstants.quizCreation),
+            text: 'Back to Quiz Creation',
+            icon: Icons.arrow_back,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNotFoundState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.quiz_outlined, size: 64, color: AppColors.coolGray),
+          const SizedBox(height: AppSpacing.spacingL),
+          Text('Quiz not found', style: AppTextStyles.sectionHeader),
+          const SizedBox(height: AppSpacing.spacingM),
+          Text(
+            'The quiz you\'re trying to publish doesn\'t exist.',
+            style: AppTextStyles.bodyText.copyWith(color: AppColors.coolGray),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: AppSpacing.spacingL),
+          PrimaryButton(
+            onPressed: () => context.go(RouteConstants.quizCreation),
+            text: 'Back to Quiz Creation',
+            icon: Icons.arrow_back,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPublishState(quiz, publishState) {
     return ScaleTransition(
       scale: _animationController.drive(
         CurveTween(curve: AppAnimations.elastic),
@@ -134,6 +259,32 @@ class _QuizPublishPageState extends ConsumerState<QuizPublishPage>
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: AppSpacing.spacingXL),
+              // Show error if publishing failed
+              if (publishState.error != null) ...[
+                Container(
+                  padding: const EdgeInsets.all(AppSpacing.spacingL),
+                  decoration: BoxDecoration(
+                    color: AppColors.coralRed.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppColors.coralRed),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.error_outline, color: AppColors.coralRed),
+                      const SizedBox(width: AppSpacing.spacingM),
+                      Expanded(
+                        child: Text(
+                          publishState.error!,
+                          style: AppTextStyles.bodyText.copyWith(
+                            color: AppColors.coralRed,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.spacingL),
+              ],
               // Quiz summary
               Container(
                 padding: const EdgeInsets.all(AppSpacing.spacingL),
@@ -143,15 +294,18 @@ class _QuizPublishPageState extends ConsumerState<QuizPublishPage>
                 ),
                 child: Column(
                   children: [
-                    _buildSummaryRow('Quiz Title', 'World Geography Quiz'),
+                    _buildSummaryRow('Quiz Title', quiz.title),
                     const Divider(height: AppSpacing.spacingL),
-                    _buildSummaryRow('Category', 'Geography'),
+                    _buildSummaryRow('Category', quiz.metadata.category),
                     const Divider(height: AppSpacing.spacingL),
-                    _buildSummaryRow('Questions', '15'),
+                    _buildSummaryRow('Questions', '${quiz.questions.length}'),
                     const Divider(height: AppSpacing.spacingL),
-                    _buildSummaryRow('Total Points', '1500'),
+                    _buildSummaryRow('Total Points', '${quiz.totalPoints}'),
                     const Divider(height: AppSpacing.spacingL),
-                    _buildSummaryRow('Visibility', 'Public'),
+                    _buildSummaryRow(
+                      'Visibility',
+                      quiz.isPublic ? 'Public' : 'Private',
+                    ),
                   ],
                 ),
               ),
@@ -160,10 +314,10 @@ class _QuizPublishPageState extends ConsumerState<QuizPublishPage>
                 children: [
                   Expanded(
                     child: TextButton(
-                      onPressed: _isPublishing
+                      onPressed: publishState.isPublishing
                           ? null
                           : () => context.go(
-                              '${RouteConstants.quizCreation}/preview',
+                              '${RouteConstants.quizCreationPreview}?id=${quiz.id}',
                             ),
                       child: Text(
                         'Back to Preview',
@@ -176,10 +330,14 @@ class _QuizPublishPageState extends ConsumerState<QuizPublishPage>
                   const SizedBox(width: AppSpacing.spacingM),
                   Expanded(
                     child: PrimaryButton(
-                      onPressed: _isPublishing ? null : _publishQuiz,
-                      text: _isPublishing ? 'Publishing...' : 'Publish Quiz',
+                      onPressed: publishState.isPublishing
+                          ? null
+                          : _publishQuiz,
+                      text: publishState.isPublishing
+                          ? 'Publishing...'
+                          : 'Publish Quiz',
                       backgroundColor: AppColors.success,
-                      isLoading: _isPublishing,
+                      isLoading: publishState.isPublishing,
                     ),
                   ),
                 ],
@@ -191,7 +349,7 @@ class _QuizPublishPageState extends ConsumerState<QuizPublishPage>
     );
   }
 
-  Widget _buildSuccessState() {
+  Widget _buildSuccessState(quiz) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -220,7 +378,7 @@ class _QuizPublishPageState extends ConsumerState<QuizPublishPage>
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: AppSpacing.spacingXXL),
-        // Share options
+        // Quiz published info
         Container(
           padding: const EdgeInsets.all(AppSpacing.spacingL),
           decoration: BoxDecoration(
@@ -229,7 +387,7 @@ class _QuizPublishPageState extends ConsumerState<QuizPublishPage>
           ),
           child: Column(
             children: [
-              Text('Share Quiz PIN', style: AppTextStyles.sectionHeader),
+              Text('Quiz Details', style: AppTextStyles.sectionHeader),
               const SizedBox(height: AppSpacing.spacingM),
               Container(
                 padding: const EdgeInsets.all(AppSpacing.spacingM),
@@ -238,28 +396,39 @@ class _QuizPublishPageState extends ConsumerState<QuizPublishPage>
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: AppColors.lightGray),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                child: Column(
                   children: [
                     Text(
-                      '1234567',
-                      style: AppTextStyles.gameTitle.copyWith(
-                        color: AppColors.vibrantPurple,
-                        fontFamily: 'monospace',
-                        letterSpacing: 4,
+                      quiz.title,
+                      style: AppTextStyles.bodyText.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: AppSpacing.spacingS),
+                    Text(
+                      '${quiz.questions.length} questions • ${quiz.totalPoints} points',
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.coolGray,
                       ),
                     ),
-                    const SizedBox(width: AppSpacing.spacingM),
-                    IconButton(
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('PIN copied to clipboard!'),
-                            backgroundColor: AppColors.success,
-                          ),
-                        );
-                      },
-                      icon: Icon(Icons.copy, color: AppColors.vibrantPurple),
+                    const SizedBox(height: AppSpacing.spacingS),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.spacingM,
+                        vertical: AppSpacing.spacingXS,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.success.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        'PUBLISHED',
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppColors.success,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -281,7 +450,8 @@ class _QuizPublishPageState extends ConsumerState<QuizPublishPage>
             const SizedBox(width: AppSpacing.spacingM),
             Expanded(
               child: PrimaryButton(
-                onPressed: () => context.go(RouteConstants.gameHost),
+                onPressed: () =>
+                    context.go('${RouteConstants.gameHost}?quizId=${quiz.id}'),
                 text: 'Host Game',
                 backgroundColor: AppColors.turquoise,
                 icon: Icons.play_arrow,

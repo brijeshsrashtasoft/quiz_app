@@ -43,6 +43,13 @@ abstract class GameSessionRepository {
     PlayerEntity player,
   );
 
+  /// Set player ready status
+  Future<Result<GameSessionEntity>> setPlayerReady(
+    String sessionId,
+    String playerId,
+    bool isReady,
+  );
+
   /// Start game session
   Future<Result<GameSessionEntity>> startGameSession(String sessionId);
 
@@ -139,7 +146,9 @@ abstract class GameSessionRepository {
   Stream<Result<Map<String, dynamic>>> watchGamePhase(String sessionId);
 
   /// Get all answers for the entire session
-  Future<Result<List<Map<String, dynamic>>>> getSessionAnswers(String sessionId);
+  Future<Result<List<Map<String, dynamic>>>> getSessionAnswers(
+    String sessionId,
+  );
 }
 
 /// Game session analytics data model

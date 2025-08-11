@@ -264,6 +264,41 @@ class GameSessionRepositoryImpl extends BaseRepository
   }
 
   @override
+  Future<Result<GameSessionEntity>> setPlayerReady(
+    String sessionId,
+    String playerId,
+    bool isReady,
+  ) async {
+    try {
+      if (sessionId.isEmpty || playerId.isEmpty) {
+        return Result.failure(
+          const ValidationException(
+            message: 'Session ID and Player ID cannot be empty',
+          ).toFailure(),
+        );
+      }
+
+      final result = await dataSource.setPlayerReady(
+        sessionId,
+        playerId,
+        isReady,
+      );
+
+      return result.when(
+        success: (updatedModel) => Result.success(updatedModel.toEntity()),
+        failure: (error) => Result.failure(error),
+      );
+    } catch (e) {
+      return Result.failure(
+        ServerException(
+          message: 'Failed to set player ready status: ${e.toString()}',
+          code: 'set_player_ready_error',
+        ).toFailure(),
+      );
+    }
+  }
+
+  @override
   Future<Result<GameSessionEntity>> startGameSession(String sessionId) async {
     try {
       if (sessionId.isEmpty) {

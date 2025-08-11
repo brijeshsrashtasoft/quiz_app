@@ -23,18 +23,14 @@ import '../../domain/usecases/submit_answer.dart';
 class RealTimeGamePlayScreen extends ConsumerStatefulWidget {
   final String sessionId;
 
-  const RealTimeGamePlayScreen({
-    super.key,
-    required this.sessionId,
-  });
+  const RealTimeGamePlayScreen({super.key, required this.sessionId});
 
   @override
   ConsumerState<RealTimeGamePlayScreen> createState() =>
       _RealTimeGamePlayScreenState();
 }
 
-class _RealTimeGamePlayScreenState
-    extends ConsumerState<RealTimeGamePlayScreen>
+class _RealTimeGamePlayScreenState extends ConsumerState<RealTimeGamePlayScreen>
     with TickerProviderStateMixin {
   late AnimationController _questionTransitionController;
   late AnimationController _answerRevealController;
@@ -86,7 +82,7 @@ class _RealTimeGamePlayScreenState
     final notifier = ref.read(
       gamePlayStateNotifierProvider(widget.sessionId).notifier,
     );
-    
+
     if (!notifier.hasSubmittedAnswer) {
       await notifier.submitAnswer(selectedOption);
       _answerRevealController.forward();
@@ -97,10 +93,10 @@ class _RealTimeGamePlayScreenState
     final notifier = ref.read(
       gamePlayStateNotifierProvider(widget.sessionId).notifier,
     );
-    
+
     _questionTransitionController.reset();
     _answerRevealController.reset();
-    
+
     await notifier.nextQuestion();
     _questionTransitionController.forward();
   }
@@ -128,24 +124,21 @@ class _RealTimeGamePlayScreenState
         ),
         const SizedBox(width: AppSpacing.spacingM),
         // Connection status
-        ConnectionStatusIndicator(
-          isConnected: true,
-          onReconnect: () {},
-        ),
+        ConnectionStatusIndicator(isConnected: true, onReconnect: () {}),
       ],
       body: gamePlayState.isLoading
-        ? _buildLoadingView()
-        : gamePlayState.isPlaying 
+          ? _buildLoadingView()
+          : gamePlayState.isPlaying
           ? _buildGamePlayView(gamePlayState.gameState!, currentUser?.id)
           : gamePlayState.isSubmittingAnswer
-            ? _buildSubmittingView()
-            : gamePlayState.hasSubmittedAnswer
-              ? _buildAnswerResultView(gamePlayState.answerResult!)
-              : gamePlayState.isGameEnded
-                ? _buildGameEndedView()
-                : gamePlayState.hasError
-                  ? _buildErrorView(gamePlayState.errorMessage!)
-                  : _buildLoadingView(),
+          ? _buildSubmittingView()
+          : gamePlayState.hasSubmittedAnswer
+          ? _buildAnswerResultView(gamePlayState.answerResult!)
+          : gamePlayState.isGameEnded
+          ? _buildGameEndedView()
+          : gamePlayState.hasError
+          ? _buildErrorView(gamePlayState.errorMessage!)
+          : _buildLoadingView(),
     );
   }
 
@@ -153,11 +146,11 @@ class _RealTimeGamePlayScreenState
     final notifier = ref.read(
       gamePlayStateNotifierProvider(widget.sessionId).notifier,
     );
-    
+
     if (notifier.isHost) {
       return 'Hosting Game';
     }
-    
+
     if (state.isLoading) return 'Loading Game...';
     if (state.isPlaying) return 'Playing Quiz';
     if (state.isSubmittingAnswer) return 'Submitting Answer...';
@@ -174,10 +167,7 @@ class _RealTimeGamePlayScreenState
         children: [
           LoadingSpinner(),
           SizedBox(height: AppSpacing.spacingL),
-          Text(
-            'Loading game data...',
-            style: AppTextStyles.bodyText,
-          ),
+          Text('Loading game data...', style: AppTextStyles.bodyText),
         ],
       ),
     );
@@ -188,7 +178,7 @@ class _RealTimeGamePlayScreenState
       gamePlayStateNotifierProvider(widget.sessionId).notifier,
     );
     final isHost = notifier.isHost;
-    
+
     return AnimatedBuilder(
       animation: _questionTransitionController,
       builder: (context, child) {
@@ -200,9 +190,9 @@ class _RealTimeGamePlayScreenState
               children: [
                 // Timer and progress
                 _buildTimerSection(gameState),
-                
+
                 const SizedBox(height: AppSpacing.spacingL),
-                
+
                 // Question display
                 Expanded(
                   flex: 3,
@@ -220,17 +210,17 @@ class _RealTimeGamePlayScreenState
                     },
                   ),
                 ),
-                
+
                 const SizedBox(height: AppSpacing.spacingL),
-                
+
                 // Answer grid or host controls
                 Expanded(
                   flex: 2,
-                  child: isHost 
-                    ? _buildHostControls(gameState)
-                    : _buildPlayerAnswerGrid(gameState),
+                  child: isHost
+                      ? _buildHostControls(gameState)
+                      : _buildPlayerAnswerGrid(gameState),
                 ),
-                
+
                 const SizedBox(height: AppSpacing.spacingXL),
               ],
             ),
@@ -264,7 +254,7 @@ class _RealTimeGamePlayScreenState
               ),
             ),
           ),
-          
+
           // Question progress
           Text(
             'Question ${gameState.currentQuestionIndex + 1}',
@@ -281,11 +271,11 @@ class _RealTimeGamePlayScreenState
     final notifier = ref.read(
       gamePlayStateNotifierProvider(widget.sessionId).notifier,
     );
-    
+
     if (notifier.hasSubmittedAnswer) {
       return _buildWaitingForOthers();
     }
-    
+
     return AnswerSelectionGrid(
       answers: gameState.currentQuestion.options,
       selectedIndex: null,
@@ -301,16 +291,14 @@ class _RealTimeGamePlayScreenState
       children: [
         // Player progress indicator
         _buildPlayerProgressIndicator(gameState),
-        
+
         const SizedBox(height: AppSpacing.spacingL),
-        
+
         // Answer statistics
-        Expanded(
-          child: _buildAnswerStatistics(gameState),
-        ),
-        
+        Expanded(child: _buildAnswerStatistics(gameState)),
+
         const SizedBox(height: AppSpacing.spacingL),
-        
+
         // Next question button
         ElevatedButton(
           onPressed: _handleNextQuestion,
@@ -334,10 +322,7 @@ class _RealTimeGamePlayScreenState
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            'Players Answered:',
-            style: AppTextStyles.bodyMedium,
-          ),
+          Text('Players Answered:', style: AppTextStyles.bodyMedium),
           Text(
             '${gameState.playerAnswers.length}', // TODO: Get total players
             style: AppTextStyles.bodyMedium.copyWith(
@@ -352,23 +337,20 @@ class _RealTimeGamePlayScreenState
 
   Widget _buildAnswerStatistics(GameState gameState) {
     final distribution = gameState.getAnswerDistribution();
-    
+
     if (distribution.isEmpty) {
       return const Center(
-        child: Text(
-          'Waiting for answers...',
-          style: AppTextStyles.bodyText,
-        ),
+        child: Text('Waiting for answers...', style: AppTextStyles.bodyText),
       );
     }
-    
+
     return ListView.builder(
       itemCount: gameState.currentQuestion.options.length,
       itemBuilder: (context, index) {
         final option = gameState.currentQuestion.options[index];
         final percentage = distribution[index] ?? 0;
         final isCorrect = index == gameState.currentQuestion.correctAnswerIndex;
-        
+
         return Container(
           margin: const EdgeInsets.only(bottom: AppSpacing.spacingM),
           padding: AppSpacing.allM,
@@ -423,9 +405,7 @@ class _RealTimeGamePlayScreenState
           const SizedBox(height: AppSpacing.spacingM),
           Text(
             'Waiting for other players...',
-            style: AppTextStyles.bodyText.copyWith(
-              color: AppColors.coolGray,
-            ),
+            style: AppTextStyles.bodyText.copyWith(color: AppColors.coolGray),
           ),
         ],
       ),
@@ -439,10 +419,7 @@ class _RealTimeGamePlayScreenState
         children: [
           LoadingSpinner(),
           SizedBox(height: AppSpacing.spacingL),
-          Text(
-            'Submitting your answer...',
-            style: AppTextStyles.bodyText,
-          ),
+          Text('Submitting your answer...', style: AppTextStyles.bodyText),
         ],
       ),
     );
@@ -457,14 +434,18 @@ class _RealTimeGamePlayScreenState
           children: [
             Icon(
               result.isCorrect ? Icons.check_circle : Icons.cancel,
-              color: result.isCorrect ? AppColors.turquoise : AppColors.coralRed,
+              color: result.isCorrect
+                  ? AppColors.turquoise
+                  : AppColors.coralRed,
               size: 64,
             ),
             const SizedBox(height: AppSpacing.spacingL),
             Text(
               result.isCorrect ? 'Correct!' : 'Incorrect',
               style: AppTextStyles.sectionHeader.copyWith(
-                color: result.isCorrect ? AppColors.turquoise : AppColors.coralRed,
+                color: result.isCorrect
+                    ? AppColors.turquoise
+                    : AppColors.coralRed,
               ),
             ),
             const SizedBox(height: AppSpacing.spacingM),
@@ -481,9 +462,7 @@ class _RealTimeGamePlayScreenState
             ],
             Text(
               'Response time: ${result.responseTimeSeconds.toStringAsFixed(1)}s',
-              style: AppTextStyles.bodyText.copyWith(
-                color: AppColors.coolGray,
-              ),
+              style: AppTextStyles.bodyText.copyWith(color: AppColors.coolGray),
             ),
           ],
         ),
@@ -498,26 +477,28 @@ class _RealTimeGamePlayScreenState
         children: [
           // Final leaderboard
           Expanded(
-            child: ref.watch(leaderboardProvider(widget.sessionId)).when(
-              data: (leaderboard) => LeaderboardPreview(
-                entries: leaderboard,
-                maxVisible: 10,
-                showFinalResults: true,
-              ),
-              loading: () => const LoadingSpinner(),
-              error: (_, __) => Container(
-                padding: AppSpacing.allL,
-                child: const Text(
-                  'Failed to load final results',
-                  style: TextStyle(color: Colors.red),
-                  textAlign: TextAlign.center,
+            child: ref
+                .watch(leaderboardProvider(widget.sessionId))
+                .when(
+                  data: (leaderboard) => LeaderboardPreview(
+                    entries: leaderboard,
+                    maxVisible: 10,
+                    showFinalResults: true,
+                  ),
+                  loading: () => const LoadingSpinner(),
+                  error: (_, __) => Container(
+                    padding: AppSpacing.allL,
+                    child: const Text(
+                      'Failed to load final results',
+                      style: TextStyle(color: Colors.red),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
                 ),
-              ),
-            ),
           ),
-          
+
           const SizedBox(height: AppSpacing.spacingL),
-          
+
           // Action buttons
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -550,11 +531,7 @@ class _RealTimeGamePlayScreenState
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.error_outline,
-            color: AppColors.coralRed,
-            size: 64,
-          ),
+          Icon(Icons.error_outline, color: AppColors.coralRed, size: 64),
           const SizedBox(height: AppSpacing.spacingL),
           Text(
             'Error',

@@ -18,6 +18,13 @@ class QuizCard extends StatefulWidget {
   final bool isSelected;
   final Color? cardColor;
 
+  // Additional properties for quiz management
+  final bool? isDraft;
+  final bool? isPublic;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
+  final VoidCallback? onShare;
+
   const QuizCard({
     super.key,
     required this.title,
@@ -29,6 +36,11 @@ class QuizCard extends StatefulWidget {
     this.onTap,
     this.isSelected = false,
     this.cardColor,
+    this.isDraft,
+    this.isPublic,
+    this.onEdit,
+    this.onDelete,
+    this.onShare,
   });
 
   @override
@@ -211,7 +223,115 @@ class _QuizCardState extends State<QuizCard>
                             ),
 
                             const Spacer(), // Push footer to bottom
-                            // Footer with metadata tags - single row layout
+                            // Draft/Public status badge
+                            if (widget.isDraft == true ||
+                                widget.isPublic != null)
+                              Container(
+                                margin: EdgeInsets.only(
+                                  bottom: AppSpacing.spacingXS,
+                                ),
+                                child: Row(
+                                  children: [
+                                    if (widget.isDraft == true)
+                                      Container(
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: AppSpacing.spacingXS,
+                                          vertical: 2,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.warmYellow
+                                              .withOpacity(0.1),
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                          border: Border.all(
+                                            color: AppColors.warmYellow,
+                                            width: 1,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          'DRAFT',
+                                          style: AppTextStyles.caption.copyWith(
+                                            color: AppColors.warmYellow,
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 10,
+                                          ),
+                                        ),
+                                      )
+                                    else if (widget.isPublic == true)
+                                      Container(
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: AppSpacing.spacingXS,
+                                          vertical: 2,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.mintGreen
+                                              .withOpacity(0.1),
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(
+                                              Icons.public,
+                                              size: 10,
+                                              color: AppColors.mintGreen,
+                                            ),
+                                            SizedBox(width: 2),
+                                            Text(
+                                              'PUBLIC',
+                                              style: AppTextStyles.caption
+                                                  .copyWith(
+                                                    color: AppColors.mintGreen,
+                                                    fontWeight: FontWeight.w600,
+                                                    fontSize: 10,
+                                                  ),
+                                            ),
+                                          ],
+                                        ),
+                                      )
+                                    else if (widget.isPublic == false)
+                                      Container(
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: AppSpacing.spacingXS,
+                                          vertical: 2,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.coolGray.withOpacity(
+                                            0.1,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(
+                                              Icons.lock,
+                                              size: 10,
+                                              color: AppColors.coolGray,
+                                            ),
+                                            SizedBox(width: 2),
+                                            Text(
+                                              'PRIVATE',
+                                              style: AppTextStyles.caption
+                                                  .copyWith(
+                                                    color: AppColors.coolGray,
+                                                    fontWeight: FontWeight.w600,
+                                                    fontSize: 10,
+                                                  ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+
+                            // Footer with metadata and actions
                             Row(
                               children: [
                                 // Question count - compact version
@@ -272,7 +392,78 @@ class _QuizCardState extends State<QuizCard>
 
                                 const Spacer(),
 
-                                // Selected indicator - compact
+                                // Action buttons for management
+                                if (widget.onEdit != null ||
+                                    widget.onDelete != null ||
+                                    widget.onShare != null)
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      if (widget.onEdit != null)
+                                        GestureDetector(
+                                          onTap: widget.onEdit,
+                                          child: Container(
+                                            padding: EdgeInsets.all(4),
+                                            decoration: BoxDecoration(
+                                              color: AppColors.vibrantPurple
+                                                  .withOpacity(0.1),
+                                              borderRadius:
+                                                  BorderRadius.circular(4),
+                                            ),
+                                            child: Icon(
+                                              Icons.edit,
+                                              size: 12,
+                                              color: AppColors.vibrantPurple,
+                                            ),
+                                          ),
+                                        ),
+                                      if (widget.onEdit != null &&
+                                          (widget.onDelete != null ||
+                                              widget.onShare != null))
+                                        SizedBox(width: 4),
+                                      if (widget.onShare != null)
+                                        GestureDetector(
+                                          onTap: widget.onShare,
+                                          child: Container(
+                                            padding: EdgeInsets.all(4),
+                                            decoration: BoxDecoration(
+                                              color: AppColors.mintGreen
+                                                  .withOpacity(0.1),
+                                              borderRadius:
+                                                  BorderRadius.circular(4),
+                                            ),
+                                            child: Icon(
+                                              Icons.share,
+                                              size: 12,
+                                              color: AppColors.mintGreen,
+                                            ),
+                                          ),
+                                        ),
+                                      if (widget.onShare != null &&
+                                          widget.onDelete != null)
+                                        SizedBox(width: 4),
+                                      if (widget.onDelete != null)
+                                        GestureDetector(
+                                          onTap: widget.onDelete,
+                                          child: Container(
+                                            padding: EdgeInsets.all(4),
+                                            decoration: BoxDecoration(
+                                              color: AppColors.coralRed
+                                                  .withOpacity(0.1),
+                                              borderRadius:
+                                                  BorderRadius.circular(4),
+                                            ),
+                                            child: Icon(
+                                              Icons.delete,
+                                              size: 12,
+                                              color: AppColors.coralRed,
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  )
+                                else
+                                // Selected indicator - compact (only if no action buttons)
                                 if (widget.isSelected)
                                   Container(
                                     padding: EdgeInsets.all(2),

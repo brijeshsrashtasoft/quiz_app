@@ -74,7 +74,9 @@ class _WaitingLobbyScreenState extends ConsumerState<WaitingLobbyScreen>
   @override
   Widget build(BuildContext context) {
     // Watch session stream for real-time updates
-    final sessionAsyncValue = ref.watch(gameSessionStreamProvider(widget.sessionId));
+    final sessionAsyncValue = ref.watch(
+      gameSessionStreamProvider(widget.sessionId),
+    );
     final connectionState = ref.watch(connectionStateProvider);
 
     return PageLayout(
@@ -104,9 +106,9 @@ class _WaitingLobbyScreenState extends ConsumerState<WaitingLobbyScreen>
           if (session == null) {
             return _buildErrorState('Game session not found');
           }
-          
+
           _currentSession = session;
-          
+
           // Handle session state changes
           if (session.status == GameSessionStatus.active) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -117,7 +119,7 @@ class _WaitingLobbyScreenState extends ConsumerState<WaitingLobbyScreen>
               _handleGameCompleted(context);
             });
           }
-          
+
           return _buildWaitingContent(session);
         },
       ),
@@ -127,7 +129,7 @@ class _WaitingLobbyScreenState extends ConsumerState<WaitingLobbyScreen>
   Widget _buildWaitingContent(GameSessionEntity session) {
     // Get quiz data for display
     final quizAsyncValue = ref.watch(quizByIdProvider(session.quizId));
-    
+
     return quizAsyncValue.when(
       loading: () => const LoadingSpinner(message: 'Loading quiz data...'),
       error: (error, _) => _buildSessionContent(session, 'Quiz'),
@@ -137,7 +139,7 @@ class _WaitingLobbyScreenState extends ConsumerState<WaitingLobbyScreen>
       },
     );
   }
-  
+
   Widget _buildSessionContent(GameSessionEntity session, String quizTitle) {
     return Column(
       children: [
@@ -211,9 +213,9 @@ class _WaitingLobbyScreenState extends ConsumerState<WaitingLobbyScreen>
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
-                          _isStartingGame 
-                            ? Icons.play_arrow_rounded 
-                            : Icons.hourglass_top_rounded,
+                          _isStartingGame
+                              ? Icons.play_arrow_rounded
+                              : Icons.hourglass_top_rounded,
                           color: AppColors.pureWhite,
                           size: 24,
                         ),
@@ -233,8 +235,8 @@ class _WaitingLobbyScreenState extends ConsumerState<WaitingLobbyScreen>
           _isStartingGame
               ? 'Starting game...'
               : (widget.isHost
-                  ? 'Waiting for players to join...'
-                  : 'Waiting for host to start...'),
+                    ? 'Waiting for players to join...'
+                    : 'Waiting for host to start...'),
           style: AppTextStyles.bodyText,
           textAlign: TextAlign.center,
         ),
@@ -283,8 +285,9 @@ class _WaitingLobbyScreenState extends ConsumerState<WaitingLobbyScreen>
         Expanded(
           child: LobbyPlayerList(
             players: session.players,
+            hostId: session.hostId,
             staggerController: _staggerController,
-            isHost: widget.isHost,
+            isCurrentUserHost: widget.isHost,
           ),
         ),
 
@@ -299,8 +302,8 @@ class _WaitingLobbyScreenState extends ConsumerState<WaitingLobbyScreen>
                       ? () => _startGame()
                       : null,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _isStartingGame 
-                        ? AppColors.coolGray 
+                    backgroundColor: _isStartingGame
+                        ? AppColors.coolGray
                         : AppColors.turquoise,
                     foregroundColor: AppColors.pureWhite,
                     padding: const EdgeInsets.symmetric(
@@ -372,11 +375,7 @@ class _WaitingLobbyScreenState extends ConsumerState<WaitingLobbyScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
-            Icons.error_outline,
-            size: 80,
-            color: AppColors.error,
-          ),
+          const Icon(Icons.error_outline, size: 80, color: AppColors.error),
           const SizedBox(height: AppSpacing.spacingL),
           Text(
             'Session Error',
@@ -428,12 +427,12 @@ class _WaitingLobbyScreenState extends ConsumerState<WaitingLobbyScreen>
       // The navigation will be handled by session state change listener
     } catch (e) {
       AppLogger.error('Failed to start game', e);
-      
+
       if (mounted) {
         setState(() {
           _isStartingGame = false;
         });
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to start game: ${e.toString()}'),
@@ -449,17 +448,17 @@ class _WaitingLobbyScreenState extends ConsumerState<WaitingLobbyScreen>
       'WaitingLobbyScreen',
       'Game started, navigating to game session',
     );
-    
+
     // Navigate to the active game session
     context.go('/game/${widget.sessionId}');
   }
-  
+
   void _handleGameCompleted(BuildContext context) {
     AppLogger.firebase(
       'WaitingLobbyScreen',
       'Game completed, navigating to results',
     );
-    
+
     // Navigate to game results
     context.go('/game/${widget.sessionId}/results');
   }

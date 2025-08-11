@@ -157,8 +157,7 @@ class SubmitAnswerRealtime {
 
     // Check if player has already answered this question
     final player = session.getPlayer(playerId);
-    if (player != null &&
-        player.answers.length > questionIndex) {
+    if (player != null && player.answers.length > questionIndex) {
       return const Failure.sessionFailure(
         message: 'You have already answered this question',
         code: 'ALREADY_ANSWERED',
@@ -184,11 +183,11 @@ class SubmitAnswerRealtime {
     // Speed bonus (50% scaled by remaining time)
     final timeLimitMs = timeLimit * 1000;
     final speedRatio = 1 - (responseTimeMs / timeLimitMs).clamp(0.0, 1.0);
-    
+
     // Apply speed bonus curve (faster answers get exponentially more points)
     final speedMultiplier = speedRatio * speedRatio; // Quadratic curve
-    final speedBonus = (maxPoints * (1 - basePointsPercentage) * speedMultiplier)
-        .round();
+    final speedBonus =
+        (maxPoints * (1 - basePointsPercentage) * speedMultiplier).round();
 
     return basePoints + speedBonus;
   }

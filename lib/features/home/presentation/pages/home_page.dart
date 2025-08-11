@@ -14,6 +14,8 @@ import '../../../authentication/domain/entities/auth_state.dart';
 import '../../../authentication/presentation/providers/auth_providers.dart';
 import '../../../quiz_creation/presentation/providers/quiz_providers.dart';
 import '../../../quiz_creation/domain/entities/quiz.dart';
+import '../../../game_session/presentation/providers/session_providers.dart';
+import '../../../game_session/domain/entities/game_session_entity.dart';
 
 /// Main home page with dashboard and navigation
 /// Following Kahoot-style engaging UI design
@@ -109,6 +111,12 @@ class _HomePageState extends ConsumerState<HomePage>
           _buildFeaturedQuizzes(),
 
           const SizedBox(height: AppSpacing.sectionSpacing),
+
+          // My Quizzes Section (only for authenticated users)
+          if (user != null) ...[
+            _buildMyQuizzes(),
+            const SizedBox(height: AppSpacing.sectionSpacing),
+          ],
 
           // Recent Activity
           _buildRecentActivity(),
@@ -365,7 +373,7 @@ class _HomePageState extends ConsumerState<HomePage>
               title: 'Browse Quizzes',
               subtitle: 'Explore quizzes',
               color: AppColors.warmYellow,
-              onTap: () => context.push('/quiz-management'),
+              onTap: () => context.push(RouteConstants.quizManagement),
             ),
           ],
         ),
@@ -653,27 +661,12 @@ class _HomePageState extends ConsumerState<HomePage>
   }
 
   Widget _buildRecentActivity() {
-    // Mock recent activity data
-    final recentActivities = [
-      {
-        'type': 'created',
-        'title': 'History Quiz',
-        'time': '2 hours ago',
-        'icon': Icons.quiz,
-      },
-      {
-        'type': 'played',
-        'title': 'Math Challenge',
-        'time': '1 day ago',
-        'icon': Icons.sports_esports,
-      },
-      {
-        'type': 'hosted',
-        'title': 'Science Trivia',
-        'time': '3 days ago',
-        'icon': Icons.person,
-      },
-    ];
+    final currentUser = ref.watch(currentUserProvider);
+    if (currentUser == null) {
+      return _buildGuestActivitySection();
+    }
+
+    final userHostedSessions = ref.watch(userHostedSessionsProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -688,36 +681,381 @@ class _HomePageState extends ConsumerState<HomePage>
 
         const SizedBox(height: AppSpacing.spacingM),
 
-        Container(
-          decoration: BoxDecoration(
-            color: AppColors.pureWhite,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.shadowLight,
-                blurRadius: 8,
-                spreadRadius: 1,
-              ),
-            ],
-          ),
-          child: Column(
-            children: recentActivities.asMap().entries.map((entry) {
-              final index = entry.key;
-              final activity = entry.value;
-              final isLast = index == recentActivities.length - 1;
+        userHostedSessions.when(
+          loading: () => _buildActivityLoadingSkeleton(),
+          error: (error, stack) => _buildActivityErrorWidget(error),
+          data: (sessions) {
+            if (sessions.isEmpty) {
+              return _buildEmptyActivityState();
+            }
 
-              return _RecentActivityItem(
-                type: activity['type'] as String,
-                title: activity['title'] as String,
-                time: activity['time'] as String,
-                icon: activity['icon'] as IconData,
-                showDivider: !isLast,
+            // Take the 3 most recent sessions for activity display
+            final recentSessions = sessions.take(3).toList();
+
+            return Container(
+              decoration: BoxDecoration(
+                color: AppColors.pureWhite,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.shadowLight,
+                    blurRadius: 8,
+                    spreadRadius: 1,
+                  ),
+                ],
+              ),
+              child: Column(
+                children: recentSessions.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final session = entry.value;
+                  final isLast = index == recentSessions.length - 1;
+
+                  return _RecentActivityItem(
+                    type: _getActivityType(session),
+                    title: 'Game Session ${session.pin}',
+                    time: _getTimeAgo(session.createdAt),
+                    icon: _getActivityIcon(session),
+                    showDivider: !isLast,
+                    onTap: () {
+                      // Navigate to session details or results
+                      if (session.status == GameSessionStatus.completed) {
+                        context.push(
+                          RouteConstants.gameResultsPath(session.id),
+                        );
+                      } else {
+                        context.push(
+                          RouteConstants.gameSessionPath(session.id),
+                        );
+                      }
+                    },
+                  );
+                }).toList(),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMyQuizzes() {
+    final userQuizzes = ref.watch(userQuizzesProvider);
+    final userDraftQuizzes = ref.watch(userDraftQuizzesProvider);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'My Quizzes',
+              style: AppTextStyles.sectionHeader.copyWith(
+                color: AppColors.charcoal,
+                fontSize: 20,
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                context.push(RouteConstants.quizManagement);
+              },
+              child: Text(
+                'Manage All',
+                style: AppTextStyles.bodyText.copyWith(
+                  color: AppColors.vibrantPurple,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: AppSpacing.spacingM),
+
+        SizedBox(
+          height: 200,
+          child: userQuizzes.when(
+            loading: () => _buildLoadingSkeleton(),
+            error: (error, stack) => _buildErrorWidget(error),
+            data: (publishedQuizzes) {
+              return userDraftQuizzes.when(
+                loading: () => _buildLoadingSkeleton(),
+                error: (error, stack) => _buildErrorWidget(error),
+                data: (draftQuizzes) {
+                  final allUserQuizzes = [...publishedQuizzes, ...draftQuizzes];
+
+                  if (allUserQuizzes.isEmpty) {
+                    return _buildMyQuizzesEmptyState();
+                  }
+
+                  return ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: allUserQuizzes.length,
+                    itemBuilder: (context, index) {
+                      final quiz = allUserQuizzes[index];
+                      return Container(
+                        width: 280,
+                        margin: EdgeInsets.only(
+                          right: index < allUserQuizzes.length - 1
+                              ? AppSpacing.spacingM
+                              : 0,
+                        ),
+                        child: _MyQuizCard(
+                          quiz: quiz,
+                          onTap: () {
+                            if (quiz.isDraft) {
+                              // Navigate to edit draft
+                              context.push(
+                                RouteConstants.quizEditPath(quiz.id),
+                              );
+                            } else {
+                              // Navigate to quiz details
+                              context.push(
+                                RouteConstants.quizDetailsPath(quiz.id),
+                              );
+                            }
+                          },
+                          onHost: quiz.isDraft
+                              ? null
+                              : () {
+                                  // Navigate to host game screen with this quiz
+                                  context.push(
+                                    '${RouteConstants.gameHost}?quizId=${quiz.id}',
+                                  );
+                                },
+                        ),
+                      );
+                    },
+                  );
+                },
               );
-            }).toList(),
+            },
           ),
         ),
       ],
     );
+  }
+
+  Widget _buildGuestActivitySection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Recent Activity',
+          style: AppTextStyles.sectionHeader.copyWith(
+            color: AppColors.charcoal,
+            fontSize: 20,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.spacingM),
+        Container(
+          padding: const EdgeInsets.all(AppSpacing.spacingL),
+          decoration: BoxDecoration(
+            color: AppColors.offWhite,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.lightGray, width: 1),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.history, size: 48, color: AppColors.coolGray),
+              const SizedBox(height: AppSpacing.spacingM),
+              Text(
+                'Sign in to see your activity',
+                style: AppTextStyles.bodyText.copyWith(
+                  color: AppColors.coolGray,
+                  fontWeight: FontWeight.w600,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: AppSpacing.spacingS),
+              Text(
+                'Track your quiz creations, game sessions, and performance',
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.coolGray,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActivityLoadingSkeleton() {
+    return Container(
+      height: 200,
+      padding: const EdgeInsets.all(AppSpacing.spacingL),
+      decoration: BoxDecoration(
+        color: AppColors.lightGray.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const CircularProgressIndicator(
+            strokeWidth: 2,
+            valueColor: AlwaysStoppedAnimation<Color>(AppColors.vibrantPurple),
+          ),
+          const SizedBox(height: AppSpacing.spacingM),
+          Text(
+            'Loading activity...',
+            style: AppTextStyles.caption.copyWith(color: AppColors.coolGray),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActivityErrorWidget(Object error) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.spacingL),
+      decoration: BoxDecoration(
+        color: AppColors.coralRed.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: AppColors.coralRed.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.error_outline, size: 48, color: AppColors.coralRed),
+          const SizedBox(height: AppSpacing.spacingM),
+          Text(
+            'Failed to load activity',
+            style: AppTextStyles.bodyText.copyWith(
+              color: AppColors.coralRed,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.spacingS),
+          Text(
+            'Please check your connection and try again',
+            style: AppTextStyles.caption.copyWith(color: AppColors.coolGray),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyActivityState() {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.spacingL),
+      decoration: BoxDecoration(
+        color: AppColors.offWhite,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.lightGray, width: 1),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.timeline, size: 48, color: AppColors.coolGray),
+          const SizedBox(height: AppSpacing.spacingM),
+          Text(
+            'No recent activity',
+            style: AppTextStyles.bodyText.copyWith(
+              color: AppColors.coolGray,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.spacingS),
+          Text(
+            'Start hosting quiz games to see your activity here',
+            style: AppTextStyles.caption.copyWith(color: AppColors.coolGray),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMyQuizzesEmptyState() {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.spacingL),
+      decoration: BoxDecoration(
+        color: AppColors.offWhite,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.lightGray, width: 1),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.quiz_outlined, size: 48, color: AppColors.coolGray),
+          const SizedBox(height: AppSpacing.spacingM),
+          Text(
+            'No quizzes created yet',
+            style: AppTextStyles.bodyText.copyWith(
+              color: AppColors.coolGray,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.spacingS),
+          Text(
+            'Create your first quiz to get started!',
+            style: AppTextStyles.caption.copyWith(color: AppColors.coolGray),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: AppSpacing.spacingL),
+          ElevatedButton(
+            onPressed: () => context.push(RouteConstants.quizCreation),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.vibrantPurple,
+              foregroundColor: AppColors.pureWhite,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text(
+              'Create Quiz',
+              style: AppTextStyles.buttonText.copyWith(
+                color: AppColors.pureWhite,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getActivityType(GameSessionEntity session) {
+    switch (session.status) {
+      case GameSessionStatus.completed:
+        return 'completed';
+      case GameSessionStatus.active:
+        return 'hosted';
+      case GameSessionStatus.waiting:
+        return 'created';
+    }
+  }
+
+  IconData _getActivityIcon(GameSessionEntity session) {
+    switch (session.status) {
+      case GameSessionStatus.completed:
+        return Icons.check_circle;
+      case GameSessionStatus.active:
+        return Icons.play_circle;
+      case GameSessionStatus.waiting:
+        return Icons.group_add;
+    }
+  }
+
+  String _getTimeAgo(DateTime dateTime) {
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+
+    if (difference.inMinutes < 60) {
+      return '${difference.inMinutes}m ago';
+    } else if (difference.inHours < 24) {
+      return '${difference.inHours}h ago';
+    } else if (difference.inDays < 7) {
+      return '${difference.inDays}d ago';
+    } else {
+      return '${(difference.inDays / 7).floor()}w ago';
+    }
   }
 }
 
@@ -834,6 +1172,7 @@ class _RecentActivityItem extends StatelessWidget {
   final String time;
   final IconData icon;
   final bool showDivider;
+  final VoidCallback? onTap;
 
   const _RecentActivityItem({
     required this.type,
@@ -841,6 +1180,7 @@ class _RecentActivityItem extends StatelessWidget {
     required this.time,
     required this.icon,
     required this.showDivider,
+    this.onTap,
   });
 
   @override
@@ -861,11 +1201,11 @@ class _RecentActivityItem extends StatelessWidget {
     String getTypeText() {
       switch (type) {
         case 'created':
-          return 'Created';
-        case 'played':
-          return 'Played';
+          return 'Created session';
         case 'hosted':
-          return 'Hosted';
+          return 'Hosted game';
+        case 'completed':
+          return 'Completed game';
         default:
           return 'Activity';
       }
@@ -873,43 +1213,50 @@ class _RecentActivityItem extends StatelessWidget {
 
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.all(AppSpacing.spacingM),
-          child: Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: getTypeColor().withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(icon, color: getTypeColor(), size: 20),
-              ),
-
-              const SizedBox(width: AppSpacing.spacingM),
-
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '${getTypeText()} $title',
-                      style: AppTextStyles.bodyText.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+        Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.spacingM),
+              child: Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: getTypeColor().withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    Text(time, style: AppTextStyles.caption),
-                  ],
-                ),
-              ),
+                    child: Icon(icon, color: getTypeColor(), size: 20),
+                  ),
 
-              Icon(
-                Icons.arrow_forward_ios,
-                size: 16,
-                color: AppColors.coolGray,
+                  const SizedBox(width: AppSpacing.spacingM),
+
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '${getTypeText()} $title',
+                          style: AppTextStyles.bodyText.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Text(time, style: AppTextStyles.caption),
+                      ],
+                    ),
+                  ),
+
+                  if (onTap != null)
+                    Icon(
+                      Icons.arrow_forward_ios,
+                      size: 16,
+                      color: AppColors.coolGray,
+                    ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
 
@@ -921,6 +1268,261 @@ class _RecentActivityItem extends StatelessWidget {
             endIndent: AppSpacing.spacingM,
           ),
       ],
+    );
+  }
+}
+
+/// My Quiz card widget for user's created quizzes
+class _MyQuizCard extends StatefulWidget {
+  final Quiz quiz;
+  final VoidCallback onTap;
+  final VoidCallback? onHost;
+
+  const _MyQuizCard({required this.quiz, required this.onTap, this.onHost});
+
+  @override
+  State<_MyQuizCard> createState() => _MyQuizCardState();
+}
+
+class _MyQuizCardState extends State<_MyQuizCard>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: AppAnimations.shortAnimation,
+      vsync: this,
+    );
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: AppAnimations.easeOut,
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _scaleAnimation,
+      builder: (context, child) {
+        return Transform.scale(
+          scale: _scaleAnimation.value,
+          child: Container(
+            decoration: BoxDecoration(
+              color: AppColors.pureWhite,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.shadowLight,
+                  blurRadius: 8,
+                  spreadRadius: 1,
+                ),
+              ],
+              border: widget.quiz.isDraft
+                  ? Border.all(
+                      color: AppColors.warmYellow.withOpacity(0.5),
+                      width: 2,
+                    )
+                  : null,
+            ),
+            child: Material(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(16),
+              child: InkWell(
+                onTap: widget.onTap,
+                onTapDown: (_) => _animationController.forward(),
+                onTapUp: (_) => _animationController.reverse(),
+                onTapCancel: () => _animationController.reverse(),
+                borderRadius: BorderRadius.circular(16),
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.spacingM),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Header with status badge
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              widget.quiz.title,
+                              style: AppTextStyles.bodyText.copyWith(
+                                fontWeight: FontWeight.w700,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (widget.quiz.isDraft)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: AppSpacing.spacingS,
+                                vertical: AppSpacing.spacingXS,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.warmYellow.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(
+                                  color: AppColors.warmYellow,
+                                  width: 1,
+                                ),
+                              ),
+                              child: Text(
+                                'DRAFT',
+                                style: AppTextStyles.caption.copyWith(
+                                  color: AppColors.warmYellow,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+
+                      const SizedBox(height: AppSpacing.spacingS),
+
+                      // Description
+                      Text(
+                        widget.quiz.description,
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppColors.coolGray,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+
+                      const Spacer(),
+
+                      // Quiz stats
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.quiz_outlined,
+                            size: 16,
+                            color: AppColors.coolGray,
+                          ),
+                          const SizedBox(width: AppSpacing.spacingXS),
+                          Text(
+                            '${widget.quiz.questions.length} questions',
+                            style: AppTextStyles.caption.copyWith(
+                              color: AppColors.coolGray,
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.spacingM),
+                          Icon(
+                            Icons.category_outlined,
+                            size: 16,
+                            color: AppColors.coolGray,
+                          ),
+                          const SizedBox(width: AppSpacing.spacingXS),
+                          Expanded(
+                            child: Text(
+                              widget.quiz.metadata.category,
+                              style: AppTextStyles.caption.copyWith(
+                                color: AppColors.coolGray,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: AppSpacing.spacingM),
+
+                      // Action buttons
+                      if (!widget.quiz.isDraft && widget.onHost != null)
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: widget.onHost,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.mintGreen,
+                              foregroundColor: AppColors.pureWhite,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                vertical: AppSpacing.spacingS,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.play_arrow, size: 18),
+                                const SizedBox(width: AppSpacing.spacingXS),
+                                Text(
+                                  'Host Game',
+                                  style: AppTextStyles.caption.copyWith(
+                                    color: AppColors.pureWhite,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      else
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton(
+                            onPressed: widget.onTap,
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppColors.vibrantPurple,
+                              side: BorderSide(
+                                color: widget.quiz.isDraft
+                                    ? AppColors.warmYellow
+                                    : AppColors.vibrantPurple,
+                                width: 1,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                vertical: AppSpacing.spacingS,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  widget.quiz.isDraft
+                                      ? Icons.edit
+                                      : Icons.visibility,
+                                  size: 18,
+                                  color: widget.quiz.isDraft
+                                      ? AppColors.warmYellow
+                                      : AppColors.vibrantPurple,
+                                ),
+                                const SizedBox(width: AppSpacing.spacingXS),
+                                Text(
+                                  widget.quiz.isDraft ? 'Continue' : 'View',
+                                  style: AppTextStyles.caption.copyWith(
+                                    color: widget.quiz.isDraft
+                                        ? AppColors.warmYellow
+                                        : AppColors.vibrantPurple,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

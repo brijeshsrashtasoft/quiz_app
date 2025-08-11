@@ -11,6 +11,7 @@ import '../../domain/usecases/get_public_quizzes_usecase.dart';
 import '../../domain/usecases/get_popular_quizzes_usecase.dart';
 import '../../domain/usecases/get_recent_quizzes_usecase.dart';
 import '../../domain/usecases/get_user_quizzes_usecase.dart';
+import '../../domain/usecases/publish_quiz_usecase.dart';
 import '../../domain/entities/quiz.dart';
 import '../../../authentication/presentation/providers/auth_providers.dart';
 
@@ -73,6 +74,11 @@ final getRecentQuizzesUseCaseProvider = Provider<GetRecentQuizzesUseCase>((
 final getUserQuizzesUseCaseProvider = Provider<GetUserQuizzesUseCase>((ref) {
   final repository = ref.watch(quizRepositoryProvider);
   return GetUserQuizzesUseCase(repository);
+});
+
+final publishQuizUseCaseProvider = Provider<PublishQuizUseCase>((ref) {
+  final repository = ref.watch(quizRepositoryProvider);
+  return PublishQuizUseCase(repository);
 });
 
 /// Provider to fetch a quiz by ID for preview/editing
@@ -157,37 +163,69 @@ final recentQuizzesProvider = FutureProvider<List<Quiz>>((ref) async {
 
 /// Provider to fetch user's created quizzes for hosting/management
 final userQuizzesProvider = FutureProvider<List<Quiz>>((ref) async {
+  debugPrint('🔍 [userQuizzesProvider] Starting to fetch user quizzes');
+
   final currentUserId = ref.watch(currentUserIdProvider);
+  debugPrint('🔍 [userQuizzesProvider] Current user ID: $currentUserId');
 
   if (currentUserId == null) {
-    debugPrint('No user authenticated, returning empty quiz list');
+    debugPrint(
+      '❌ [userQuizzesProvider] No user authenticated, returning empty quiz list',
+    );
     return [];
   }
 
-  debugPrint('Fetching quizzes for user: $currentUserId');
+  debugPrint(
+    '✅ [userQuizzesProvider] Fetching quizzes for user: $currentUserId',
+  );
 
   final useCase = ref.watch(getUserQuizzesUseCaseProvider);
-  final result = await useCase.call(
-    GetUserQuizzesParams(
-      userId: currentUserId,
-      limit: 50,
-      includeDrafts: false, // Only published quizzes for hosting
-      sortBy: QuizSortOption.updatedAt,
-    ),
+  debugPrint(
+    '🔍 [userQuizzesProvider] Use case obtained: ${useCase.runtimeType}',
+  );
+
+  final params = GetUserQuizzesParams(
+    userId: currentUserId,
+    limit: 50,
+    includeDrafts: false, // Only published quizzes for hosting
+    sortBy: QuizSortOption.updatedAt,
+  );
+  debugPrint(
+    '🔍 [userQuizzesProvider] Calling use case with params: userId=$currentUserId, limit=50, includeDrafts=false',
+  );
+
+  final result = await useCase.call(params);
+  debugPrint(
+    '🔍 [userQuizzesProvider] Use case result type: ${result.runtimeType}',
   );
 
   return result.when(
     success: (quizzes) {
-      debugPrint('Successfully fetched ${quizzes.length} user quizzes');
+      debugPrint(
+        '✅ [userQuizzesProvider] Successfully fetched ${quizzes.length} user quizzes',
+      );
+      debugPrint(
+        '🔍 [userQuizzesProvider] Quiz titles: ${quizzes.map((q) => q.title).toList()}',
+      );
+
       // Filter only quizzes suitable for multiplayer hosting
       final suitableQuizzes = quizzes
           .where((quiz) => quiz.isMultiplayerSuitable)
           .toList();
-      debugPrint('${suitableQuizzes.length} quizzes suitable for hosting');
+      debugPrint(
+        '✅ [userQuizzesProvider] ${suitableQuizzes.length} quizzes suitable for hosting',
+      );
+      debugPrint(
+        '🔍 [userQuizzesProvider] Suitable quiz titles: ${suitableQuizzes.map((q) => q.title).toList()}',
+      );
+
       return suitableQuizzes;
     },
     failure: (error) {
-      debugPrint('Failed to fetch user quizzes: ${error.message}');
+      debugPrint(
+        '❌ [userQuizzesProvider] Failed to fetch user quizzes: ${error.message}',
+      );
+      debugPrint('❌ [userQuizzesProvider] Error type: ${error.runtimeType}');
       return [];
     },
   );
@@ -195,34 +233,173 @@ final userQuizzesProvider = FutureProvider<List<Quiz>>((ref) async {
 
 /// Provider to fetch user's draft quizzes
 final userDraftQuizzesProvider = FutureProvider<List<Quiz>>((ref) async {
+  debugPrint(
+    '🔍 [userDraftQuizzesProvider] Starting to fetch user draft quizzes',
+  );
+
   final currentUserId = ref.watch(currentUserIdProvider);
+  debugPrint('🔍 [userDraftQuizzesProvider] Current user ID: $currentUserId');
 
   if (currentUserId == null) {
-    debugPrint('No user authenticated, returning empty draft quiz list');
+    debugPrint(
+      '❌ [userDraftQuizzesProvider] No user authenticated, returning empty draft quiz list',
+    );
     return [];
   }
 
-  debugPrint('Fetching draft quizzes for user: $currentUserId');
+  debugPrint(
+    '✅ [userDraftQuizzesProvider] Fetching draft quizzes for user: $currentUserId',
+  );
 
   final useCase = ref.watch(getUserQuizzesUseCaseProvider);
-  final result = await useCase.call(
-    GetUserQuizzesParams(
-      userId: currentUserId,
-      limit: 20,
-      includeDrafts: true, // Only drafts
-      sortBy: QuizSortOption.updatedAt,
-    ),
+  debugPrint(
+    '🔍 [userDraftQuizzesProvider] Use case obtained: ${useCase.runtimeType}',
+  );
+
+  final params = GetUserQuizzesParams(
+    userId: currentUserId,
+    limit: 20,
+    includeDrafts: true, // Only drafts
+    sortBy: QuizSortOption.updatedAt,
+  );
+  debugPrint(
+    '🔍 [userDraftQuizzesProvider] Calling use case with params: userId=$currentUserId, limit=20, includeDrafts=true',
+  );
+
+  final result = await useCase.call(params);
+  debugPrint(
+    '🔍 [userDraftQuizzesProvider] Use case result type: ${result.runtimeType}',
   );
 
   return result.when(
     success: (quizzes) {
+      debugPrint(
+        '✅ [userDraftQuizzesProvider] Received ${quizzes.length} total quizzes',
+      );
       final drafts = quizzes.where((quiz) => quiz.isDraft).toList();
-      debugPrint('Successfully fetched ${drafts.length} draft quizzes');
+      debugPrint(
+        '✅ [userDraftQuizzesProvider] Successfully filtered ${drafts.length} draft quizzes',
+      );
+      debugPrint(
+        '🔍 [userDraftQuizzesProvider] Draft quiz titles: ${drafts.map((q) => q.title).toList()}',
+      );
       return drafts;
     },
     failure: (error) {
-      debugPrint('Failed to fetch draft quizzes: ${error.message}');
+      debugPrint(
+        '❌ [userDraftQuizzesProvider] Failed to fetch draft quizzes: ${error.message}',
+      );
+      debugPrint(
+        '❌ [userDraftQuizzesProvider] Error type: ${error.runtimeType}',
+      );
       return [];
     },
   );
 });
+
+/// Provider for quiz publishing state and functionality
+final quizPublishProvider =
+    StateNotifierProvider.family<QuizPublishNotifier, QuizPublishState, String>(
+      (ref, quizId) {
+        final publishUseCase = ref.watch(publishQuizUseCaseProvider);
+        final currentUserId = ref.watch(currentUserIdProvider);
+        return QuizPublishNotifier(
+          publishUseCase: publishUseCase,
+          quizId: quizId,
+          currentUserId: currentUserId,
+        );
+      },
+    );
+
+/// Publish state
+class QuizPublishState {
+  final bool isPublishing;
+  final bool isPublished;
+  final String? error;
+  final Quiz? publishedQuiz;
+
+  const QuizPublishState({
+    this.isPublishing = false,
+    this.isPublished = false,
+    this.error,
+    this.publishedQuiz,
+  });
+
+  QuizPublishState copyWith({
+    bool? isPublishing,
+    bool? isPublished,
+    String? error,
+    Quiz? publishedQuiz,
+  }) {
+    return QuizPublishState(
+      isPublishing: isPublishing ?? this.isPublishing,
+      isPublished: isPublished ?? this.isPublished,
+      error: error ?? this.error,
+      publishedQuiz: publishedQuiz ?? this.publishedQuiz,
+    );
+  }
+}
+
+/// Publish notifier
+class QuizPublishNotifier extends StateNotifier<QuizPublishState> {
+  final PublishQuizUseCase _publishUseCase;
+  final String _quizId;
+  final String? _currentUserId;
+
+  QuizPublishNotifier({
+    required PublishQuizUseCase publishUseCase,
+    required String quizId,
+    required String? currentUserId,
+  }) : _publishUseCase = publishUseCase,
+       _quizId = quizId,
+       _currentUserId = currentUserId,
+       super(const QuizPublishState());
+
+  /// Publish the quiz
+  Future<bool> publishQuiz() async {
+    if (_currentUserId == null) {
+      state = state.copyWith(error: 'You must be logged in to publish a quiz');
+      return false;
+    }
+
+    state = state.copyWith(isPublishing: true, error: null);
+
+    try {
+      final result = await _publishUseCase(
+        PublishQuizParams(quizId: _quizId, userId: _currentUserId!),
+      );
+
+      return result.when(
+        success: (publishedQuiz) {
+          state = state.copyWith(
+            isPublishing: false,
+            isPublished: true,
+            publishedQuiz: publishedQuiz,
+            error: null,
+          );
+          return true;
+        },
+        failure: (failure) {
+          state = state.copyWith(
+            isPublishing: false,
+            isPublished: false,
+            error: failure.message,
+          );
+          return false;
+        },
+      );
+    } catch (e) {
+      state = state.copyWith(
+        isPublishing: false,
+        isPublished: false,
+        error: 'Failed to publish quiz: $e',
+      );
+      return false;
+    }
+  }
+
+  /// Reset publish state
+  void reset() {
+    state = const QuizPublishState();
+  }
+}

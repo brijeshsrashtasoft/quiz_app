@@ -8,6 +8,9 @@ import '../../features/quiz_creation/presentation/pages/quiz_creation_page.dart'
     as quiz_pages;
 import '../../features/quiz_creation/presentation/pages/quiz_preview_page.dart';
 import '../../features/quiz_creation/presentation/pages/quiz_publish_page.dart';
+import '../../features/quiz_creation/presentation/pages/quiz_management_page.dart';
+import '../../features/quiz_creation/presentation/pages/quiz_details_page.dart'
+    as quiz_details;
 import 'navigation_utils.dart';
 import '../../features/authentication/presentation/pages/login_page.dart';
 import '../../features/authentication/presentation/pages/register_page.dart';
@@ -141,12 +144,18 @@ class AppRouter {
       GoRoute(
         path: RouteConstants.quizCreation,
         name: 'quiz-creation',
-        builder: (context, state) => const quiz_pages.QuizCreationPage(),
+        builder: (context, state) {
+          final quizId = state.uri.queryParameters['id'];
+          return quiz_pages.QuizCreationPage(quizId: quizId);
+        },
         routes: [
           GoRoute(
             path: 'form',
             name: 'quiz-creation-form',
-            builder: (context, state) => const quiz_pages.QuizCreationPage(),
+            builder: (context, state) {
+              final quizId = state.uri.queryParameters['id'];
+              return quiz_pages.QuizCreationPage(quizId: quizId);
+            },
           ),
           GoRoute(
             path: 'preview',
@@ -159,6 +168,13 @@ class AppRouter {
             builder: (context, state) => const QuizPublishPage(),
           ),
         ],
+      ),
+
+      // Quiz management route
+      GoRoute(
+        path: RouteConstants.quizManagement,
+        name: 'quiz-management',
+        builder: (context, state) => const QuizManagementPage(),
       ),
 
       // Quiz details and editing with validation
@@ -177,7 +193,7 @@ class AppRouter {
             );
           }
 
-          return QuizDetailsPage(quizId: quizId);
+          return quiz_details.QuizDetailsPage(quizId: quizId);
         },
         routes: [
           GoRoute(
@@ -195,7 +211,7 @@ class AppRouter {
                 );
               }
 
-              return QuizEditPage(quizId: quizId);
+              return quiz_pages.QuizCreationPage(quizId: quizId);
             },
           ),
         ],

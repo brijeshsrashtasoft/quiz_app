@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/firebase/auth_config.dart';
 import '../../../../core/utils/result.dart';
@@ -158,7 +159,11 @@ final isAuthenticatedProvider = Provider<bool>((ref) {
 /// User ID provider - quick access to current user ID
 final currentUserIdProvider = Provider<String?>((ref) {
   final user = ref.watch(currentUserProvider);
-  return user?.id;
+  final userId = user?.id;
+  debugPrint(
+    '🔍 [currentUserIdProvider] Current user: ${user?.email}, ID: $userId',
+  );
+  return userId;
 });
 
 /// Watch user provider - real-time user data updates

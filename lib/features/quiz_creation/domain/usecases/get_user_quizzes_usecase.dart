@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/utils/result.dart';
 import '../entities/quiz.dart';
@@ -12,48 +13,88 @@ class GetUserQuizzesUseCase {
 
   /// Execute the use case
   Future<Result<List<Quiz>>> call(GetUserQuizzesParams params) async {
+    debugPrint(
+      '🔍 [GetUserQuizzesUseCase] Starting with params: userId=${params.userId}, limit=${params.limit}, includeDrafts=${params.includeDrafts}',
+    );
+
     // Validate user ID
     if (params.userId.isEmpty) {
+      debugPrint('❌ [GetUserQuizzesUseCase] User ID is empty');
       return const Result.failure(
         ValidationFailure(message: 'User ID cannot be empty.'),
       );
     }
 
+    debugPrint('✅ [GetUserQuizzesUseCase] User ID validated: ${params.userId}');
+
     // Get user's quizzes
+    debugPrint(
+      '🔍 [GetUserQuizzesUseCase] Calling repository.getQuizzesByUser...',
+    );
     final result = await _repository.getQuizzesByUser(
       params.userId,
       limit: params.limit,
       lastCreatedAt: params.lastCreatedAt,
     );
 
+    debugPrint(
+      '🔍 [GetUserQuizzesUseCase] Repository result: ${result.isSuccess ? "SUCCESS" : "FAILURE"}',
+    );
+
     if (result.isFailure) {
+      debugPrint(
+        '❌ [GetUserQuizzesUseCase] Repository call failed: ${result.failureOrNull}',
+      );
       return result;
     }
 
     final quizzes = result.dataOrNull!;
+    debugPrint(
+      '✅ [GetUserQuizzesUseCase] Repository returned ${quizzes.length} quizzes',
+    );
 
     // Filter based on parameters
     List<Quiz> filteredQuizzes = quizzes;
+    debugPrint(
+      '🔍 [GetUserQuizzesUseCase] Starting filtering with ${filteredQuizzes.length} quizzes',
+    );
 
     // Filter by status if specified
     if (params.filterByStatus != null) {
+      debugPrint(
+        '🔍 [GetUserQuizzesUseCase] Filtering by status: ${params.filterByStatus}',
+      );
       filteredQuizzes = filteredQuizzes
           .where((quiz) => quiz.status == params.filterByStatus)
           .toList();
+      debugPrint(
+        '🔍 [GetUserQuizzesUseCase] After status filter: ${filteredQuizzes.length} quizzes',
+      );
     }
 
     // Filter by draft status if specified
     if (params.includeDrafts != null) {
+      debugPrint(
+        '🔍 [GetUserQuizzesUseCase] Filtering by draft status: includeDrafts=${params.includeDrafts}',
+      );
       if (params.includeDrafts!) {
         // Include only drafts
+        debugPrint('🔍 [GetUserQuizzesUseCase] Including only drafts');
         filteredQuizzes = filteredQuizzes
             .where((quiz) => quiz.isDraft)
             .toList();
+        debugPrint(
+          '🔍 [GetUserQuizzesUseCase] Draft quizzes found: ${filteredQuizzes.length}',
+        );
       } else {
         // Exclude drafts
+        debugPrint('🔍 [GetUserQuizzesUseCase] Excluding drafts');
         filteredQuizzes = filteredQuizzes
             .where((quiz) => !quiz.isDraft)
             .toList();
+        debugPrint(
+          '🔍 [GetUserQuizzesUseCase] Non-draft quizzes found: ${filteredQuizzes.length}',
+        );
       }
     }
 
@@ -79,6 +120,13 @@ class GetUserQuizzesUseCase {
         filteredQuizzes.sort((a, b) => b.rating.compareTo(a.rating));
         break;
     }
+
+    debugPrint(
+      '✅ [GetUserQuizzesUseCase] Final result: ${filteredQuizzes.length} quizzes after filtering and sorting',
+    );
+    debugPrint(
+      '🔍 [GetUserQuizzesUseCase] Final quiz titles: ${filteredQuizzes.map((q) => "${q.title} (isDraft: ${q.isDraft})").toList()}',
+    );
 
     return Result.success(filteredQuizzes);
   }
