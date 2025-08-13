@@ -1,8 +1,8 @@
 import 'dart:async';
-import 'package:dartz/dartz.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/network/network_info.dart';
+import '../../../../core/utils/result.dart';
 import '../../domain/entities/leaderboard.dart';
 import '../../domain/entities/leaderboard_entry.dart';
 import '../../domain/entities/score_entity.dart';
@@ -21,7 +21,7 @@ class LeaderboardRepositoryImpl implements LeaderboardRepository {
   });
 
   @override
-  Stream<Either<Failure, Leaderboard>> watchLeaderboard(
+  Stream<Result<Leaderboard>> watchLeaderboard(
     String sessionId,
   ) async* {
     if (await networkInfo.isConnected) {
@@ -29,20 +29,20 @@ class LeaderboardRepositoryImpl implements LeaderboardRepository {
         await for (final leaderboardModel in remoteDataSource.watchLeaderboard(
           sessionId,
         )) {
-          yield Right(leaderboardModel.toEntity());
+          yield Result.success(leaderboardModel.toEntity());
         }
       } on ServerException catch (e) {
-        yield Left(ServerFailure(message: e.message));
+        yield Result.failure(Failure.serverFailure(message: e.message));
       } catch (e) {
-        yield Left(ServerFailure(message: e.toString()));
+        yield Result.failure(Failure.serverFailure(message: e.toString()));
       }
     } else {
-      yield const Left(NetworkFailure());
+      yield Result.failure(const Failure.networkFailure(message: 'No internet connection'));
     }
   }
 
   @override
-  Future<Either<Failure, void>> updateScore(
+  Future<Result<void>> updateScore(
     String sessionId,
     ScoreEntity score,
   ) async {
@@ -50,37 +50,37 @@ class LeaderboardRepositoryImpl implements LeaderboardRepository {
       try {
         final scoreModel = ScoreModel.fromEntity(score);
         await remoteDataSource.updateScore(sessionId, scoreModel);
-        return const Right(null);
+        return const Result.success(null);
       } on ServerException catch (e) {
-        return Left(ServerFailure(message: e.message));
+        return Result.failure(Failure.serverFailure(message: e.message));
       } catch (e) {
-        return Left(ServerFailure(message: e.toString()));
+        return Result.failure(Failure.serverFailure(message: e.toString()));
       }
     } else {
-      return const Left(NetworkFailure());
+      return Result.failure(const Failure.networkFailure(message: 'No internet connection'));
     }
   }
 
   @override
-  Future<Either<Failure, Leaderboard>> getLeaderboard(String sessionId) async {
+  Future<Result<Leaderboard>> getLeaderboard(String sessionId) async {
     if (await networkInfo.isConnected) {
       try {
         final leaderboardModel = await remoteDataSource.getLeaderboard(
           sessionId,
         );
-        return Right(leaderboardModel.toEntity());
+        return Result.success(leaderboardModel.toEntity());
       } on ServerException catch (e) {
-        return Left(ServerFailure(message: e.message));
+        return Result.failure(Failure.serverFailure(message: e.message));
       } catch (e) {
-        return Left(ServerFailure(message: e.toString()));
+        return Result.failure(Failure.serverFailure(message: e.toString()));
       }
     } else {
-      return const Left(NetworkFailure());
+      return Result.failure(const Failure.networkFailure(message: 'No internet connection'));
     }
   }
 
   @override
-  Future<Either<Failure, List<LeaderboardEntry>>> getHistoricalLeaderboard({
+  Future<Result<List<LeaderboardEntry>>> getHistoricalLeaderboard({
     required String quizId,
     DateTime? startDate,
     DateTime? endDate,
@@ -94,19 +94,19 @@ class LeaderboardRepositoryImpl implements LeaderboardRepository {
           endDate: endDate,
           limit: limit,
         );
-        return Right(entries.map((e) => e.toEntity()).toList());
+        return Result.success(entries.map((e) => e.toEntity()).toList());
       } on ServerException catch (e) {
-        return Left(ServerFailure(message: e.message));
+        return Result.failure(Failure.serverFailure(message: e.message));
       } catch (e) {
-        return Left(ServerFailure(message: e.toString()));
+        return Result.failure(Failure.serverFailure(message: e.toString()));
       }
     } else {
-      return const Left(NetworkFailure());
+      return Result.failure(const Failure.networkFailure(message: 'No internet connection'));
     }
   }
 
   @override
-  Future<Either<Failure, LeaderboardEntry>> getPlayerStats({
+  Future<Result<LeaderboardEntry>> getPlayerStats({
     required String playerId,
     required String sessionId,
   }) async {
@@ -116,67 +116,67 @@ class LeaderboardRepositoryImpl implements LeaderboardRepository {
           playerId: playerId,
           sessionId: sessionId,
         );
-        return Right(entry.toEntity());
+        return Result.success(entry.toEntity());
       } on ServerException catch (e) {
-        return Left(ServerFailure(message: e.message));
+        return Result.failure(Failure.serverFailure(message: e.message));
       } catch (e) {
-        return Left(ServerFailure(message: e.toString()));
+        return Result.failure(Failure.serverFailure(message: e.toString()));
       }
     } else {
-      return const Left(NetworkFailure());
+      return Result.failure(const Failure.networkFailure(message: 'No internet connection'));
     }
   }
 
   @override
-  Future<Either<Failure, void>> recordFinalLeaderboard(
+  Future<Result<void>> recordFinalLeaderboard(
     Leaderboard leaderboard,
   ) async {
     if (await networkInfo.isConnected) {
       try {
         final leaderboardModel = LeaderboardModel.fromEntity(leaderboard);
         await remoteDataSource.recordFinalLeaderboard(leaderboardModel);
-        return const Right(null);
+        return const Result.success(null);
       } on ServerException catch (e) {
-        return Left(ServerFailure(message: e.message));
+        return Result.failure(Failure.serverFailure(message: e.message));
       } catch (e) {
-        return Left(ServerFailure(message: e.toString()));
+        return Result.failure(Failure.serverFailure(message: e.toString()));
       }
     } else {
-      return const Left(NetworkFailure());
+      return Result.failure(const Failure.networkFailure(message: 'No internet connection'));
     }
   }
 
   @override
-  Future<Either<Failure, List<Leaderboard>>> getPlayerHistory(
+  Future<Result<List<Leaderboard>>> getPlayerHistory(
     String playerId,
   ) async {
     if (await networkInfo.isConnected) {
       try {
         final leaderboards = await remoteDataSource.getPlayerHistory(playerId);
-        return Right(leaderboards.map((e) => e.toEntity()).toList());
+        return Result.success(leaderboards.map((e) => e.toEntity()).toList());
       } on ServerException catch (e) {
-        return Left(ServerFailure(message: e.message));
+        return Result.failure(Failure.serverFailure(message: e.message));
       } catch (e) {
-        return Left(ServerFailure(message: e.toString()));
+        return Result.failure(Failure.serverFailure(message: e.toString()));
       }
     } else {
-      return const Left(NetworkFailure());
+      return Result.failure(const Failure.networkFailure(message: 'No internet connection'));
     }
   }
 
   @override
-  Future<Either<Failure, void>> clearLeaderboard(String sessionId) async {
+  Future<Result<void>> clearLeaderboard(String sessionId) async {
     if (await networkInfo.isConnected) {
       try {
         await remoteDataSource.clearLeaderboard(sessionId);
-        return const Right(null);
+        return const Result.success(null);
       } on ServerException catch (e) {
-        return Left(ServerFailure(message: e.message));
+        return Result.failure(Failure.serverFailure(message: e.message));
       } catch (e) {
-        return Left(ServerFailure(message: e.toString()));
+        return Result.failure(Failure.serverFailure(message: e.toString()));
       }
     } else {
-      return const Left(NetworkFailure());
+      return Result.failure(const Failure.networkFailure(message: 'No internet connection'));
     }
   }
 }
