@@ -35,6 +35,13 @@ Kahoot-style interactive quiz app built with Flutter, Firestore, and Clean Archi
 lib/
 ├── core/                 # Shared utilities and constants
 ├── features/             # Feature-based organization (auth, quiz, game, leaderboard)
+│   └── game_session/     # Game session management
+│       ├── data/         # Data sources and repositories
+│       ├── domain/       # Entities, use cases, repository interfaces
+│       └── presentation/ # Pages, widgets, providers
+│           ├── pages/    # GameHostSetupPage, HostGameScreen
+│           ├── providers/# GameHostSetupProvider, SessionProviders
+│           └── widgets/  # Reusable UI components
 └── shared/              # Shared widgets and providers
 ```
 

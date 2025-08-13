@@ -21,6 +21,11 @@ class UIShowcasePage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('UI Component Showcase'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.pop(),
+          tooltip: 'Back',
+        ),
         actions: [
           IconButton(
             icon: Icon(

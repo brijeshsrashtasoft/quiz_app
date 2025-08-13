@@ -728,7 +728,7 @@ class GameSessionFirestoreDataSource extends BaseFirebaseDataSource {
         // Update player ready status
         final currentPlayer = gameSession.players[playerId]!;
         final updatedPlayer = currentPlayer.copyWith(isReady: isReady);
-        
+
         final updatedPlayers = Map<String, PlayerModel>.from(
           gameSession.players,
         );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../shared/constants/app_colors.dart';
 import '../../../shared/constants/app_text_styles.dart';
 import '../../../shared/constants/app_spacing.dart';
@@ -21,7 +22,16 @@ class PlaceholderPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(title), centerTitle: true, actions: actions),
+      appBar: AppBar(
+        title: Text(title),
+        centerTitle: true,
+        actions: actions,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.pop(),
+          tooltip: 'Back',
+        ),
+      ),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.spacingXL),
@@ -283,8 +293,8 @@ class GameHostPage extends StatelessWidget {
   }
 }
 
-class GameHostSetupPage extends StatelessWidget {
-  const GameHostSetupPage({super.key});
+class GameHostSetupPlaceholderPage extends StatelessWidget {
+  const GameHostSetupPlaceholderPage({super.key});
 
   @override
   Widget build(BuildContext context) {

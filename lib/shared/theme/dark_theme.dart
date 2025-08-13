@@ -265,7 +265,7 @@ class DarkTheme {
       ),
 
       // Progress indicator theme
-      progressIndicatorTheme: const ProgressIndicatorThemeData(
+      progressIndicatorTheme: ProgressIndicatorThemeData(
         color: AppColors.vibrantPurple,
         linearTrackColor: AppColors.mediumGray,
         circularTrackColor: AppColors.mediumGray,

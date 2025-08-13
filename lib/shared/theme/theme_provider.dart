@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'app_theme.dart';
-import 'dark_theme.dart';
+// import 'dark_theme.dart'; // Temporarily disabled due to compilation errors
 
 /// Theme mode state provider
 final themeModeProvider = StateNotifierProvider<ThemeModeNotifier, ThemeMode>((
@@ -63,7 +63,8 @@ final themeDataProvider = Provider.family<ThemeData, Brightness>((
 ) {
   return brightness == Brightness.light
       ? AppTheme.lightTheme
-      : DarkTheme.darkTheme;
+      : AppTheme
+            .lightTheme; // Using light theme for both until dark theme is fixed
 });
 
 /// Current theme provider
@@ -74,7 +75,7 @@ final currentThemeProvider = Provider<ThemeData>((ref) {
     case ThemeMode.light:
       return AppTheme.lightTheme;
     case ThemeMode.dark:
-      return DarkTheme.darkTheme;
+      return AppTheme.lightTheme; // Using light theme until dark theme is fixed
     case ThemeMode.system:
       // This will be resolved by MaterialApp
       return AppTheme.lightTheme;

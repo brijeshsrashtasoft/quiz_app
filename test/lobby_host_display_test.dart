@@ -43,7 +43,7 @@ void main() {
 
       // Look for HOST text - should appear exactly once
       expect(find.text('HOST'), findsOneWidget);
-      
+
       // Verify both player names appear (may be multiple instances due to UI layout)
       expect(find.textContaining('Host Player'), findsAtLeastNWidgets(1));
       expect(find.textContaining('Regular Player'), findsAtLeastNWidgets(1));
@@ -66,12 +66,14 @@ void main() {
 
       // Should show Ready status for both players (at least 2)
       expect(find.text('Ready'), findsAtLeastNWidgets(2));
-      
+
       // Should not show Joining... status
       expect(find.text('Joining...'), findsNothing);
     });
 
-    testWidgets('should not show HOST badge when hostId is null', (tester) async {
+    testWidgets('should not show HOST badge when hostId is null', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -89,7 +91,7 @@ void main() {
 
       // Should not find HOST badge
       expect(find.text('HOST'), findsNothing);
-      
+
       // Dispose any remaining timers
       await tester.binding.delayed(const Duration(milliseconds: 100));
     });

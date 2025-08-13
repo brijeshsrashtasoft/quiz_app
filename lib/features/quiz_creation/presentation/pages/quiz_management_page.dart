@@ -96,6 +96,11 @@ class _QuizManagementPageState extends ConsumerState<QuizManagementPage>
         backgroundColor: AppColors.pureWhite,
         elevation: 0,
         title: Text('My Quizzes', style: AppTextStyles.sectionHeader),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: AppColors.charcoal),
+          onPressed: () => context.pop(),
+          tooltip: 'Back',
+        ),
         actions: [
           IconButton(
             onPressed: () {

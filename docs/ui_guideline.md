@@ -76,6 +76,13 @@
 - **Incorrect Animation**: Shake + color change to coral red
 - **Disabled State**: 50% opacity
 
+### Game Setup Components
+- **LabeledSlider**: Labeled value sliders with tick marks and animated feedback
+- **NumberInput**: Number input with increment/decrement controls and animation
+- **SettingToggle**: Toggle switches with icons, descriptions, and smooth animations  
+- **GameSettingDropdown**: Custom dropdowns with rotation animations and purple theming
+- **Section Cards**: Collapsible sections with icons, consistent padding, and border effects
+
 ### Timer Component
 - **Size**: 80x80dp
 - **Style**: Circular progress

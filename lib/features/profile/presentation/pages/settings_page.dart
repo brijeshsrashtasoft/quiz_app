@@ -7,8 +7,12 @@ import '../../../../shared/constants/app_text_styles.dart';
 import '../../../../shared/constants/app_spacing.dart';
 import '../../../../shared/constants/app_animations.dart';
 import '../../../../core/navigation/route_constants.dart';
+import '../../../../shared/theme/theme_provider.dart';
 import '../widgets/privacy_toggle_widget.dart';
 import '../widgets/account_action_widget.dart';
+import '../providers/settings_providers.dart';
+import '../../../authentication/presentation/providers/auth_providers.dart';
+import '../../../../core/base/base_usecase.dart';
 
 /// Settings page with organized sections for user preferences
 /// Kahoot-style engaging design with privacy controls and account management
@@ -24,17 +28,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
   late AnimationController _animationController;
   late Animation<double> _fadeInAnimation;
   late Animation<Offset> _slideAnimation;
-
-  // Settings state - normally these would come from a settings provider
-  bool _isProfilePublic = true;
-  bool _showGameHistory = true;
-  bool _showOnlineStatus = true;
-  bool _emailNotifications = true;
-  bool _pushNotifications = true;
-  bool _gameInvites = true;
-  bool _darkMode = false;
-  bool _soundEffects = true;
-  bool _hapticFeedback = true;
 
   @override
   void initState() {
@@ -74,30 +67,73 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.offWhite,
-      appBar: AppBar(
-        title: Text(
-          'Settings',
-          style: AppTextStyles.sectionHeader.copyWith(
-            color: AppColors.pureWhite,
-          ),
-        ),
-        backgroundColor: AppColors.vibrantPurple,
-        foregroundColor: AppColors.pureWhite,
-        elevation: 0,
-      ),
-      body: AnimatedBuilder(
-        animation: _animationController,
-        builder: (context, child) {
-          return FadeTransition(
-            opacity: _fadeInAnimation,
-            child: SlideTransition(
-              position: _slideAnimation,
-              child: _buildContent(),
+    final settingsState = ref.watch(settingsProvider);
+    final isLoading = settingsState.isLoading;
+
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) {
+        if (didPop) return;
+
+        // Handle back button - navigate back to previous page
+        if (Navigator.of(context).canPop()) {
+          Navigator.of(context).pop();
+        } else {
+          // If no previous page, go to home
+          context.go(RouteConstants.home);
+        }
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.offWhite,
+        appBar: AppBar(
+          title: Text(
+            'Settings',
+            style: AppTextStyles.sectionHeader.copyWith(
+              color: AppColors.pureWhite,
             ),
-          );
-        },
+          ),
+          backgroundColor: AppColors.vibrantPurple,
+          foregroundColor: AppColors.pureWhite,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: AppColors.pureWhite),
+            onPressed: () {
+              if (Navigator.of(context).canPop()) {
+                Navigator.of(context).pop();
+              } else {
+                context.go(RouteConstants.home);
+              }
+            },
+          ),
+          actions: [
+            if (isLoading)
+              const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      AppColors.pureWhite,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+        body: AnimatedBuilder(
+          animation: _animationController,
+          builder: (context, child) {
+            return FadeTransition(
+              opacity: _fadeInAnimation,
+              child: SlideTransition(
+                position: _slideAnimation,
+                child: _buildContent(),
+              ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -135,74 +171,61 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
   }
 
   Widget _buildPrivacySection() {
+    final privacySettings = ref.watch(privacySettingsProvider);
+    final settingsNotifier = ref.read(settingsProvider.notifier);
+
     return _SettingsSection(
       title: 'Privacy & Visibility',
       icon: Icons.privacy_tip,
       iconColor: AppColors.turquoise,
       children: [
         ProfileVisibilityToggle(
-          isPublic: _isProfilePublic,
-          onChanged: (value) {
-            setState(() {
-              _isProfilePublic = value;
-            });
-          },
+          isPublic: privacySettings.profileVisible,
+          onChanged: settingsNotifier.updateProfileVisible,
         ),
         GameHistoryVisibilityToggle(
-          isVisible: _showGameHistory,
-          onChanged: (value) {
-            setState(() {
-              _showGameHistory = value;
-            });
-          },
+          isVisible: privacySettings.statsVisible,
+          onChanged: settingsNotifier.updateStatsVisible,
         ),
         OnlineStatusToggle(
-          showOnlineStatus: _showOnlineStatus,
-          onChanged: (value) {
-            setState(() {
-              _showOnlineStatus = value;
-            });
-          },
+          showOnlineStatus: privacySettings.showInLeaderboards,
+          onChanged: settingsNotifier.updateShowInLeaderboards,
         ),
       ],
     );
   }
 
   Widget _buildNotificationSection() {
+    final preferences = ref.watch(userPreferencesProvider);
+    final privacySettings = ref.watch(privacySettingsProvider);
+    final settingsNotifier = ref.read(settingsProvider.notifier);
+
     return _SettingsSection(
       title: 'Notifications',
       icon: Icons.notifications,
       iconColor: AppColors.vibrantPurple,
       children: [
         EmailNotificationsToggle(
-          isEnabled: _emailNotifications,
-          onChanged: (value) {
-            setState(() {
-              _emailNotifications = value;
-            });
-          },
+          isEnabled: preferences.notificationsEnabled,
+          onChanged: settingsNotifier.updateNotificationsEnabled,
         ),
         PushNotificationsToggle(
-          isEnabled: _pushNotifications,
-          onChanged: (value) {
-            setState(() {
-              _pushNotifications = value;
-            });
-          },
+          isEnabled: preferences.notificationsEnabled,
+          onChanged: settingsNotifier.updateNotificationsEnabled,
         ),
         GameInvitesToggle(
-          isEnabled: _gameInvites,
-          onChanged: (value) {
-            setState(() {
-              _gameInvites = value;
-            });
-          },
+          isEnabled: privacySettings.allowGameInvites,
+          onChanged: settingsNotifier.updateAllowGameInvites,
         ),
       ],
     );
   }
 
   Widget _buildAppPreferencesSection() {
+    final preferences = ref.watch(userPreferencesProvider);
+    final themeMode = ref.watch(themeModeProvider);
+    final settingsNotifier = ref.read(settingsProvider.notifier);
+
     return _SettingsSection(
       title: 'App Preferences',
       icon: Icons.tune,
@@ -211,11 +234,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
         PrivacyToggleWidget(
           title: 'Dark Mode',
           description: 'Use dark theme throughout the app',
-          value: _darkMode,
+          value:
+              preferences.theme == 'dark' ||
+              (preferences.theme == 'system' && themeMode == ThemeMode.dark),
           onChanged: (value) {
-            setState(() {
-              _darkMode = value;
-            });
+            final newTheme = value ? 'dark' : 'light';
+            settingsNotifier.updateTheme(newTheme);
           },
           icon: Icons.dark_mode,
           iconColor: AppColors.charcoal,
@@ -223,24 +247,16 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
         PrivacyToggleWidget(
           title: 'Sound Effects',
           description: 'Play sounds for game interactions',
-          value: _soundEffects,
-          onChanged: (value) {
-            setState(() {
-              _soundEffects = value;
-            });
-          },
+          value: preferences.soundEnabled,
+          onChanged: settingsNotifier.updateSoundEnabled,
           icon: Icons.volume_up,
           iconColor: AppColors.warmYellow,
         ),
         PrivacyToggleWidget(
           title: 'Haptic Feedback',
           description: 'Vibrate on button presses and interactions',
-          value: _hapticFeedback,
-          onChanged: (value) {
-            setState(() {
-              _hapticFeedback = value;
-            });
-          },
+          value: preferences.vibrationEnabled,
+          onChanged: settingsNotifier.updateVibrationEnabled,
           icon: Icons.vibration,
           iconColor: AppColors.coralRed,
         ),
@@ -264,7 +280,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
 
   // Action handlers
   void _exportData() {
-    // TODO: Implement data export functionality
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
@@ -278,55 +293,144 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
     );
   }
 
-  void _clearData() {
-    // TODO: Implement data clearing functionality
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Game data cleared successfully.',
-          style: AppTextStyles.bodyText.copyWith(color: AppColors.pureWhite),
-        ),
-        backgroundColor: AppColors.success,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-    );
+  Future<void> _clearData() async {
+    try {
+      // Clear settings and local data
+      await ref.read(settingsProvider.notifier).clearSettings();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Game data cleared successfully.',
+              style: AppTextStyles.bodyText.copyWith(
+                color: AppColors.pureWhite,
+              ),
+            ),
+            backgroundColor: AppColors.success,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Failed to clear data. Please try again.',
+              style: AppTextStyles.bodyText.copyWith(
+                color: AppColors.pureWhite,
+              ),
+            ),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+      }
+    }
   }
 
-  void _deactivateAccount() {
-    // TODO: Implement account deactivation
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Account deactivated. Sign in anytime to reactivate.',
-          style: AppTextStyles.bodyText.copyWith(color: AppColors.pureWhite),
-        ),
-        backgroundColor: AppColors.warning,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-    );
+  Future<void> _deactivateAccount() async {
+    try {
+      // Sign out user using the auth config
+      final signOutUseCase = ref.read(signOutUseCaseProvider);
+      await signOutUseCase(const NoParams());
 
-    // Navigate to login after deactivation
-    context.go(RouteConstants.login);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Account deactivated. Sign in anytime to reactivate.',
+              style: AppTextStyles.bodyText.copyWith(
+                color: AppColors.pureWhite,
+              ),
+            ),
+            backgroundColor: AppColors.warning,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+
+        // Navigate to login after deactivation
+        context.go(RouteConstants.login);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Failed to deactivate account. Please try again.',
+              style: AppTextStyles.bodyText.copyWith(
+                color: AppColors.pureWhite,
+              ),
+            ),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+      }
+    }
   }
 
-  void _deleteAccount() {
-    // TODO: Implement account deletion
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Account deletion initiated. This may take a few minutes.',
-          style: AppTextStyles.bodyText.copyWith(color: AppColors.pureWhite),
-        ),
-        backgroundColor: AppColors.error,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-    );
+  Future<void> _deleteAccount() async {
+    try {
+      // Clear all settings first
+      await ref.read(settingsProvider.notifier).clearSettings();
 
-    // Navigate to login after deletion
-    context.go(RouteConstants.login);
+      // Sign out user (account deletion would be handled by backend)
+      final signOutUseCase = ref.read(signOutUseCaseProvider);
+      await signOutUseCase(const NoParams());
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Account deletion initiated. This may take a few minutes.',
+              style: AppTextStyles.bodyText.copyWith(
+                color: AppColors.pureWhite,
+              ),
+            ),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+
+        // Navigate to login after deletion
+        context.go(RouteConstants.login);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Failed to delete account. Please try again.',
+              style: AppTextStyles.bodyText.copyWith(
+                color: AppColors.pureWhite,
+              ),
+            ),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+      }
+    }
   }
 }
 

@@ -220,7 +220,7 @@ class _AccountActionWidgetState extends State<AccountActionWidget>
           onTap: _handleAction,
           borderRadius: BorderRadius.circular(16),
           child: Padding(
-            padding: AppSpacing.allL,
+            padding: const EdgeInsets.all(AppSpacing.spacingL),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -279,7 +279,7 @@ class _AccountActionWidgetState extends State<AccountActionWidget>
                 if (widget.warningText != null) ...[
                   const SizedBox(height: AppSpacing.spacingM),
                   Container(
-                    padding: AppSpacing.allS,
+                    padding: const EdgeInsets.all(AppSpacing.spacingS),
                     decoration: BoxDecoration(
                       color: AppColors.warning.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
@@ -398,7 +398,7 @@ class _DestructiveActionDialogState extends State<_DestructiveActionDialog>
             contentPadding: EdgeInsets.zero,
             actionsPadding: EdgeInsets.zero,
             title: Container(
-              padding: AppSpacing.allL,
+              padding: const EdgeInsets.all(AppSpacing.spacingL),
               decoration: BoxDecoration(
                 color: widget.actionColor.withValues(alpha: 0.1),
                 borderRadius: const BorderRadius.only(
@@ -426,7 +426,7 @@ class _DestructiveActionDialogState extends State<_DestructiveActionDialog>
               ),
             ),
             content: Padding(
-              padding: AppSpacing.allL,
+              padding: const EdgeInsets.all(AppSpacing.spacingL),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -469,7 +469,7 @@ class _DestructiveActionDialogState extends State<_DestructiveActionDialog>
             ),
             actions: [
               Container(
-                padding: AppSpacing.allL,
+                padding: const EdgeInsets.all(AppSpacing.spacingL),
                 child: Row(
                   children: [
                     Expanded(

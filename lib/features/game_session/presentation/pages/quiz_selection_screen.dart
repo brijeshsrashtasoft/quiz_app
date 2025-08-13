@@ -69,8 +69,8 @@ class _QuizSelectionScreenState extends ConsumerState<QuizSelectionScreen>
 
   void _hostGame() {
     if (_selectedQuiz != null) {
-      // Navigate to host game screen with the selected quiz ID as parameter
-      context.push('${RouteConstants.gameHost}?quizId=${_selectedQuiz!.id}');
+      // Navigate to game setup screen with the selected quiz ID as query parameter
+      context.push('${RouteConstants.gameHostSetup}?quizId=${_selectedQuiz!.id}');
     }
   }
 
@@ -267,7 +267,7 @@ class _QuizSelectionScreenState extends ConsumerState<QuizSelectionScreen>
               PrimaryButton(
                 onPressed: _selectedQuiz != null ? _hostGame : null,
                 text: _selectedQuiz != null
-                    ? 'Host "${_selectedQuiz!.title}"'
+                    ? 'Setup Game for "${_selectedQuiz!.title}"'
                     : 'Select a Quiz First',
                 width: double.infinity,
                 isDisabled: _selectedQuiz == null,

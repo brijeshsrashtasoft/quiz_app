@@ -18,9 +18,12 @@ import '../../features/authentication/presentation/pages/email_verification_page
 import '../../features/authentication/presentation/pages/forgot_password_page.dart';
 import '../../features/authentication/presentation/pages/profile_page.dart'
     as auth_pages;
+import '../../features/profile/presentation/pages/settings_page.dart'
+    as settings_pages;
 import '../../features/home/presentation/pages/home_page.dart' as home_pages;
 import '../../features/game_session/presentation/pages/host_game_screen.dart';
 import '../../features/game_session/presentation/pages/quiz_selection_screen.dart';
+import '../../features/game_session/presentation/pages/game_host_setup_page.dart';
 import '../../features/game_session/presentation/pages/game_session_router.dart';
 import '../../features/game_session/presentation/pages/answer_reveal_screen.dart';
 import '../../features/ui_showcase/presentation/pages/ui_showcase_page.dart';
@@ -255,7 +258,13 @@ class AppRouter {
           GoRoute(
             path: 'setup',
             name: 'game-host-setup',
-            builder: (context, state) => const GameHostSetupPage(),
+            builder: (context, state) {
+              // Get optional quiz ID parameter from query params
+              final queryParams = NavigationUtils.getQueryParameters(state);
+              final quizId = queryParams['quizId'];
+
+              return GameHostSetupPage(selectedQuizId: quizId);
+            },
           ),
         ],
       ),
@@ -483,7 +492,7 @@ class AppRouter {
       GoRoute(
         path: RouteConstants.settings,
         name: 'settings',
-        builder: (context, state) => const SettingsPage(),
+        builder: (context, state) => const settings_pages.SettingsPage(),
       ),
       GoRoute(
         path: RouteConstants.about,

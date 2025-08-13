@@ -5,7 +5,8 @@ import '../repositories/game_session_repository.dart';
 
 /// Use case for setting player ready status
 /// Follows Clean Architecture patterns from CLAUDE.md
-class SetPlayerReady implements UseCase<GameSessionEntity, SetPlayerReadyParams> {
+class SetPlayerReady
+    implements UseCase<GameSessionEntity, SetPlayerReadyParams> {
   final GameSessionRepository repository;
 
   const SetPlayerReady(this.repository);
