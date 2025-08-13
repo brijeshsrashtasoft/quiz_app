@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../../core/firebase/firestore_config.dart';
 import '../../../../core/utils/result.dart';

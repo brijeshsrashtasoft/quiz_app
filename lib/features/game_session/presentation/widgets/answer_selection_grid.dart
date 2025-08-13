@@ -3,7 +3,6 @@ import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/constants/app_text_styles.dart';
 import '../../../../shared/constants/app_spacing.dart';
 import '../../../../shared/constants/app_animations.dart';
-import '../../../../shared/widgets/buttons/answer_button.dart';
 import '../../../../shared/widgets/primitives/shake_widget.dart';
 
 class AnswerSelectionGrid extends StatefulWidget {
@@ -117,7 +116,7 @@ class _AnswerSelectionGridState extends State<AnswerSelectionGrid>
       } else if (index == widget.selectedIndex) {
         return AppColors.coralRed;
       } else {
-        return AppColors.coolGray.withOpacity(0.5);
+        return AppColors.coolGray.withValues(alpha: 0.5);
       }
     }
   }
@@ -250,7 +249,7 @@ class _AnswerButton extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: color.withOpacity(0.3),
+                    color: color.withValues(alpha: 0.3),
                     blurRadius: 10,
                     offset: const Offset(0, 5),
                   ),
@@ -268,7 +267,7 @@ class _AnswerButton extends StatelessWidget {
                     child: Icon(
                       shape,
                       size: 32,
-                      color: AppColors.pureWhite.withOpacity(0.2),
+                      color: AppColors.pureWhite.withValues(alpha: 0.2),
                     ),
                   ),
 

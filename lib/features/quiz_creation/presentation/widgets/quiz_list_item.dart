@@ -81,15 +81,15 @@ class _QuizListItemState extends State<QuizListItem>
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: _isHovered
-                    ? AppColors.vibrantPurple.withOpacity(0.3)
+                    ? AppColors.vibrantPurple.withValues(alpha: 0.3)
                     : AppColors.lightGray,
                 width: _isHovered ? 2 : 1,
               ),
               boxShadow: [
                 BoxShadow(
                   color: _isHovered
-                      ? AppColors.vibrantPurple.withOpacity(0.1)
-                      : AppColors.shadowLight.withOpacity(0.05),
+                      ? AppColors.vibrantPurple.withValues(alpha: 0.1)
+                      : AppColors.shadowLight.withValues(alpha: 0.05),
                   blurRadius: _isHovered ? 16 : 8,
                   offset: const Offset(0, 4),
                 ),
@@ -271,7 +271,7 @@ class _QuizListItemState extends State<QuizListItem>
         vertical: AppSpacing.spacingXS,
       ),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(

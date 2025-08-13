@@ -165,7 +165,7 @@ class _HomePageState extends ConsumerState<HomePage>
                     Text(
                       '$greeting,',
                       style: AppTextStyles.bodyText.copyWith(
-                        color: AppColors.pureWhite.withOpacity(0.8),
+                        color: AppColors.pureWhite.withValues(alpha: 0.8),
                       ),
                     ),
                     const SizedBox(height: AppSpacing.spacingXS),
@@ -183,7 +183,7 @@ class _HomePageState extends ConsumerState<HomePage>
                 width: 60,
                 height: 60,
                 decoration: BoxDecoration(
-                  color: AppColors.pureWhite.withOpacity(0.2),
+                  color: AppColors.pureWhite.withValues(alpha: 0.2),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
@@ -200,7 +200,7 @@ class _HomePageState extends ConsumerState<HomePage>
           Text(
             'Ready to challenge minds and have fun with interactive quizzes?',
             style: AppTextStyles.bodyText.copyWith(
-              color: AppColors.pureWhite.withOpacity(0.9),
+              color: AppColors.pureWhite.withValues(alpha: 0.9),
             ),
           ),
 
@@ -481,7 +481,7 @@ class _HomePageState extends ConsumerState<HomePage>
           margin: EdgeInsets.only(right: index < 2 ? AppSpacing.spacingM : 0),
           child: Container(
             decoration: BoxDecoration(
-              color: AppColors.lightGray.withOpacity(0.3),
+              color: AppColors.lightGray.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Column(
@@ -513,10 +513,10 @@ class _HomePageState extends ConsumerState<HomePage>
     return Container(
       padding: const EdgeInsets.all(AppSpacing.spacingL),
       decoration: BoxDecoration(
-        color: AppColors.coralRed.withOpacity(0.1),
+        color: AppColors.coralRed.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: AppColors.coralRed.withOpacity(0.3),
+          color: AppColors.coralRed.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -888,7 +888,7 @@ class _HomePageState extends ConsumerState<HomePage>
       height: 200,
       padding: const EdgeInsets.all(AppSpacing.spacingL),
       decoration: BoxDecoration(
-        color: AppColors.lightGray.withOpacity(0.3),
+        color: AppColors.lightGray.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -912,10 +912,10 @@ class _HomePageState extends ConsumerState<HomePage>
     return Container(
       padding: const EdgeInsets.all(AppSpacing.spacingL),
       decoration: BoxDecoration(
-        color: AppColors.coralRed.withOpacity(0.1),
+        color: AppColors.coralRed.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AppColors.coralRed.withOpacity(0.3),
+          color: AppColors.coralRed.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -1131,7 +1131,7 @@ class _QuickActionCardState extends State<_QuickActionCard>
                       width: 48,
                       height: 48,
                       decoration: BoxDecoration(
-                        color: widget.color.withOpacity(0.1),
+                        color: widget.color.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(widget.icon, color: widget.color, size: 24),
@@ -1225,7 +1225,7 @@ class _RecentActivityItem extends StatelessWidget {
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: getTypeColor().withOpacity(0.1),
+                      color: getTypeColor().withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(icon, color: getTypeColor(), size: 20),
@@ -1330,7 +1330,7 @@ class _MyQuizCardState extends State<_MyQuizCard>
               ],
               border: widget.quiz.isDraft
                   ? Border.all(
-                      color: AppColors.warmYellow.withOpacity(0.5),
+                      color: AppColors.warmYellow.withValues(alpha: 0.5),
                       width: 2,
                     )
                   : null,
@@ -1369,7 +1369,7 @@ class _MyQuizCardState extends State<_MyQuizCard>
                                 vertical: AppSpacing.spacingXS,
                               ),
                               decoration: BoxDecoration(
-                                color: AppColors.warmYellow.withOpacity(0.1),
+                                color: AppColors.warmYellow.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(6),
                                 border: Border.all(
                                   color: AppColors.warmYellow,

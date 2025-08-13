@@ -8,7 +8,6 @@ import '../../../../core/utils/performance/connection_manager.dart';
 import '../../../../core/utils/performance/memory_cache.dart';
 import '../../domain/entities/game_session_entity.dart';
 import '../../data/models/game_session_model.dart';
-import '../../data/repositories/game_session_repository_impl.dart';
 import '../../data/datasources/game_session_firestore_datasource.dart';
 import '../../../authentication/presentation/providers/auth_providers.dart';
 import 'session_providers.dart';

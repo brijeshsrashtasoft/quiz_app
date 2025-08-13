@@ -12,7 +12,6 @@ import '../../../../shared/widgets/buttons/secondary_button.dart';
 import '../../../../shared/widgets/inputs/text_input.dart';
 import '../../../../shared/widgets/inputs/game_setup_inputs.dart';
 import '../../../../shared/widgets/primitives/app_card.dart';
-import '../../../../shared/widgets/cards/quiz_card.dart';
 import '../../../../core/navigation/route_constants.dart';
 import '../../../quiz_creation/domain/entities/quiz.dart';
 import '../../../quiz_creation/presentation/providers/quiz_providers.dart';
@@ -23,13 +22,11 @@ import '../../../quiz_creation/presentation/providers/quiz_providers.dart';
 class GameHostSetupScreen extends ConsumerStatefulWidget {
   final String quizId;
 
-  const GameHostSetupScreen({
-    super.key,
-    required this.quizId,
-  });
+  const GameHostSetupScreen({super.key, required this.quizId});
 
   @override
-  ConsumerState<GameHostSetupScreen> createState() => _GameHostSetupScreenState();
+  ConsumerState<GameHostSetupScreen> createState() =>
+      _GameHostSetupScreenState();
 }
 
 class _GameHostSetupScreenState extends ConsumerState<GameHostSetupScreen>
@@ -41,15 +38,15 @@ class _GameHostSetupScreenState extends ConsumerState<GameHostSetupScreen>
 
   // Form controllers and state
   final _descriptionController = TextEditingController();
-  
+
   // Game Settings
   double _timePerQuestion = 20.0; // seconds
   int _maxPlayers = 50;
   bool _randomizeQuestions = true;
-  
-  // Room Settings  
+
+  // Room Settings
   bool _isPublicRoom = false;
-  
+
   // Advanced Settings
   bool _showLeaderboardDuringGame = true;
   bool _allowLateJoins = false;
@@ -68,27 +65,23 @@ class _GameHostSetupScreenState extends ConsumerState<GameHostSetupScreen>
       duration: AppAnimations.mediumAnimation,
       vsync: this,
     );
-    
+
     _fadeController = AnimationController(
       duration: AppAnimations.longAnimation,
       vsync: this,
     );
 
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 1),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _slideController,
-      curve: AppAnimations.easeInOut,
-    ));
+    _slideAnimation = Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero)
+        .animate(
+          CurvedAnimation(
+            parent: _slideController,
+            curve: AppAnimations.easeInOut,
+          ),
+        );
 
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _fadeController,
-      curve: AppAnimations.easeOut,
-    ));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _fadeController, curve: AppAnimations.easeOut),
+    );
 
     // Start animations
     _slideController.forward();
@@ -124,12 +117,12 @@ class _GameHostSetupScreenState extends ConsumerState<GameHostSetupScreen>
       'autoStartWhenFull': _autoStartWhenFull.toString(),
       'description': _descriptionController.text.trim(),
     };
-    
+
     final uri = Uri(
       path: RouteConstants.gameHost,
       queryParameters: queryParams,
     );
-    
+
     context.push(uri.toString());
   }
 
@@ -145,13 +138,10 @@ class _GameHostSetupScreenState extends ConsumerState<GameHostSetupScreen>
   @override
   Widget build(BuildContext context) {
     final quizAsync = ref.watch(quizByIdProvider(widget.quizId));
-    
+
     return AppScaffold(
       appBar: AppBar(
-        title: Text(
-          'Game Setup',
-          style: AppTextStyles.sectionHeader,
-        ),
+        title: Text('Game Setup', style: AppTextStyles.sectionHeader),
         backgroundColor: AppColors.offWhite,
         elevation: 0,
         leading: IconButton(
@@ -164,9 +154,7 @@ class _GameHostSetupScreenState extends ConsumerState<GameHostSetupScreen>
           opacity: _fadeAnimation,
           child: quizAsync.when(
             loading: () => const Center(
-              child: CircularProgressIndicator(
-                color: AppColors.vibrantPurple,
-              ),
+              child: CircularProgressIndicator(color: AppColors.vibrantPurple),
             ),
             error: (error, stack) => _buildErrorState(error),
             data: (quiz) => _buildSetupContent(quiz),
@@ -181,11 +169,7 @@ class _GameHostSetupScreenState extends ConsumerState<GameHostSetupScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.error_outline,
-            size: 80,
-            color: AppColors.error,
-          ),
+          Icon(Icons.error_outline, size: 80, color: AppColors.error),
           const SizedBox(height: AppSpacing.spacingL),
           Text(
             'Quiz Not Found',
@@ -269,10 +253,7 @@ class _GameHostSetupScreenState extends ConsumerState<GameHostSetupScreen>
                         color: AppColors.textSecondary,
                       ),
                     ),
-                    Text(
-                      quiz.title,
-                      style: AppTextStyles.sectionHeader,
-                    ),
+                    Text(quiz.title, style: AppTextStyles.sectionHeader),
                   ],
                 ),
               ),
@@ -313,11 +294,7 @@ class _GameHostSetupScreenState extends ConsumerState<GameHostSetupScreen>
   }) {
     return Row(
       children: [
-        Icon(
-          icon,
-          size: 16,
-          color: AppColors.textSecondary,
-        ),
+        Icon(icon, size: 16, color: AppColors.textSecondary),
         const SizedBox(width: AppSpacing.spacingXS),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -400,7 +377,7 @@ class _GameHostSetupScreenState extends ConsumerState<GameHostSetupScreen>
       children: [
         SettingToggle(
           title: 'Public Room',
-          description: _isPublicRoom 
+          description: _isPublicRoom
               ? 'Anyone can find and join this game'
               : 'Only players with the PIN can join',
           value: _isPublicRoom,
@@ -500,7 +477,9 @@ class _GameHostSetupScreenState extends ConsumerState<GameHostSetupScreen>
                 top: Radius.circular(12),
                 bottom: Radius.circular(isCollapsible ? 0 : 12),
               ),
-              onTap: isCollapsible ? () => onExpandChanged?.call(!isExpanded) : null,
+              onTap: isCollapsible
+                  ? () => onExpandChanged?.call(!isExpanded)
+                  : null,
               child: Container(
                 padding: AppSpacing.allM,
                 child: Row(
@@ -511,18 +490,11 @@ class _GameHostSetupScreenState extends ConsumerState<GameHostSetupScreen>
                         color: iconColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Icon(
-                        icon,
-                        color: iconColor,
-                        size: 24,
-                      ),
+                      child: Icon(icon, color: iconColor, size: 24),
                     ),
                     const SizedBox(width: AppSpacing.spacingM),
                     Expanded(
-                      child: Text(
-                        title,
-                        style: AppTextStyles.sectionHeader,
-                      ),
+                      child: Text(title, style: AppTextStyles.sectionHeader),
                     ),
                     if (isCollapsible)
                       AnimatedRotation(
@@ -538,18 +510,15 @@ class _GameHostSetupScreenState extends ConsumerState<GameHostSetupScreen>
               ),
             ),
           ),
-          
+
           // Section content
           if (!isCollapsible || isExpanded)
             Container(
               padding: AppSpacing.allM,
-              decoration: isCollapsible 
+              decoration: isCollapsible
                   ? const BoxDecoration(
                       border: Border(
-                        top: BorderSide(
-                          color: AppColors.borderLight,
-                          width: 1,
-                        ),
+                        top: BorderSide(color: AppColors.borderLight, width: 1),
                       ),
                     )
                   : null,
@@ -568,12 +537,7 @@ class _GameHostSetupScreenState extends ConsumerState<GameHostSetupScreen>
       padding: AppSpacing.allL,
       decoration: BoxDecoration(
         color: AppColors.pureWhite,
-        border: Border(
-          top: BorderSide(
-            color: AppColors.borderLight,
-            width: 1,
-          ),
-        ),
+        border: Border(top: BorderSide(color: AppColors.borderLight, width: 1)),
       ),
       child: Row(
         children: [

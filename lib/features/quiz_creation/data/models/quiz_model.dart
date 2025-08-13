@@ -1,7 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../domain/entities/quiz.dart';
-import '../../domain/entities/question_entities.dart';
 import 'question_model.dart';
 import 'quiz_metadata_model.dart';
 

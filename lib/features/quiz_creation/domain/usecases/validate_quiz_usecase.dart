@@ -1,7 +1,5 @@
-import '../../../../core/errors/failures.dart';
 import '../../../../core/utils/result.dart';
 import '../entities/quiz.dart';
-import '../entities/question_entities.dart';
 import '../repositories/quiz_repository.dart';
 
 /// Use case for validating a quiz before publishing or playing

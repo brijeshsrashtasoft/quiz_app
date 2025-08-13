@@ -95,7 +95,7 @@ class _AnswerButtonState extends State<AnswerButton>
     }
 
     if (widget.isSelected && !widget.showResult) {
-      return (widget.color ?? _getShapeColor()).withOpacity(0.8);
+      return (widget.color ?? _getShapeColor()).withValues(alpha: 0.8);
     }
 
     return widget.color ?? _getShapeColor();
@@ -200,7 +200,7 @@ class _AnswerButtonState extends State<AnswerButton>
                             width: 32,
                             height: 32,
                             decoration: BoxDecoration(
-                              color: textColor.withOpacity(0.2),
+                              color: textColor.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Icon(

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/constants/app_text_styles.dart';
 import '../../../../shared/constants/app_spacing.dart';
-import '../../../../shared/constants/app_animations.dart';
 
 class ConnectionStatusIndicator extends StatefulWidget {
   final bool isConnected;
@@ -74,13 +73,13 @@ class _ConnectionStatusIndicatorState extends State<ConnectionStatusIndicator>
           ),
           decoration: BoxDecoration(
             color: widget.isConnected
-                ? AppColors.turquoise.withOpacity(0.1)
-                : AppColors.coralRed.withOpacity(0.1),
+                ? AppColors.turquoise.withValues(alpha: 0.1)
+                : AppColors.coralRed.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: widget.isConnected
-                  ? AppColors.turquoise.withOpacity(0.3)
-                  : AppColors.coralRed.withOpacity(0.3),
+                  ? AppColors.turquoise.withValues(alpha: 0.3)
+                  : AppColors.coralRed.withValues(alpha: 0.3),
             ),
           ),
           child: Row(

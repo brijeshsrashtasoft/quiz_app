@@ -222,7 +222,7 @@ class _NavigationItemState extends State<_NavigationItem>
                 ),
                 decoration: BoxDecoration(
                   color: widget.isActive
-                      ? AppColors.vibrantPurple.withOpacity(0.1)
+                      ? AppColors.vibrantPurple.withValues(alpha: 0.1)
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(
                     AppDimensions.buttonRadius,
@@ -500,7 +500,7 @@ class AppNavigationDrawer extends ConsumerWidget {
               accountEmail: Text(
                 user.email,
                 style: AppTextStyles.bodyText.copyWith(
-                  color: AppColors.pureWhite.withOpacity(0.8),
+                  color: AppColors.pureWhite.withValues(alpha: 0.8),
                 ),
               ),
               currentAccountPicture: CircleAvatar(
@@ -691,7 +691,7 @@ class _DrawerItem extends StatelessWidget {
         ),
       ),
       selected: isActive,
-      selectedTileColor: AppColors.vibrantPurple.withOpacity(0.1),
+      selectedTileColor: AppColors.vibrantPurple.withValues(alpha: 0.1),
       onTap: onTap,
     );
   }

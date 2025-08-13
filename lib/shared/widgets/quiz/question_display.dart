@@ -137,7 +137,7 @@ class _QuestionDisplayState extends State<QuestionDisplay>
                   color: AppColors.pureWhite,
                   borderRadius: BorderRadius.circular(AppDimensions.cardRadius),
                   border: Border.all(
-                    color: AppColors.vibrantPurple.withOpacity(0.2),
+                    color: AppColors.vibrantPurple.withValues(alpha: 0.2),
                     width: 2,
                   ),
                   boxShadow: [
@@ -175,7 +175,7 @@ class _QuestionDisplayState extends State<QuestionDisplay>
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.spacingM),
       decoration: BoxDecoration(
-        color: AppColors.vibrantPurple.withOpacity(0.1),
+        color: AppColors.vibrantPurple.withValues(alpha: 0.1),
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(AppDimensions.cardRadius),
           topRight: Radius.circular(AppDimensions.cardRadius),
@@ -321,7 +321,7 @@ class CompactQuestionDisplay extends StatelessWidget {
         color: AppColors.pureWhite,
         borderRadius: BorderRadius.circular(AppDimensions.borderRadiusM),
         border: Border.all(
-          color: AppColors.vibrantPurple.withOpacity(0.3),
+          color: AppColors.vibrantPurple.withValues(alpha: 0.3),
           width: 1,
         ),
       ),

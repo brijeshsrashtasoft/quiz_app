@@ -70,7 +70,9 @@ class _QuizSelectionScreenState extends ConsumerState<QuizSelectionScreen>
   void _hostGame() {
     if (_selectedQuiz != null) {
       // Navigate to game setup screen with the selected quiz ID as query parameter
-      context.push('${RouteConstants.gameHostSetup}?quizId=${_selectedQuiz!.id}');
+      context.push(
+        '${RouteConstants.gameHostSetup}?quizId=${_selectedQuiz!.id}',
+      );
     }
   }
 

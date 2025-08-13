@@ -1,7 +1,6 @@
 import '../../../../core/utils/result.dart';
 import '../../../../core/errors/failures.dart';
 import '../entities/game_session_entity.dart';
-import '../entities/game_state.dart';
 import '../repositories/game_session_repository.dart';
 import '../../../quiz_creation/domain/repositories/quiz_repository.dart';
 import '../../../quiz_creation/domain/entities/quiz.dart';

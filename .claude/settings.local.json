@@ -108,7 +108,13 @@
       "Bash(./check_integration_tests.sh:*)",
       "Bash(/dev/null)",
       "Bash(adb logcat:*)",
-      "Bash(r)"
+      "Bash(r)",
+      "Bash(for:*)",
+      "Bash(do echo \"Processing $file\")",
+      "Bash(done)",
+      "Bash(flutter:*)",
+      "Replace",
+      "Edit"
     ],
     "deny": [
       "Bash(sudo:*)",

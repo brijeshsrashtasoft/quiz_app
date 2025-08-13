@@ -1,6 +1,5 @@
 /// Base widget utilities and abstractions for the application
 /// This barrel file exports all base widget functionality
-library base_widgets;
 
 // Base widget abstractions
 export 'base_widget.dart';

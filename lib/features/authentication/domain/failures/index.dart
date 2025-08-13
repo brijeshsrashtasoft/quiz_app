@@ -1,5 +1,3 @@
-library auth_failures;
-
 /// Authentication failures exports
 /// Following CLAUDE.md Clean Architecture patterns
 ///

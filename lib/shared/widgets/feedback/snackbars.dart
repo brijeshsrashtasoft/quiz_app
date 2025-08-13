@@ -169,7 +169,7 @@ class _SnackBarContent extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppDimensions.cardRadius),
         boxShadow: [
           BoxShadow(
-            color: backgroundColor.withOpacity(0.3),
+            color: backgroundColor.withValues(alpha: 0.3),
             offset: const Offset(0, 4),
             blurRadius: 12,
             spreadRadius: 0,

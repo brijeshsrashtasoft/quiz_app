@@ -114,7 +114,7 @@ class _CountdownTimerState extends State<CountdownTimer>
   }
 
   Color get _backgroundColor {
-    return _primaryColor.withOpacity(0.1);
+    return _primaryColor.withValues(alpha: 0.1);
   }
 
   double get _progress {
@@ -149,7 +149,7 @@ class _CountdownTimerState extends State<CountdownTimer>
                 color: _backgroundColor,
                 boxShadow: [
                   BoxShadow(
-                    color: _primaryColor.withOpacity(0.2),
+                    color: _primaryColor.withValues(alpha: 0.2),
                     blurRadius: 8,
                     spreadRadius: 2,
                   ),
@@ -166,7 +166,7 @@ class _CountdownTimerState extends State<CountdownTimer>
                       value: 1.0,
                       strokeWidth: AppDimensions.timerStrokeWidth,
                       valueColor: AlwaysStoppedAnimation<Color>(
-                        _primaryColor.withOpacity(0.2),
+                        _primaryColor.withValues(alpha: 0.2),
                       ),
                       backgroundColor: Colors.transparent,
                     ),
@@ -207,7 +207,7 @@ class _CountdownTimerState extends State<CountdownTimer>
                     Container(
                       padding: const EdgeInsets.all(4),
                       decoration: BoxDecoration(
-                        color: AppColors.charcoal.withOpacity(0.8),
+                        color: AppColors.charcoal.withValues(alpha: 0.8),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(

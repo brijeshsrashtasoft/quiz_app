@@ -1,6 +1,4 @@
-import '../../../../core/base/base_usecase.dart';
 import '../../../../core/utils/result.dart';
-import '../../../../core/errors/failures.dart';
 
 /// Secure storage use case for handling sensitive data storage
 /// Following CLAUDE.md Clean Architecture patterns

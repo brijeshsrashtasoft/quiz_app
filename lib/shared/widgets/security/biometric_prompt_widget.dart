@@ -203,8 +203,8 @@ class _BiometricPromptWidgetState extends State<BiometricPromptWidget>
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: _errorMessage != null
-                              ? AppColors.error.withOpacity(0.1)
-                              : AppColors.vibrantPurple.withOpacity(0.1),
+                              ? AppColors.error.withValues(alpha: 0.1)
+                              : AppColors.vibrantPurple.withValues(alpha: 0.1),
                           border: Border.all(
                             color: _errorMessage != null
                                 ? AppColors.error
@@ -451,7 +451,7 @@ class _BiometricSetupWizardState extends State<BiometricSetupWizard> {
             ),
             borderRadius: BorderRadius.circular(AppDimensions.buttonRadius),
             color: isSelected
-                ? AppColors.vibrantPurple.withOpacity(0.05)
+                ? AppColors.vibrantPurple.withValues(alpha: 0.05)
                 : Colors.transparent,
           ),
           child: Row(
@@ -462,8 +462,8 @@ class _BiometricSetupWizardState extends State<BiometricSetupWizard> {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: isSelected
-                      ? AppColors.vibrantPurple.withOpacity(0.1)
-                      : AppColors.lightGray.withOpacity(0.3),
+                      ? AppColors.vibrantPurple.withValues(alpha: 0.1)
+                      : AppColors.lightGray.withValues(alpha: 0.3),
                 ),
                 child: Icon(
                   _getBiometricIcon(biometric),

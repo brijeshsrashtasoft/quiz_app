@@ -1,5 +1,3 @@
-library navigation;
-
 /// Navigation system exports
 ///
 /// This file provides a single import point for all navigation-related functionality.

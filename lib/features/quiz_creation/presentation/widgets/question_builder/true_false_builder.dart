@@ -92,8 +92,8 @@ class _TrueFalseBuilderState extends State<TrueFalseBuilder>
             ),
             decoration: BoxDecoration(
               color: widget.correctAnswer == 0
-                  ? AppColors.turquoise.withOpacity(0.1)
-                  : AppColors.coralRed.withOpacity(0.1),
+                  ? AppColors.turquoise.withValues(alpha: 0.1)
+                  : AppColors.coralRed.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: widget.correctAnswer == 0
@@ -164,7 +164,7 @@ class _TrueFalseBuilderState extends State<TrueFalseBuilder>
           isSmallScreen ? AppSpacing.spacingM : AppSpacing.spacingL,
         ),
         decoration: BoxDecoration(
-          color: isSelected ? color.withOpacity(0.1) : AppColors.pureWhite,
+          color: isSelected ? color.withValues(alpha: 0.1) : AppColors.pureWhite,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected ? color : AppColors.lightGray,
@@ -173,7 +173,7 @@ class _TrueFalseBuilderState extends State<TrueFalseBuilder>
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: color.withOpacity(0.2),
+                    color: color.withValues(alpha: 0.2),
                     blurRadius: isSmallScreen ? 8 : 12,
                     offset: const Offset(0, 4),
                   ),

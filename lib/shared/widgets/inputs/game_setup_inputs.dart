@@ -74,10 +74,7 @@ class _LabeledSliderState extends State<LabeledSlider>
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              widget.label,
-              style: AppTextStyles.inputLabel,
-            ),
+            Text(widget.label, style: AppTextStyles.inputLabel),
             AnimatedBuilder(
               animation: _colorAnimation,
               builder: (context, child) {
@@ -87,7 +84,8 @@ class _LabeledSliderState extends State<LabeledSlider>
                     vertical: AppSpacing.spacingXS,
                   ),
                   decoration: BoxDecoration(
-                    color: _colorAnimation.value?.withValues(alpha: 0.1) ??
+                    color:
+                        _colorAnimation.value?.withValues(alpha: 0.1) ??
                         AppColors.vibrantPurple.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
@@ -109,7 +107,7 @@ class _LabeledSliderState extends State<LabeledSlider>
           ],
         ),
         const SizedBox(height: AppSpacing.spacingS),
-        
+
         SliderTheme(
           data: SliderTheme.of(context).copyWith(
             activeTrackColor: AppColors.vibrantPurple,
@@ -256,12 +254,9 @@ class _NumberInputState extends State<NumberInput>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          widget.label,
-          style: AppTextStyles.inputLabel,
-        ),
+        Text(widget.label, style: AppTextStyles.inputLabel),
         const SizedBox(height: AppSpacing.spacingS),
-        
+
         Container(
           decoration: BoxDecoration(
             color: AppColors.pureWhite,
@@ -283,7 +278,7 @@ class _NumberInputState extends State<NumberInput>
                 onPressed: widget.value > widget.min ? _decrement : null,
                 isEnabled: widget.value > widget.min,
               ),
-              
+
               // Number display/input
               Expanded(
                 child: AnimatedBuilder(
@@ -321,7 +316,7 @@ class _NumberInputState extends State<NumberInput>
                   },
                 ),
               ),
-              
+
               // Increment button
               _buildControlButton(
                 icon: Icons.add,
@@ -354,7 +349,7 @@ class _NumberInputState extends State<NumberInput>
       width: 48,
       height: 48,
       decoration: BoxDecoration(
-        color: isEnabled 
+        color: isEnabled
             ? AppColors.vibrantPurple.withValues(alpha: 0.1)
             : AppColors.lightGray.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(AppDimensions.inputRadius),
@@ -444,8 +439,9 @@ class _SettingToggleState extends State<SettingToggle>
               color: AppColors.pureWhite,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: widget.value 
-                    ? (widget.activeColor ?? AppColors.vibrantPurple).withValues(alpha: 0.3)
+                color: widget.value
+                    ? (widget.activeColor ?? AppColors.vibrantPurple)
+                          .withValues(alpha: 0.3)
                     : AppColors.borderLight,
                 width: widget.value ? 2 : 1,
               ),
@@ -467,7 +463,8 @@ class _SettingToggleState extends State<SettingToggle>
                       padding: EdgeInsets.all(AppSpacing.spacingS),
                       decoration: BoxDecoration(
                         color: widget.value
-                            ? (widget.activeColor ?? AppColors.vibrantPurple).withValues(alpha: 0.1)
+                            ? (widget.activeColor ?? AppColors.vibrantPurple)
+                                  .withValues(alpha: 0.1)
                             : AppColors.lightGray.withValues(alpha: 0.5),
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -481,7 +478,7 @@ class _SettingToggleState extends State<SettingToggle>
                     ),
                     const SizedBox(width: AppSpacing.spacingM),
                   ],
-                  
+
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -490,8 +487,8 @@ class _SettingToggleState extends State<SettingToggle>
                           widget.title,
                           style: AppTextStyles.bodyText.copyWith(
                             fontWeight: FontWeight.w600,
-                            color: widget.value 
-                                ? AppColors.textPrimary 
+                            color: widget.value
+                                ? AppColors.textPrimary
                                 : AppColors.textSecondary,
                           ),
                         ),
@@ -507,9 +504,9 @@ class _SettingToggleState extends State<SettingToggle>
                       ],
                     ),
                   ),
-                  
+
                   const SizedBox(width: AppSpacing.spacingM),
-                  
+
                   // Custom toggle switch
                   GestureDetector(
                     onTap: () => _onToggle(!widget.value),
@@ -623,18 +620,17 @@ class _GameSettingDropdownState extends State<GameSettingDropdown>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          widget.label,
-          style: AppTextStyles.inputLabel,
-        ),
+        Text(widget.label, style: AppTextStyles.inputLabel),
         const SizedBox(height: AppSpacing.spacingS),
-        
+
         Container(
           decoration: BoxDecoration(
             color: AppColors.pureWhite,
             borderRadius: BorderRadius.circular(AppDimensions.inputRadius),
             border: Border.all(
-              color: _isExpanded ? AppColors.vibrantPurple : AppColors.borderLight,
+              color: _isExpanded
+                  ? AppColors.vibrantPurple
+                  : AppColors.borderLight,
               width: _isExpanded ? 2 : 1,
             ),
             boxShadow: [
@@ -659,10 +655,7 @@ class _GameSettingDropdownState extends State<GameSettingDropdown>
               ),
               border: InputBorder.none,
               prefixIcon: widget.prefixIcon != null
-                  ? Icon(
-                      widget.prefixIcon,
-                      color: AppColors.vibrantPurple,
-                    )
+                  ? Icon(widget.prefixIcon, color: AppColors.vibrantPurple)
                   : null,
             ),
             icon: AnimatedBuilder(

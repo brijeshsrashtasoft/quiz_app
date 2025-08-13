@@ -141,7 +141,7 @@ class _LoadingAnimationsState extends State<LoadingAnimations>
             height: widget.size,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: _color.withOpacity(0.2), width: 3),
+              border: Border.all(color: _color.withValues(alpha: 0.2), width: 3),
             ),
             child: Stack(
               children: [
@@ -174,7 +174,7 @@ class _LoadingAnimationsState extends State<LoadingAnimations>
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: _color.withOpacity(0.4),
+                  color: _color.withValues(alpha: 0.4),
                   blurRadius: 8 * _animation.value,
                   spreadRadius: 2 * _animation.value,
                 ),
@@ -259,7 +259,7 @@ class QuizLoadingOverlay extends StatelessWidget {
     if (!isVisible) return const SizedBox.shrink();
 
     return Container(
-      color: AppColors.charcoal.withOpacity(0.8),
+      color: AppColors.charcoal.withValues(alpha: 0.8),
       child: Center(
         child: Container(
           padding: const EdgeInsets.all(AppSpacing.spacingXL),

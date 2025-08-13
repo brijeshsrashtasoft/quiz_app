@@ -1,4 +1,3 @@
-import '../../../../core/base/base_usecase.dart';
 import '../../../../core/utils/result.dart';
 import '../entities/session_entity.dart';
 import '../repositories/session_repository.dart';

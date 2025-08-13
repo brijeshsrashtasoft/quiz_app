@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:go_router/go_router.dart';
 import '../../../../core/navigation/route_constants.dart';
 import '../../../../core/navigation/app_router.dart';
 import '../../../../core/utils/logger.dart';

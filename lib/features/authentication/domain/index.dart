@@ -1,5 +1,3 @@
-library auth_domain;
-
 /// Authentication domain layer exports
 /// Following CLAUDE.md Clean Architecture patterns
 ///

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../constants/app_spacing.dart';
-import '../../constants/app_dimensions.dart';
 
 /// Responsive layout component that adapts to different screen sizes
 /// Reference: docs/ui_guideline.md - Responsive Design

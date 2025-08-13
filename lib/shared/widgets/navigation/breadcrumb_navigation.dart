@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import '../../constants/app_colors.dart';
 import '../../constants/app_text_styles.dart';
 import '../../constants/app_spacing.dart';
-import '../../constants/app_dimensions.dart';
 import '../../../core/navigation/route_constants.dart';
 
 /// Breadcrumb navigation for complex navigation hierarchies

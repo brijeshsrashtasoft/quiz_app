@@ -55,7 +55,7 @@ class AppImage extends StatelessWidget {
           Container(
             width: width,
             height: height,
-            color: AppColors.coolGray.withOpacity(0.3),
+            color: AppColors.coolGray.withValues(alpha: 0.3),
             child: const Icon(Icons.image_not_supported),
           );
     }

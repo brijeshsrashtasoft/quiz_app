@@ -265,11 +265,11 @@ class _AnswerSubmissionPanelState extends ConsumerState<AnswerSubmissionPanel> {
     if (widget.showCorrectAnswer) {
       if (isCorrect) return AppColors.correctAnswer;
       if (isWrong) return AppColors.incorrectAnswer;
-      if (widget.isSubmitted) return defaultColor.withOpacity(0.3);
+      if (widget.isSubmitted) return defaultColor.withValues(alpha: 0.3);
     }
 
     if (_selectedIndex == index) {
-      return defaultColor.withOpacity(0.8);
+      return defaultColor.withValues(alpha: 0.8);
     }
 
     return defaultColor;
@@ -308,7 +308,7 @@ class AnswerFeedbackOverlay extends StatelessWidget {
                           (isCorrect
                                   ? AppColors.correctAnswer
                                   : AppColors.incorrectAnswer)
-                              .withOpacity(0.3),
+                              .withValues(alpha: 0.3),
                       blurRadius: 20,
                       spreadRadius: 5,
                     ),

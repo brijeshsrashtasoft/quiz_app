@@ -84,15 +84,15 @@ class _QuestionCardWidgetState extends State<QuestionCardWidget>
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: _isHovered
-                  ? _getQuestionTypeColor().withOpacity(0.3)
+                  ? _getQuestionTypeColor().withValues(alpha: 0.3)
                   : AppColors.lightGray,
               width: _isHovered ? 2 : 1,
             ),
             boxShadow: [
               BoxShadow(
                 color: _isHovered
-                    ? _getQuestionTypeColor().withOpacity(0.1)
-                    : AppColors.shadowLight.withOpacity(0.05),
+                    ? _getQuestionTypeColor().withValues(alpha: 0.1)
+                    : AppColors.shadowLight.withValues(alpha: 0.05),
                 blurRadius: _isHovered ? 12 : 8,
                 offset: const Offset(0, 4),
               ),
@@ -128,7 +128,7 @@ class _QuestionCardWidgetState extends State<QuestionCardWidget>
                         width: isSmallScreen ? 32 : 40,
                         height: isSmallScreen ? 32 : 40,
                         decoration: BoxDecoration(
-                          color: _getQuestionTypeColor().withOpacity(0.1),
+                          color: _getQuestionTypeColor().withValues(alpha: 0.1),
                           shape: BoxShape.circle,
                         ),
                         child: Center(
@@ -290,7 +290,7 @@ class _QuestionCardWidgetState extends State<QuestionCardWidget>
         vertical: AppSpacing.spacingXS,
       ),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(

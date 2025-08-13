@@ -66,7 +66,7 @@ class GameHostSetupConfiguration {
   /// Get configuration summary for display
   String get summaryText {
     if (selectedQuiz == null) return 'No quiz selected';
-    
+
     return '${selectedQuiz!.title} • $maxPlayers players • ${questionTimeLimit}s per question';
   }
 
@@ -86,7 +86,9 @@ class GameHostSetupConfiguration {
 /// Game host setup state notifier
 class GameHostSetupNotifier extends StateNotifier<GameHostSetupConfiguration> {
   GameHostSetupNotifier() : super(const GameHostSetupConfiguration()) {
-    AppLogger.info('GameHostSetupNotifier initialized with default configuration');
+    AppLogger.info(
+      'GameHostSetupNotifier initialized with default configuration',
+    );
   }
 
   /// Update selected quiz
@@ -98,10 +100,12 @@ class GameHostSetupNotifier extends StateNotifier<GameHostSetupConfiguration> {
   /// Update maximum players
   void updateMaxPlayers(int maxPlayers) {
     if (maxPlayers < 2 || maxPlayers > 100) {
-      AppLogger.warning('Invalid max players value: $maxPlayers. Must be between 2-100');
+      AppLogger.warning(
+        'Invalid max players value: $maxPlayers. Must be between 2-100',
+      );
       return;
     }
-    
+
     AppLogger.info('Updating max players: $maxPlayers');
     state = state.copyWith(maxPlayers: maxPlayers);
   }
@@ -109,10 +113,12 @@ class GameHostSetupNotifier extends StateNotifier<GameHostSetupConfiguration> {
   /// Update question time limit
   void updateQuestionTimeLimit(int timeLimit) {
     if (timeLimit < 5 || timeLimit > 60) {
-      AppLogger.warning('Invalid time limit value: $timeLimit. Must be between 5-60 seconds');
+      AppLogger.warning(
+        'Invalid time limit value: $timeLimit. Must be between 5-60 seconds',
+      );
       return;
     }
-    
+
     AppLogger.info('Updating question time limit: $timeLimit');
     state = state.copyWith(questionTimeLimit: timeLimit);
   }
@@ -150,14 +156,16 @@ class GameHostSetupNotifier extends StateNotifier<GameHostSetupConfiguration> {
   /// Load configuration from quiz ID
   void loadConfigurationFromQuiz(Quiz quiz) {
     AppLogger.info('Loading configuration from quiz: ${quiz.title}');
-    
+
     // Calculate optimal question time limit based on quiz complexity
     int optimalTimeLimit = 20; // default
     if (quiz.questions.isNotEmpty) {
-      final avgQuestionLength = quiz.questions
-          .map((q) => q.questionText.length)
-          .reduce((a, b) => a + b) / quiz.questions.length;
-      
+      final avgQuestionLength =
+          quiz.questions
+              .map((q) => q.questionText.length)
+              .reduce((a, b) => a + b) /
+          quiz.questions.length;
+
       if (avgQuestionLength > 100) {
         optimalTimeLimit = 30; // Longer questions need more time
       } else if (avgQuestionLength < 50) {
@@ -168,9 +176,10 @@ class GameHostSetupNotifier extends StateNotifier<GameHostSetupConfiguration> {
     // Calculate optimal max players based on quiz difficulty
     int optimalMaxPlayers = 50; // default
     if (quiz.questions.isNotEmpty) {
-      final hasComplexQuestions = quiz.questions
-          .any((q) => q.options.length > 4 || q.questionText.length > 150);
-      
+      final hasComplexQuestions = quiz.questions.any(
+        (q) => q.options.length > 4 || q.questionText.length > 150,
+      );
+
       if (hasComplexQuestions) {
         optimalMaxPlayers = 30; // Fewer players for complex quizzes
       }
@@ -194,7 +203,7 @@ class GameHostSetupNotifier extends StateNotifier<GameHostSetupConfiguration> {
     bool? isPublicRoom,
   }) {
     AppLogger.info('Applying bulk configuration updates');
-    
+
     state = state.copyWith(
       selectedQuiz: selectedQuiz,
       maxPlayers: maxPlayers,
@@ -208,9 +217,10 @@ class GameHostSetupNotifier extends StateNotifier<GameHostSetupConfiguration> {
 }
 
 /// Provider for game host setup configuration
-final gameHostSetupProvider = StateNotifierProvider<GameHostSetupNotifier, GameHostSetupConfiguration>(
-  (ref) => GameHostSetupNotifier(),
-);
+final gameHostSetupProvider =
+    StateNotifierProvider<GameHostSetupNotifier, GameHostSetupConfiguration>(
+      (ref) => GameHostSetupNotifier(),
+    );
 
 /// Provider for checking if current configuration is valid
 final isHostSetupValidProvider = Provider<bool>((ref) {
@@ -227,20 +237,22 @@ final hostSetupSummaryProvider = Provider<String>((ref) {
 /// Provider for getting optimal player count based on selected quiz
 final optimalPlayerCountProvider = Provider<int>((ref) {
   final configuration = ref.watch(gameHostSetupProvider);
-  
+
   if (configuration.selectedQuiz == null) {
     return 50; // Default
   }
 
   final quiz = configuration.selectedQuiz!;
-  
+
   // Calculate optimal based on quiz characteristics
   if (quiz.questions.isEmpty) return 50;
-  
-  final avgQuestionComplexity = quiz.questions
-      .map((q) => q.options.length + (q.questionText.length / 50).round())
-      .reduce((a, b) => a + b) / quiz.questions.length;
-  
+
+  final avgQuestionComplexity =
+      quiz.questions
+          .map((q) => q.options.length + (q.questionText.length / 50).round())
+          .reduce((a, b) => a + b) /
+      quiz.questions.length;
+
   if (avgQuestionComplexity > 8) {
     return 20; // Complex quizzes work better with fewer players
   } else if (avgQuestionComplexity > 6) {
@@ -253,19 +265,19 @@ final optimalPlayerCountProvider = Provider<int>((ref) {
 /// Provider for getting optimal time limit based on selected quiz
 final optimalTimeLimitProvider = Provider<int>((ref) {
   final configuration = ref.watch(gameHostSetupProvider);
-  
+
   if (configuration.selectedQuiz == null) {
     return 20; // Default
   }
 
   final quiz = configuration.selectedQuiz!;
-  
+
   if (quiz.questions.isEmpty) return 20;
-  
-  final avgQuestionLength = quiz.questions
-      .map((q) => q.questionText.length)
-      .reduce((a, b) => a + b) / quiz.questions.length;
-  
+
+  final avgQuestionLength =
+      quiz.questions.map((q) => q.questionText.length).reduce((a, b) => a + b) /
+      quiz.questions.length;
+
   if (avgQuestionLength > 150) {
     return 35; // Long questions need more time
   } else if (avgQuestionLength > 100) {

@@ -157,7 +157,7 @@ class _SessionListTileState extends State<SessionListTile>
                               height: 48,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: AppColors.vibrantPurple.withOpacity(0.1),
+                                color: AppColors.vibrantPurple.withValues(alpha: 0.1),
                               ),
                               child: Icon(
                                 _getDeviceIcon(widget.sessionInfo.deviceType),
@@ -262,7 +262,7 @@ class _SessionListTileState extends State<SessionListTile>
                               decoration: BoxDecoration(
                                 color: _getStatusColor(
                                   widget.sessionInfo.status,
-                                ).withOpacity(0.1),
+                                ).withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
                                   color: _getStatusColor(
@@ -561,7 +561,7 @@ class _SessionTimeoutPickerState extends State<SessionTimeoutPicker> {
             ),
             borderRadius: BorderRadius.circular(AppDimensions.buttonRadius),
             color: isSelected
-                ? AppColors.vibrantPurple.withOpacity(0.05)
+                ? AppColors.vibrantPurple.withValues(alpha: 0.05)
                 : Colors.transparent,
           ),
           child: Row(

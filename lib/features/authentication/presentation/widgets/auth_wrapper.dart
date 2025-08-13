@@ -10,7 +10,6 @@ import '../../../../shared/widgets/layout/page_layout.dart';
 import '../../../../core/navigation/route_constants.dart';
 import '../../domain/entities/auth_state.dart';
 import '../providers/auth_providers.dart';
-import '../pages/login_page.dart';
 
 /// Authentication wrapper widget that handles app-level authentication state
 /// Routes users to appropriate screens based on authentication status

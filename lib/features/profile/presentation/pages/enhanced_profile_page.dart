@@ -6,7 +6,6 @@ import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/constants/app_text_styles.dart';
 import '../../../../shared/constants/app_spacing.dart';
 import '../../../../shared/constants/app_animations.dart';
-import '../../../../shared/widgets/buttons/primary_button.dart';
 import '../../../../core/navigation/route_constants.dart';
 import '../widgets/avatar_upload_widget.dart';
 import '../widgets/statistics_card_widget.dart';

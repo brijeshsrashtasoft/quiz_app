@@ -78,7 +78,7 @@ class _TestQuizCreationScreenState extends State<TestQuizCreationScreen> {
                   ElevatedButton(
                     onPressed: _currentStep < 2
                         ? () => setState(() => _currentStep++)
-                        : () => print('Save & Preview'),
+                        : () => debugPrint('Save & Preview'),
                     child: Text(_currentStep < 2 ? 'Next' : 'Save & Preview'),
                   ),
                 ],
@@ -175,7 +175,7 @@ class _TestQuizCreationScreenState extends State<TestQuizCreationScreen> {
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             ElevatedButton.icon(
-              onPressed: () => print('Add Question'),
+              onPressed: () => debugPrint('Add Question'),
               icon: const Icon(Icons.add),
               label: const Text('Add Question'),
             ),

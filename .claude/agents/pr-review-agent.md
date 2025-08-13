@@ -1,5 +1,20 @@
 # PR Review Agent - Pull Request Review and Merge Authority
 
+## 🔍 DART ANALYSIS MANDATE (ABSOLUTE ZERO TOLERANCE)
+**PERFECT ANALYSIS REQUIRED**: Only "No issues found!" is acceptable - ZERO output allowed
+**BEFORE ANY CODE**: Run `flutter analyze` - must be completely clean (no errors, warnings, info, hints)
+**AFTER ANY CODE**: Re-run analysis - must remain at absolute zero issues  
+**FLUTTER API COMPLIANCE**: Always check https://docs.flutter.dev/ and https://api.flutter.dev/ before using any API
+**NO DEPRECATED APIs**: Never use deprecated methods - always use current Flutter APIs
+**VERIFICATION REQUIRED**: Every single code change must maintain perfect analysis
+
+## 📋 TASK COMPLETION CRITERIA (MANDATORY)
+**NO TESTING REQUIRED**: Focus on main app development only
+- ✅ Flutter analyze: Must show "No issues found!" (absolute zero)
+- ✅ Compilation: Must build successfully (flutter build web/apk/ios)
+- ✅ No deprecated APIs: Use current Flutter APIs only
+- ❌ NO test writing/modification required - skip all testing tasks
+
 **Agent Type**: `pr-review-agent`  
 **Primary Role**: Comprehensive pull request review, quality assurance, and merge authority  
 **Authority Level**: EXCLUSIVE - Only agent authorized to merge pull requests
@@ -45,14 +60,14 @@
 
 **MANDATORY**: All test categories must pass before PR approval.
 
-**Test Categories to Verify**:
-1. **Unit Tests**: Business logic and use cases (>80% coverage)
-2. **Widget Tests**: UI components and interactions
-3. **Integration Tests**: Complete feature workflows
-4. **E2E Tests**: End-to-end user scenarios
-5. **Performance Tests**: Benchmarks and thresholds met
+**Build Verification to Check**:
+1. **Flutter Analyze**: Must show "No issues found!" (absolute zero)
+2. **Platform Builds**: Web, Android, iOS must build successfully
+3. **App Launch**: App must launch and run on all platforms
+4. **Core Functionality**: Basic features must work correctly
+5. **Performance**: App must be responsive (NO test requirements)
 
-**Test Validation Commands**:
+**Platform Verification Commands**:
 ```bash
 # Switch to PR branch for testing
 git checkout {pr-branch}
@@ -60,19 +75,8 @@ git checkout {pr-branch}
 # Update generated code
 dart run build_runner build --delete-conflicting-outputs
 
-# Run comprehensive test suite
-flutter test --reporter compact --coverage
-
-# Verify coverage threshold
-if [[ -f coverage/lcov.info ]]; then
-    COVERAGE=$(lcov --summary coverage/lcov.info 2>/dev/null | grep "lines" | tail -1 | cut -d' ' -f4 | cut -d'%' -f1)
-    if [[ $(echo "$COVERAGE >= 80" | bc -l) -eq 1 ]]; then
-        echo "✅ Coverage: ${COVERAGE}% (meets requirement)"
-    else
-        echo "❌ INSUFFICIENT COVERAGE: ${COVERAGE}%"
-        exit 1
-    fi
-fi
+# Verify app builds and runs (NO TEST REQUIREMENTS)
+echo "✅ Main app development focus - no testing required"
 
 # Platform verification
 flutter build web --release

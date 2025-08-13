@@ -440,7 +440,7 @@ class _AnimatedFloatingButtonState extends State<AnimatedFloatingButton>
                             color:
                                 (widget.backgroundColor ??
                                         AppColors.vibrantPurple)
-                                    .withOpacity(0.3),
+                                    .withValues(alpha: 0.3),
                             blurRadius: 12,
                             spreadRadius: 4,
                           ),

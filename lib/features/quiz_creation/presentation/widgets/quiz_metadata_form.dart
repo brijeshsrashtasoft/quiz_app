@@ -198,8 +198,8 @@ class _QuizMetadataFormState extends ConsumerState<QuizMetadataForm> {
       ),
       decoration: BoxDecoration(
         color: isMetadataValid
-            ? AppColors.mintGreen.withOpacity(0.1)
-            : AppColors.coralRed.withOpacity(0.1),
+            ? AppColors.mintGreen.withValues(alpha: 0.1)
+            : AppColors.coralRed.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: isMetadataValid ? AppColors.mintGreen : AppColors.coralRed,
@@ -433,7 +433,7 @@ class _QuizMetadataFormState extends ConsumerState<QuizMetadataForm> {
                         vertical: AppSpacing.spacingXS,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.vibrantPurple.withOpacity(0.1),
+                        color: AppColors.vibrantPurple.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(

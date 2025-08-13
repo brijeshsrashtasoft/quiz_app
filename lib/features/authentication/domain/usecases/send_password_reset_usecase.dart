@@ -1,7 +1,6 @@
 import '../../../../core/base/base_usecase.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/utils/result.dart';
-import '../../../../core/utils/logger.dart';
 import '../repositories/auth_repository.dart';
 
 class SendPasswordResetUseCase

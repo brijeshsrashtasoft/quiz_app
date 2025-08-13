@@ -3,7 +3,6 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../../../core/utils/result.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/utils/logger.dart';
-import '../../domain/entities/user_entity.dart';
 import '../../domain/value_objects/email.dart';
 import '../../domain/value_objects/password.dart';
 import 'auth_providers.dart';

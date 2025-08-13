@@ -214,7 +214,7 @@ class _QuizCardState extends State<QuizCard>
                               child: Text(
                                 widget.description,
                                 style: AppTextStyles.cardDescription.copyWith(
-                                  color: textColor.withOpacity(0.8),
+                                  color: textColor.withValues(alpha: 0.8),
                                   fontSize: 12, // Smaller text
                                 ),
                                 maxLines: 2, // Reduced from 3
@@ -240,7 +240,7 @@ class _QuizCardState extends State<QuizCard>
                                         ),
                                         decoration: BoxDecoration(
                                           color: AppColors.warmYellow
-                                              .withOpacity(0.1),
+                                              .withValues(alpha: 0.1),
                                           borderRadius: BorderRadius.circular(
                                             8,
                                           ),
@@ -266,7 +266,7 @@ class _QuizCardState extends State<QuizCard>
                                         ),
                                         decoration: BoxDecoration(
                                           color: AppColors.mintGreen
-                                              .withOpacity(0.1),
+                                              .withValues(alpha: 0.1),
                                           borderRadius: BorderRadius.circular(
                                             8,
                                           ),
@@ -299,7 +299,7 @@ class _QuizCardState extends State<QuizCard>
                                           vertical: 2,
                                         ),
                                         decoration: BoxDecoration(
-                                          color: AppColors.coolGray.withOpacity(
+                                          color: AppColors.coolGray.withValues(alpha:
                                             0.1,
                                           ),
                                           borderRadius: BorderRadius.circular(
@@ -341,7 +341,7 @@ class _QuizCardState extends State<QuizCard>
                                     vertical: 2,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: AppColors.turquoise.withOpacity(0.1),
+                                    color: AppColors.turquoise.withValues(alpha: 0.1),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Row(
@@ -375,7 +375,7 @@ class _QuizCardState extends State<QuizCard>
                                       vertical: 2,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: _getDifficultyColor().withOpacity(
+                                      color: _getDifficultyColor().withValues(alpha:
                                         0.1,
                                       ),
                                       borderRadius: BorderRadius.circular(8),
@@ -406,7 +406,7 @@ class _QuizCardState extends State<QuizCard>
                                             padding: EdgeInsets.all(4),
                                             decoration: BoxDecoration(
                                               color: AppColors.vibrantPurple
-                                                  .withOpacity(0.1),
+                                                  .withValues(alpha: 0.1),
                                               borderRadius:
                                                   BorderRadius.circular(4),
                                             ),
@@ -428,7 +428,7 @@ class _QuizCardState extends State<QuizCard>
                                             padding: EdgeInsets.all(4),
                                             decoration: BoxDecoration(
                                               color: AppColors.mintGreen
-                                                  .withOpacity(0.1),
+                                                  .withValues(alpha: 0.1),
                                               borderRadius:
                                                   BorderRadius.circular(4),
                                             ),
@@ -449,7 +449,7 @@ class _QuizCardState extends State<QuizCard>
                                             padding: EdgeInsets.all(4),
                                             decoration: BoxDecoration(
                                               color: AppColors.coralRed
-                                                  .withOpacity(0.1),
+                                                  .withValues(alpha: 0.1),
                                               borderRadius:
                                                   BorderRadius.circular(4),
                                             ),

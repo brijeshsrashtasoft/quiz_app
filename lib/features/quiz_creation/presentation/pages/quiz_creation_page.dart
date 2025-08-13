@@ -347,7 +347,7 @@ class _QuizCreationPageState extends ConsumerState<QuizCreationPage> {
                         color: AppColors.pureWhite,
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.shadowLight.withOpacity(0.1),
+                            color: AppColors.shadowLight.withValues(alpha: 0.1),
                             blurRadius: 8,
                             offset: const Offset(0, -2),
                           ),

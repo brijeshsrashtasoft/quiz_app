@@ -10,14 +10,12 @@ import '../../../../shared/constants/app_animations.dart';
 import '../../../../shared/widgets/layout/page_layout.dart';
 import '../../../../shared/widgets/buttons/primary_button.dart';
 import '../../../../shared/widgets/buttons/secondary_button.dart';
-import '../../../../shared/widgets/feedback/loading_indicators.dart';
 import '../../../../shared/widgets/cards/quiz_card.dart';
 import '../../../../core/navigation/route_constants.dart';
 import '../../../quiz_creation/presentation/providers/quiz_providers.dart';
 import '../../../quiz_creation/domain/entities/quiz.dart';
 import '../../../authentication/presentation/providers/auth_providers.dart';
 import '../../domain/entities/game_session_entity.dart';
-import '../providers/session_providers.dart';
 import '../providers/game_host_setup_providers.dart';
 
 /// Game Host Setup Page - Intermediate configuration page between quiz selection and hosting
@@ -80,10 +78,12 @@ class _GameHostSetupPageState extends ConsumerState<GameHostSetupPage>
           (q) => q.id == widget.selectedQuizId,
           orElse: () => throw Exception('Quiz not found'),
         );
-        
+
         if (mounted) {
           // Update the configuration provider with the selected quiz
-          ref.read(gameHostSetupProvider.notifier).loadConfigurationFromQuiz(quiz);
+          ref
+              .read(gameHostSetupProvider.notifier)
+              .loadConfigurationFromQuiz(quiz);
         }
       } catch (e) {
         if (mounted) {
@@ -91,7 +91,9 @@ class _GameHostSetupPageState extends ConsumerState<GameHostSetupPage>
             SnackBar(
               content: Text(
                 'Failed to load quiz: ${e.toString()}',
-                style: AppTextStyles.bodyText.copyWith(color: AppColors.pureWhite),
+                style: AppTextStyles.bodyText.copyWith(
+                  color: AppColors.pureWhite,
+                ),
               ),
               backgroundColor: AppColors.error,
             ),
@@ -126,12 +128,14 @@ class _GameHostSetupPageState extends ConsumerState<GameHostSetupPage>
   }
 
   void _updateQuestionTimeLimit(double value) {
-    ref.read(gameHostSetupProvider.notifier).updateQuestionTimeLimit(value.round());
+    ref
+        .read(gameHostSetupProvider.notifier)
+        .updateQuestionTimeLimit(value.round());
   }
 
   Future<void> _startGameSession() async {
     final configuration = ref.read(gameHostSetupProvider);
-    
+
     if (configuration.selectedQuiz == null) return;
 
     try {
@@ -142,10 +146,7 @@ class _GameHostSetupPageState extends ConsumerState<GameHostSetupPage>
       // The host game screen will create the session with these settings
       context.push(
         '${RouteConstants.gameHost}?quizId=${configuration.selectedQuiz!.id}',
-        extra: {
-          'settings': settings,
-          'isPublic': configuration.isPublicRoom,
-        },
+        extra: {'settings': settings, 'isPublic': configuration.isPublicRoom},
       );
     } catch (e) {
       // Show error message
@@ -154,7 +155,9 @@ class _GameHostSetupPageState extends ConsumerState<GameHostSetupPage>
           SnackBar(
             content: Text(
               'Failed to start game session: ${e.toString()}',
-              style: AppTextStyles.bodyText.copyWith(color: AppColors.pureWhite),
+              style: AppTextStyles.bodyText.copyWith(
+                color: AppColors.pureWhite,
+              ),
             ),
             backgroundColor: AppColors.error,
             behavior: SnackBarBehavior.floating,
@@ -324,14 +327,12 @@ class _GameHostSetupPageState extends ConsumerState<GameHostSetupPage>
               const SizedBox(width: AppSpacing.spacingS),
               Text(
                 'Selected Quiz',
-                style: AppTextStyles.sectionHeader.copyWith(
-                  fontSize: 18,
-                ),
+                style: AppTextStyles.sectionHeader.copyWith(fontSize: 18),
               ),
             ],
           ),
           const SizedBox(height: AppSpacing.spacingM),
-          
+
           if (configuration.selectedQuiz != null) ...[
             QuizCard(
               title: configuration.selectedQuiz!.title,
@@ -352,7 +353,9 @@ class _GameHostSetupPageState extends ConsumerState<GameHostSetupPage>
                   width: 2,
                   style: BorderStyle.solid,
                 ),
-                borderRadius: BorderRadius.circular(AppDimensions.borderRadiusM),
+                borderRadius: BorderRadius.circular(
+                  AppDimensions.borderRadiusM,
+                ),
               ),
               child: Column(
                 children: [
@@ -391,7 +394,9 @@ class _GameHostSetupPageState extends ConsumerState<GameHostSetupPage>
     );
   }
 
-  Widget _buildGameConfigurationSection(GameHostSetupConfiguration configuration) {
+  Widget _buildGameConfigurationSection(
+    GameHostSetupConfiguration configuration,
+  ) {
     return Container(
       width: double.infinity,
       padding: AppSpacing.allM,
@@ -419,9 +424,7 @@ class _GameHostSetupPageState extends ConsumerState<GameHostSetupPage>
               const SizedBox(width: AppSpacing.spacingS),
               Text(
                 'Game Configuration',
-                style: AppTextStyles.sectionHeader.copyWith(
-                  fontSize: 18,
-                ),
+                style: AppTextStyles.sectionHeader.copyWith(fontSize: 18),
               ),
             ],
           ),
@@ -442,7 +445,7 @@ class _GameHostSetupPageState extends ConsumerState<GameHostSetupPage>
 
           const SizedBox(height: AppSpacing.spacingL),
 
-          // Question Time Limit Slider  
+          // Question Time Limit Slider
           _buildSliderSetting(
             title: 'Question Time Limit',
             value: configuration.questionTimeLimit.toDouble(),
@@ -487,9 +490,7 @@ class _GameHostSetupPageState extends ConsumerState<GameHostSetupPage>
               const SizedBox(width: AppSpacing.spacingS),
               Text(
                 'Room Settings',
-                style: AppTextStyles.sectionHeader.copyWith(
-                  fontSize: 18,
-                ),
+                style: AppTextStyles.sectionHeader.copyWith(fontSize: 18),
               ),
             ],
           ),
@@ -498,22 +499,28 @@ class _GameHostSetupPageState extends ConsumerState<GameHostSetupPage>
           // Room Type Toggle
           _buildToggleSetting(
             title: 'Room Type',
-            subtitle: configuration.isPublicRoom 
+            subtitle: configuration.isPublicRoom
                 ? 'Public - Anyone can join with PIN'
                 : 'Private - Invite only',
             value: configuration.isPublicRoom,
             onChanged: (value) {
-              ref.read(gameHostSetupProvider.notifier).updateIsPublicRoom(value);
+              ref
+                  .read(gameHostSetupProvider.notifier)
+                  .updateIsPublicRoom(value);
             },
             icon: configuration.isPublicRoom ? Icons.public : Icons.lock,
-            color: configuration.isPublicRoom ? AppColors.mintGreen : AppColors.coralRed,
+            color: configuration.isPublicRoom
+                ? AppColors.mintGreen
+                : AppColors.coralRed,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildAdvancedSettingsSection(GameHostSetupConfiguration configuration) {
+  Widget _buildAdvancedSettingsSection(
+    GameHostSetupConfiguration configuration,
+  ) {
     return Container(
       width: double.infinity,
       padding: AppSpacing.allM,
@@ -543,9 +550,7 @@ class _GameHostSetupPageState extends ConsumerState<GameHostSetupPage>
                 const SizedBox(width: AppSpacing.spacingS),
                 Text(
                   'Advanced Settings',
-                  style: AppTextStyles.sectionHeader.copyWith(
-                    fontSize: 18,
-                  ),
+                  style: AppTextStyles.sectionHeader.copyWith(fontSize: 18),
                 ),
                 const Spacer(),
                 Icon(
@@ -564,7 +569,9 @@ class _GameHostSetupPageState extends ConsumerState<GameHostSetupPage>
               subtitle: 'Display correct answers after each question',
               value: configuration.showCorrectAnswers,
               onChanged: (value) {
-                ref.read(gameHostSetupProvider.notifier).updateShowCorrectAnswers(value);
+                ref
+                    .read(gameHostSetupProvider.notifier)
+                    .updateShowCorrectAnswers(value);
               },
               icon: Icons.check_circle,
               color: AppColors.success,
@@ -577,7 +584,9 @@ class _GameHostSetupPageState extends ConsumerState<GameHostSetupPage>
               subtitle: 'Randomize question order for each player',
               value: configuration.shuffleQuestions,
               onChanged: (value) {
-                ref.read(gameHostSetupProvider.notifier).updateShuffleQuestions(value);
+                ref
+                    .read(gameHostSetupProvider.notifier)
+                    .updateShuffleQuestions(value);
               },
               icon: Icons.shuffle,
               color: AppColors.warmYellow,
@@ -590,7 +599,9 @@ class _GameHostSetupPageState extends ConsumerState<GameHostSetupPage>
               subtitle: 'Let players replay the quiz after completion',
               value: configuration.allowReplay,
               onChanged: (value) {
-                ref.read(gameHostSetupProvider.notifier).updateAllowReplay(value);
+                ref
+                    .read(gameHostSetupProvider.notifier)
+                    .updateAllowReplay(value);
               },
               icon: Icons.replay,
               color: AppColors.mintGreen,
@@ -627,10 +638,14 @@ class _GameHostSetupPageState extends ConsumerState<GameHostSetupPage>
             ),
             const Spacer(),
             Container(
-              padding: AppSpacing.horizontalM.add(const EdgeInsets.symmetric(vertical: AppSpacing.spacingS)),
+              padding: AppSpacing.horizontalM.add(
+                const EdgeInsets.symmetric(vertical: AppSpacing.spacingS),
+              ),
               decoration: BoxDecoration(
                 color: color.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(AppDimensions.borderRadiusS),
+                borderRadius: BorderRadius.circular(
+                  AppDimensions.borderRadiusS,
+                ),
               ),
               child: Text(
                 valueDisplay,
@@ -711,18 +726,15 @@ class _GameHostSetupPageState extends ConsumerState<GameHostSetupPage>
       padding: AppSpacing.allM,
       decoration: BoxDecoration(
         color: AppColors.pureWhite,
-        border: Border(
-          top: BorderSide(
-            color: AppColors.lightGray,
-            width: 1,
-          ),
-        ),
+        border: Border(top: BorderSide(color: AppColors.lightGray, width: 1)),
       ),
       child: Column(
         children: [
           // Start Game Session button (primary action)
           PrimaryButton(
-            onPressed: configuration.selectedQuiz != null ? _startGameSession : null,
+            onPressed: configuration.selectedQuiz != null
+                ? _startGameSession
+                : null,
             text: configuration.selectedQuiz != null
                 ? 'Start Game Session'
                 : 'Select a Quiz First',

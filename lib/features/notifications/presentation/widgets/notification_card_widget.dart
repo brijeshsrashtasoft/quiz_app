@@ -48,7 +48,7 @@ class NotificationCardWidget extends ConsumerWidget {
                 ? null
                 : LinearGradient(
                     colors: [
-                      AppColors.vibrantPurple.withOpacity(0.05),
+                      AppColors.vibrantPurple.withValues(alpha: 0.05),
                       Colors.transparent,
                     ],
                     begin: Alignment.topLeft,
@@ -93,13 +93,13 @@ class NotificationCardWidget extends ConsumerWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: LinearGradient(
-          colors: [color, color.withOpacity(0.8)],
+          colors: [color, color.withValues(alpha: 0.8)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.3),
+            color: color.withValues(alpha: 0.3),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -251,7 +251,7 @@ class NotificationCardWidget extends ConsumerWidget {
             vertical: 2,
           ),
           decoration: BoxDecoration(
-            color: _getNotificationColor().withOpacity(0.2),
+            color: _getNotificationColor().withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(

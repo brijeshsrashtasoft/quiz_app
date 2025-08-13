@@ -165,7 +165,7 @@ class _GoogleSignInButtonState extends ConsumerState<GoogleSignInButton>
                   border: Border.all(
                     color: _isLoading
                         ? AppColors.lightGray
-                        : AppColors.lightGray.withOpacity(0.8),
+                        : AppColors.lightGray.withValues(alpha: 0.8),
                   ),
                   boxShadow: _isLoading
                       ? null
@@ -198,7 +198,7 @@ class _GoogleSignInButtonState extends ConsumerState<GoogleSignInButton>
                         width: 20,
                         height: 20,
                         decoration: BoxDecoration(
-                          color: AppColors.vibrantPurple.withOpacity(0.1),
+                          color: AppColors.vibrantPurple.withValues(alpha: 0.1),
                           shape: BoxShape.circle,
                         ),
                         child: const Text(

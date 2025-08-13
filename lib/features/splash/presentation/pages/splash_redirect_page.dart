@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/navigation/route_constants.dart';
 import '../../../../core/utils/logger.dart';
-import '../../../authentication/presentation/providers/auth_providers.dart';
 
 /// Quick splash redirect page that immediately navigates based on auth state
 class SplashRedirectPage extends ConsumerStatefulWidget {

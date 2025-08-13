@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/constants/app_text_styles.dart';
 import '../../../../shared/constants/app_spacing.dart';
-import '../../../../shared/constants/app_animations.dart';
 
 class PinDisplay extends StatefulWidget {
   final String pin;
@@ -56,7 +55,7 @@ class _PinDisplayState extends State<PinDisplay>
               borderRadius: BorderRadius.circular(24),
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.vibrantPurple.withOpacity(0.3),
+                  color: AppColors.vibrantPurple.withValues(alpha: 0.3),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),
@@ -69,10 +68,10 @@ class _PinDisplayState extends State<PinDisplay>
                   'Game PIN',
                   style: widget.isLarge
                       ? AppTextStyles.sectionHeader.copyWith(
-                          color: AppColors.pureWhite.withOpacity(0.9),
+                          color: AppColors.pureWhite.withValues(alpha: 0.9),
                         )
                       : AppTextStyles.bodyText.copyWith(
-                          color: AppColors.pureWhite.withOpacity(0.9),
+                          color: AppColors.pureWhite.withValues(alpha: 0.9),
                         ),
                 ),
                 const SizedBox(height: AppSpacing.spacingS),

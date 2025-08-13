@@ -440,7 +440,7 @@ class _QuizManagementPageState extends ConsumerState<QuizManagementPage>
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadowLight.withOpacity(0.1),
+            color: AppColors.shadowLight.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),

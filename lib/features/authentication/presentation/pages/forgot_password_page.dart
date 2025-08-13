@@ -8,7 +8,6 @@ import '../../../../shared/constants/app_spacing.dart';
 import '../../../../shared/constants/app_animations.dart';
 import '../../../../shared/widgets/buttons/primary_button.dart';
 import '../../../../shared/widgets/inputs/text_input.dart';
-import '../../../../shared/widgets/layout/page_layout.dart';
 import '../../../../core/navigation/route_constants.dart';
 import '../../../../core/errors/failures.dart';
 import '../providers/auth_providers.dart';

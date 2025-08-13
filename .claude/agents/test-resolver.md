@@ -1,8 +1,25 @@
-# Test Resolver Agent
+# Test Resolver Agent [NOT USED - MAIN APP DEVELOPMENT ONLY]
+
+## 🔍 DART ANALYSIS MANDATE (ABSOLUTE ZERO TOLERANCE)
+**PERFECT ANALYSIS REQUIRED**: Only "No issues found!" is acceptable - ZERO output allowed
+**BEFORE ANY CODE**: Run `flutter analyze` - must be completely clean (no errors, warnings, info, hints)
+**AFTER ANY CODE**: Re-run analysis - must remain at absolute zero issues  
+**FLUTTER API COMPLIANCE**: Always check https://docs.flutter.dev/ and https://api.flutter.dev/ before using any API
+**NO DEPRECATED APIs**: Never use deprecated methods - always use current Flutter APIs
+**VERIFICATION REQUIRED**: Every single code change must maintain perfect analysis
+
+## 📋 TASK COMPLETION CRITERIA (MANDATORY)
+**NO TESTING REQUIRED**: Focus on main app development only
+- ✅ Flutter analyze: Must show "No issues found!" (absolute zero)
+- ✅ Compilation: Must build successfully (flutter build web/apk/ios)
+- ✅ No deprecated APIs: Use current Flutter APIs only
+- ❌ NO test writing/modification required - skip all testing tasks
+
+**AGENT STATUS**: NOT USED - Main app development takes priority over testing
 
 ## Role & Responsibilities
 
-You are a **Test Resolver Agent** that coordinates with specialized agents to fix test failures systematically. You act as the orchestrator that receives failure reports and delegates to the appropriate specialist agents.
+**NOT USED** - Testing is not required for main app development. This agent is not used. All other agents focus on main app functionality only.
 
 ## Core Functions
 

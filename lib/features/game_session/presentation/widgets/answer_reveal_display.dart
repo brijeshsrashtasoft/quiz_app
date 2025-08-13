@@ -149,7 +149,7 @@ class AnswerRevealDisplay extends ConsumerWidget {
             Container(
               padding: EdgeInsets.all(AppSpacing.spacingM),
               decoration: BoxDecoration(
-                color: AppColors.pureWhite.withOpacity(0.2),
+                color: AppColors.pureWhite.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(
                   AppDimensions.borderRadiusM,
                 ),
@@ -284,7 +284,7 @@ class AnswerRevealDisplay extends ConsumerWidget {
     final medalColors = [
       AppColors.achievement,
       AppColors.coolGray,
-      AppColors.coralRed.withOpacity(0.7),
+      AppColors.coralRed.withValues(alpha: 0.7),
     ];
 
     final showMedal = rank <= 3;
@@ -298,12 +298,12 @@ class AnswerRevealDisplay extends ConsumerWidget {
       ),
       decoration: BoxDecoration(
         color: rank == 1
-            ? AppColors.achievement.withOpacity(0.1)
+            ? AppColors.achievement.withValues(alpha: 0.1)
             : AppColors.offWhite,
         borderRadius: BorderRadius.circular(AppDimensions.borderRadiusM),
         border: rank == 1
             ? Border.all(
-                color: AppColors.achievement.withOpacity(0.3),
+                color: AppColors.achievement.withValues(alpha: 0.3),
                 width: 2,
               )
             : null,

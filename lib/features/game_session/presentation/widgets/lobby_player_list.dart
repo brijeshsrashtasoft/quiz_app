@@ -141,14 +141,14 @@ class _PlayerCardState extends State<_PlayerCard>
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: isReady
-                    ? AppColors.turquoise.withOpacity(0.3)
+                    ? AppColors.turquoise.withValues(alpha: 0.3)
                     : AppColors.lightGray,
                 width: isReady ? 2 : 1,
               ),
               boxShadow: [
                 BoxShadow(
                   color: isReady
-                      ? AppColors.turquoise.withOpacity(0.1)
+                      ? AppColors.turquoise.withValues(alpha: 0.1)
                       : AppColors.shadowLight,
                   blurRadius: 10,
                   offset: const Offset(0, 4),

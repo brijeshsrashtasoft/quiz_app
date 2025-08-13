@@ -254,7 +254,7 @@ class _MultipleChoiceBuilderState extends State<MultipleChoiceBuilder>
                 ),
                 filled: true,
                 fillColor: isCorrect
-                    ? color.withOpacity(0.05)
+                    ? color.withValues(alpha: 0.05)
                     : AppColors.offWhite,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),

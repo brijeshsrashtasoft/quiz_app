@@ -416,7 +416,7 @@ class _AddQuestionDialogState extends State<AddQuestionDialog>
           isSmallScreen ? AppSpacing.spacingS : AppSpacing.spacingM,
         ),
         decoration: BoxDecoration(
-          color: isSelected ? color.withOpacity(0.1) : AppColors.offWhite,
+          color: isSelected ? color.withValues(alpha: 0.1) : AppColors.offWhite,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected ? color : AppColors.lightGray,

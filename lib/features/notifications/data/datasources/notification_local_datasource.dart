@@ -1,4 +1,3 @@
-import '../../../../core/utils/result.dart';
 import '../models/notification_model.dart';
 import '../../domain/failures/notification_failure.dart';
 

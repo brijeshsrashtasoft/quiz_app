@@ -165,7 +165,7 @@ class _LeaderboardItem extends StatelessWidget {
         color: isTopThree
             ? null
             : (isCurrentPlayer
-                  ? AppColors.vibrantPurple.withOpacity(0.1)
+                  ? AppColors.vibrantPurple.withValues(alpha: 0.1)
                   : AppColors.pureWhite),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
@@ -177,7 +177,7 @@ class _LeaderboardItem extends StatelessWidget {
         boxShadow: [
           BoxShadow(
             color: isTopThree
-                ? _getColorForPosition(position).withOpacity(0.3)
+                ? _getColorForPosition(position).withValues(alpha: 0.3)
                 : AppColors.shadowLight,
             blurRadius: isTopThree ? 15 : 10,
             offset: const Offset(0, 5),
@@ -192,7 +192,7 @@ class _LeaderboardItem extends StatelessWidget {
             height: 40,
             decoration: BoxDecoration(
               color: isTopThree
-                  ? AppColors.pureWhite.withOpacity(0.2)
+                  ? AppColors.pureWhite.withValues(alpha: 0.2)
                   : AppColors.offWhite,
               shape: BoxShape.circle,
             ),
@@ -251,8 +251,8 @@ class _LeaderboardItem extends StatelessWidget {
               ),
               decoration: BoxDecoration(
                 color: change > 0
-                    ? AppColors.turquoise.withOpacity(0.2)
-                    : AppColors.coralRed.withOpacity(0.2),
+                    ? AppColors.turquoise.withValues(alpha: 0.2)
+                    : AppColors.coralRed.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(

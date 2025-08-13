@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/breakpoints.dart';
 
 /// Responsive builder widget for creating adaptive layouts
 class ResponsiveBuilder extends StatelessWidget {

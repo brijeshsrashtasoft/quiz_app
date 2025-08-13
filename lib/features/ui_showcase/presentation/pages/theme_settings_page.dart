@@ -138,8 +138,8 @@ class ThemeSettingsPage extends ConsumerWidget {
                             .setTheme(themeId);
                       }
                     },
-                    backgroundColor: _getThemeColor(themeId).withOpacity(0.1),
-                    selectedColor: _getThemeColor(themeId).withOpacity(0.3),
+                    backgroundColor: _getThemeColor(themeId).withValues(alpha: 0.1),
+                    selectedColor: _getThemeColor(themeId).withValues(alpha: 0.3),
                     checkmarkColor: _getThemeColor(themeId),
                   );
                 }).toList(),

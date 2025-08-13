@@ -116,7 +116,7 @@ class _AnswerRevealScreenState extends ConsumerState<AnswerRevealScreen>
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.vibrantPurple.withOpacity(0.3),
+                      color: AppColors.vibrantPurple.withValues(alpha: 0.3),
                       blurRadius: 20,
                       offset: const Offset(0, 10),
                     ),
@@ -127,7 +127,7 @@ class _AnswerRevealScreenState extends ConsumerState<AnswerRevealScreen>
                     Text(
                       'Correct Answer',
                       style: AppTextStyles.bodyText.copyWith(
-                        color: AppColors.pureWhite.withOpacity(0.9),
+                        color: AppColors.pureWhite.withValues(alpha: 0.9),
                       ),
                     ),
                     const SizedBox(height: AppSpacing.spacingS),
@@ -182,7 +182,7 @@ class _AnswerRevealScreenState extends ConsumerState<AnswerRevealScreen>
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color: AppColors.vibrantPurple.withOpacity(0.3),
+                                color: AppColors.vibrantPurple.withValues(alpha: 0.3),
                                 blurRadius: 15,
                                 offset: const Offset(0, 5),
                               ),
@@ -235,7 +235,7 @@ class _AnswerRevealScreenState extends ConsumerState<AnswerRevealScreen>
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.vibrantPurple.withOpacity(0.3),
+                    color: AppColors.vibrantPurple.withValues(alpha: 0.3),
                     blurRadius: 20,
                     offset: const Offset(0, 10),
                   ),
@@ -265,7 +265,7 @@ class _AnswerRevealScreenState extends ConsumerState<AnswerRevealScreen>
           width: 120,
           height: 120,
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             shape: BoxShape.circle,
           ),
           child: Center(
@@ -277,7 +277,7 @@ class _AnswerRevealScreenState extends ConsumerState<AnswerRevealScreen>
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: color.withOpacity(0.5),
+                    color: color.withValues(alpha: 0.5),
                     blurRadius: 20,
                     offset: const Offset(0, 10),
                   ),
@@ -297,9 +297,9 @@ class _AnswerRevealScreenState extends ConsumerState<AnswerRevealScreen>
               vertical: AppSpacing.spacingM,
             ),
             decoration: BoxDecoration(
-              color: AppColors.warmYellow.withOpacity(0.1),
+              color: AppColors.warmYellow.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(30),
-              border: Border.all(color: AppColors.warmYellow.withOpacity(0.3)),
+              border: Border.all(color: AppColors.warmYellow.withValues(alpha: 0.3)),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,

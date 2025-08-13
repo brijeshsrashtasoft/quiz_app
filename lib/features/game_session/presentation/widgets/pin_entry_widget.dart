@@ -196,7 +196,7 @@ class _PinDigitFieldState extends State<_PinDigitField>
             height: 64,
             decoration: BoxDecoration(
               color: widget.isActive
-                  ? AppColors.vibrantPurple.withOpacity(0.1)
+                  ? AppColors.vibrantPurple.withValues(alpha: 0.1)
                   : AppColors.pureWhite,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
@@ -208,7 +208,7 @@ class _PinDigitFieldState extends State<_PinDigitField>
               boxShadow: widget.isActive
                   ? [
                       BoxShadow(
-                        color: AppColors.vibrantPurple.withOpacity(0.2),
+                        color: AppColors.vibrantPurple.withValues(alpha: 0.2),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),

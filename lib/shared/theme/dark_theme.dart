@@ -236,9 +236,9 @@ class DarkTheme {
         }),
         trackColor: MaterialStateProperty.resolveWith((states) {
           if (states.contains(MaterialState.selected)) {
-            return AppColors.vibrantPurple.withOpacity(0.5);
+            return AppColors.vibrantPurple.withValues(alpha: 0.5);
           }
-          return AppColors.mediumGray.withOpacity(0.5);
+          return AppColors.mediumGray.withValues(alpha: 0.5);
         }),
       ),
 

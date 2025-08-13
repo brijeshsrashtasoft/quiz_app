@@ -109,7 +109,7 @@ class _DeviceManagementCardState extends State<DeviceManagementCard>
                               height: 56,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: AppColors.vibrantPurple.withOpacity(0.1),
+                                color: AppColors.vibrantPurple.withValues(alpha: 0.1),
                               ),
                               child: Icon(
                                 _getDeviceIcon(widget.deviceInfo.deviceType),
@@ -219,12 +219,12 @@ class _DeviceManagementCardState extends State<DeviceManagementCard>
                       decoration: BoxDecoration(
                         color: _getTrustLevelColor(
                           widget.deviceInfo.trustLevel,
-                        ).withOpacity(0.1),
+                        ).withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
                           color: _getTrustLevelColor(
                             widget.deviceInfo.trustLevel,
-                          ).withOpacity(0.3),
+                          ).withValues(alpha: 0.3),
                           width: 1,
                         ),
                       ),
@@ -579,7 +579,7 @@ class _NewDeviceApprovalFlowState extends State<NewDeviceApprovalFlow>
                       height: 80,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: AppColors.warning.withOpacity(0.1),
+                        color: AppColors.warning.withValues(alpha: 0.1),
                       ),
                       child: Icon(
                         Icons.security,

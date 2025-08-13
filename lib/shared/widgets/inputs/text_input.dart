@@ -199,7 +199,7 @@ class _CustomTextInputState extends State<CustomTextInput>
                   boxShadow: [
                     if (_isFocused)
                       BoxShadow(
-                        color: borderColor.withOpacity(
+                        color: borderColor.withValues(alpha:
                           0.2 * _focusAnimation.value,
                         ),
                         offset: Offset(0, 4 * _focusAnimation.value),

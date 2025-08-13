@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../../shared/constants/app_colors.dart';
-import '../../../../shared/constants/app_text_styles.dart';
 import '../../../../shared/constants/app_spacing.dart';
 import '../../../../shared/constants/app_animations.dart';
 import '../../../../shared/widgets/quiz/score_counter.dart';
@@ -82,7 +81,7 @@ class _ScoreDisplayState extends State<ScoreDisplay>
                       (widget.score >= 10000
                               ? AppColors.achievement
                               : AppColors.vibrantPurple)
-                          .withOpacity(0.3),
+                          .withValues(alpha: 0.3),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),

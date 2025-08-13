@@ -1,6 +1,4 @@
-import '../../../../core/base/base_usecase.dart';
 import '../../../../core/utils/result.dart';
-import '../../../../core/errors/failures.dart';
 import '../entities/device_entity.dart';
 import '../repositories/device_repository.dart';
 import '../repositories/security_repository.dart';

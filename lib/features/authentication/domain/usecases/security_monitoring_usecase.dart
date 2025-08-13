@@ -1,4 +1,3 @@
-import '../../../../core/base/base_usecase.dart';
 import '../../../../core/utils/result.dart';
 import '../entities/security_event_entity.dart';
 import '../repositories/security_repository.dart';

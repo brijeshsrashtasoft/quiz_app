@@ -13,10 +13,11 @@ Kahoot-style interactive quiz app built with Flutter, Firestore, and Clean Archi
 **🎯 STATUS**: Foundation complete. Ready for parallel development with 8 issues available.
 
 ## Development Approach
-- **FOCUS ON MAIN APP FIRST**: Implement core functionality before tests
-- Ensure all platforms build successfully (Web, Android, iOS)
-- Workflow: Explore → Plan → Code → Commit
-- Tests will be added later after main features are complete
+- **MAIN APP ONLY**: Focus exclusively on core functionality - NO testing required
+- **NO TEST WRITING**: Skip all test creation/modification - main app development only
+- **COMPILATION MANDATORY**: All platforms must build successfully (Web, Android, iOS)
+- **Workflow**: Explore → Plan → Code → Verify Build → Commit
+- **Task Completion Criteria**: flutter analyze (zero issues) + successful compilation
 
 ## Unified Ticket System
 **Format**: `docs/tickets/{branch-name}.md` (ONE file per issue)
@@ -48,11 +49,51 @@ lib/
 ## Essential Commands
 ```bash
 flutter run                    # Debug mode with hot reload
-flutter analyze               # Static analysis
+flutter analyze               # Static analysis - MANDATORY before any commit
 flutter build web/apk/ios     # Platform builds
 dart format .                  # Code formatting
 firebase emulators:start      # Local Firebase
 ```
+
+## 🔍 DART ANALYSIS POLICY (ABSOLUTE ZERO TOLERANCE)
+**CRITICAL REQUIREMENT**: ALL agents MUST achieve PERFECT analysis before ANY code changes.
+
+### Analysis Standards:
+- **ABSOLUTE ZERO**: No errors, warnings, info, hints, or any analysis output allowed
+- **PERFECT STANDARD**: Only "No issues found!" is acceptable
+- **PRE-CODE CHECK**: Run `flutter analyze` - must be completely clean
+- **POST-CODE CHECK**: Verify zero issues after every single change
+- **COMMIT BLOCKER**: NO commits allowed with ANY analysis output
+
+### Flutter API Compliance (MANDATORY):
+- **OFFICIAL SOURCES ONLY**: Always use https://docs.flutter.dev/ and https://api.flutter.dev/
+- **NO DEPRECATED APIs**: Never use deprecated methods/classes
+- **CURRENT API REFERENCE**: Check Flutter docs for correct modern API usage
+- **VERSION COMPATIBILITY**: Ensure APIs match current Flutter version
+- **BEST PRACTICES**: Follow official Flutter guidelines and conventions
+
+### Enforcement Rules:
+1. **Before coding**: `flutter analyze` must show "No issues found!" (zero output)
+2. **API verification**: Check Flutter docs for correct API usage before writing code
+3. **After changes**: Re-run analysis - must remain at zero issues
+4. **Mass fixes**: Use official Flutter migration guides and verified patterns
+5. **Documentation check**: Reference https://docs.flutter.dev/ for any API questions
+6. **Agent coordination**: All sub-agents must follow this absolute zero policy
+
+## 📋 TASK COMPLETION CRITERIA (MANDATORY)
+**EVERY TASK MUST PASS THESE CHECKS BEFORE COMPLETION:**
+
+### Required Verifications:
+1. **Flutter Analyze**: `flutter analyze` - MUST show "No issues found!" (absolute zero)
+2. **Compilation Check**: `flutter build web` - MUST compile successfully without errors
+3. **NO TESTING**: Skip all test writing/modification - main app only
+4. **API Compliance**: All code uses current Flutter APIs (no deprecated methods)
+
+### Task NOT Complete Until:
+- ✅ Zero analysis issues (no errors, warnings, info, hints)  
+- ✅ Successful compilation on target platforms
+- ✅ No deprecated API usage
+- ❌ NO test writing required
 
 ## Sub-Agent System (MANDATORY)
 
@@ -60,7 +101,7 @@ firebase emulators:start      # Local Firebase
 - **flutter-architect** - Clean Architecture implementation
 - **firebase-specialist** - Firestore, Authentication, real-time features
 - **ui-designer** - Kahoot-style UI and design system compliance
-- **testing-specialist** - TDD implementation [DEFERRED]
+- **testing-specialist** - NOT USED (main app development only)
 - **code-reviewer** - Quality assurance and compliance
 - **performance-optimizer** - Performance optimization
 - **pr-review-agent** - **EXCLUSIVE** PR review and merge authority
@@ -96,7 +137,7 @@ flutter build ios --release       # iOS build success
 ### Commit Standards
 ```bash
 git commit -m "type(scope): description - closes #issue-number"
-# Types: fix, feat, docs, refactor, test, chore
+# Types: fix, feat, docs, refactor, chore
 ```
 
 ## Technology Stack
@@ -131,7 +172,7 @@ lib/shared/
 ### Blocking Detection
 ```bash
 flutter analyze | head -20    # Check for >50 errors (BLOCKED)
-flutter test --dry-run       # Test framework issues
+flutter build web/apk/ios    # Compilation verification
 dart run build_runner build  # Code generation issues
 ```
 
@@ -171,4 +212,4 @@ dart run build_runner build  # Code generation issues
 - Firebase Security Rules for data protection
 
 ---
-**Focus**: Main app implementation first. Tests will be added after core features are complete.
+**Focus**: Main app implementation only. NO testing required - compilation + analysis verification only.

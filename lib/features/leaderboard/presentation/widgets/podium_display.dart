@@ -108,7 +108,7 @@ class PodiumDisplay extends StatelessWidget {
             ),
             boxShadow: [
               BoxShadow(
-                color: color.withOpacity(0.3),
+                color: color.withValues(alpha: 0.3),
                 blurRadius: 20,
                 offset: const Offset(0, 10),
               ),
@@ -125,7 +125,7 @@ class PodiumDisplay extends StatelessWidget {
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withValues(alpha: 0.2),
                       shape: BoxShape.circle,
                     ),
                     child: Center(
@@ -149,7 +149,7 @@ class PodiumDisplay extends StatelessWidget {
                     child:
                         Icon(
                               Icons.emoji_events,
-                              color: Colors.white.withOpacity(0.9),
+                              color: Colors.white.withValues(alpha: 0.9),
                               size: 40,
                             )
                             .animate(
@@ -192,7 +192,7 @@ class PodiumDisplay extends StatelessWidget {
         border: Border.all(color: colors[rank - 1], width: 3),
         boxShadow: [
           BoxShadow(
-            color: colors[rank - 1].withOpacity(0.3),
+            color: colors[rank - 1].withValues(alpha: 0.3),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),

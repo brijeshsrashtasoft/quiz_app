@@ -1,5 +1,3 @@
-library auth_usecases;
-
 /// Authentication use cases exports
 /// Following CLAUDE.md Clean Architecture patterns
 ///

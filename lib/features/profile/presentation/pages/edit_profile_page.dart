@@ -8,11 +8,8 @@ import '../../../../shared/constants/app_text_styles.dart';
 import '../../../../shared/constants/app_spacing.dart';
 import '../../../../shared/constants/app_animations.dart';
 import '../../../../shared/widgets/buttons/primary_button.dart';
-import '../../../../shared/widgets/navigation/app_navigation_bar.dart';
 import '../../../../shared/widgets/layout/page_layout.dart';
-import '../../../../core/navigation/route_constants.dart';
 import '../widgets/avatar_upload_widget.dart';
-import '../widgets/profile_field_widget.dart';
 import '../../../authentication/domain/entities/auth_state.dart';
 import '../../../authentication/presentation/providers/auth_providers.dart';
 

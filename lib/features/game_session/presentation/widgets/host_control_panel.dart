@@ -146,14 +146,14 @@ class _ControlButtonState extends State<_ControlButton>
                   width: size,
                   height: size,
                   decoration: BoxDecoration(
-                    color: widget.color.withOpacity(
-                      widget.onPressed != null ? 1.0 : 0.5,
+                    color: widget.color.withValues(
+                      alpha: widget.onPressed != null ? 1.0 : 0.5,
                     ),
                     shape: BoxShape.circle,
                     boxShadow: widget.onPressed != null && !_isPressed
                         ? [
                             BoxShadow(
-                              color: widget.color.withOpacity(0.3),
+                              color: widget.color.withValues(alpha: 0.3),
                               blurRadius: 15,
                               offset: const Offset(0, 5),
                             ),

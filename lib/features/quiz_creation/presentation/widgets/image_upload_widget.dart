@@ -4,7 +4,6 @@ import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/constants/app_spacing.dart';
 import '../../../../shared/constants/app_text_styles.dart';
 import '../../../../shared/constants/app_animations.dart';
-import '../../../../shared/widgets/buttons/primary_button.dart';
 
 /// Image upload widget for questions
 class ImageUploadWidget extends ConsumerStatefulWidget {
@@ -173,7 +172,7 @@ class _ImageUploadWidgetState extends ConsumerState<ImageUploadWidget>
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.shadowDark.withOpacity(0.1),
+                      color: AppColors.shadowDark.withValues(alpha: 0.1),
                       blurRadius: 4,
                     ),
                   ],
@@ -195,7 +194,7 @@ class _ImageUploadWidgetState extends ConsumerState<ImageUploadWidget>
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.shadowDark.withOpacity(0.1),
+                      color: AppColors.shadowDark.withValues(alpha: 0.1),
                       blurRadius: 4,
                     ),
                   ],

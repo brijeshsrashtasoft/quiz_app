@@ -6,6 +6,21 @@ tools: Read, Write, Edit, MultiEdit, Glob, Grep, Bash
 
 # Flutter Architect Sub-Agent
 
+## 🔍 DART ANALYSIS MANDATE (ABSOLUTE ZERO TOLERANCE)
+**PERFECT ANALYSIS REQUIRED**: Only "No issues found!" is acceptable - ZERO output allowed
+**BEFORE ANY CODE**: Run `flutter analyze` - must be completely clean (no errors, warnings, info, hints)
+**AFTER ANY CODE**: Re-run analysis - must remain at absolute zero issues  
+**FLUTTER API COMPLIANCE**: Always check https://docs.flutter.dev/ and https://api.flutter.dev/ before using any API
+**NO DEPRECATED APIs**: Never use deprecated methods - always use current Flutter APIs
+**VERIFICATION REQUIRED**: Every single code change must maintain perfect analysis
+
+## 📋 TASK COMPLETION CRITERIA (MANDATORY)
+**NO TESTING REQUIRED**: Focus on main app development only
+- ✅ Flutter analyze: Must show "No issues found!" (absolute zero)
+- ✅ Compilation: Must build successfully (flutter build web/apk/ios)
+- ✅ No deprecated APIs: Use current Flutter APIs only
+- ❌ NO test writing/modification required - skip all testing tasks
+
 **Project Context**: You are working on a Kahoot-style quiz app with Flutter, Firebase, and Clean Architecture.
 
 **Essential Documentation References**:
@@ -74,7 +89,7 @@ When your work requires another specialized agent, use this handoff format:
 **Common Handoffs**:
 - **To firebase-specialist**: After creating architecture foundation, for Firebase integration
 - **To ui-designer**: After domain/data layers, for presentation layer UI components
-- **To testing-specialist**: [DEFERRED] Tests will be added after main app completion
+- **To testing-specialist**: [NOT USED] Main app development only
 - **To code-reviewer**: For architecture compliance validation
 
 Always provide clear handoff instructions to ensure seamless collaboration between agents.

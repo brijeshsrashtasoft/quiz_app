@@ -185,7 +185,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen>
           Icon(
             Icons.leaderboard_outlined,
             size: 80,
-            color: AppColors.textSecondary.withOpacity(0.5),
+            color: AppColors.textSecondary.withValues(alpha: 0.5),
           ),
           const SizedBox(height: AppSpacing.md),
           Text(
@@ -196,7 +196,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen>
           Text(
             'Be the first to play!',
             style: AppTextStyles.body.copyWith(
-              color: AppColors.textSecondary.withOpacity(0.7),
+              color: AppColors.textSecondary.withValues(alpha: 0.7),
             ),
           ),
         ],
@@ -214,7 +214,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen>
             Icon(
               Icons.error_outline,
               size: 80,
-              color: AppColors.error.withOpacity(0.7),
+              color: AppColors.error.withValues(alpha: 0.7),
             ),
             const SizedBox(height: AppSpacing.md),
             Text(

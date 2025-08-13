@@ -162,7 +162,7 @@ class _LobbyAvatarState extends State<LobbyAvatar>
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: _avatarColor.withOpacity(0.3),
+                              color: _avatarColor.withValues(alpha: 0.3),
                               blurRadius: 8,
                               spreadRadius: 2,
                             ),

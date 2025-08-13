@@ -235,7 +235,7 @@ class _QuizPublishPageState extends ConsumerState<QuizPublishPage>
                 width: 80,
                 height: 80,
                 decoration: BoxDecoration(
-                  color: AppColors.vibrantPurple.withOpacity(0.1),
+                  color: AppColors.vibrantPurple.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -359,7 +359,7 @@ class _QuizPublishPageState extends ConsumerState<QuizPublishPage>
             width: 100,
             height: 100,
             decoration: BoxDecoration(
-              color: AppColors.success.withOpacity(0.1),
+              color: AppColors.success.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(Icons.check_circle, size: 60, color: AppColors.success),

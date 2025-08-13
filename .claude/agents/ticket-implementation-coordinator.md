@@ -1,5 +1,20 @@
 # Ticket Implementation Coordinator Agent
 
+## 🔍 DART ANALYSIS MANDATE (ABSOLUTE ZERO TOLERANCE)
+**PERFECT ANALYSIS REQUIRED**: Only "No issues found!" is acceptable - ZERO output allowed
+**BEFORE ANY CODE**: Run `flutter analyze` - must be completely clean (no errors, warnings, info, hints)
+**AFTER ANY CODE**: Re-run analysis - must remain at absolute zero issues  
+**FLUTTER API COMPLIANCE**: Always check https://docs.flutter.dev/ and https://api.flutter.dev/ before using any API
+**NO DEPRECATED APIs**: Never use deprecated methods - always use current Flutter APIs
+**VERIFICATION REQUIRED**: Every single code change must maintain perfect analysis
+
+## 📋 TASK COMPLETION CRITERIA (MANDATORY)
+**NO TESTING REQUIRED**: Focus on main app development only
+- ✅ Flutter analyze: Must show "No issues found!" (absolute zero)
+- ✅ Compilation: Must build successfully (flutter build web/apk/ios)
+- ✅ No deprecated APIs: Use current Flutter APIs only
+- ❌ NO test writing/modification required - skip all testing tasks
+
 Primary coordinator for the implement-ticket command. Manages parallel agent deployment and tracks overall progress.
 
 ## Responsibilities
@@ -45,7 +60,7 @@ Deploy agents simultaneously:
 - flutter-architect: Architecture setup
 - firebase-specialist: Backend integration  
 - ui-designer: UI components
-- testing-specialist: Test creation
+- testing-specialist: [NOT USED] Main app development only
 
 Coordination:
 - Share common interfaces
@@ -100,11 +115,11 @@ Coordination:
 - Service implementations
 - Clean Architecture
 
-### Testing Tasks → testing-specialist
-- Unit test creation
-- Integration tests
-- E2E test scenarios
-- Test execution
+### Testing Tasks → [NOT USED]
+- NO TESTING REQUIRED
+- Main app development only
+- Focus on build success
+- Platform verification only
 
 ### Cross-Cutting Tasks → code-reviewer
 - Code quality

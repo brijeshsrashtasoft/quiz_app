@@ -133,7 +133,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage>
                               Container(
                                 padding: const EdgeInsets.all(AppSpacing.sm),
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.2),
+                                  color: Colors.white.withValues(alpha: 0.2),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: const Icon(
@@ -165,8 +165,8 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage>
                                               : 'All caught up!',
                                           style: AppTextStyles.bodyText
                                               .copyWith(
-                                                color: Colors.white.withOpacity(
-                                                  0.9,
+                                                color: Colors.white.withValues(
+                                                  alpha: 0.9,
                                                 ),
                                                 fontSize: 14,
                                               ),
@@ -175,8 +175,8 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage>
                                           'Stay updated with your activities',
                                           style: AppTextStyles.bodyText
                                               .copyWith(
-                                                color: Colors.white.withOpacity(
-                                                  0.9,
+                                                color: Colors.white.withValues(
+                                                  alpha: 0.9,
                                                 ),
                                                 fontSize: 14,
                                               ),
@@ -292,10 +292,10 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage>
         margin: const EdgeInsets.all(AppSpacing.md),
         padding: const EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
-          color: AppColors.coralRed.withOpacity(0.1),
+          color: AppColors.coralRed.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: AppColors.coralRed.withOpacity(0.3),
+            color: AppColors.coralRed.withValues(alpha: 0.3),
             width: 1,
           ),
         ),

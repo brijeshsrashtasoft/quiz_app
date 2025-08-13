@@ -83,7 +83,7 @@ class _NotificationFilterBarWidgetState
         widget.onCategoryChanged?.call(selected ? category : null);
       },
       backgroundColor: Colors.white,
-      selectedColor: AppColors.vibrantPurple.withOpacity(0.2),
+      selectedColor: AppColors.vibrantPurple.withValues(alpha: 0.2),
       checkmarkColor: AppColors.vibrantPurple,
       labelStyle: AppTextStyles.caption.copyWith(
         color: isSelected ? AppColors.vibrantPurple : AppColors.textSecondary,
@@ -97,7 +97,7 @@ class _NotificationFilterBarWidgetState
         ),
       ),
       elevation: isSelected ? 2 : 0,
-      shadowColor: AppColors.vibrantPurple.withOpacity(0.3),
+      shadowColor: AppColors.vibrantPurple.withValues(alpha: 0.3),
     );
   }
 

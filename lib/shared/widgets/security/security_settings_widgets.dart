@@ -3,7 +3,6 @@ import '../../constants/app_colors.dart';
 import '../../constants/app_text_styles.dart';
 import '../../constants/app_spacing.dart';
 import '../../constants/app_dimensions.dart';
-import '../../constants/app_animations.dart';
 
 /// Security settings panel with comprehensive security preferences
 /// Follows Kahoot-style design with security-focused UX patterns
@@ -104,7 +103,7 @@ class _SecuritySettingsPanelState extends State<SecuritySettingsPanel> {
         Container(
           padding: EdgeInsets.all(AppSpacing.spacingS),
           decoration: BoxDecoration(
-            color: AppColors.vibrantPurple.withOpacity(0.1),
+            color: AppColors.vibrantPurple.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(icon, color: AppColors.vibrantPurple, size: 24),
@@ -261,7 +260,7 @@ class _SecuritySettingsPanelState extends State<SecuritySettingsPanel> {
         margin: EdgeInsets.only(bottom: AppSpacing.spacingS),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.vibrantPurple.withOpacity(0.1)
+              ? AppColors.vibrantPurple.withValues(alpha: 0.1)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
@@ -357,10 +356,10 @@ class _SecuritySettingsPanelState extends State<SecuritySettingsPanel> {
                 width: double.infinity,
                 padding: AppSpacing.allS,
                 decoration: BoxDecoration(
-                  color: AppColors.success.withOpacity(0.1),
+                  color: AppColors.success.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: AppColors.success.withOpacity(0.3),
+                    color: AppColors.success.withValues(alpha: 0.3),
                     width: 1,
                   ),
                 ),

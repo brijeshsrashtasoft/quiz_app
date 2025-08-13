@@ -198,7 +198,7 @@ class _AnswerStatisticsChartState extends State<AnswerStatisticsChart>
                               Container(
                                 height: 32,
                                 decoration: BoxDecoration(
-                                  color: AppColors.lightGray.withOpacity(0.3),
+                                  color: AppColors.lightGray.withValues(alpha: 0.3),
                                   borderRadius: BorderRadius.circular(16),
                                 ),
                               ),
@@ -220,7 +220,7 @@ class _AnswerStatisticsChartState extends State<AnswerStatisticsChart>
                                       color: _getBarColor(
                                         index,
                                         isCorrect,
-                                      ).withOpacity(0.3),
+                                      ).withValues(alpha: 0.3),
                                       blurRadius: 8,
                                       offset: const Offset(0, 2),
                                     ),

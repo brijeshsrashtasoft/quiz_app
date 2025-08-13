@@ -182,8 +182,8 @@ class _ScoreCounterState extends State<ScoreCounter>
                     ? AppColors.goldGradient
                     : LinearGradient(
                         colors: [
-                          AppColors.vibrantPurple.withOpacity(0.1),
-                          AppColors.vibrantPurple.withOpacity(0.2),
+                          AppColors.vibrantPurple.withValues(alpha: 0.1),
+                          AppColors.vibrantPurple.withValues(alpha: 0.2),
                         ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
@@ -194,7 +194,7 @@ class _ScoreCounterState extends State<ScoreCounter>
                 border: Border.all(
                   color: widget.isHighScore
                       ? AppColors.achievement
-                      : AppColors.vibrantPurple.withOpacity(0.3),
+                      : AppColors.vibrantPurple.withValues(alpha: 0.3),
                   width: 2,
                 ),
               ),
@@ -281,8 +281,8 @@ class CompactScoreCounter extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: isHighScore
-            ? AppColors.achievement.withOpacity(0.2)
-            : AppColors.vibrantPurple.withOpacity(0.1),
+            ? AppColors.achievement.withValues(alpha: 0.2)
+            : AppColors.vibrantPurple.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(AppDimensions.borderRadiusFull),
         border: Border.all(
           color: isHighScore ? AppColors.achievement : AppColors.vibrantPurple,
@@ -361,7 +361,7 @@ class LeaderboardScoreDisplay extends StatelessWidget {
       padding: const EdgeInsets.all(AppSpacing.spacingM),
       decoration: BoxDecoration(
         color: isCurrentPlayer
-            ? AppColors.vibrantPurple.withOpacity(0.1)
+            ? AppColors.vibrantPurple.withValues(alpha: 0.1)
             : AppColors.pureWhite,
         borderRadius: BorderRadius.circular(AppDimensions.borderRadiusM),
         border: Border.all(

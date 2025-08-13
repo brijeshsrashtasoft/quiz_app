@@ -65,7 +65,7 @@ class _LeaderboardEntryWidgetState extends State<LeaderboardEntryWidget>
       ),
       decoration: BoxDecoration(
         color: widget.isCurrentPlayer
-            ? AppColors.primary.withOpacity(0.1)
+            ? AppColors.primary.withValues(alpha: 0.1)
             : AppColors.surface,
         borderRadius: BorderRadius.circular(16),
         border: widget.isCurrentPlayer
@@ -73,7 +73,7 @@ class _LeaderboardEntryWidgetState extends State<LeaderboardEntryWidget>
             : null,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
