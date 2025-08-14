@@ -40,4 +40,30 @@ class LeaderboardModel with _$LeaderboardModel {
     type: LeaderboardType.values.firstWhere((e) => e.name == type),
     totalPlayers: totalPlayers,
   );
+
+  /// Convert to Firestore document
+  Map<String, dynamic> toFirestore() => {
+    'sessionId': sessionId,
+    'quizId': quizId,
+    'entries': entries.map((e) => e.toJson()).toList(),
+    'lastUpdated': lastUpdated.millisecondsSinceEpoch,
+    'type': type,
+    'totalPlayers': totalPlayers,
+  };
+
+  /// Create from Firestore document
+  factory LeaderboardModel.fromFirestore(Map<String, dynamic> data) {
+    return LeaderboardModel(
+      sessionId: data['sessionId'] ?? '',
+      quizId: data['quizId'] ?? '',
+      entries: (data['entries'] as List<dynamic>? ?? [])
+          .map((e) => LeaderboardEntryModel.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      lastUpdated: DateTime.fromMillisecondsSinceEpoch(
+        data['lastUpdated'] ?? 0,
+      ),
+      type: data['type'] ?? 'session',
+      totalPlayers: data['totalPlayers'] ?? 0,
+    );
+  }
 }

@@ -19,7 +19,9 @@ export 'cards/quiz_card.dart';
 
 // Layout
 export 'layout/responsive_layout.dart';
-export 'layout/grid_layout.dart';
+export 'layout/grid_layout.dart'
+    hide
+        StaggeredGrid; // StaggeredGrid exported from primitives, ResponsiveGrid moved to primitives
 export 'layout/page_layout.dart';
 
 // Inputs

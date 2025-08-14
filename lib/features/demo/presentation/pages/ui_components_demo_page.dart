@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/constants/app_spacing.dart';
 import '../../../../shared/constants/app_text_styles.dart';
@@ -14,15 +13,14 @@ import '../../../../shared/widgets/primitives/shake_widget.dart';
 import '../../../../shared/widgets/primitives/responsive_grid.dart';
 
 /// Demo page showcasing all the quiz UI components
-class UIComponentsDemoPage extends ConsumerStatefulWidget {
+class UIComponentsDemoPage extends StatefulWidget {
   const UIComponentsDemoPage({super.key});
 
   @override
-  ConsumerState<UIComponentsDemoPage> createState() =>
-      _UIComponentsDemoPageState();
+  State<UIComponentsDemoPage> createState() => _UIComponentsDemoPageState();
 }
 
-class _UIComponentsDemoPageState extends ConsumerState<UIComponentsDemoPage> {
+class _UIComponentsDemoPageState extends State<UIComponentsDemoPage> {
   int _currentScore = 0;
   int _selectedAnswer = -1;
   bool _showResult = false;
@@ -33,8 +31,6 @@ class _UIComponentsDemoPageState extends ConsumerState<UIComponentsDemoPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Theme(
       data: _isDarkMode ? ThemeData.dark() : ThemeData.light(),
       child: Scaffold(
@@ -143,19 +139,22 @@ class _UIComponentsDemoPageState extends ConsumerState<UIComponentsDemoPage> {
                     spacing: AppSpacing.spacingXL,
                     runSpacing: AppSpacing.spacingXL,
                     children: [
-                      LobbyAvatar(
+                      const LobbyAvatar(
                         playerName: 'John Doe',
                         isOnline: true,
                         isReady: true,
                         isHost: true,
                       ),
-                      LobbyAvatar(
+                      const LobbyAvatar(
                         playerName: 'Jane Smith',
                         isOnline: true,
                         isReady: false,
                       ),
-                      LobbyAvatar(playerName: 'Bob Wilson', isOnline: false),
-                      LobbyAvatar(
+                      const LobbyAvatar(
+                        playerName: 'Bob Wilson',
+                        isOnline: false,
+                      ),
+                      const LobbyAvatar(
                         playerName: 'Alice Brown',
                         isOnline: true,
                         isReady: true,
@@ -171,22 +170,22 @@ class _UIComponentsDemoPageState extends ConsumerState<UIComponentsDemoPage> {
                     runSpacing: AppSpacing.spacingXL,
                     alignment: WrapAlignment.spaceEvenly,
                     children: [
-                      LoadingAnimations(
+                      const LoadingAnimations(
                         type: LoadingType.spinner,
                         message: 'Loading...',
                         color: AppColors.vibrantPurple,
                       ),
-                      LoadingAnimations(
+                      const LoadingAnimations(
                         type: LoadingType.pulse,
                         message: 'Pulse',
                         color: AppColors.turquoise,
                       ),
-                      LoadingAnimations(
+                      const LoadingAnimations(
                         type: LoadingType.bounce,
                         message: 'Bounce',
                         color: AppColors.coralRed,
                       ),
-                      LoadingAnimations(
+                      const LoadingAnimations(
                         type: LoadingType.wave,
                         message: 'Wave',
                         color: AppColors.mintGreen,
@@ -199,20 +198,20 @@ class _UIComponentsDemoPageState extends ConsumerState<UIComponentsDemoPage> {
                   _buildSectionHeader('Leaderboard'),
                   Column(
                     children: [
-                      LeaderboardScoreDisplay(
+                      const LeaderboardScoreDisplay(
                         rank: 1,
                         score: 2500,
                         playerName: 'John Doe',
                         isCurrentPlayer: true,
                       ),
                       const SizedBox(height: AppSpacing.spacingS),
-                      LeaderboardScoreDisplay(
+                      const LeaderboardScoreDisplay(
                         rank: 2,
                         score: 2300,
                         playerName: 'Jane Smith',
                       ),
                       const SizedBox(height: AppSpacing.spacingS),
-                      LeaderboardScoreDisplay(
+                      const LeaderboardScoreDisplay(
                         rank: 3,
                         score: 2100,
                         playerName: 'Bob Wilson',

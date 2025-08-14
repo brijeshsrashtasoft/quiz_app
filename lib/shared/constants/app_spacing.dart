@@ -6,7 +6,6 @@ class AppSpacing {
   AppSpacing._();
 
   // Base spacing unit (8dp) - foundation of Material Design
-  static const double _baseUnit = 8.0;
 
   // Spacing constants following 8dp grid
   static const double spacingXS = 4.0; // _baseUnit * 0.5

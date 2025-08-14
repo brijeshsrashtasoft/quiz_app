@@ -3,6 +3,7 @@
 ///
 /// This file provides centralized access to all authentication domain components
 /// for easier imports and better maintainability.
+library;
 
 // Entities
 export 'entities/user_entity.dart';

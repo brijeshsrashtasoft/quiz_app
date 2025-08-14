@@ -88,7 +88,6 @@ final optimizedGameSessionStreamProvider =
       final dataSource = ref.read(gameSessionDataSourceProvider);
       final cache = ref.read(sessionCacheProvider);
       final listenerPool = ref.read(listenerPoolProvider);
-      final connectionManager = ref.read(connectionManagerProvider);
 
       // Check cache first
       final cached = cache.get(sessionId);
@@ -135,7 +134,15 @@ final optimizedGameSessionStreamProvider =
 
       // Return stream with cached initial value
       if (cached != null) {
-        return controller.stream.startWith(cached);
+        // Create a new stream that starts with the cached value
+        final streamController = StreamController<GameSessionEntity>();
+        streamController.add(cached);
+        controller.stream.listen((session) {
+          if (session != null) {
+            streamController.add(session);
+          }
+        });
+        return streamController.stream;
       }
 
       return controller.stream;
@@ -232,42 +239,47 @@ class OptimizedSessionStateNotifier extends StateNotifier<SessionState> {
     final startTime = DateTime.now();
 
     // Optimistic update for immediate UI feedback
-    if (state is _LoadedState) {
-      final currentSession = (state as _LoadedState).session;
-      final currentPlayer = currentSession.players[currentUser.id];
+    switch (state) {
+      case final loadedState
+          when loadedState.runtimeType.toString() == '_LoadedState':
+        final session = (loadedState as dynamic).session;
+        final currentPlayer = session.players[currentUser.id];
 
-      if (currentPlayer != null) {
-        final newAnswers = List<int>.from(currentPlayer.answers);
-        if (questionIndex < newAnswers.length) {
-          newAnswers[questionIndex] = answerIndex;
-        } else {
-          newAnswers.add(answerIndex);
+        if (currentPlayer != null) {
+          final newAnswers = List<int>.from(currentPlayer.answers);
+          if (questionIndex < newAnswers.length) {
+            newAnswers[questionIndex] = answerIndex;
+          } else {
+            newAnswers.add(answerIndex);
+          }
+
+          // Calculate score (simplified for optimization)
+          final newScore = currentPlayer.score + 100;
+
+          // Immediate optimistic UI update
+          final optimisticPlayer = currentPlayer.copyWith(
+            answers: newAnswers,
+            score: newScore,
+          );
+
+          final optimisticPlayers = Map<String, PlayerEntity>.from(
+            session.players,
+          );
+          optimisticPlayers[currentUser.id] = optimisticPlayer;
+
+          state = SessionState.loaded(
+            session.copyWith(players: optimisticPlayers),
+          );
+
+          // Batch the actual update
+          await updatePlayerScoreBatched(newScore, newAnswers);
+
+          final latency = DateTime.now().difference(startTime);
+          AppLogger.performance('Answer submission latency', latency);
         }
-
-        // Calculate score (simplified for optimization)
-        final newScore = currentPlayer.score + 100;
-
-        // Immediate optimistic UI update
-        final optimisticPlayer = currentPlayer.copyWith(
-          answers: newAnswers,
-          score: newScore,
-        );
-
-        final optimisticPlayers = Map<String, PlayerEntity>.from(
-          currentSession.players,
-        );
-        optimisticPlayers[currentUser.id] = optimisticPlayer;
-
-        state = SessionState.loaded(
-          currentSession.copyWith(players: optimisticPlayers),
-        );
-
-        // Batch the actual update
-        await updatePlayerScoreBatched(newScore, newAnswers);
-
-        final latency = DateTime.now().difference(startTime);
-        AppLogger.performance('Answer submission latency', latency);
-      }
+        break;
+      default:
+        break;
     }
   }
 

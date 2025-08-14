@@ -53,7 +53,7 @@ class StartupPerformance {
 
     if (totalStartupTime != null) {
       final totalMs = totalStartupTime!.inMilliseconds;
-      summary.writeln('  Total startup: ${totalMs}ms');
+      summary.writeln('  Total startup: $totalMs ms');
 
       // Check against 3-second requirement
       if (totalMs > 3000) {
@@ -65,7 +65,7 @@ class StartupPerformance {
 
     if (firebaseInitTime != null) {
       final firebaseMs = firebaseInitTime!.inMilliseconds;
-      summary.writeln('  Firebase init: ${firebaseMs}ms');
+      summary.writeln('  Firebase init: $firebaseMs ms');
 
       // Check Firebase initialization performance
       if (firebaseMs > 2000) {

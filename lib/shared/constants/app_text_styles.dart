@@ -288,7 +288,7 @@ class AppTextStyles {
   );
 
   // Accessibility enhanced text styles (larger sizes)
-  static const TextStyle gameTitle_Accessible = TextStyle(
+  static const TextStyle gameTitleAccessible = TextStyle(
     fontFamily: _fontFamily,
     fontFamilyFallback: _fontFamilyFallback,
     fontSize: 40,
@@ -298,7 +298,7 @@ class AppTextStyles {
     letterSpacing: -0.6,
   );
 
-  static const TextStyle bodyText_Accessible = TextStyle(
+  static const TextStyle bodyTextAccessible = TextStyle(
     fontFamily: _fontFamily,
     fontFamilyFallback: _fontFamilyFallback,
     fontSize: 20,
@@ -383,4 +383,28 @@ class AppTextStyles {
   static const TextStyle body = bodyText;
   static const TextStyle sectionSubheader = cardTitle;
   static const TextStyle titleMedium = cardTitle;
+
+  // Material Design text styles for theme compatibility
+  static const TextStyle displayLarge = gameTitle;
+  static const TextStyle displayMedium = sectionHeader;
+  static const TextStyle displaySmall = questionText;
+  static const TextStyle headlineLarge = sectionHeader;
+  static const TextStyle headlineSmall = cardTitle;
+  static const TextStyle titleLarge = sectionHeader;
+  static const TextStyle titleSmall = cardDescription;
+  static const TextStyle bodyLarge = bodyText;
+  static const TextStyle bodySmall = caption;
+  static const TextStyle labelLarge = buttonText;
+  static const TextStyle labelMedium = buttonMedium;
+  static const TextStyle buttonLabel = buttonText;
+  // App bar title style
+  static const TextStyle appBarTitle = TextStyle(
+    fontFamily: _fontFamily,
+    fontFamilyFallback: _fontFamilyFallback,
+    fontSize: 24,
+    fontWeight: FontWeight.w600,
+    height: 1.3,
+    color: AppColors.pureWhite,
+    letterSpacing: -0.3,
+  );
 }

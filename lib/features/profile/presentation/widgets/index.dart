@@ -1,5 +1,6 @@
 /// Profile widgets barrel file
 /// Exports all profile-related UI components for easy importing
+library;
 
 export 'avatar_upload_widget.dart';
 export 'profile_field_widget.dart';

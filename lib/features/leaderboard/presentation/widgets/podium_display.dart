@@ -41,11 +41,7 @@ class PodiumDisplay extends StatelessWidget {
 
           return Expanded(
             child:
-                _buildPodiumStep(
-                      entry: entry,
-                      height: height,
-                      rank: entry!.rank,
-                    )
+                _buildPodiumStep(entry: entry, height: height, rank: entry.rank)
                     .animate()
                     .slideY(
                       begin: 1,

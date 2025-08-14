@@ -80,29 +80,92 @@ class _AddQuestionDialogState extends State<AddQuestionDialog>
     super.dispose();
   }
 
-  void _saveQuestion() {
-    if (_questionController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Please enter a question'),
-          backgroundColor: AppColors.coralRed,
-        ),
-      );
-      return;
+  bool _validateQuestion() {
+    // Clear any previous errors
+
+    // Validate question text
+    if (_questionController.text.trim().isEmpty) {
+      _showValidationError('Please enter a question');
+      return false;
     }
 
-    final question = {
-      'question': _questionController.text,
-      'type': _questionType,
-      'options': _options.where((o) => o.isNotEmpty).toList(),
-      'correctAnswer': _correctAnswer,
-      'timeLimit': int.tryParse(_timeLimitController.text) ?? 20,
-      'points': int.tryParse(_pointsController.text) ?? 100,
-      'imageUrl': _imageUrl,
-    };
+    if (_questionController.text.trim().length < 5) {
+      _showValidationError('Question must be at least 5 characters long');
+      return false;
+    }
 
-    widget.onQuestionAdded(question);
-    Navigator.pop(context);
+    // Validate options for multiple choice
+    if (_questionType == 'multiple_choice') {
+      final validOptions = _options.where((o) => o.trim().isNotEmpty).toList();
+      if (validOptions.length < 2) {
+        _showValidationError('Please provide at least 2 answer options');
+        return false;
+      }
+
+      // Check if correct answer is valid
+      if (_correctAnswer >= validOptions.length) {
+        _showValidationError('Please select a valid correct answer');
+        return false;
+      }
+    }
+
+    // Validate time limit
+    final timeLimit = int.tryParse(_timeLimitController.text);
+    if (timeLimit == null || timeLimit < 5 || timeLimit > 300) {
+      _showValidationError('Time limit must be between 5 and 300 seconds');
+      return false;
+    }
+
+    // Validate points
+    final points = int.tryParse(_pointsController.text);
+    if (points == null || points < 10 || points > 10000) {
+      _showValidationError('Points must be between 10 and 10,000');
+      return false;
+    }
+
+    return true;
+  }
+
+  void _showValidationError(String message) {
+    // Also show snackbar for immediate feedback
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(Icons.error_outline, color: Colors.white, size: 20),
+            const SizedBox(width: AppSpacing.spacingS),
+            Expanded(child: Text(message)),
+          ],
+        ),
+        backgroundColor: AppColors.coralRed,
+        behavior: SnackBarBehavior.floating,
+        duration: Duration(seconds: 3),
+      ),
+    );
+  }
+
+  void _saveQuestion() {
+    if (!_validateQuestion()) return;
+
+    // Show loading state briefly for better UX
+
+    // Simulate brief processing time
+    Future.delayed(Duration(milliseconds: 300), () {
+      if (mounted) {
+        final question = {
+          'question': _questionController.text.trim(),
+          'type': _questionType,
+          'options': _options.where((o) => o.trim().isNotEmpty).toList(),
+          'correctAnswer': _correctAnswer,
+          'timeLimit': int.parse(_timeLimitController.text),
+          'points': int.parse(_pointsController.text),
+          'imageUrl': _imageUrl,
+        };
+
+        widget.onQuestionAdded(question);
+        Navigator.pop(context);
+      }
+    });
   }
 
   @override

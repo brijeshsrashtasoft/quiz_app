@@ -354,7 +354,7 @@ class _SecuritySettingsPanelState extends State<SecuritySettingsPanel> {
               SizedBox(height: AppSpacing.spacingM),
               Container(
                 width: double.infinity,
-                padding: AppSpacing.allS,
+                padding: const EdgeInsets.all(AppSpacing.spacingS),
                 decoration: BoxDecoration(
                   color: AppColors.success.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),

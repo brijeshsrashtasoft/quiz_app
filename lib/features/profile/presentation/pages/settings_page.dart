@@ -72,7 +72,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
 
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) {
+      onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
 
         // Handle back button - navigate back to previous page

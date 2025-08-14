@@ -17,12 +17,14 @@ abstract class BaseWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return AnimatedBuilder(
-      animation: rebuildOnThemeChange
-          ? Theme.of(context)
-          : const AlwaysStoppedAnimation(0),
-      builder: (context, child) => buildWidget(context, ref),
-    );
+    if (rebuildOnThemeChange) {
+      return buildWidget(context, ref);
+    } else {
+      return AnimatedBuilder(
+        animation: const AlwaysStoppedAnimation(0),
+        builder: (context, child) => buildWidget(context, ref),
+      );
+    }
   }
 }
 
@@ -92,8 +94,7 @@ abstract class BaseState<T extends BaseStatefulWidget> extends ConsumerState<T>
 }
 
 /// Mixin for widgets that need animation controllers
-mixin AnimationControllerMixin<T extends StatefulWidget>
-    on State<T>, TickerProviderStateMixin {
+mixin AnimationControllerMixin on State, TickerProviderStateMixin {
   final Map<String, AnimationController> _controllers = {};
   final Map<String, Animation> _animations = {};
 
@@ -122,10 +123,10 @@ mixin AnimationControllerMixin<T extends StatefulWidget>
   AnimationController? getController(String key) => _controllers[key];
 
   /// Create and register an animation
-  Animation<T> createAnimation<T>({
+  Animation<U> createAnimation<U>({
     required String key,
     required String controllerKey,
-    required Animatable<T> animatable,
+    required Animatable<U> animatable,
   }) {
     final controller = _controllers[controllerKey];
     if (controller == null) {
@@ -137,8 +138,8 @@ mixin AnimationControllerMixin<T extends StatefulWidget>
   }
 
   /// Get a registered animation
-  Animation<T>? getAnimation<T>(String key) =>
-      _animations[key] as Animation<T>?;
+  Animation<U>? getAnimation<U>(String key) =>
+      _animations[key] as Animation<U>?;
 
   @override
   void dispose() {

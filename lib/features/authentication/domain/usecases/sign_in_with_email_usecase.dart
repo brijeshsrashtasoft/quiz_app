@@ -108,6 +108,5 @@ class SignInWithEmailParams extends BaseUseCaseParams {
 
   const SignInWithEmailParams({required this.email, required this.password});
 
-  @override
   List<Object?> get props => [email, password];
 }

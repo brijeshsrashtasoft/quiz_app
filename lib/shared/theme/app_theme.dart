@@ -27,8 +27,7 @@ class AppTheme {
         onError: AppColors.pureWhite,
         surface: AppColors.pureWhite,
         onSurface: AppColors.charcoal,
-        background: AppColors.offWhite,
-        onBackground: AppColors.charcoal,
+        surfaceContainerLowest: AppColors.offWhite,
         outline: AppColors.lightGray,
         outlineVariant: AppColors.lightGray,
         shadow: AppColors.shadowLight,
@@ -374,8 +373,7 @@ class AppTheme {
         onError: AppColors.pureWhite,
         surface: AppColors.darkSurface,
         onSurface: AppColors.darkPrimaryText,
-        background: AppColors.darkBackground,
-        onBackground: AppColors.darkPrimaryText,
+        surfaceContainerLowest: AppColors.darkBackground,
         outline: AppColors.darkDividers,
         outlineVariant: AppColors.darkDividers,
         shadow: AppColors.shadowDark,
@@ -384,7 +382,7 @@ class AppTheme {
       scaffoldBackgroundColor: AppColors.darkBackground,
 
       // Dark app bar theme
-      appBarTheme: lightTheme.appBarTheme!.copyWith(
+      appBarTheme: lightTheme.appBarTheme.copyWith(
         backgroundColor: AppColors.darkSurface,
         foregroundColor: AppColors.darkPrimaryText,
         titleTextStyle: AppTextStyles.sectionHeaderDark,
@@ -396,7 +394,7 @@ class AppTheme {
       ),
 
       // Dark card theme
-      cardTheme: lightTheme.cardTheme!.copyWith(
+      cardTheme: lightTheme.cardTheme.copyWith(
         color: AppColors.darkSurface,
         shadowColor: AppColors.shadowDark,
       ),
@@ -421,7 +419,7 @@ class AppTheme {
       ),
 
       // Dark input decoration theme
-      inputDecorationTheme: lightTheme.inputDecorationTheme!.copyWith(
+      inputDecorationTheme: lightTheme.inputDecorationTheme.copyWith(
         fillColor: AppColors.darkSurface,
         labelStyle: AppTextStyles.inputLabel.copyWith(
           color: AppColors.darkPrimaryText,
@@ -452,21 +450,21 @@ class AppTheme {
       ),
 
       // Dark bottom navigation theme
-      bottomNavigationBarTheme: lightTheme.bottomNavigationBarTheme!.copyWith(
+      bottomNavigationBarTheme: lightTheme.bottomNavigationBarTheme.copyWith(
         backgroundColor: AppColors.darkSurface,
         selectedItemColor: AppColors.vibrantPurple,
         unselectedItemColor: AppColors.darkSecondaryText,
       ),
 
       // Dark dialog theme
-      dialogTheme: lightTheme.dialogTheme!.copyWith(
+      dialogTheme: lightTheme.dialogTheme.copyWith(
         backgroundColor: AppColors.darkSurface,
         titleTextStyle: AppTextStyles.sectionHeaderDark,
         contentTextStyle: AppTextStyles.bodyTextDark,
       ),
 
       // Dark list tile theme
-      listTileTheme: lightTheme.listTileTheme!.copyWith(
+      listTileTheme: lightTheme.listTileTheme.copyWith(
         titleTextStyle: AppTextStyles.bodyTextDark,
         subtitleTextStyle: AppTextStyles.captionDark,
         iconColor: AppColors.darkSecondaryText,

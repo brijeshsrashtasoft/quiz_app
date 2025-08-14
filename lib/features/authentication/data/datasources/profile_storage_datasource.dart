@@ -78,6 +78,7 @@ class ProfileStorageDataSource {
       final uploadTask = storageRef.putData(imageData, metadata);
 
       // Monitor upload progress if needed (useful for large files)
+      // ignore: unused_result
       uploadTask.snapshotEvents.listen(
         (TaskSnapshot snapshot) {
           final progress = snapshot.bytesTransferred / snapshot.totalBytes;

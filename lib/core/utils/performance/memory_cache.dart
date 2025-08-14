@@ -84,7 +84,7 @@ class MemoryCache<K, V> {
     return {
       'size': _cache.length,
       'maxSize': maxSize,
-      'utilization': (_cache.length / maxSize * 100).toStringAsFixed(1) + '%',
+      'utilization': '${(_cache.length / maxSize * 100).toStringAsFixed(1)}%',
     };
   }
 }

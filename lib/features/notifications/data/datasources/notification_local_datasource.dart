@@ -1,5 +1,4 @@
 import '../models/notification_model.dart';
-import '../../domain/failures/notification_failure.dart';
 
 /// Abstract local data source for notifications
 /// Defines contract for local notification storage (cache, offline support)

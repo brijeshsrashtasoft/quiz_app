@@ -1,5 +1,6 @@
 /// Profile pages barrel file
 /// Exports all profile-related pages for easy importing
+library;
 
 export 'edit_profile_page.dart';
 export 'settings_page.dart';

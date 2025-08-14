@@ -130,6 +130,5 @@ class SignUpWithEmailParams extends BaseUseCaseParams {
     this.displayName,
   });
 
-  @override
   List<Object?> get props => [email, password, displayName];
 }

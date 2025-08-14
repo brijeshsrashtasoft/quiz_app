@@ -2,6 +2,7 @@
 ///
 /// This file provides a single import point for all navigation-related functionality.
 /// Import this file to access routing, navigation utilities, and type-safe navigation.
+library;
 
 // Core routing
 export 'app_router.dart';

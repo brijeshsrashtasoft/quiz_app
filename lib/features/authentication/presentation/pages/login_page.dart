@@ -34,7 +34,6 @@ class _LoginPageState extends ConsumerState<LoginPage>
   late AnimationController _buttonAnimationController;
   late Animation<double> _fadeInAnimation;
   late Animation<Offset> _slideAnimation;
-  late Animation<double> _buttonBounceAnimation;
 
   bool _isLoading = false;
   bool _obscurePassword = true;
@@ -71,13 +70,6 @@ class _LoginPageState extends ConsumerState<LoginPage>
             curve: AppAnimations.bounce,
           ),
         );
-
-    _buttonBounceAnimation = Tween<double>(begin: 1.0, end: 1.1).animate(
-      CurvedAnimation(
-        parent: _buttonAnimationController,
-        curve: AppAnimations.elastic,
-      ),
-    );
 
     _animationController.forward();
     // Subtle continuous bounce for sign-in button
@@ -196,9 +188,9 @@ class _LoginPageState extends ConsumerState<LoginPage>
               label: 'Email',
               hint: 'Enter your email address',
               keyboardType: TextInputType.emailAddress,
-              prefixIcon: Icon(Icons.email_outlined, color: AppColors.coolGray),
               textInputAction: TextInputAction.next,
               validator: validateEmail,
+              prefixIcon: Icon(Icons.email_outlined, color: AppColors.coolGray),
             ),
 
             const SizedBox(height: AppSpacing.spacingL),
@@ -209,6 +201,9 @@ class _LoginPageState extends ConsumerState<LoginPage>
               label: 'Password',
               hint: 'Enter your password',
               obscureText: _obscurePassword,
+              textInputAction: TextInputAction.done,
+              validator: (value) => validatePassword(value, minLength: 6),
+              onSubmitted: (_) => _handleLogin(),
               prefixIcon: Icon(Icons.lock_outlined, color: AppColors.coolGray),
               suffixIcon: IconButton(
                 icon: Icon(
@@ -218,9 +213,6 @@ class _LoginPageState extends ConsumerState<LoginPage>
                 onPressed: () =>
                     setState(() => _obscurePassword = !_obscurePassword),
               ),
-              textInputAction: TextInputAction.done,
-              onSubmitted: (_) => _handleLogin(),
-              validator: (value) => validatePassword(value, minLength: 6),
             ),
 
             const SizedBox(height: AppSpacing.spacingM),
@@ -281,8 +273,8 @@ class _LoginPageState extends ConsumerState<LoginPage>
               text: 'Sign In',
               onPressed: _isLoading ? null : _handleLogin,
               isLoading: _isLoading,
-              icon: Icons.login,
               backgroundColor: AppColors.vibrantPurple,
+              icon: Icons.login,
             ),
 
             const SizedBox(height: AppSpacing.spacingL),

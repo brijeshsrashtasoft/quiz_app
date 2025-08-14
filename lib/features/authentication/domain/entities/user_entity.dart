@@ -13,6 +13,10 @@ class UserEntity with _$UserEntity {
     required DateTime createdAt,
     UserStats? stats,
     String? profileImageUrl,
+    String? photoURL, // For Firebase Auth compatibility
+    String? displayName, // For profile display
+    String? username, // For unique usernames
+    String? bio, // For user description
     UserPreferences? preferences,
   }) = _UserEntity;
 }

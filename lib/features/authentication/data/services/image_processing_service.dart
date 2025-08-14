@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -74,7 +73,7 @@ class ImageProcessingService {
 
       AppLogger.firebase(
         'ImageProcessingService',
-        'Resizing image from ${image.width}x${image.height} to ${newWidth}x${newHeight}',
+        'Resizing image from ${image.width}x${image.height} to ${newWidth}x$newHeight',
       );
 
       // Create a new image with the calculated dimensions

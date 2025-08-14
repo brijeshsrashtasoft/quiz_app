@@ -15,7 +15,6 @@ import '../../../../core/navigation/route_constants.dart';
 import '../../../quiz_creation/presentation/providers/quiz_providers.dart';
 import '../../../quiz_creation/domain/entities/quiz.dart';
 import '../../../authentication/presentation/providers/auth_providers.dart';
-import '../../domain/entities/game_session_entity.dart';
 import '../providers/game_host_setup_providers.dart';
 
 /// Game Host Setup Page - Intermediate configuration page between quiz selection and hosting
@@ -107,10 +106,6 @@ class _GameHostSetupPageState extends ConsumerState<GameHostSetupPage>
   void dispose() {
     _animationController.dispose();
     super.dispose();
-  }
-
-  void _selectQuiz(Quiz quiz) {
-    ref.read(gameHostSetupProvider.notifier).updateSelectedQuiz(quiz);
   }
 
   void _navigateToQuizSelection() {

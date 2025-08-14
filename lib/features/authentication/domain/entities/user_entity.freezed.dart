@@ -23,6 +23,13 @@ mixin _$UserEntity {
   DateTime get createdAt => throw _privateConstructorUsedError;
   UserStats? get stats => throw _privateConstructorUsedError;
   String? get profileImageUrl => throw _privateConstructorUsedError;
+  String? get photoURL =>
+      throw _privateConstructorUsedError; // For Firebase Auth compatibility
+  String? get displayName =>
+      throw _privateConstructorUsedError; // For profile display
+  String? get username =>
+      throw _privateConstructorUsedError; // For unique usernames
+  String? get bio => throw _privateConstructorUsedError; // For user description
   UserPreferences? get preferences => throw _privateConstructorUsedError;
 
   /// Create a copy of UserEntity
@@ -46,6 +53,10 @@ abstract class $UserEntityCopyWith<$Res> {
     DateTime createdAt,
     UserStats? stats,
     String? profileImageUrl,
+    String? photoURL,
+    String? displayName,
+    String? username,
+    String? bio,
     UserPreferences? preferences,
   });
 
@@ -74,6 +85,10 @@ class _$UserEntityCopyWithImpl<$Res, $Val extends UserEntity>
     Object? createdAt = null,
     Object? stats = freezed,
     Object? profileImageUrl = freezed,
+    Object? photoURL = freezed,
+    Object? displayName = freezed,
+    Object? username = freezed,
+    Object? bio = freezed,
     Object? preferences = freezed,
   }) {
     return _then(
@@ -101,6 +116,22 @@ class _$UserEntityCopyWithImpl<$Res, $Val extends UserEntity>
             profileImageUrl: freezed == profileImageUrl
                 ? _value.profileImageUrl
                 : profileImageUrl // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            photoURL: freezed == photoURL
+                ? _value.photoURL
+                : photoURL // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            displayName: freezed == displayName
+                ? _value.displayName
+                : displayName // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            username: freezed == username
+                ? _value.username
+                : username // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            bio: freezed == bio
+                ? _value.bio
+                : bio // ignore: cast_nullable_to_non_nullable
                       as String?,
             preferences: freezed == preferences
                 ? _value.preferences
@@ -156,6 +187,10 @@ abstract class _$$UserEntityImplCopyWith<$Res>
     DateTime createdAt,
     UserStats? stats,
     String? profileImageUrl,
+    String? photoURL,
+    String? displayName,
+    String? username,
+    String? bio,
     UserPreferences? preferences,
   });
 
@@ -185,6 +220,10 @@ class __$$UserEntityImplCopyWithImpl<$Res>
     Object? createdAt = null,
     Object? stats = freezed,
     Object? profileImageUrl = freezed,
+    Object? photoURL = freezed,
+    Object? displayName = freezed,
+    Object? username = freezed,
+    Object? bio = freezed,
     Object? preferences = freezed,
   }) {
     return _then(
@@ -213,6 +252,22 @@ class __$$UserEntityImplCopyWithImpl<$Res>
             ? _value.profileImageUrl
             : profileImageUrl // ignore: cast_nullable_to_non_nullable
                   as String?,
+        photoURL: freezed == photoURL
+            ? _value.photoURL
+            : photoURL // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        displayName: freezed == displayName
+            ? _value.displayName
+            : displayName // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        username: freezed == username
+            ? _value.username
+            : username // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        bio: freezed == bio
+            ? _value.bio
+            : bio // ignore: cast_nullable_to_non_nullable
+                  as String?,
         preferences: freezed == preferences
             ? _value.preferences
             : preferences // ignore: cast_nullable_to_non_nullable
@@ -232,6 +287,10 @@ class _$UserEntityImpl implements _UserEntity {
     required this.createdAt,
     this.stats,
     this.profileImageUrl,
+    this.photoURL,
+    this.displayName,
+    this.username,
+    this.bio,
     this.preferences,
   });
 
@@ -248,11 +307,23 @@ class _$UserEntityImpl implements _UserEntity {
   @override
   final String? profileImageUrl;
   @override
+  final String? photoURL;
+  // For Firebase Auth compatibility
+  @override
+  final String? displayName;
+  // For profile display
+  @override
+  final String? username;
+  // For unique usernames
+  @override
+  final String? bio;
+  // For user description
+  @override
   final UserPreferences? preferences;
 
   @override
   String toString() {
-    return 'UserEntity(id: $id, name: $name, email: $email, createdAt: $createdAt, stats: $stats, profileImageUrl: $profileImageUrl, preferences: $preferences)';
+    return 'UserEntity(id: $id, name: $name, email: $email, createdAt: $createdAt, stats: $stats, profileImageUrl: $profileImageUrl, photoURL: $photoURL, displayName: $displayName, username: $username, bio: $bio, preferences: $preferences)';
   }
 
   @override
@@ -268,6 +339,13 @@ class _$UserEntityImpl implements _UserEntity {
             (identical(other.stats, stats) || other.stats == stats) &&
             (identical(other.profileImageUrl, profileImageUrl) ||
                 other.profileImageUrl == profileImageUrl) &&
+            (identical(other.photoURL, photoURL) ||
+                other.photoURL == photoURL) &&
+            (identical(other.displayName, displayName) ||
+                other.displayName == displayName) &&
+            (identical(other.username, username) ||
+                other.username == username) &&
+            (identical(other.bio, bio) || other.bio == bio) &&
             (identical(other.preferences, preferences) ||
                 other.preferences == preferences));
   }
@@ -281,6 +359,10 @@ class _$UserEntityImpl implements _UserEntity {
     createdAt,
     stats,
     profileImageUrl,
+    photoURL,
+    displayName,
+    username,
+    bio,
     preferences,
   );
 
@@ -301,6 +383,10 @@ abstract class _UserEntity implements UserEntity {
     required final DateTime createdAt,
     final UserStats? stats,
     final String? profileImageUrl,
+    final String? photoURL,
+    final String? displayName,
+    final String? username,
+    final String? bio,
     final UserPreferences? preferences,
   }) = _$UserEntityImpl;
 
@@ -316,6 +402,14 @@ abstract class _UserEntity implements UserEntity {
   UserStats? get stats;
   @override
   String? get profileImageUrl;
+  @override
+  String? get photoURL; // For Firebase Auth compatibility
+  @override
+  String? get displayName; // For profile display
+  @override
+  String? get username; // For unique usernames
+  @override
+  String? get bio; // For user description
   @override
   UserPreferences? get preferences;
 

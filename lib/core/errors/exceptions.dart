@@ -87,3 +87,15 @@ class DataSourceException implements Exception {
 }
 
 enum DataSourceExceptionType { server, network, auth, cache }
+
+/// Unauthorized access exception
+class UnauthorizedException implements Exception {
+  final String message;
+  final String? code;
+
+  const UnauthorizedException({required this.message, this.code});
+
+  @override
+  String toString() =>
+      'UnauthorizedException: $message${code != null ? ' (Code: $code)' : ''}';
+}

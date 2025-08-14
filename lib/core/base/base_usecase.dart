@@ -5,6 +5,9 @@ abstract class BaseUseCase<Type, Params> {
   Future<Result<Type>> call(Params params);
 }
 
+/// UseCase alias for BaseUseCase (for backward compatibility)
+typedef UseCase<Type, Params> = BaseUseCase<Type, Params>;
+
 /// Base use case for no parameters
 abstract class BaseUseCaseNoParams<Type> {
   Future<Result<Type>> call();

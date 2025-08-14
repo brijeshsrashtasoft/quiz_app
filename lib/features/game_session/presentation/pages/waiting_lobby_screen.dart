@@ -11,8 +11,8 @@ import '../widgets/connection_status_indicator.dart';
 import '../widgets/lobby_player_list.dart';
 import '../providers/session_providers.dart';
 import '../../domain/entities/game_session_entity.dart';
-import '../../data/services/game_session_realtime_service.dart' as realtime;
 import '../../../quiz_creation/presentation/providers/quiz_providers.dart';
+import '../../../../core/utils/performance/connection_manager.dart' as conn;
 
 class WaitingLobbyScreen extends ConsumerStatefulWidget {
   final String sessionId;
@@ -84,7 +84,7 @@ class _WaitingLobbyScreenState extends ConsumerState<WaitingLobbyScreen>
       actions: [
         connectionState.when(
           data: (state) => ConnectionStatusIndicator(
-            isConnected: state == realtime.ConnectionState.connected,
+            isConnected: state == conn.ConnectionState.online,
             onReconnect: () {
               // Refresh session data
               ref.invalidate(gameSessionStreamProvider(widget.sessionId));

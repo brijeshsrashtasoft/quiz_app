@@ -364,7 +364,7 @@ class ProfileFirebaseDataSource implements ProfileRemoteDataSource {
 
       final querySnapshot = await _usersCollection
           .where('username', isGreaterThanOrEqualTo: query)
-          .where('username', isLessThan: query + 'z')
+          .where('username', isLessThan: '${query}z')
           .limit(20)
           .get();
 

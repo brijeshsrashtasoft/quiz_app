@@ -103,7 +103,7 @@ class AuthSecurityService {
         expiresAt: sessionEntity.expiresAt,
         isActive: sessionEntity.isActive,
         trustLevel: sessionEntity.isTrusted ? 'trusted' : 'unknown',
-        metadata: {'location': sessionEntity.location ?? ''},
+        metadata: {'location': sessionEntity.location},
       );
 
       // Log successful login event

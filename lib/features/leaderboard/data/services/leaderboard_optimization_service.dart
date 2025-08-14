@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 import '../models/leaderboard_model.dart';
 import '../models/score_model.dart';
@@ -9,7 +11,6 @@ class LeaderboardOptimizationService {
   final _updateDebouncer = <String, Timer>{};
 
   static const _debounceDuration = Duration(milliseconds: 300);
-  static const _batchSize = 10;
 
   Stream<List<ScoreModel>> get batchedScoreUpdates =>
       _scoreUpdateSubject.bufferTime(_debounceDuration);

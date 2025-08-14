@@ -3,16 +3,21 @@ import '../../../../core/utils/logger.dart';
 import '../../../../core/firebase/firestore_config.dart';
 import '../../../../core/utils/result.dart';
 import '../../../../core/errors/failures.dart';
+import '../models/game_session_model.dart';
+import '../../domain/entities/game_session_entity.dart';
 
-/// Optimized PIN lookup service with caching and rate limiting
-/// Follows CLAUDE.md FREE tier optimization guidelines
+/// Enhanced PIN lookup service with real-time validation and caching
+/// Optimized for instant PIN validation with comprehensive error handling
 class PinLookupService {
-  static const int _cacheExpirationMinutes = 5;
-  static const int _rateLimitPerMinute = 10;
+  static const int _cacheExpirationMinutes = 3;
+  static const int _rateLimitPerMinute = 20;
+  static const int _maxCacheSize = 500;
 
-  // In-memory cache for PIN lookups to minimize Firestore reads
+  // Enhanced cache for PIN lookups with session details
   final _pinCache = <String, _PinCacheEntry>{};
   final _lookupHistory = <DateTime>[];
+  final Map<String, StreamSubscription> _activeWatchers = {};
+  Timer? _cleanupTimer;
 
   /// Look up game session by PIN with caching
   Future<Result<String?>> lookupSessionByPin(String pin) async {
@@ -236,23 +241,233 @@ class PinLookupService {
     return chunks;
   }
 
+  /// Enhanced real-time PIN validation with comprehensive session info
+  Future<Result<PinValidationResult>> validatePinRealtime(String pin) async {
+    if (!_isValidPin(pin)) {
+      return Result.success(
+        PinValidationResult(
+          pin: pin,
+          isValid: false,
+          errorMessage: 'PIN must be exactly 6 digits',
+          sessionInfo: null,
+        ),
+      );
+    }
+
+    if (!_checkRateLimit()) {
+      return Result.failure(
+        const ServerFailure(
+          message: 'Too many PIN lookups. Please try again later.',
+        ),
+      );
+    }
+
+    try {
+      final startTime = DateTime.now();
+
+      // Check enhanced cache first
+      final cachedEntry = _pinCache[pin];
+      if (cachedEntry != null &&
+          !cachedEntry.isExpired &&
+          cachedEntry.sessionData != null) {
+        AppLogger.firebase(
+          'PinLookupService',
+          'PIN validation from cache: $pin',
+        );
+        return Result.success(_buildValidationFromCache(pin, cachedEntry));
+      }
+
+      _lookupHistory.add(DateTime.now());
+
+      // Enhanced Firestore query with session details
+      final query = await FirestoreConfig.gameSessionsCollection
+          .where('pin', isEqualTo: pin)
+          .where('status', whereIn: ['waiting', 'active'])
+          .limit(1)
+          .get();
+
+      final duration = DateTime.now().difference(startTime);
+      AppLogger.performance('Real-time PIN validation', duration);
+
+      if (query.docs.isEmpty) {
+        _cachePinResult(pin, null);
+        return Result.success(
+          PinValidationResult(
+            pin: pin,
+            isValid: false,
+            errorMessage: 'PIN not found or game session has ended',
+            sessionInfo: null,
+          ),
+        );
+      }
+
+      final doc = query.docs.first;
+      final data = doc.data();
+      data['id'] = doc.id;
+      final session = GameSessionModel.fromFirestore(data);
+
+      _cachePinResult(pin, session);
+
+      final validationResult = _buildValidationResult(pin, session);
+      return Result.success(validationResult);
+    } catch (e, stackTrace) {
+      AppLogger.error('PIN validation failed: $pin', e, stackTrace);
+      return Result.failure(
+        ServerFailure(message: 'Failed to validate PIN: ${e.toString()}'),
+      );
+    }
+  }
+
+  /// Build validation result from session data
+  PinValidationResult _buildValidationResult(
+    String pin,
+    GameSessionModel session,
+  ) {
+    final entity = session.toEntity();
+
+    return PinValidationResult(
+      pin: pin,
+      isValid: true,
+      errorMessage: null,
+      sessionInfo: SessionInfo(
+        sessionId: session.id,
+        pin: pin,
+        status: session.status,
+        playerCount: session.players.length,
+        maxPlayers: session.settings?.maxPlayers ?? 50,
+        canJoin: session.status == GameSessionStatus.waiting && !entity.isFull,
+        createdAt: session.createdAt,
+      ),
+    );
+  }
+
+  /// Build validation result from cache
+  PinValidationResult _buildValidationFromCache(
+    String pin,
+    _PinCacheEntry cached,
+  ) {
+    if (cached.sessionData == null) {
+      return PinValidationResult(
+        pin: pin,
+        isValid: false,
+        errorMessage: 'PIN not found or session has ended',
+        sessionInfo: null,
+      );
+    }
+
+    return _buildValidationResult(pin, cached.sessionData!);
+  }
+
+  /// Cache PIN result with enhanced session data
+  void _cachePinResult(String pin, GameSessionModel? session) {
+    if (_pinCache.length >= _maxCacheSize) {
+      clearExpiredCache();
+    }
+
+    _pinCache[pin] = _PinCacheEntry(
+      sessionId: session?.id,
+      sessionData: session,
+      timestamp: DateTime.now(),
+    );
+  }
+
   /// Clear all cache
   void clearCache() {
     _pinCache.clear();
     _lookupHistory.clear();
     AppLogger.firebase('PinLookupService', 'Cache cleared');
   }
+
+  /// Dispose service and cleanup resources
+  void dispose() {
+    _cleanupTimer?.cancel();
+
+    for (final subscription in _activeWatchers.values) {
+      subscription.cancel();
+    }
+    _activeWatchers.clear();
+
+    clearCache();
+
+    AppLogger.firebase('PinLookupService', 'Disposed PIN lookup service');
+  }
 }
 
-/// Cache entry for PIN lookups
+/// Enhanced cache entry for PIN lookups with session data
 class _PinCacheEntry {
   final String? sessionId;
+  final GameSessionModel? sessionData;
   final DateTime timestamp;
 
-  _PinCacheEntry({required this.sessionId, required this.timestamp});
+  _PinCacheEntry({
+    required this.sessionId,
+    this.sessionData,
+    required this.timestamp,
+  });
 
   bool get isExpired {
     final age = DateTime.now().difference(timestamp);
     return age.inMinutes >= PinLookupService._cacheExpirationMinutes;
   }
+}
+
+/// PIN validation result
+class PinValidationResult {
+  final String pin;
+  final bool isValid;
+  final String? errorMessage;
+  final SessionInfo? sessionInfo;
+
+  const PinValidationResult({
+    required this.pin,
+    required this.isValid,
+    this.errorMessage,
+    this.sessionInfo,
+  });
+}
+
+/// Session information
+class SessionInfo {
+  final String sessionId;
+  final String pin;
+  final GameSessionStatus status;
+  final int playerCount;
+  final int maxPlayers;
+  final bool canJoin;
+  final DateTime createdAt;
+
+  const SessionInfo({
+    required this.sessionId,
+    required this.pin,
+    required this.status,
+    required this.playerCount,
+    required this.maxPlayers,
+    required this.canJoin,
+    required this.createdAt,
+  });
+
+  bool get isFull => playerCount >= maxPlayers;
+  int get availableSlots => maxPlayers - playerCount;
+  double get fillPercentage => maxPlayers > 0 ? playerCount / maxPlayers : 0.0;
+}
+
+/// PIN status update for real-time monitoring
+class PinStatusUpdate {
+  final String pin;
+  final bool exists;
+  final GameSessionStatus? status;
+  final int playerCount;
+  final int maxPlayers;
+  final bool canJoin;
+  final DateTime lastUpdated;
+
+  const PinStatusUpdate({
+    required this.pin,
+    required this.exists,
+    this.status,
+    required this.playerCount,
+    required this.maxPlayers,
+    required this.canJoin,
+    required this.lastUpdated,
+  });
 }

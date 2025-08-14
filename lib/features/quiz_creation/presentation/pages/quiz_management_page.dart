@@ -82,7 +82,6 @@ class _QuizManagementPageState extends ConsumerState<QuizManagementPage>
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final isTablet = size.width > 600;
     final isDesktop = size.width > 1200;
 
     // Watch both published and draft quizzes
@@ -247,8 +246,10 @@ class _QuizManagementPageState extends ConsumerState<QuizManagementPage>
             const SizedBox(height: AppSpacing.spacingXL),
             PrimaryButton(
               onPressed: () {
-                // Refresh the providers
+                // Refresh the providers - explicitly ignore return values for refresh operations
+                // ignore: unused_result
                 ref.refresh(userQuizzesProvider);
+                // ignore: unused_result
                 ref.refresh(userDraftQuizzesProvider);
               },
               text: 'Try Again',
@@ -501,46 +502,181 @@ class _QuizManagementPageState extends ConsumerState<QuizManagementPage>
   }
 
   void _showSearchDialog() {
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Search Quizzes', style: AppTextStyles.sectionHeader),
-        content: TextField(
-          autofocus: true,
-          decoration: InputDecoration(
-            hintText: 'Search by title, description, or category',
-            hintStyle: AppTextStyles.inputHint,
-            prefixIcon: Icon(Icons.search, color: AppColors.coolGray),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-          ),
-          onChanged: (value) {
-            setState(() {
-              _searchQuery = value;
-            });
-          },
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
         ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              setState(() {
-                _searchQuery = '';
-              });
-              Navigator.pop(context);
-            },
-            child: Text(
-              'Clear',
-              style: AppTextStyles.buttonMedium.copyWith(
-                color: AppColors.coolGray,
+        child: Container(
+          padding: const EdgeInsets.all(AppSpacing.spacingL),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.search, color: AppColors.vibrantPurple, size: 24),
+                  const SizedBox(width: AppSpacing.spacingS),
+                  Text('Search & Filter', style: AppTextStyles.sectionHeader),
+                  const Spacer(),
+                  if (_searchQuery.isNotEmpty)
+                    TextButton(
+                      onPressed: () {
+                        setState(() {
+                          _searchQuery = '';
+                        });
+                      },
+                      child: Text(
+                        'Clear',
+                        style: AppTextStyles.buttonMedium.copyWith(
+                          color: AppColors.coralRed,
+                        ),
+                      ),
+                    ),
+                ],
               ),
-            ),
+              const SizedBox(height: AppSpacing.spacingL),
+
+              // Search input with enhanced design
+              Container(
+                decoration: BoxDecoration(
+                  color: AppColors.offWhite,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.lightGray),
+                ),
+                child: TextField(
+                  autofocus: true,
+                  controller: TextEditingController(text: _searchQuery),
+                  decoration: InputDecoration(
+                    hintText: 'Search by title, description, or category',
+                    hintStyle: AppTextStyles.inputHint,
+                    prefixIcon: Icon(Icons.search, color: AppColors.coolGray),
+                    suffixIcon: _searchQuery.isNotEmpty
+                        ? IconButton(
+                            icon: Icon(Icons.clear, color: AppColors.coolGray),
+                            onPressed: () {
+                              setState(() {
+                                _searchQuery = '';
+                              });
+                            },
+                          )
+                        : null,
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.spacingM,
+                      vertical: AppSpacing.spacingM,
+                    ),
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      _searchQuery = value;
+                    });
+                  },
+                ),
+              ),
+
+              const SizedBox(height: AppSpacing.spacingL),
+
+              // Quick filter suggestions
+              Text(
+                'Quick Filters',
+                style: AppTextStyles.bodyText.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.spacingM),
+
+              Wrap(
+                spacing: AppSpacing.spacingS,
+                runSpacing: AppSpacing.spacingS,
+                children: [
+                  _buildQuickFilterChip('General Knowledge'),
+                  _buildQuickFilterChip('Science'),
+                  _buildQuickFilterChip('History'),
+                  _buildQuickFilterChip('Technology'),
+                  _buildQuickFilterChip('Sports'),
+                ],
+              ),
+
+              const SizedBox(height: AppSpacing.spacingXL),
+
+              // Action buttons
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () {
+                        setState(() {
+                          _searchQuery = '';
+                          _selectedFilter = 'all';
+                        });
+                        Navigator.pop(context);
+                      },
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: AppSpacing.spacingM,
+                        ),
+                        side: BorderSide(color: AppColors.coolGray),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Text(
+                        'Reset All',
+                        style: AppTextStyles.buttonMedium.copyWith(
+                          color: AppColors.coolGray,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.spacingM),
+                  Expanded(
+                    child: PrimaryButton(
+                      onPressed: () => Navigator.pop(context),
+                      text: 'Apply',
+                      backgroundColor: AppColors.vibrantPurple,
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-          PrimaryButton(
-            onPressed: () => Navigator.pop(context),
-            text: 'Done',
-            backgroundColor: AppColors.vibrantPurple,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuickFilterChip(String category) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _searchQuery = category;
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.spacingM,
+          vertical: AppSpacing.spacingS,
+        ),
+        decoration: BoxDecoration(
+          color: AppColors.vibrantPurple.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: AppColors.vibrantPurple.withValues(alpha: 0.3),
           ),
-        ],
+        ),
+        child: Text(
+          category,
+          style: AppTextStyles.caption.copyWith(
+            color: AppColors.vibrantPurple,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
       ),
     );
   }
@@ -550,10 +686,51 @@ class _QuizManagementPageState extends ConsumerState<QuizManagementPage>
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Delete Quiz?', style: AppTextStyles.sectionHeader),
-        content: Text(
-          'Are you sure you want to delete "${quiz.title}"? This action cannot be undone.',
-          style: AppTextStyles.bodyText,
+        title: Row(
+          children: [
+            Icon(Icons.warning, color: AppColors.coralRed, size: 24),
+            const SizedBox(width: AppSpacing.spacingS),
+            Text('Delete Quiz?', style: AppTextStyles.sectionHeader),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.spacingM),
+              decoration: BoxDecoration(
+                color: AppColors.coralRed.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: AppColors.coralRed.withValues(alpha: 0.3),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Quiz: ${quiz.title}',
+                    style: AppTextStyles.bodyText.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.spacingXS),
+                  Text(
+                    '${quiz.questions.length} questions will be permanently deleted',
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.coolGray,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSpacing.spacingM),
+            Text(
+              'This action cannot be undone. All game sessions using this quiz will also be affected.',
+              style: AppTextStyles.bodyText,
+            ),
+          ],
         ),
         actions: [
           TextButton(
@@ -568,28 +745,225 @@ class _QuizManagementPageState extends ConsumerState<QuizManagementPage>
           PrimaryButton(
             onPressed: () {
               Navigator.pop(context);
-              // TODO: Implement actual deletion
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Quiz deletion not implemented yet'),
-                  backgroundColor: AppColors.warmYellow,
-                ),
-              );
+              _performQuizDeletion(quiz);
             },
-            text: 'Delete',
+            text: 'Delete Forever',
             backgroundColor: AppColors.coralRed,
+            icon: Icons.delete_forever,
           ),
         ],
       ),
     );
   }
 
-  void _shareQuiz(Quiz quiz) {
-    // TODO: Implement sharing functionality
+  void _performQuizDeletion(Quiz quiz) {
+    // Show loading indicator
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Quiz sharing not implemented yet'),
+      SnackBar(
+        content: Row(
+          children: [
+            SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation(Colors.white),
+              ),
+            ),
+            const SizedBox(width: AppSpacing.spacingM),
+            Text('Deleting quiz...'),
+          ],
+        ),
+        backgroundColor: AppColors.coralRed,
+        duration: Duration(seconds: 3),
+      ),
+    );
+
+    // TODO: Implement actual deletion with proper error handling
+    Future.delayed(Duration(seconds: 1), () {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.info, color: Colors.white, size: 20),
+                const SizedBox(width: AppSpacing.spacingS),
+                Text('Quiz deletion feature is not yet implemented'),
+              ],
+            ),
+            backgroundColor: AppColors.warmYellow,
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+    });
+  }
+
+  void _shareQuiz(Quiz quiz) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(AppSpacing.spacingL),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.share, color: AppColors.mintGreen, size: 24),
+                const SizedBox(width: AppSpacing.spacingS),
+                Text('Share Quiz', style: AppTextStyles.sectionHeader),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.spacingL),
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.spacingM),
+              decoration: BoxDecoration(
+                color: AppColors.offWhite,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.quiz, color: AppColors.vibrantPurple, size: 40),
+                  const SizedBox(width: AppSpacing.spacingM),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          quiz.title,
+                          style: AppTextStyles.cardTitle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          '${quiz.questions.length} questions • ${quiz.metadata.category}',
+                          style: AppTextStyles.caption,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSpacing.spacingL),
+            Row(
+              children: [
+                Expanded(
+                  child: PrimaryButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      _copyQuizLink(quiz);
+                    },
+                    text: 'Copy Link',
+                    icon: Icons.link,
+                    backgroundColor: AppColors.turquoise,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.spacingM),
+                Expanded(
+                  child: PrimaryButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      _shareQuizCode(quiz);
+                    },
+                    text: 'Share Code',
+                    icon: Icons.qr_code,
+                    backgroundColor: AppColors.vibrantPurple,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.spacingM),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'Cancel',
+                style: AppTextStyles.buttonMedium.copyWith(
+                  color: AppColors.coolGray,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _copyQuizLink(Quiz quiz) {
+    // Generate shareable link (placeholder implementation)
+    // final link = 'https://myquizapp.com/quiz/${quiz.id}';
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(Icons.info, color: Colors.white, size: 20),
+            const SizedBox(width: AppSpacing.spacingS),
+            Text('Quiz sharing feature coming soon!'),
+          ],
+        ),
         backgroundColor: AppColors.mintGreen,
+        action: SnackBarAction(
+          label: 'Got it',
+          textColor: Colors.white,
+          onPressed: () {},
+        ),
+      ),
+    );
+  }
+
+  void _shareQuizCode(Quiz quiz) {
+    // Generate shareable code (placeholder implementation)
+    final code = quiz.id.substring(0, 6).toUpperCase();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text('Quiz Code', style: AppTextStyles.sectionHeader),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Players can join using this code:',
+              style: AppTextStyles.bodyText,
+            ),
+            const SizedBox(height: AppSpacing.spacingL),
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.spacingL),
+              decoration: BoxDecoration(
+                color: AppColors.vibrantPurple.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.vibrantPurple),
+              ),
+              child: Text(
+                code,
+                style: AppTextStyles.gameTitle.copyWith(
+                  color: AppColors.vibrantPurple,
+                  letterSpacing: 4,
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.spacingM),
+            Text(
+              'Feature coming soon!',
+              style: AppTextStyles.caption.copyWith(
+                color: AppColors.coolGray,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          PrimaryButton(
+            onPressed: () => Navigator.pop(context),
+            text: 'Got it',
+            backgroundColor: AppColors.vibrantPurple,
+          ),
+        ],
       ),
     );
   }

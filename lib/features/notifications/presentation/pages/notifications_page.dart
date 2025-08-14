@@ -464,7 +464,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage>
           // Show grouped notifications
           ...groupedNotifications.entries.map((entry) {
             return _buildNotificationGroup(entry.key, entry.value);
-          }).toList(),
+          }),
         ] else ...[
           // Show flat list for specific category
           SliverList(

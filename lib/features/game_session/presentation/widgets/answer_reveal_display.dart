@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:collection/collection.dart';
 import '../../../quiz_creation/domain/entities/question_entities.dart';
 import '../../domain/entities/game_session_entity.dart';
 import '../../../../shared/constants/app_colors.dart';
@@ -252,7 +251,9 @@ class AnswerRevealDisplay extends ConsumerWidget {
             ],
           ),
           SizedBox(height: AppSpacing.spacingM),
-          ...correctPlayers.take(5).mapIndexed((index, entry) {
+          ...correctPlayers.take(5).toList().asMap().entries.map((mapEntry) {
+            final index = mapEntry.key;
+            final entry = mapEntry.value;
             final player = entry.value!;
             final delay = Duration(milliseconds: 100 * index);
 

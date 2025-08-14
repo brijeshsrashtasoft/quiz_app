@@ -7,6 +7,7 @@ import '../../../quiz_creation/presentation/providers/quiz_providers.dart';
 import '../../domain/entities/game_session_entity.dart';
 import '../providers/session_providers.dart';
 import '../../../authentication/presentation/providers/auth_providers.dart';
+import '../../../../core/utils/performance/connection_manager.dart' as conn;
 import '../widgets/question_display.dart';
 import '../widgets/answer_submission_panel.dart';
 import '../widgets/answer_reveal_display.dart';
@@ -38,7 +39,7 @@ class GamePlayPage extends ConsumerStatefulWidget {
 class _GamePlayPageState extends ConsumerState<GamePlayPage> {
   int _currentQuestionIndex = 0;
   bool _showingAnswerReveal = false;
-  Map<String, int> _currentAnswers = {};
+  final Map<String, int> _currentAnswers = {};
   bool _hasAnsweredCurrentQuestion = false;
 
   @override
@@ -109,9 +110,8 @@ class _GamePlayPageState extends ConsumerState<GamePlayPage> {
     });
 
     // Auto-advance after reveal for non-hosts
-    final isHost =
-        ref.read(userSessionRoleProvider(widget.sessionId)).value ==
-        UserSessionRole.host;
+    final userRole = ref.read(userSessionRoleProvider(widget.sessionId)).value;
+    final isHost = userRole != null && userRole == UserSessionRole.host;
     if (!isHost) {
       Future.delayed(const Duration(seconds: 5), () {
         if (mounted) {
@@ -126,9 +126,8 @@ class _GamePlayPageState extends ConsumerState<GamePlayPage> {
     if (quizAsync.value == null) return;
 
     final quiz = quizAsync.value!;
-    final isHost =
-        ref.read(userSessionRoleProvider(widget.sessionId)).value ==
-        UserSessionRole.host;
+    final userRole = ref.read(userSessionRoleProvider(widget.sessionId)).value;
+    final isHost = userRole != null && userRole == UserSessionRole.host;
 
     if (!isHost) return; // Only host can advance questions
 
@@ -186,10 +185,10 @@ class _GamePlayPageState extends ConsumerState<GamePlayPage> {
                     title: 'Game data not found',
                     message: 'The game session or quiz could not be loaded.',
                     onRetry: () {
-                      ref.refresh(
+                      ref.invalidate(
                         optimizedSessionStreamProvider(widget.sessionId),
                       );
-                      ref.refresh(quizByIdProvider(widget.quizId));
+                      ref.invalidate(quizByIdProvider(widget.quizId));
                     },
                   ),
                 );
@@ -209,7 +208,9 @@ class _GamePlayPageState extends ConsumerState<GamePlayPage> {
                     right: 16,
                     child: ConnectionStatusIndicator(
                       isConnected:
-                          connectionState.value == ConnectionState.active,
+                          connectionState.hasValue &&
+                          connectionState.valueOrNull ==
+                              conn.ConnectionState.online,
                     ),
                   ),
                 ],
@@ -217,31 +218,32 @@ class _GamePlayPageState extends ConsumerState<GamePlayPage> {
             },
             loading: () => const Center(
               child: LoadingOverlay(
-                child: CircularProgressIndicator(),
                 isLoading: true,
+                child: CircularProgressIndicator(),
               ),
             ),
             error: (error, _) => Center(
               child: AppErrorWidget(
                 title: 'Error loading quiz',
                 message: error.toString(),
-                onRetry: () => ref.refresh(quizByIdProvider(widget.quizId)),
+                onRetry: () => ref.invalidate(quizByIdProvider(widget.quizId)),
               ),
             ),
           );
         },
         loading: () => const Center(
           child: LoadingOverlay(
-            child: CircularProgressIndicator(),
             isLoading: true,
+            child: CircularProgressIndicator(),
           ),
         ),
         error: (error, _) => Center(
           child: AppErrorWidget(
             title: 'Error loading session',
             message: error.toString(),
-            onRetry: () =>
-                ref.refresh(optimizedSessionStreamProvider(widget.sessionId)),
+            onRetry: () => ref.invalidate(
+              optimizedSessionStreamProvider(widget.sessionId),
+            ),
           ),
         ),
       ),

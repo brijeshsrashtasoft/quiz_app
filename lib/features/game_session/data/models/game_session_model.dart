@@ -188,6 +188,12 @@ extension GameSessionModelX on GameSessionModel {
   bool canUserJoin(String userId) {
     return toEntity().canUserJoin(userId);
   }
+
+  /// Get current player count (delegates to entity logic)
+  int get playerCount => toEntity().playerCount;
+
+  /// Check if session is full (delegates to entity logic)
+  bool get isFull => toEntity().isFull;
 }
 
 extension PlayerModelX on PlayerModel {

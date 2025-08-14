@@ -18,7 +18,7 @@ class ValidateQuizUseCase {
       return Result.failure(quizResult.failureOrNull!);
     }
 
-    final quiz = quizResult.dataOrNull!;
+    final Quiz quiz = quizResult.dataOrNull!;
 
     // Perform validation
     final errors = <String>[];

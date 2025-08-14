@@ -67,7 +67,7 @@ class _NotificationFilterBarWidgetState
                 category,
               ),
             );
-          }).toList(),
+          }),
         ],
       ),
     );

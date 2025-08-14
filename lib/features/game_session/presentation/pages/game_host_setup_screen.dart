@@ -157,7 +157,9 @@ class _GameHostSetupScreenState extends ConsumerState<GameHostSetupScreen>
               child: CircularProgressIndicator(color: AppColors.vibrantPurple),
             ),
             error: (error, stack) => _buildErrorState(error),
-            data: (quiz) => _buildSetupContent(quiz),
+            data: (quiz) => quiz != null
+                ? _buildSetupContent(quiz)
+                : _buildErrorState('Quiz not found'),
           ),
         ),
       ),
@@ -231,7 +233,7 @@ class _GameHostSetupScreenState extends ConsumerState<GameHostSetupScreen>
           Row(
             children: [
               Container(
-                padding: AppSpacing.allS,
+                padding: const EdgeInsets.all(AppSpacing.spacingS),
                 decoration: BoxDecoration(
                   color: AppColors.vibrantPurple.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
@@ -261,7 +263,7 @@ class _GameHostSetupScreenState extends ConsumerState<GameHostSetupScreen>
           ),
           const SizedBox(height: AppSpacing.spacingM),
           Container(
-            padding: AppSpacing.allS,
+            padding: const EdgeInsets.all(AppSpacing.spacingS),
             decoration: BoxDecoration(
               color: AppColors.offWhite,
               borderRadius: BorderRadius.circular(8),
@@ -473,8 +475,8 @@ class _GameHostSetupScreenState extends ConsumerState<GameHostSetupScreen>
           Material(
             color: Colors.transparent,
             child: InkWell(
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(12),
+              borderRadius: BorderRadius.vertical(
+                top: const Radius.circular(12),
                 bottom: Radius.circular(isCollapsible ? 0 : 12),
               ),
               onTap: isCollapsible
@@ -485,7 +487,7 @@ class _GameHostSetupScreenState extends ConsumerState<GameHostSetupScreen>
                 child: Row(
                   children: [
                     Container(
-                      padding: AppSpacing.allS,
+                      padding: const EdgeInsets.all(AppSpacing.spacingS),
                       decoration: BoxDecoration(
                         color: iconColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),

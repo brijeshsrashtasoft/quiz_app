@@ -26,9 +26,6 @@ import '../../features/game_session/presentation/pages/quiz_selection_screen.dar
 import '../../features/game_session/presentation/pages/game_host_setup_page.dart';
 import '../../features/game_session/presentation/pages/game_session_router.dart';
 import '../../features/game_session/presentation/pages/answer_reveal_screen.dart';
-import '../../features/ui_showcase/presentation/pages/ui_showcase_page.dart';
-import '../../features/ui_showcase/presentation/pages/theme_settings_page.dart';
-import '../../features/ui_showcase/presentation/pages/all_components_demo_page.dart';
 import '../../shared/widgets/error/error_page_widget.dart';
 import '../../shared/widgets/deep_link/game_join_widget.dart';
 import '../../features/splash/presentation/pages/splash_redirect_page.dart';
@@ -395,88 +392,6 @@ class AppRouter {
 
               return SessionLeaderboardPage(sessionId: sessionId);
             },
-          ),
-        ],
-      ),
-
-      // UI Showcase routes
-      GoRoute(
-        path: RouteConstants.uiShowcase,
-        name: 'ui-showcase',
-        builder: (context, state) => const UIShowcasePage(),
-        routes: [
-          GoRoute(
-            path: 'buttons',
-            name: 'ui-showcase-buttons',
-            builder: (context, state) => const PlaceholderPage(
-              title: 'Answer Buttons',
-              subtitle: 'Interactive answer buttons with shapes and animations',
-              icon: Icons.radio_button_checked,
-            ),
-          ),
-          GoRoute(
-            path: 'animations',
-            name: 'ui-showcase-animations',
-            builder: (context, state) => const PlaceholderPage(
-              title: 'Animations',
-              subtitle: 'Smooth transitions and micro-interactions',
-              icon: Icons.animation,
-            ),
-          ),
-          GoRoute(
-            path: 'timers',
-            name: 'ui-showcase-timers',
-            builder: (context, state) => const PlaceholderPage(
-              title: 'Countdown Timers',
-              subtitle: 'Animated timer with progress indicators',
-              icon: Icons.timer,
-            ),
-          ),
-          GoRoute(
-            path: 'effects',
-            name: 'ui-showcase-effects',
-            builder: (context, state) => const PlaceholderPage(
-              title: 'Particle Effects',
-              subtitle: 'Celebration effects and visual feedback',
-              icon: Icons.auto_awesome,
-            ),
-          ),
-          GoRoute(
-            path: 'lobby',
-            name: 'ui-showcase-lobby',
-            builder: (context, state) => const PlaceholderPage(
-              title: 'Lobby Screen',
-              subtitle: 'Waiting room with animated player avatars',
-              icon: Icons.people,
-            ),
-          ),
-          GoRoute(
-            path: 'themes',
-            name: 'ui-showcase-themes',
-            builder: (context, state) => const ThemeSettingsPage(),
-          ),
-          GoRoute(
-            path: 'loading',
-            name: 'ui-showcase-loading',
-            builder: (context, state) => const PlaceholderPage(
-              title: 'Loading States',
-              subtitle: 'Engaging loading animations and spinners',
-              icon: Icons.hourglass_empty,
-            ),
-          ),
-          GoRoute(
-            path: 'scores',
-            name: 'ui-showcase-scores',
-            builder: (context, state) => const PlaceholderPage(
-              title: 'Score Counter',
-              subtitle: 'Animated score displays and achievements',
-              icon: Icons.emoji_events,
-            ),
-          ),
-          GoRoute(
-            path: 'all-components',
-            name: 'ui-showcase-all',
-            builder: (context, state) => const AllComponentsDemoPage(),
           ),
         ],
       ),

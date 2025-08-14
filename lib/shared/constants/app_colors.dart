@@ -35,6 +35,7 @@ class AppColors {
   // Dark Mode Colors
   static const Color darkBackground = Color(0xFF1E1E1E);
   static const Color darkSurface = Color(0xFF2D2D2D);
+  static const Color darkGray = Color(0xFF2D2D2D); // Alias for dark surface
   static const Color darkPrimaryText = Color(0xFFF5F3F4);
   static const Color darkSecondaryText = Color(0xFFB2BEC3);
   static const Color darkDividers = Color(0xFF3D3D3D);
@@ -66,8 +67,15 @@ class AppColors {
 
   // Background Colors (aliases for consistency)
   static const Color backgroundPrimary = offWhite;
+  static const Color background = offWhite; // Alias for theme compatibility
   static const Color backgroundLight = Color(0xFFFAFAFA);
   static const Color backgroundSecondary = pureWhite;
+
+  // Additional missing getters for theme compatibility
+  static const Color mediumGray = Color(0xFF95A5A6);
+  static const Color primary = vibrantPurple; // Primary brand color alias
+  static const Color surface = pureWhite; // Surface color alias
+  static const Color divider = lightGray; // Divider color alias
 
   // Gradient Colors for special effects
   static const LinearGradient purpleGradient = LinearGradient(

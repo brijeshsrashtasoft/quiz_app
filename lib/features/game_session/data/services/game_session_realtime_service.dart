@@ -4,6 +4,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/firebase/firestore_config.dart';
+import '../../../../core/utils/performance/connection_manager.dart' as conn;
 import '../models/game_session_model.dart';
 import '../../domain/entities/game_session_entity.dart';
 
@@ -17,18 +18,19 @@ class GameSessionRealtimeService {
   final _connectivity = Connectivity();
   final _activeStreams = <String, StreamSubscription>{};
   final _connectionStateController =
-      StreamController<ConnectionState>.broadcast();
+      StreamController<conn.ConnectionState>.broadcast();
   final _pendingUpdates = <String, List<Map<String, dynamic>>>{};
 
   Timer? _batchUpdateTimer;
   int _reconnectAttempts = 0;
   bool _isOnline = true;
 
-  Stream<ConnectionState> get connectionState =>
+  Stream<conn.ConnectionState> get connectionState =>
       _connectionStateController.stream;
 
   /// Initialize connection monitoring
   void initialize() {
+    // ignore: unused_result
     _connectivity.onConnectivityChanged.listen((results) {
       // Handle List<ConnectivityResult> returned by newer connectivity_plus
       final result = results.isNotEmpty
@@ -78,7 +80,7 @@ class GameSessionRealtimeService {
                 // Update connection state
                 if (!isFromCache && !_isOnline) {
                   _isOnline = true;
-                  _connectionStateController.add(ConnectionState.connected);
+                  _connectionStateController.add(conn.ConnectionState.online);
                 }
               } catch (e) {
                 AppLogger.error('Failed to parse session data', e);
@@ -203,11 +205,11 @@ class GameSessionRealtimeService {
 
     if (_isOnline && !wasOnline) {
       // Coming back online - reconnect streams
-      _connectionStateController.add(ConnectionState.reconnecting);
+      _connectionStateController.add(conn.ConnectionState.syncing);
       _reconnectStreams();
     } else if (!_isOnline && wasOnline) {
       // Going offline
-      _connectionStateController.add(ConnectionState.offline);
+      _connectionStateController.add(conn.ConnectionState.offline);
     }
   }
 
@@ -224,7 +226,7 @@ class GameSessionRealtimeService {
       // Also check Firestore connectivity
       final isFirestoreConnected = await FirestoreConfig.checkConnectivity();
       if (!isFirestoreConnected && _isOnline) {
-        _connectionStateController.add(ConnectionState.error);
+        _connectionStateController.add(conn.ConnectionState.error);
       }
     } catch (e) {
       AppLogger.error('Connectivity check failed', e);
@@ -251,7 +253,7 @@ class GameSessionRealtimeService {
         },
       );
     } else {
-      _connectionStateController.add(ConnectionState.error);
+      _connectionStateController.add(conn.ConnectionState.error);
     }
   }
 
@@ -341,9 +343,7 @@ extension StreamDebounce<T> on Stream<T> {
     return transform(
       StreamTransformer<T, T>.fromHandlers(
         handleData: (data, sink) {
-          Timer? timer;
-          timer?.cancel();
-          timer = Timer(duration, () => sink.add(data));
+          Timer(duration, () => sink.add(data));
         },
       ),
     );

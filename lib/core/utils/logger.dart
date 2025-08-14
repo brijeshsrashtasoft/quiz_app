@@ -49,10 +49,10 @@ class AppLogger {
     if (ms > 200) {
       // Following CLAUDE.md 200ms latency requirement
       _logger.w(
-        'Performance warning: $operation took ${ms}ms (>200ms threshold)',
+        'Performance warning: $operation took $ms ms (>200ms threshold),',
       );
     } else {
-      _logger.d('Performance: $operation completed in ${ms}ms');
+      _logger.d('Performance: $operation completed in $ms ms');
     }
   }
 }

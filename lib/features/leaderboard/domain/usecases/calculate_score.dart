@@ -1,15 +1,14 @@
-import 'package:dartz/dartz.dart';
-import 'package:equatable/equatable.dart';
+import '../../../../core/base/base_usecase.dart';
+import '../../../../core/utils/result.dart';
 import '../../../../core/errors/failures.dart';
-import '../../../../core/usecases/usecase.dart';
 import '../entities/score_entity.dart';
 import '../entities/score_multiplier.dart';
 
-class CalculateScore implements UseCase<ScoreEntity, CalculateScoreParams> {
-  const CalculateScore();
+class CalculateScore extends BaseUseCase<ScoreEntity, CalculateScoreParams> {
+  CalculateScore();
 
   @override
-  Future<Either<Failure, ScoreEntity>> call(CalculateScoreParams params) async {
+  Future<Result<ScoreEntity>> call(CalculateScoreParams params) async {
     try {
       final multiplier =
           params.multiplier ??
@@ -51,14 +50,14 @@ class CalculateScore implements UseCase<ScoreEntity, CalculateScoreParams> {
         isCorrect: params.isCorrect,
       );
 
-      return Right(score);
+      return Result.success(score);
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Result.failure(ServerFailure(message: e.toString()));
     }
   }
 }
 
-class CalculateScoreParams extends Equatable {
+class CalculateScoreParams extends BaseUseCaseParams {
   final String playerId;
   final String playerName;
   final bool isCorrect;
@@ -79,7 +78,6 @@ class CalculateScoreParams extends Equatable {
     this.multiplier,
   });
 
-  @override
   List<Object?> get props => [
     playerId,
     playerName,

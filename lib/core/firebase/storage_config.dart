@@ -60,6 +60,7 @@ class StorageConfig {
       final uploadTask = ref.putData(Uint8List.fromList(imageBytes), metadata);
 
       // Monitor upload progress
+      // ignore: unused_result
       uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
         final progress = snapshot.bytesTransferred / snapshot.totalBytes;
         AppLogger.firebase(

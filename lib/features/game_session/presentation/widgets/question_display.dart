@@ -224,7 +224,7 @@ class _TimerDisplayState extends State<TimerDisplay>
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: widget.size,
       height: widget.size,
       child: Stack(

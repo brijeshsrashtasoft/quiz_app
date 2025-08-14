@@ -164,7 +164,9 @@ class _TrueFalseBuilderState extends State<TrueFalseBuilder>
           isSmallScreen ? AppSpacing.spacingM : AppSpacing.spacingL,
         ),
         decoration: BoxDecoration(
-          color: isSelected ? color.withValues(alpha: 0.1) : AppColors.pureWhite,
+          color: isSelected
+              ? color.withValues(alpha: 0.1)
+              : AppColors.pureWhite,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected ? color : AppColors.lightGray,

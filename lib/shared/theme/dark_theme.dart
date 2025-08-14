@@ -27,8 +27,7 @@ class DarkTheme {
         onError: AppColors.pureWhite,
         surface: AppColors.darkGray,
         onSurface: AppColors.pureWhite,
-        background: AppColors.charcoal,
-        onBackground: AppColors.pureWhite,
+        surfaceContainerLowest: AppColors.charcoal,
         outline: AppColors.mediumGray,
         outlineVariant: AppColors.darkGray,
         shadow: AppColors.shadowDark,
@@ -116,7 +115,7 @@ class DarkTheme {
       ),
 
       // Card theme
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: AppColors.darkGray,
         elevation: AppDimensions.elevationSmall,
         shape: RoundedRectangleBorder(
@@ -188,7 +187,7 @@ class DarkTheme {
       ),
 
       // Dialog theme
-      dialogTheme: DialogTheme(
+      dialogTheme: DialogThemeData(
         backgroundColor: AppColors.darkGray,
         elevation: AppDimensions.elevationLarge,
         shape: RoundedRectangleBorder(
@@ -228,14 +227,14 @@ class DarkTheme {
 
       // Switch theme
       switchTheme: SwitchThemeData(
-        thumbColor: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.selected)) {
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
             return AppColors.vibrantPurple;
           }
           return AppColors.mediumGray;
         }),
-        trackColor: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.selected)) {
+        trackColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
             return AppColors.vibrantPurple.withValues(alpha: 0.5);
           }
           return AppColors.mediumGray.withValues(alpha: 0.5);
@@ -244,20 +243,20 @@ class DarkTheme {
 
       // Checkbox theme
       checkboxTheme: CheckboxThemeData(
-        fillColor: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.selected)) {
+        fillColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
             return AppColors.vibrantPurple;
           }
           return Colors.transparent;
         }),
-        checkColor: MaterialStateProperty.all(AppColors.pureWhite),
+        checkColor: WidgetStateProperty.all(AppColors.pureWhite),
         side: const BorderSide(color: AppColors.mediumGray, width: 2),
       ),
 
       // Radio theme
       radioTheme: RadioThemeData(
-        fillColor: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.selected)) {
+        fillColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
             return AppColors.vibrantPurple;
           }
           return AppColors.mediumGray;

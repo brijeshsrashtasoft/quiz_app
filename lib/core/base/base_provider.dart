@@ -37,7 +37,7 @@ class BaseAsyncState<T> {
 }
 
 /// Base notifier for async operations
-/// Provides common patterns for handling Result<T> responses
+/// Provides common patterns for handling Result responses
 abstract class BaseAsyncNotifier<T> extends StateNotifier<BaseAsyncState<T>> {
   BaseAsyncNotifier() : super(const BaseAsyncState());
 

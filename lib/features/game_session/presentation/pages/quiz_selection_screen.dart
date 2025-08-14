@@ -174,7 +174,10 @@ class _QuizSelectionScreenState extends ConsumerState<QuizSelectionScreen>
           ),
           const SizedBox(height: AppSpacing.spacingXL),
           PrimaryButton(
-            onPressed: () => ref.refresh(userQuizzesProvider),
+            onPressed: () {
+              // ignore: unused_result
+              ref.refresh(userQuizzesProvider);
+            },
             text: 'Retry',
             width: 150,
           ),
@@ -190,73 +193,289 @@ class _QuizSelectionScreenState extends ConsumerState<QuizSelectionScreen>
 
     return Column(
       children: [
-        // Header with instructions
+        // Enhanced header with better visual hierarchy
         Container(
           width: double.infinity,
-          padding: AppSpacing.allM,
+          padding: AppSpacing.allL,
           margin: EdgeInsets.only(bottom: AppSpacing.spacingL),
           decoration: BoxDecoration(
-            color: AppColors.vibrantPurple.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(12),
+            gradient: LinearGradient(
+              colors: [
+                AppColors.vibrantPurple.withValues(alpha: 0.1),
+                AppColors.turquoise.withValues(alpha: 0.05),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: AppColors.vibrantPurple.withValues(alpha: 0.2),
               width: 1,
             ),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.shadowLight.withValues(alpha: 0.1),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
-                  Icon(
-                    Icons.info_outline,
-                    color: AppColors.vibrantPurple,
-                    size: 20,
-                  ),
-                  const SizedBox(width: AppSpacing.spacingS),
-                  Text(
-                    'Select a quiz to host',
-                    style: AppTextStyles.sectionHeader.copyWith(
+                  Container(
+                    padding: const EdgeInsets.all(AppSpacing.spacingS),
+                    decoration: BoxDecoration(
+                      color: AppColors.vibrantPurple.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      Icons.rocket_launch,
                       color: AppColors.vibrantPurple,
-                      fontSize: 16,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.spacingM),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Ready to Host?',
+                          style: AppTextStyles.sectionHeader.copyWith(
+                            color: AppColors.vibrantPurple,
+                            fontSize: 18,
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.spacingXS),
+                        Text(
+                          'Select a published quiz to start a live game session',
+                          style: AppTextStyles.bodyText.copyWith(
+                            color: AppColors.coolGray,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: AppSpacing.spacingXS),
-              Text(
-                'Choose from your published quizzes with 3+ questions. Draft quizzes cannot be hosted.',
-                style: AppTextStyles.bodyText.copyWith(
-                  color: AppColors.coolGray,
-                  fontSize: 13,
+              const SizedBox(height: AppSpacing.spacingM),
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.spacingM),
+                decoration: BoxDecoration(
+                  color: AppColors.pureWhite.withValues(alpha: 0.8),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.info_outline,
+                      color: AppColors.turquoise,
+                      size: 16,
+                    ),
+                    const SizedBox(width: AppSpacing.spacingS),
+                    Expanded(
+                      child: Text(
+                        'Only published quizzes with 3+ questions can be hosted',
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppColors.coolGray,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
         ),
 
-        // Quiz list
+        // Enhanced quiz list with better organization
         Expanded(
-          child: ListView.builder(
-            padding: EdgeInsets.zero,
-            itemCount: quizzes.length,
-            itemBuilder: (context, index) {
-              final quiz = quizzes[index];
-              final isSelected = _selectedQuiz?.id == quiz.id;
-
-              return Container(
-                margin: EdgeInsets.only(bottom: AppSpacing.spacingM),
-                child: QuizCard(
-                  title: quiz.title,
-                  description: quiz.description,
-                  questionCount: quiz.questions.length,
-                  difficulty: _getDifficultyFromQuiz(quiz),
-                  category: quiz.metadata.category,
-                  isSelected: isSelected,
-                  onTap: () => _selectQuiz(quiz),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // List header with stats
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.spacingM,
+                  vertical: AppSpacing.spacingS,
                 ),
-              );
-            },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Your Quizzes',
+                          style: AppTextStyles.sectionHeader.copyWith(
+                            fontSize: 16,
+                          ),
+                        ),
+                        Text(
+                          '${quizzes.length} quiz${quizzes.length == 1 ? '' : 'es'} available',
+                          style: AppTextStyles.caption.copyWith(
+                            color: AppColors.coolGray,
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (_selectedQuiz != null)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.spacingM,
+                          vertical: AppSpacing.spacingXS,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.mintGreen.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.check_circle,
+                              color: AppColors.mintGreen,
+                              size: 16,
+                            ),
+                            const SizedBox(width: AppSpacing.spacingXS),
+                            Text(
+                              'Selected',
+                              style: AppTextStyles.caption.copyWith(
+                                color: AppColors.mintGreen,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: AppSpacing.spacingS),
+
+              // Quiz list with enhanced cards
+              Expanded(
+                child: ListView.builder(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: AppSpacing.spacingS,
+                  ),
+                  itemCount: quizzes.length,
+                  itemBuilder: (context, index) {
+                    final quiz = quizzes[index];
+                    final isSelected = _selectedQuiz?.id == quiz.id;
+                    final isHostable =
+                        quiz.questions.length >= 3 && !quiz.isDraft;
+
+                    return Container(
+                      margin: EdgeInsets.only(bottom: AppSpacing.spacingM),
+                      child: AnimatedContainer(
+                        duration: Duration(milliseconds: 200),
+                        child: Stack(
+                          children: [
+                            QuizCard(
+                              title: quiz.title,
+                              description: quiz.description,
+                              questionCount: quiz.questions.length,
+                              difficulty: _getDifficultyFromQuiz(quiz),
+                              category: quiz.metadata.category,
+                              isSelected: isSelected,
+                              onTap: isHostable
+                                  ? () => _selectQuiz(quiz)
+                                  : null,
+                            ),
+
+                            // Overlay for non-hostable quizzes
+                            if (!isHostable)
+                              Positioned.fill(
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: AppColors.coolGray.withValues(
+                                      alpha: 0.7,
+                                    ),
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: Center(
+                                    child: Container(
+                                      padding: const EdgeInsets.all(
+                                        AppSpacing.spacingM,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.pureWhite,
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            quiz.isDraft
+                                                ? Icons.edit
+                                                : Icons.help_outline,
+                                            color: AppColors.coralRed,
+                                            size: 24,
+                                          ),
+                                          const SizedBox(
+                                            height: AppSpacing.spacingS,
+                                          ),
+                                          Text(
+                                            quiz.isDraft
+                                                ? 'Draft Quiz'
+                                                : 'Needs 3+ Questions',
+                                            style: AppTextStyles.caption
+                                                .copyWith(
+                                                  color: AppColors.coralRed,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                            // Selected indicator
+                            if (isSelected)
+                              Positioned(
+                                top: AppSpacing.spacingM,
+                                right: AppSpacing.spacingM,
+                                child: Container(
+                                  padding: const EdgeInsets.all(
+                                    AppSpacing.spacingS,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.mintGreen,
+                                    shape: BoxShape.circle,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: AppColors.mintGreen.withValues(
+                                          alpha: 0.3,
+                                        ),
+                                        blurRadius: 8,
+                                        spreadRadius: 2,
+                                      ),
+                                    ],
+                                  ),
+                                  child: Icon(
+                                    Icons.check,
+                                    color: AppColors.pureWhite,
+                                    size: 16,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
         ),
 

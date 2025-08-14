@@ -3,6 +3,7 @@
 ///
 /// This file provides centralized access to all authentication use cases
 /// for easier imports and better maintainability.
+library;
 
 // Core authentication use cases
 export 'sign_in_usecase.dart';

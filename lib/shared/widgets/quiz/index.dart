@@ -1,5 +1,6 @@
 /// Quiz-specific UI components
 /// All components follow Kahoot-style design system from docs/ui_guideline.md
+library;
 
 // Answer components
 export '../buttons/answer_button.dart';

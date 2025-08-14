@@ -172,7 +172,7 @@ class _CustomTextInputState extends State<CustomTextInput>
               color: hasError ? AppColors.error : AppColors.textPrimary,
             ),
           ),
-          SizedBox(height: AppSpacing.spacingXS),
+          const SizedBox(height: AppSpacing.spacingXS),
         ],
 
         AnimatedBuilder(
@@ -199,8 +199,8 @@ class _CustomTextInputState extends State<CustomTextInput>
                   boxShadow: [
                     if (_isFocused)
                       BoxShadow(
-                        color: borderColor.withValues(alpha:
-                          0.2 * _focusAnimation.value,
+                        color: borderColor.withValues(
+                          alpha: 0.2 * _focusAnimation.value,
                         ),
                         offset: Offset(0, 4 * _focusAnimation.value),
                         blurRadius: 12 * _focusAnimation.value,
@@ -236,7 +236,7 @@ class _CustomTextInputState extends State<CustomTextInput>
                     suffixText: widget.suffixText,
                     contentPadding:
                         widget.contentPadding ??
-                        EdgeInsets.symmetric(
+                        const EdgeInsets.symmetric(
                           horizontal: AppSpacing.spacingM,
                           vertical: AppSpacing.spacingM,
                         ),
@@ -254,13 +254,13 @@ class _CustomTextInputState extends State<CustomTextInput>
         ),
 
         if (widget.errorText != null) ...[
-          SizedBox(height: AppSpacing.spacingXS),
+          const SizedBox(height: AppSpacing.spacingXS),
           Text(
             widget.errorText!,
             style: AppTextStyles.caption.copyWith(color: AppColors.error),
           ),
         ] else if (widget.helperText != null) ...[
-          SizedBox(height: AppSpacing.spacingXS),
+          const SizedBox(height: AppSpacing.spacingXS),
           Text(
             widget.helperText!,
             style: AppTextStyles.caption.copyWith(
@@ -343,11 +343,11 @@ class _SearchInputState extends State<SearchInput> {
       keyboardType: TextInputType.text,
       textInputAction: TextInputAction.search,
       autofocus: widget.autofocus,
-      prefixIcon: Icon(Icons.search, color: AppColors.textSecondary),
+      prefixIcon: const Icon(Icons.search, color: AppColors.textSecondary),
       suffixIcon: _hasText
           ? IconButton(
               onPressed: _onClear,
-              icon: Icon(Icons.clear, color: AppColors.textSecondary),
+              icon: const Icon(Icons.clear, color: AppColors.textSecondary),
             )
           : null,
     );
@@ -420,8 +420,8 @@ class _PinInputState extends State<PinInput> {
     }
   }
 
-  void _onKeyDown(int index, RawKeyEvent event) {
-    if (event is RawKeyDownEvent &&
+  void _onKeyDown(int index, KeyEvent event) {
+    if (event is KeyDownEvent &&
         event.logicalKey == LogicalKeyboardKey.backspace) {
       if (_controllers[index].text.isEmpty && index > 0) {
         _focusNodes[index - 1].requestFocus();
@@ -440,9 +440,9 @@ class _PinInputState extends State<PinInput> {
         return SizedBox(
           width: 48,
           height: 56,
-          child: RawKeyboardListener(
+          child: KeyboardListener(
             focusNode: FocusNode(),
-            onKey: (event) => _onKeyDown(index, event),
+            onKeyEvent: (event) => _onKeyDown(index, event),
             child: TextField(
               controller: _controllers[index],
               focusNode: _focusNodes[index],
@@ -461,13 +461,13 @@ class _PinInputState extends State<PinInput> {
                   borderRadius: BorderRadius.circular(
                     AppDimensions.inputRadius,
                   ),
-                  borderSide: BorderSide(color: AppColors.borderLight),
+                  borderSide: const BorderSide(color: AppColors.borderLight),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(
                     AppDimensions.inputRadius,
                   ),
-                  borderSide: BorderSide(
+                  borderSide: const BorderSide(
                     color: AppColors.vibrantPurple,
                     width: 2,
                   ),

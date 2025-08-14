@@ -12,6 +12,7 @@ import '../widgets/nickname_input.dart';
 import '../providers/session_providers.dart';
 import '../../../authentication/presentation/providers/auth_providers.dart';
 import '../../../../core/utils/logger.dart';
+import '../../domain/entities/game_session_entity.dart';
 
 class PlayerJoinScreen extends ConsumerStatefulWidget {
   const PlayerJoinScreen({super.key});

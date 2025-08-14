@@ -66,6 +66,22 @@ class Question with _$Question {
     multipleChoice: (_, _, _, correctAnswer, _, _, _, _) => correctAnswer,
     trueFalse: (_, _, correctAnswer, _, _, _, _) => correctAnswer ? 0 : 1,
   );
+
+  /// Validate question completeness and correctness
+  bool get isValid => when(
+    multipleChoice: (_, question, options, correctAnswer, timeLimit, _, _, _) {
+      return question.trim().isNotEmpty &&
+          options.isNotEmpty &&
+          options.length >= 2 &&
+          correctAnswer >= 0 &&
+          correctAnswer < options.length &&
+          timeLimit > 0 &&
+          options.every((option) => option.trim().isNotEmpty);
+    },
+    trueFalse: (_, question, _, timeLimit, _, _, _) {
+      return question.trim().isNotEmpty && timeLimit > 0;
+    },
+  );
 }
 
 /// Extension methods for Question validation

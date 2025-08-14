@@ -109,7 +109,9 @@ class _DeviceManagementCardState extends State<DeviceManagementCard>
                               height: 56,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: AppColors.vibrantPurple.withValues(alpha: 0.1),
+                                color: AppColors.vibrantPurple.withValues(
+                                  alpha: 0.1,
+                                ),
                               ),
                               child: Icon(
                                 _getDeviceIcon(widget.deviceInfo.deviceType),
@@ -215,7 +217,7 @@ class _DeviceManagementCardState extends State<DeviceManagementCard>
                     // Trust level details
                     SizedBox(height: AppSpacing.spacingM),
                     Container(
-                      padding: AppSpacing.allS,
+                      padding: const EdgeInsets.all(AppSpacing.spacingS),
                       decoration: BoxDecoration(
                         color: _getTrustLevelColor(
                           widget.deviceInfo.trustLevel,
@@ -253,7 +255,7 @@ class _DeviceManagementCardState extends State<DeviceManagementCard>
 
                     // Expanded actions
                     AnimatedCrossFade(
-                      firstChild: Container(),
+                      firstChild: const SizedBox.shrink(),
                       secondChild: _buildActionButtons(),
                       crossFadeState: _showActions
                           ? CrossFadeState.showSecond

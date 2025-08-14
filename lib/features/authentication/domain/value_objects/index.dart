@@ -3,6 +3,7 @@
 ///
 /// This file provides centralized access to all authentication value objects
 /// for easier imports and better maintainability.
+library;
 
 export 'email.dart';
 export 'password.dart';

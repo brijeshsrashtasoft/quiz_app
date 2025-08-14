@@ -78,10 +78,6 @@ class _AnswerStatisticsChartState extends State<AnswerStatisticsChart>
 
   @override
   Widget build(BuildContext context) {
-    final maxPercentage = _statistics
-        .map((s) => s['percentage'] as int)
-        .reduce((a, b) => a > b ? a : b);
-
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.spacingL),
       child: Column(
@@ -198,7 +194,9 @@ class _AnswerStatisticsChartState extends State<AnswerStatisticsChart>
                               Container(
                                 height: 32,
                                 decoration: BoxDecoration(
-                                  color: AppColors.lightGray.withValues(alpha: 0.3),
+                                  color: AppColors.lightGray.withValues(
+                                    alpha: 0.3,
+                                  ),
                                   borderRadius: BorderRadius.circular(16),
                                 ),
                               ),

@@ -151,9 +151,7 @@ class ManageGameState {
 
 /// Game flow controller for orchestrating game phases
 class GameFlowController {
-  final ManageGameState _manageGameState;
-
-  const GameFlowController(this._manageGameState);
+  const GameFlowController();
 
   /// Get next phase in game flow
   GamePhase getNextPhase(GamePhase currentPhase, bool hasMoreQuestions) {

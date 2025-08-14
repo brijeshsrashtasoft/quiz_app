@@ -28,14 +28,12 @@ class NotificationModel with _$NotificationModel {
 /// Notification type model for JSON serialization
 @freezed
 class NotificationTypeModel with _$NotificationTypeModel {
-  @JsonSerializable(explicitToJson: true)
   const factory NotificationTypeModel.quizInvite({
     required String quizId,
     required String fromUserId,
     required String fromUserName,
   }) = _QuizInviteNotificationModel;
 
-  @JsonSerializable(explicitToJson: true)
   const factory NotificationTypeModel.gameInvite({
     required String gameSessionId,
     required String gamePin,
@@ -43,7 +41,6 @@ class NotificationTypeModel with _$NotificationTypeModel {
     required String fromUserName,
   }) = _GameInviteNotificationModel;
 
-  @JsonSerializable(explicitToJson: true)
   const factory NotificationTypeModel.achievementUnlocked({
     required String achievementId,
     required String achievementName,
@@ -51,7 +48,6 @@ class NotificationTypeModel with _$NotificationTypeModel {
     required int pointsEarned,
   }) = _AchievementNotificationModel;
 
-  @JsonSerializable(explicitToJson: true)
   const factory NotificationTypeModel.gameResult({
     required String gameSessionId,
     required int finalScore,
@@ -60,14 +56,12 @@ class NotificationTypeModel with _$NotificationTypeModel {
     required String leaderboardPosition,
   }) = _GameResultNotificationModel;
 
-  @JsonSerializable(explicitToJson: true)
   const factory NotificationTypeModel.friendRequest({
     required String fromUserId,
     required String fromUserName,
     required String fromUserAvatar,
   }) = _FriendRequestNotificationModel;
 
-  @JsonSerializable(explicitToJson: true)
   const factory NotificationTypeModel.quizLiked({
     required String quizId,
     required String quizTitle,
@@ -75,7 +69,6 @@ class NotificationTypeModel with _$NotificationTypeModel {
     required String fromUserName,
   }) = _QuizLikedNotificationModel;
 
-  @JsonSerializable(explicitToJson: true)
   const factory NotificationTypeModel.leaderboardUpdate({
     required String gameSessionId,
     required String oldPosition,
@@ -83,7 +76,6 @@ class NotificationTypeModel with _$NotificationTypeModel {
     required bool isImprovement,
   }) = _LeaderboardUpdateNotificationModel;
 
-  @JsonSerializable(explicitToJson: true)
   const factory NotificationTypeModel.systemMessage({
     required String category,
     required String priority,

@@ -1,8 +1,10 @@
 /// Base widget utilities and abstractions for the application
 /// This barrel file exports all base widget functionality
+library;
 
 // Base widget abstractions
-export 'base_widget.dart';
+export 'base_widget.dart'
+    hide ScreenSize; // ScreenSize exported from responsive_builder.dart
 
 // Animation management
 export 'animation_manager.dart';

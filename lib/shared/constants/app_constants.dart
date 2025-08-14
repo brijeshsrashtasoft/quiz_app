@@ -1,5 +1,7 @@
 /// Central export file for all UI constants
 /// This file provides a single import point for all design system constants
+library;
+
 ///
 /// Usage:
 /// ```dart

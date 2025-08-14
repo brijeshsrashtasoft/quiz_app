@@ -140,8 +140,9 @@ class SecurityMonitoringUseCase {
       limit: 100, // Last 100 events
     );
 
-    if (eventsResult.isFailure)
+    if (eventsResult.isFailure) {
       return Result.failure(eventsResult.failureOrNull!);
+    }
 
     final events = eventsResult.data!;
 

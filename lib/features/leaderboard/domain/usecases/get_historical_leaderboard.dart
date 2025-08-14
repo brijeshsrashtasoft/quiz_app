@@ -1,18 +1,17 @@
-import 'package:dartz/dartz.dart';
-import 'package:equatable/equatable.dart';
-import '../../../../core/errors/failures.dart';
-import '../../../../core/usecases/usecase.dart';
+import '../../../../core/base/base_usecase.dart';
+import '../../../../core/utils/result.dart';
 import '../entities/leaderboard_entry.dart';
 import '../repositories/leaderboard_repository.dart';
 
 class GetHistoricalLeaderboard
-    implements UseCase<List<LeaderboardEntry>, GetHistoricalLeaderboardParams> {
+    extends
+        BaseUseCase<List<LeaderboardEntry>, GetHistoricalLeaderboardParams> {
   final LeaderboardRepository repository;
 
-  const GetHistoricalLeaderboard(this.repository);
+  GetHistoricalLeaderboard(this.repository);
 
   @override
-  Future<Either<Failure, List<LeaderboardEntry>>> call(
+  Future<Result<List<LeaderboardEntry>>> call(
     GetHistoricalLeaderboardParams params,
   ) async {
     return await repository.getHistoricalLeaderboard(
@@ -24,7 +23,7 @@ class GetHistoricalLeaderboard
   }
 }
 
-class GetHistoricalLeaderboardParams extends Equatable {
+class GetHistoricalLeaderboardParams extends BaseUseCaseParams {
   final String quizId;
   final DateTime? startDate;
   final DateTime? endDate;
@@ -37,6 +36,5 @@ class GetHistoricalLeaderboardParams extends Equatable {
     this.limit = 100,
   });
 
-  @override
   List<Object?> get props => [quizId, startDate, endDate, limit];
 }

@@ -8,7 +8,7 @@ import '../../../../core/utils/result.dart';
 import '../../../../core/utils/exception_mapper.dart';
 import '../../../../core/base/base_datasource.dart';
 import '../models/quiz_model.dart';
-import '../models/quiz_metadata_model.dart';
+import '../../domain/repositories/quiz_repository.dart';
 
 /// Quiz Firestore data source implementation
 /// Following CLAUDE.md patterns and Firestore integration

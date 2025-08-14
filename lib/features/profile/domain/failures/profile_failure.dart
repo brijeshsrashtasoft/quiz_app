@@ -87,7 +87,6 @@ class ProfileFailure with _$ProfileFailure {
     @Default('PROFILE_UNKNOWN_ERROR') String code,
   }) = UnknownProfileFailure;
 
-  @override
   String get userMessage => when(
     invalidUsername: (message, code) => message,
     usernameTaken: (message, code) => message,
@@ -107,7 +106,6 @@ class ProfileFailure with _$ProfileFailure {
     unknown: (message, code) => message,
   );
 
-  @override
   String get technicalMessage => when(
     invalidUsername: (message, code) => '$code: $message',
     usernameTaken: (message, code) => '$code: $message',

@@ -144,8 +144,8 @@ class _PulsingDotsState extends State<PulsingDots>
               height: widget.dotSize,
               margin: EdgeInsets.symmetric(horizontal: widget.dotSize * 0.25),
               decoration: BoxDecoration(
-                color: (widget.color ?? AppColors.vibrantPurple).withValues(alpha:
-                  _animations[index].value,
+                color: (widget.color ?? AppColors.vibrantPurple).withValues(
+                  alpha: _animations[index].value,
                 ),
                 shape: BoxShape.circle,
               ),

@@ -43,7 +43,7 @@ mixin PerformanceMonitor<T extends StatefulWidget> on State<T> {
   }
 
   /// Measure the time taken by a function
-  Future<T> measureAsync<T>(String operation, Future<T> Function() fn) async {
+  Future<U> measureAsync<U>(String operation, Future<U> Function() fn) async {
     startTimer(operation);
     try {
       return await fn();
@@ -53,7 +53,7 @@ mixin PerformanceMonitor<T extends StatefulWidget> on State<T> {
   }
 
   /// Measure the time taken by a synchronous function
-  T measureSync<T>(String operation, T Function() fn) {
+  U measureSync<U>(String operation, U Function() fn) {
     startTimer(operation);
     try {
       return fn();
@@ -66,7 +66,10 @@ mixin PerformanceMonitor<T extends StatefulWidget> on State<T> {
   void monitorFrameRendering(String key) {
     if (!_isMonitoring) return;
 
-    final callback = (Duration timestamp) {
+    void callback(Duration timestamp) {
+      // Only record if monitoring is enabled and key is still active
+      if (!_isMonitoring || !_frameCallbacks.containsKey(key)) return;
+
       final renderTime = SchedulerBinding.instance.currentFrameTimeStamp;
       _measurements['frame_$key'] ??= [];
       _measurements['frame_$key']!.add(
@@ -74,7 +77,7 @@ mixin PerformanceMonitor<T extends StatefulWidget> on State<T> {
           microseconds: renderTime.inMicroseconds - timestamp.inMicroseconds,
         ),
       );
-    };
+    }
 
     _frameCallbacks[key] = callback;
     SchedulerBinding.instance.addPersistentFrameCallback(callback);
@@ -82,11 +85,8 @@ mixin PerformanceMonitor<T extends StatefulWidget> on State<T> {
 
   /// Stop monitoring frame rendering for a specific key
   void stopFrameMonitoring(String key) {
-    final callback = _frameCallbacks[key];
-    if (callback != null) {
-      SchedulerBinding.instance.cancelFrameCallbackWithValue(callback);
-      _frameCallbacks.remove(key);
-    }
+    // Remove from our tracking map - callback will become inactive
+    _frameCallbacks.remove(key);
   }
 
   /// Get average duration for an operation
@@ -145,9 +145,7 @@ mixin PerformanceMonitor<T extends StatefulWidget> on State<T> {
 
   /// Clear frame callbacks
   void _clearFrameCallbacks() {
-    for (final callback in _frameCallbacks.values) {
-      SchedulerBinding.instance.cancelFrameCallbackWithValue(callback);
-    }
+    // Simply clear our tracking map - callbacks will become inactive
     _frameCallbacks.clear();
   }
 
@@ -241,7 +239,7 @@ class WidgetPerformanceObserver extends StatefulWidget {
 }
 
 class _WidgetPerformanceObserverState extends State<WidgetPerformanceObserver>
-    with PerformanceMonitor {
+    with PerformanceMonitor<WidgetPerformanceObserver> {
   @override
   void initState() {
     super.initState();

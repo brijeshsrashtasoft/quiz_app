@@ -22,12 +22,10 @@ class _ScoreDisplayState extends State<ScoreDisplay>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
-  int _previousScore = 0;
 
   @override
   void initState() {
     super.initState();
-    _previousScore = widget.score;
     _animationController = AnimationController(
       duration: AppAnimations.scoreUpdateDuration,
       vsync: this,
@@ -45,7 +43,6 @@ class _ScoreDisplayState extends State<ScoreDisplay>
   void didUpdateWidget(ScoreDisplay oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.score != oldWidget.score && widget.showAnimation) {
-      _previousScore = oldWidget.score;
       _animationController.forward().then((_) {
         _animationController.reverse();
       });

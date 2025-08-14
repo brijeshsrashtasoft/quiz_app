@@ -3,7 +3,6 @@ import '../../../../core/errors/failures.dart';
 import '../entities/game_session_entity.dart';
 import '../repositories/game_session_repository.dart';
 import '../../../quiz_creation/domain/repositories/quiz_repository.dart';
-import '../../../quiz_creation/domain/entities/quiz.dart';
 
 /// Use case for advancing to the next question
 /// Handles question progression and game completion

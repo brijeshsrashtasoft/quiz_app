@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'biometric_prompt_widget.dart';
 import 'session_management_widgets.dart';
-import 'device_management_widgets.dart';
+import 'device_management_widgets.dart' as device_mgmt;
 import 'security_settings_widgets.dart';
 import '../../constants/app_colors.dart';
 import '../../constants/app_spacing.dart';
@@ -24,7 +24,7 @@ class _SecurityWidgetsExampleState extends State<SecurityWidgetsExample> {
     SessionInfo(
       id: '1',
       deviceName: 'iPhone 14 Pro',
-      deviceType: DeviceType.mobile,
+      deviceType: device_mgmt.DeviceType.mobile,
       location: 'New York, NY',
       ipAddress: '192.168.1.100',
       lastActive: DateTime.now().subtract(const Duration(minutes: 5)),
@@ -34,7 +34,7 @@ class _SecurityWidgetsExampleState extends State<SecurityWidgetsExample> {
     SessionInfo(
       id: '2',
       deviceName: 'MacBook Pro',
-      deviceType: DeviceType.desktop,
+      deviceType: device_mgmt.DeviceType.desktop,
       location: 'New York, NY',
       ipAddress: '192.168.1.101',
       lastActive: DateTime.now().subtract(const Duration(hours: 1)),
@@ -43,34 +43,34 @@ class _SecurityWidgetsExampleState extends State<SecurityWidgetsExample> {
     ),
   ];
 
-  final List<DeviceInfo> _trustedDevices = [
-    DeviceInfo(
+  final List<device_mgmt.DeviceInfo> _trustedDevices = [
+    device_mgmt.DeviceInfo(
       id: '1',
       name: 'iPhone 14 Pro',
-      deviceType: DeviceType.mobile,
+      deviceType: device_mgmt.DeviceType.mobile,
       platform: 'iOS 17.2',
       location: 'New York, NY',
       lastSeen: DateTime.now(),
-      trustLevel: TrustLevel.trusted,
+      trustLevel: device_mgmt.TrustLevel.trusted,
       isCurrentDevice: true,
     ),
-    DeviceInfo(
+    device_mgmt.DeviceInfo(
       id: '2',
       name: 'MacBook Pro',
-      deviceType: DeviceType.desktop,
+      deviceType: device_mgmt.DeviceType.desktop,
       platform: 'macOS Sonoma',
       location: 'New York, NY',
       lastSeen: DateTime.now().subtract(const Duration(hours: 1)),
-      trustLevel: TrustLevel.trusted,
+      trustLevel: device_mgmt.TrustLevel.trusted,
     ),
-    DeviceInfo(
+    device_mgmt.DeviceInfo(
       id: '3',
       name: 'Chrome Browser',
-      deviceType: DeviceType.web,
+      deviceType: device_mgmt.DeviceType.web,
       platform: 'Windows 11',
       location: 'Unknown Location',
       lastSeen: DateTime.now().subtract(const Duration(days: 7)),
-      trustLevel: TrustLevel.recognized,
+      trustLevel: device_mgmt.TrustLevel.recognized,
     ),
   ];
 
@@ -123,7 +123,7 @@ class _SecurityWidgetsExampleState extends State<SecurityWidgetsExample> {
             Column(
               children: _trustedDevices
                   .map(
-                    (device) => DeviceManagementCard(
+                    (device) => device_mgmt.DeviceManagementCard(
                       deviceInfo: device,
                       isCurrentDevice: device.isCurrentDevice,
                       onRevokeTrust: () => _revokeDeviceTrust(device.id),
@@ -147,20 +147,20 @@ class _SecurityWidgetsExampleState extends State<SecurityWidgetsExample> {
               children: [
                 Column(
                   children: [
-                    TrustLevelIndicator(
-                      trustLevel: TrustLevel.trusted,
+                    device_mgmt.TrustLevelIndicator(
+                      trustLevel: device_mgmt.TrustLevel.trusted,
                       size: 32,
                       showText: true,
                     ),
                     SizedBox(height: AppSpacing.spacingS),
-                    TrustLevelIndicator(
-                      trustLevel: TrustLevel.recognized,
+                    device_mgmt.TrustLevelIndicator(
+                      trustLevel: device_mgmt.TrustLevel.recognized,
                       size: 32,
                       showText: true,
                     ),
                     SizedBox(height: AppSpacing.spacingS),
-                    TrustLevelIndicator(
-                      trustLevel: TrustLevel.untrusted,
+                    device_mgmt.TrustLevelIndicator(
+                      trustLevel: device_mgmt.TrustLevel.untrusted,
                       size: 32,
                       showText: true,
                     ),
@@ -274,19 +274,19 @@ class _SecurityWidgetsExampleState extends State<SecurityWidgetsExample> {
   }
 
   void _showNewDeviceApproval() {
-    final newDevice = DeviceInfo(
+    final newDevice = device_mgmt.DeviceInfo(
       id: 'new-device',
       name: 'iPad Pro',
-      deviceType: DeviceType.tablet,
+      deviceType: device_mgmt.DeviceType.tablet,
       platform: 'iOS 17.2',
       location: 'San Francisco, CA',
       lastSeen: DateTime.now(),
-      trustLevel: TrustLevel.untrusted,
+      trustLevel: device_mgmt.TrustLevel.untrusted,
     );
 
     showDialog(
       context: context,
-      builder: (context) => NewDeviceApprovalFlow(
+      builder: (context) => device_mgmt.NewDeviceApprovalFlow(
         newDevice: newDevice,
         onApprove: () {
           Navigator.of(context).pop();
@@ -327,13 +327,13 @@ class _SecurityWidgetsExampleState extends State<SecurityWidgetsExample> {
     );
   }
 
-  void _viewDeviceDetails(DeviceInfo device) {
+  void _viewDeviceDetails(device_mgmt.DeviceInfo device) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Viewing details for ${device.name}')),
     );
   }
 
-  void _editDeviceName(DeviceInfo device) {
+  void _editDeviceName(device_mgmt.DeviceInfo device) {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text('Editing name for ${device.name}')));

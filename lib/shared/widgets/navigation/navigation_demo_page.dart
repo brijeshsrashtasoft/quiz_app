@@ -110,8 +110,8 @@ class _NavigationDemoPageState extends State<NavigationDemoPage>
                     ),
                     child: Column(
                       children: [
-                        BreadcrumbNavigation(
-                          items: const [
+                        const BreadcrumbNavigation(
+                          items: [
                             BreadcrumbItem(
                               title: 'Quiz Creation',
                               route: '/quiz-creation',
@@ -126,8 +126,8 @@ class _NavigationDemoPageState extends State<NavigationDemoPage>
                           ],
                         ),
                         const Divider(height: 1),
-                        CompactBreadcrumb(
-                          items: const [
+                        const CompactBreadcrumb(
+                          items: [
                             BreadcrumbItem(
                               title: 'Game Session',
                               route: '/game/abc123',
@@ -148,12 +148,12 @@ class _NavigationDemoPageState extends State<NavigationDemoPage>
                       Expanded(
                         child: PrimaryButton(
                           text: 'Toggle Breadcrumbs',
+                          backgroundColor: AppColors.mintGreen,
                           onPressed: () {
                             setState(() {
                               _showBreadcrumbs = !_showBreadcrumbs;
                             });
                           },
-                          backgroundColor: AppColors.mintGreen,
                         ),
                       ),
                     ],
@@ -170,7 +170,7 @@ class _NavigationDemoPageState extends State<NavigationDemoPage>
               'Visual feedback for navigation and data loading',
               [
                 if (_isLoading)
-                  Container(
+                  SizedBox(
                     height: 300,
                     child: NavigationLoadingStates.fullScreenLoading(
                       message: 'Loading quiz data...',
@@ -179,7 +179,7 @@ class _NavigationDemoPageState extends State<NavigationDemoPage>
                   )
                 else ...[
                   // Shimmer demo
-                  Container(
+                  SizedBox(
                     height: 200,
                     child:
                         NavigationLoadingStates.shimmerPageLoading(

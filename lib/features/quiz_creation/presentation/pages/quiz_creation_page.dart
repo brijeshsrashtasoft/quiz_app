@@ -143,13 +143,17 @@ class _QuizCreationPageState extends ConsumerState<QuizCreationPage> {
       );
     }
 
+    // Store context references before async operations
+    final messenger = ScaffoldMessenger.of(context);
+    final router = GoRouter.of(context);
+
     // Save the quiz (pass existing quiz ID if in edit mode)
     final quizId = await notifier.saveQuiz(existingQuizId: state.editingQuizId);
 
     if (context.mounted) {
       if (quizId != null) {
         // Success - navigate to preview
-        ScaffoldMessenger.of(context).showSnackBar(
+        messenger.showSnackBar(
           const SnackBar(
             content: Row(
               children: [
@@ -163,7 +167,7 @@ class _QuizCreationPageState extends ConsumerState<QuizCreationPage> {
           ),
         );
         // Use go instead of push for nested routes, and use the proper route constant
-        context.go('${RouteConstants.quizCreationPreview}?id=$quizId');
+        router.go('${RouteConstants.quizCreationPreview}?id=$quizId');
       } else {
         // Error - show detailed error message
         _showErrorDialog(state.error ?? 'Failed to save quiz');
@@ -460,9 +464,6 @@ class _QuizCreationPageState extends ConsumerState<QuizCreationPage> {
   Widget _buildStepContent() {
     return Consumer(
       builder: (context, ref, child) {
-        // Check provider state for any errors
-        final providerState = ref.watch(quizCreationProvider);
-
         return LayoutBuilder(
           builder: (context, constraints) {
             final Widget content;
@@ -560,35 +561,50 @@ class _QuizCreationPageState extends ConsumerState<QuizCreationPage> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Quiz Settings', style: AppTextStyles.sectionHeader),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.settings,
+                            color: AppColors.vibrantPurple,
+                            size: 24,
+                          ),
+                          const SizedBox(width: AppSpacing.spacingS),
+                          Text(
+                            'Quiz Settings',
+                            style: AppTextStyles.sectionHeader,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.spacingS),
+                      Text(
+                        'Configure how your quiz behaves during gameplay',
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppColors.coolGray,
+                        ),
+                      ),
                       const SizedBox(height: AppSpacing.spacingL),
-                      SwitchListTile(
-                        title: Text(
-                          'Make quiz public',
-                          style: AppTextStyles.bodyText,
-                        ),
-                        subtitle: Text(
-                          'Allow anyone to play this quiz',
-                          style: AppTextStyles.caption,
-                        ),
+
+                      // Enhanced setting cards with better visual hierarchy
+                      _buildSettingCard(
+                        icon: Icons.public,
+                        title: 'Make quiz public',
+                        subtitle: 'Allow anyone to discover and play this quiz',
                         value: ref.watch(quizCreationProvider).isPublic,
                         onChanged: (value) {
                           ref
                               .read(quizCreationProvider.notifier)
                               .updateSettings(isPublic: value);
                         },
-                        activeColor: AppColors.vibrantPurple,
+                        iconColor: AppColors.mintGreen,
                       ),
-                      const Divider(height: AppSpacing.spacingXL),
-                      SwitchListTile(
-                        title: Text(
-                          'Enable leaderboard',
-                          style: AppTextStyles.bodyText,
-                        ),
-                        subtitle: Text(
-                          'Show player rankings after each game',
-                          style: AppTextStyles.caption,
-                        ),
+
+                      const SizedBox(height: AppSpacing.spacingM),
+
+                      _buildSettingCard(
+                        icon: Icons.leaderboard,
+                        title: 'Enable leaderboard',
+                        subtitle:
+                            'Show player rankings and scores after each game',
                         value: ref
                             .watch(quizCreationProvider)
                             .enableLeaderboard,
@@ -597,18 +613,16 @@ class _QuizCreationPageState extends ConsumerState<QuizCreationPage> {
                               .read(quizCreationProvider.notifier)
                               .updateSettings(enableLeaderboard: value);
                         },
-                        activeColor: AppColors.vibrantPurple,
+                        iconColor: AppColors.warmYellow,
                       ),
-                      const Divider(height: AppSpacing.spacingXL),
-                      SwitchListTile(
-                        title: Text(
-                          'Randomize questions',
-                          style: AppTextStyles.bodyText,
-                        ),
-                        subtitle: Text(
-                          'Questions appear in random order',
-                          style: AppTextStyles.caption,
-                        ),
+
+                      const SizedBox(height: AppSpacing.spacingM),
+
+                      _buildSettingCard(
+                        icon: Icons.shuffle,
+                        title: 'Randomize questions',
+                        subtitle:
+                            'Questions will appear in random order for each player',
                         value: ref
                             .watch(quizCreationProvider)
                             .randomizeQuestions,
@@ -617,7 +631,61 @@ class _QuizCreationPageState extends ConsumerState<QuizCreationPage> {
                               .read(quizCreationProvider.notifier)
                               .updateSettings(randomizeQuestions: value);
                         },
-                        activeColor: AppColors.vibrantPurple,
+                        iconColor: AppColors.turquoise,
+                      ),
+
+                      const SizedBox(height: AppSpacing.spacingL),
+
+                      // Settings preview card
+                      Container(
+                        padding: const EdgeInsets.all(AppSpacing.spacingM),
+                        decoration: BoxDecoration(
+                          color: AppColors.vibrantPurple.withValues(
+                            alpha: 0.05,
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: AppColors.vibrantPurple.withValues(
+                              alpha: 0.2,
+                            ),
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.preview,
+                                  color: AppColors.vibrantPurple,
+                                  size: 16,
+                                ),
+                                const SizedBox(width: AppSpacing.spacingS),
+                                Text(
+                                  'Settings Preview',
+                                  style: AppTextStyles.caption.copyWith(
+                                    color: AppColors.vibrantPurple,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: AppSpacing.spacingS),
+                            Consumer(
+                              builder: (context, ref, child) {
+                                final state = ref.watch(quizCreationProvider);
+                                return Text(
+                                  'Visibility: ${state.isPublic ? "Public" : "Private"} • '
+                                  'Leaderboard: ${state.enableLeaderboard ? "Enabled" : "Disabled"} • '
+                                  'Order: ${state.randomizeQuestions ? "Random" : "Sequential"}',
+                                  style: AppTextStyles.caption.copyWith(
+                                    color: AppColors.coolGray,
+                                  ),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -627,6 +695,56 @@ class _QuizCreationPageState extends ConsumerState<QuizCreationPage> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildSettingCard({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required bool value,
+    required Function(bool) onChanged,
+    required Color iconColor,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.pureWhite,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.lightGray.withValues(alpha: 0.5)),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadowLight.withValues(alpha: 0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: SwitchListTile(
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.spacingM,
+          vertical: AppSpacing.spacingS,
+        ),
+        secondary: Container(
+          padding: const EdgeInsets.all(AppSpacing.spacingS),
+          decoration: BoxDecoration(
+            color: iconColor.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, color: iconColor, size: 20),
+        ),
+        title: Text(
+          title,
+          style: AppTextStyles.bodyText.copyWith(fontWeight: FontWeight.w600),
+        ),
+        subtitle: Text(
+          subtitle,
+          style: AppTextStyles.caption.copyWith(color: AppColors.coolGray),
+        ),
+        value: value,
+        onChanged: onChanged,
+        activeColor: AppColors.vibrantPurple,
+        activeTrackColor: AppColors.vibrantPurple.withValues(alpha: 0.3),
+      ),
     );
   }
 

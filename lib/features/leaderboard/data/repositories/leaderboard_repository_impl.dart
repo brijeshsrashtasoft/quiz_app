@@ -21,9 +21,7 @@ class LeaderboardRepositoryImpl implements LeaderboardRepository {
   });
 
   @override
-  Stream<Result<Leaderboard>> watchLeaderboard(
-    String sessionId,
-  ) async* {
+  Stream<Result<Leaderboard>> watchLeaderboard(String sessionId) async* {
     if (await networkInfo.isConnected) {
       try {
         await for (final leaderboardModel in remoteDataSource.watchLeaderboard(
@@ -37,15 +35,14 @@ class LeaderboardRepositoryImpl implements LeaderboardRepository {
         yield Result.failure(Failure.serverFailure(message: e.toString()));
       }
     } else {
-      yield Result.failure(const Failure.networkFailure(message: 'No internet connection'));
+      yield Result.failure(
+        const Failure.networkFailure(message: 'No internet connection'),
+      );
     }
   }
 
   @override
-  Future<Result<void>> updateScore(
-    String sessionId,
-    ScoreEntity score,
-  ) async {
+  Future<Result<void>> updateScore(String sessionId, ScoreEntity score) async {
     if (await networkInfo.isConnected) {
       try {
         final scoreModel = ScoreModel.fromEntity(score);
@@ -57,7 +54,9 @@ class LeaderboardRepositoryImpl implements LeaderboardRepository {
         return Result.failure(Failure.serverFailure(message: e.toString()));
       }
     } else {
-      return Result.failure(const Failure.networkFailure(message: 'No internet connection'));
+      return Result.failure(
+        const Failure.networkFailure(message: 'No internet connection'),
+      );
     }
   }
 
@@ -75,7 +74,9 @@ class LeaderboardRepositoryImpl implements LeaderboardRepository {
         return Result.failure(Failure.serverFailure(message: e.toString()));
       }
     } else {
-      return Result.failure(const Failure.networkFailure(message: 'No internet connection'));
+      return Result.failure(
+        const Failure.networkFailure(message: 'No internet connection'),
+      );
     }
   }
 
@@ -101,7 +102,9 @@ class LeaderboardRepositoryImpl implements LeaderboardRepository {
         return Result.failure(Failure.serverFailure(message: e.toString()));
       }
     } else {
-      return Result.failure(const Failure.networkFailure(message: 'No internet connection'));
+      return Result.failure(
+        const Failure.networkFailure(message: 'No internet connection'),
+      );
     }
   }
 
@@ -123,14 +126,14 @@ class LeaderboardRepositoryImpl implements LeaderboardRepository {
         return Result.failure(Failure.serverFailure(message: e.toString()));
       }
     } else {
-      return Result.failure(const Failure.networkFailure(message: 'No internet connection'));
+      return Result.failure(
+        const Failure.networkFailure(message: 'No internet connection'),
+      );
     }
   }
 
   @override
-  Future<Result<void>> recordFinalLeaderboard(
-    Leaderboard leaderboard,
-  ) async {
+  Future<Result<void>> recordFinalLeaderboard(Leaderboard leaderboard) async {
     if (await networkInfo.isConnected) {
       try {
         final leaderboardModel = LeaderboardModel.fromEntity(leaderboard);
@@ -142,14 +145,14 @@ class LeaderboardRepositoryImpl implements LeaderboardRepository {
         return Result.failure(Failure.serverFailure(message: e.toString()));
       }
     } else {
-      return Result.failure(const Failure.networkFailure(message: 'No internet connection'));
+      return Result.failure(
+        const Failure.networkFailure(message: 'No internet connection'),
+      );
     }
   }
 
   @override
-  Future<Result<List<Leaderboard>>> getPlayerHistory(
-    String playerId,
-  ) async {
+  Future<Result<List<Leaderboard>>> getPlayerHistory(String playerId) async {
     if (await networkInfo.isConnected) {
       try {
         final leaderboards = await remoteDataSource.getPlayerHistory(playerId);
@@ -160,7 +163,9 @@ class LeaderboardRepositoryImpl implements LeaderboardRepository {
         return Result.failure(Failure.serverFailure(message: e.toString()));
       }
     } else {
-      return Result.failure(const Failure.networkFailure(message: 'No internet connection'));
+      return Result.failure(
+        const Failure.networkFailure(message: 'No internet connection'),
+      );
     }
   }
 
@@ -176,7 +181,9 @@ class LeaderboardRepositoryImpl implements LeaderboardRepository {
         return Result.failure(Failure.serverFailure(message: e.toString()));
       }
     } else {
-      return Result.failure(const Failure.networkFailure(message: 'No internet connection'));
+      return Result.failure(
+        const Failure.networkFailure(message: 'No internet connection'),
+      );
     }
   }
 }

@@ -538,82 +538,84 @@ final sessionAnswersProvider =
     });
 
 /// Enhanced real-time game state stream provider
-final realtimeGameStateStreamProvider = StreamProvider.family<GameState?, String>((
-  ref,
-  sessionId,
-) {
-  // Combine session stream with phase stream for comprehensive real-time updates
-  final sessionStream = ref.watch(gameSessionStreamProvider(sessionId));
-  final phaseStream = ref.watch(gamePhaseStreamProvider(sessionId));
+final realtimeGameStateStreamProvider =
+    StreamProvider.family<GameState?, String>((ref, sessionId) {
+      // Get session stream for real-time updates
+      final sessionStream = ref.watch(gameSessionStreamProvider(sessionId));
 
-  // Return the game state based on session data
-  return sessionStream
-      .when(
-        data: (session) async* {
-          if (session == null) {
-            yield null;
-            return;
-          }
+      // Return the game state based on session data
+      return sessionStream
+          .when(
+            data: (session) async* {
+              if (session == null) {
+                yield null;
+                return;
+              }
 
-          final quiz = await ref.read(
-            currentGameQuizProvider(sessionId).future,
-          );
-          if (quiz == null ||
-              session.currentQuestionIndex >= quiz.questions.length) {
-            yield null;
-            return;
-          }
+              final quiz = await ref.read(
+                currentGameQuizProvider(sessionId).future,
+              );
+              if (quiz == null ||
+                  session.currentQuestionIndex >= quiz.questions.length) {
+                yield null;
+                return;
+              }
 
-          final currentQuestion = quiz.questions[session.currentQuestionIndex];
+              final currentQuestion =
+                  quiz.questions[session.currentQuestionIndex];
 
-          // Get real-time answer data for current question
-          final answersStream = ref.watch(
-            questionAnswersStreamProvider(
-              QuestionAnswersParams(
-                sessionId: sessionId,
-                questionIndex: session.currentQuestionIndex,
-              ),
-            ),
-          );
+              // Get real-time answer data for current question
+              final answersStream = ref.watch(
+                questionAnswersStreamProvider(
+                  QuestionAnswersParams(
+                    sessionId: sessionId,
+                    questionIndex: session.currentQuestionIndex,
+                  ),
+                ),
+              );
 
-          await for (final answersData in answersStream.when(
-            data: (data) => Stream.value(data),
-            loading: () => Stream.value(null),
-            error: (_, __) => Stream.value(null),
-          )) {
-            final playerAnswers = <String, PlayerAnswer>{};
+              await for (final answersData in answersStream.when(
+                data: (data) => Stream.value(data),
+                loading: () => Stream.value(null),
+                error: (_, __) => Stream.value(null),
+              )) {
+                final playerAnswers = <String, PlayerAnswer>{};
 
-            if (answersData?['answers'] != null) {
-              final answers = answersData!['answers'] as Map<String, dynamic>;
-              for (final entry in answers.entries) {
-                final answerData = entry.value as Map<String, dynamic>;
-                playerAnswers[entry.key] = PlayerAnswer(
-                  playerId: answerData['playerId'] as String,
-                  selectedOption: answerData['selectedOption'] as int,
-                  answeredAt: (answerData['answeredAt'] as Timestamp).toDate(),
-                  responseTimeMs: answerData['responseTimeMs'] as int,
-                  isCorrect: answerData['isCorrect'] as bool,
-                  pointsEarned: answerData['pointsEarned'] as int,
+                if (answersData?['answers'] != null) {
+                  final answers =
+                      answersData!['answers'] as Map<String, dynamic>;
+                  for (final entry in answers.entries) {
+                    final answerData = entry.value as Map<String, dynamic>;
+                    playerAnswers[entry.key] = PlayerAnswer(
+                      playerId: answerData['playerId'] as String,
+                      selectedOption: answerData['selectedOption'] as int,
+                      answeredAt: (answerData['answeredAt'] as Timestamp)
+                          .toDate(),
+                      responseTimeMs: answerData['responseTimeMs'] as int,
+                      isCorrect: answerData['isCorrect'] as bool,
+                      pointsEarned: answerData['pointsEarned'] as int,
+                    );
+                  }
+                }
+
+                yield GameState(
+                  sessionId: sessionId,
+                  currentQuestion: currentQuestion,
+                  currentQuestionIndex: session.currentQuestionIndex,
+                  questionStartTime:
+                      DateTime.now(), // TODO: Get from phase data
+                  playerAnswers: playerAnswers,
+                  phase: _getGamePhase(session.status),
+                  answerCounts:
+                      answersData?['answerCounts'] as Map<String, int>?,
                 );
               }
-            }
-
-            yield GameState(
-              sessionId: sessionId,
-              currentQuestion: currentQuestion,
-              currentQuestionIndex: session.currentQuestionIndex,
-              questionStartTime: DateTime.now(), // TODO: Get from phase data
-              playerAnswers: playerAnswers,
-              phase: _getGamePhase(session.status),
-              answerCounts: answersData?['answerCounts'] as Map<String, int>?,
-            );
-          }
-        },
-        loading: () => const Stream.empty(),
-        error: (error, _) => Stream.value(null),
-      )
-      .asyncExpand((stream) => stream);
-});
+            },
+            loading: () => const Stream.empty(),
+            error: (error, _) => Stream.value(null),
+          )
+          .asyncExpand((stream) => stream);
+    });
 
 /// Player score provider - tracks live scores
 final playerScoreProvider = FutureProvider.family<int, PlayerScoreParams>((
@@ -731,4 +733,395 @@ class LeaderboardEntry {
         return '${rank}th';
     }
   }
+}
+
+// ===========================================
+// ENHANCED GAME STATE MANAGEMENT
+// ===========================================
+
+/// Enhanced game state provider for comprehensive multiplayer game management
+final enhancedGameStateProvider =
+    StateNotifierProvider.family<
+      EnhancedGameStateNotifier,
+      EnhancedGameState,
+      String
+    >((ref, sessionId) {
+      return EnhancedGameStateNotifier(sessionId: sessionId, ref: ref);
+    });
+
+/// Enhanced game state notifier with complete multiplayer functionality
+class EnhancedGameStateNotifier extends StateNotifier<EnhancedGameState> {
+  final String sessionId;
+  final Ref ref;
+
+  EnhancedGameStateNotifier({required this.sessionId, required this.ref})
+    : super(const EnhancedGameState.loading()) {
+    _initialize();
+  }
+
+  void _initialize() {
+    // Listen to session updates
+    ref.listen(gameSessionStreamProvider(sessionId), (previous, next) {
+      next.when(
+        data: (session) {
+          if (session != null) {
+            _updateGameState(session);
+          }
+        },
+        loading: () {},
+        error: (error, stack) {
+          AppLogger.error('Enhanced game state error', error);
+          state = EnhancedGameState.error('Failed to load game: $error');
+        },
+      );
+    });
+  }
+
+  Future<void> _updateGameState(GameSessionEntity session) async {
+    try {
+      // Load quiz data
+      final quiz = await ref.read(currentGameQuizProvider(sessionId).future);
+      final currentQuestion = await ref.read(
+        currentQuestionProvider(sessionId).future,
+      );
+
+      state = EnhancedGameState.active(
+        session: session,
+        quiz: quiz,
+        currentQuestion: currentQuestion,
+        players: session.players,
+        leaderboard: _generateLeaderboard(session.players),
+        gamePhase: _getGamePhase(session.status),
+        canSubmitAnswers: session.status == GameSessionStatus.active,
+        lastUpdated: DateTime.now(),
+      );
+    } catch (error) {
+      AppLogger.error('Error updating game state', error);
+      state = EnhancedGameState.error('Failed to update game state');
+    }
+  }
+
+  List<LeaderboardEntry> _generateLeaderboard(
+    Map<String, PlayerEntity> players,
+  ) {
+    final sortedPlayers = players.entries.toList()
+      ..sort((a, b) => b.value.score.compareTo(a.value.score));
+
+    return sortedPlayers.asMap().entries.map((entry) {
+      final playerEntry = entry.value;
+      return LeaderboardEntry(
+        rank: entry.key + 1,
+        playerId: playerEntry.key,
+        playerName: playerEntry.value.name,
+        score: playerEntry.value.score,
+        answersCorrect: _countCorrectAnswers(playerEntry.value),
+      );
+    }).toList();
+  }
+
+  int _countCorrectAnswers(PlayerEntity player) {
+    // Simple calculation: assume every 100 points = 1 correct answer
+    return (player.score / 100).floor();
+  }
+
+  GamePhase _getGamePhase(GameSessionStatus status) {
+    switch (status) {
+      case GameSessionStatus.waiting:
+        return GamePhase.waitingToStart;
+      case GameSessionStatus.active:
+        return GamePhase.questionActive;
+      case GameSessionStatus.completed:
+        return GamePhase.gameCompleted;
+    }
+  }
+
+  // Game control methods
+  Future<void> startGame() async {
+    final currentUser = ref.read(currentUserProvider);
+    if (currentUser == null) {
+      state = const EnhancedGameState.error('User not authenticated');
+      return;
+    }
+
+    try {
+      final startGameUseCase = ref.read(startGameUseCaseProvider);
+      final result = await startGameUseCase.call(
+        sessionId: sessionId,
+        hostId: currentUser.id,
+      );
+
+      result.when(
+        success: (_) => AppLogger.firebase('EnhancedGameState', 'Game started'),
+        failure: (error) {
+          state = EnhancedGameState.error(error.userMessage);
+        },
+      );
+    } catch (error) {
+      state = EnhancedGameState.error('Failed to start game');
+    }
+  }
+
+  Future<void> submitAnswer(int selectedOption) async {
+    if (state is! EnhancedGameStateActive) return;
+    final activeState = state as EnhancedGameStateActive;
+
+    if (activeState.currentQuestion == null) return;
+
+    final currentUser = ref.read(currentUserProvider);
+    if (currentUser == null) {
+      state = const EnhancedGameState.error('User not authenticated');
+      return;
+    }
+
+    try {
+      final submitUseCase = ref.read(submitAnswerRealtimeUseCaseProvider);
+      final result = await submitUseCase.call(
+        sessionId: sessionId,
+        playerId: currentUser.id,
+        playerName: activeState.players[currentUser.id]?.name ?? 'Unknown',
+        selectedOption: selectedOption,
+        currentQuestion: activeState.currentQuestion!,
+        questionStartTime: DateTime.now(),
+        questionIndex: activeState.session.currentQuestionIndex,
+      );
+
+      result.when(
+        success: (_) =>
+            AppLogger.firebase('EnhancedGameState', 'Answer submitted'),
+        failure: (error) {
+          AppLogger.error('Failed to submit answer', error);
+        },
+      );
+    } catch (error) {
+      AppLogger.error('Error submitting answer', error);
+    }
+  }
+
+  Future<void> nextQuestion() async {
+    final currentUser = ref.read(currentUserProvider);
+    if (currentUser == null) return;
+
+    try {
+      final nextQuestionUseCase = ref.read(nextQuestionUseCaseProvider);
+      final result = await nextQuestionUseCase.call(
+        sessionId: sessionId,
+        hostId: currentUser.id,
+      );
+
+      result.when(
+        success: (_) => AppLogger.firebase(
+          'EnhancedGameState',
+          'Advanced to next question',
+        ),
+        failure: (error) {
+          AppLogger.error('Failed to advance question', error);
+        },
+      );
+    } catch (error) {
+      AppLogger.error('Error advancing question', error);
+    }
+  }
+
+  // Utility methods
+  bool isHost() {
+    final currentUser = ref.read(currentUserProvider);
+    if (currentUser == null || state is! EnhancedGameStateActive) return false;
+    return (state as EnhancedGameStateActive).session.isHost(currentUser.id);
+  }
+
+  bool isPlayer() {
+    final currentUser = ref.read(currentUserProvider);
+    if (currentUser == null || state is! EnhancedGameStateActive) return false;
+    return (state as EnhancedGameStateActive).session.isPlayer(currentUser.id);
+  }
+
+  int? getPlayerRank() {
+    final currentUser = ref.read(currentUserProvider);
+    if (currentUser == null || state is! EnhancedGameStateActive) return null;
+
+    final leaderboard = (state as EnhancedGameStateActive).leaderboard;
+    final entry = leaderboard
+        .where((e) => e.playerId == currentUser.id)
+        .firstOrNull;
+    return entry?.rank;
+  }
+}
+
+/// Enhanced game state model
+sealed class EnhancedGameState {
+  const EnhancedGameState();
+
+  const factory EnhancedGameState.loading() = EnhancedGameStateLoading;
+  const factory EnhancedGameState.active({
+    required GameSessionEntity session,
+    Quiz? quiz,
+    Question? currentQuestion,
+    required Map<String, PlayerEntity> players,
+    required List<LeaderboardEntry> leaderboard,
+    required GamePhase gamePhase,
+    required bool canSubmitAnswers,
+    required DateTime lastUpdated,
+  }) = EnhancedGameStateActive;
+  const factory EnhancedGameState.error(String message) =
+      EnhancedGameStateError;
+}
+
+class EnhancedGameStateLoading extends EnhancedGameState {
+  const EnhancedGameStateLoading();
+}
+
+class EnhancedGameStateActive extends EnhancedGameState {
+  final GameSessionEntity session;
+  final Quiz? quiz;
+  final Question? currentQuestion;
+  final Map<String, PlayerEntity> players;
+  final List<LeaderboardEntry> leaderboard;
+  final GamePhase gamePhase;
+  final bool canSubmitAnswers;
+  final DateTime lastUpdated;
+
+  const EnhancedGameStateActive({
+    required this.session,
+    this.quiz,
+    this.currentQuestion,
+    required this.players,
+    required this.leaderboard,
+    required this.gamePhase,
+    required this.canSubmitAnswers,
+    required this.lastUpdated,
+  });
+
+  int get playerCount => players.length;
+  bool get isGameActive =>
+      gamePhase != GamePhase.waitingToStart &&
+      gamePhase != GamePhase.gameCompleted;
+  int get currentQuestionNumber => session.currentQuestionIndex + 1;
+  int get totalQuestions => quiz?.questions.length ?? 0;
+  double get progressPercentage =>
+      totalQuestions > 0 ? currentQuestionNumber / totalQuestions : 0;
+}
+
+class EnhancedGameStateError extends EnhancedGameState {
+  final String message;
+  const EnhancedGameStateError(this.message);
+}
+
+/// Enhanced game state extensions
+extension EnhancedGameStateX on EnhancedGameState {
+  bool get isLoading => this is EnhancedGameStateLoading;
+  bool get isActive => this is EnhancedGameStateActive;
+  bool get hasError => this is EnhancedGameStateError;
+
+  EnhancedGameStateActive? get activeState =>
+      isActive ? this as EnhancedGameStateActive : null;
+
+  String? get errorMessage =>
+      hasError ? (this as EnhancedGameStateError).message : null;
+}
+
+// ===========================================
+// CONVENIENT DERIVED PROVIDERS
+// ===========================================
+
+/// Current user's score in the session
+final currentUserSessionScoreProvider = Provider.family<int, String>((
+  ref,
+  sessionId,
+) {
+  final gameState = ref.watch(enhancedGameStateProvider(sessionId));
+  final currentUser = ref.watch(currentUserProvider);
+
+  if (gameState.isActive && currentUser != null) {
+    return gameState.activeState!.players[currentUser.id]?.score ?? 0;
+  }
+  return 0;
+});
+
+/// Current user's rank in the session
+final currentUserSessionRankProvider = Provider.family<int?, String>((
+  ref,
+  sessionId,
+) {
+  final gameState = ref.watch(enhancedGameStateProvider(sessionId));
+  final currentUser = ref.watch(currentUserProvider);
+
+  if (gameState.isActive && currentUser != null) {
+    final leaderboard = gameState.activeState!.leaderboard;
+    return leaderboard
+        .where((e) => e.playerId == currentUser.id)
+        .firstOrNull
+        ?.rank;
+  }
+  return null;
+});
+
+/// Game progress information
+final gameProgressInfoProvider = Provider.family<GameProgressInfo?, String>((
+  ref,
+  sessionId,
+) {
+  final gameState = ref.watch(enhancedGameStateProvider(sessionId));
+
+  if (gameState.isActive) {
+    final state = gameState.activeState!;
+    return GameProgressInfo(
+      currentQuestion: state.currentQuestionNumber,
+      totalQuestions: state.totalQuestions,
+      progress: state.progressPercentage,
+      phase: state.gamePhase,
+      canSubmitAnswers: state.canSubmitAnswers,
+    );
+  }
+  return null;
+});
+
+/// Game actions for UI
+final gameActionsProvider = Provider.family<GameActions, String>((
+  ref,
+  sessionId,
+) {
+  final notifier = ref.read(enhancedGameStateProvider(sessionId).notifier);
+  return GameActions(
+    startGame: notifier.startGame,
+    submitAnswer: notifier.submitAnswer,
+    nextQuestion: notifier.nextQuestion,
+    isHost: notifier.isHost,
+    isPlayer: notifier.isPlayer,
+  );
+});
+
+/// Helper data classes
+class GameProgressInfo {
+  final int currentQuestion;
+  final int totalQuestions;
+  final double progress;
+  final GamePhase phase;
+  final bool canSubmitAnswers;
+
+  const GameProgressInfo({
+    required this.currentQuestion,
+    required this.totalQuestions,
+    required this.progress,
+    required this.phase,
+    required this.canSubmitAnswers,
+  });
+
+  String get progressText => '$currentQuestion/$totalQuestions';
+  bool get isLastQuestion => currentQuestion >= totalQuestions;
+}
+
+class GameActions {
+  final Future<void> Function() startGame;
+  final Future<void> Function(int) submitAnswer;
+  final Future<void> Function() nextQuestion;
+  final bool Function() isHost;
+  final bool Function() isPlayer;
+
+  const GameActions({
+    required this.startGame,
+    required this.submitAnswer,
+    required this.nextQuestion,
+    required this.isHost,
+    required this.isPlayer,
+  });
 }

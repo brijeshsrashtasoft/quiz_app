@@ -297,10 +297,8 @@ class AuthNavigationNotifier extends StateNotifier<AuthNavigationState> {
   void resetNavigationState() {
     state = const AuthNavigationState();
   }
-}
 
-/// Authentication flow helper methods
-extension AuthNavigationHelper on AuthNavigationNotifier {
+  // Authentication flow helper methods
   /// Quick navigation method: Login -> Register
   void goToRegisterFromLogin() {
     navigateToRegister(fromRoute: RouteConstants.login);

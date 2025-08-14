@@ -357,7 +357,8 @@ class QuizPublishNotifier extends StateNotifier<QuizPublishState> {
 
   /// Publish the quiz
   Future<bool> publishQuiz() async {
-    if (_currentUserId == null) {
+    final userId = _currentUserId;
+    if (userId == null) {
       state = state.copyWith(error: 'You must be logged in to publish a quiz');
       return false;
     }
@@ -366,7 +367,7 @@ class QuizPublishNotifier extends StateNotifier<QuizPublishState> {
 
     try {
       final result = await _publishUseCase(
-        PublishQuizParams(quizId: _quizId, userId: _currentUserId!),
+        PublishQuizParams(quizId: _quizId, userId: userId),
       );
 
       return result.when(

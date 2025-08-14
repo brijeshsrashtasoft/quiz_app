@@ -31,7 +31,8 @@ class _AnswerSelectionGridState extends State<AnswerSelectionGrid>
     with TickerProviderStateMixin {
   late List<AnimationController> _tapControllers;
   late List<AnimationController> _resultControllers;
-  final Map<int, GlobalKey<ShakeWidgetState>> _shakeKeys = {};
+  final Map<int, Key> _shakeKeys = {};
+  final Map<int, bool> _shakeStates = {};
 
   @override
   void initState() {
@@ -53,7 +54,8 @@ class _AnswerSelectionGridState extends State<AnswerSelectionGrid>
     );
 
     for (int i = 0; i < widget.answers.length; i++) {
-      _shakeKeys[i] = GlobalKey<ShakeWidgetState>();
+      _shakeKeys[i] = Key('shake_$i');
+      _shakeStates[i] = false;
     }
   }
 
@@ -85,7 +87,17 @@ class _AnswerSelectionGridState extends State<AnswerSelectionGrid>
       // Shake wrong answer if selected
       if (widget.selectedIndex != null &&
           widget.selectedIndex != widget.correctIndex) {
-        _shakeKeys[widget.selectedIndex!]?.currentState?.shake();
+        setState(() {
+          _shakeStates[widget.selectedIndex!] = true;
+        });
+        // Reset shake state after animation completes
+        Future.delayed(const Duration(milliseconds: 500), () {
+          if (mounted) {
+            setState(() {
+              _shakeStates[widget.selectedIndex!] = false;
+            });
+          }
+        });
       }
     }
   }
@@ -159,6 +171,7 @@ class _AnswerSelectionGridState extends State<AnswerSelectionGrid>
 
           return ShakeWidget(
             key: _shakeKeys[index],
+            isShaking: _shakeStates[index] ?? false,
             child: AnimatedBuilder(
               animation: _resultControllers[index],
               builder: (context, child) {

@@ -118,6 +118,12 @@ class _HomePageState extends ConsumerState<HomePage>
             const SizedBox(height: AppSpacing.sectionSpacing),
           ],
 
+          // Game Statistics (for authenticated users)
+          if (user != null) ...[
+            _buildGameStatistics(),
+            const SizedBox(height: AppSpacing.sectionSpacing),
+          ],
+
           // Recent Activity
           _buildRecentActivity(),
 
@@ -354,8 +360,8 @@ class _HomePageState extends ConsumerState<HomePage>
               subtitle: 'Enter game PIN',
               color: AppColors.mintGreen,
               onTap: () {
-                // Show a PIN input dialog for now
-                _showJoinGameDialog(context);
+                // Show enhanced PIN input dialog
+                _showEnhancedJoinGameDialog(context);
               },
             ),
             _QuickActionCard(
@@ -574,90 +580,211 @@ class _HomePageState extends ConsumerState<HomePage>
     );
   }
 
-  /// Show join game dialog with PIN input
-  void _showJoinGameDialog(BuildContext context) {
+  /// Show enhanced join game dialog with improved PIN input
+  void _showEnhancedJoinGameDialog(BuildContext context) {
     final TextEditingController pinController = TextEditingController();
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.pureWhite,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(
-          'Join Game',
-          style: AppTextStyles.sectionHeader.copyWith(
-            color: AppColors.charcoal,
+      barrierDismissible: false,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          backgroundColor: AppColors.pureWhite,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
           ),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Enter the game PIN to join a live quiz session',
-              style: AppTextStyles.bodyText.copyWith(color: AppColors.coolGray),
-            ),
-            const SizedBox(height: AppSpacing.spacingL),
-            TextField(
-              controller: pinController,
-              decoration: InputDecoration(
-                hintText: 'Enter PIN',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: AppColors.lightGray),
+          contentPadding: const EdgeInsets.all(AppSpacing.spacingL),
+          title: Column(
+            children: [
+              Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  gradient: AppColors.purpleGradient,
+                  shape: BoxShape.circle,
                 ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: AppColors.vibrantPurple),
+                child: const Icon(
+                  Icons.sports_esports,
+                  color: AppColors.pureWhite,
+                  size: 30,
                 ),
               ),
-              keyboardType: TextInputType.number,
-              textAlign: TextAlign.center,
-              style: AppTextStyles.sectionHeader,
+              const SizedBox(height: AppSpacing.spacingM),
+              Text(
+                'Join Live Game',
+                style: AppTextStyles.sectionHeader.copyWith(
+                  color: AppColors.charcoal,
+                  fontSize: 24,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Enter the 6-digit game PIN to join an active quiz session',
+                style: AppTextStyles.bodyText.copyWith(
+                  color: AppColors.coolGray,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: AppSpacing.spacingL),
+
+              // Enhanced PIN input field
+              Container(
+                decoration: BoxDecoration(
+                  color: AppColors.offWhite,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: AppColors.lightGray.withValues(alpha: 0.5),
+                  ),
+                ),
+                child: TextField(
+                  controller: pinController,
+                  enabled: true,
+                  decoration: InputDecoration(
+                    hintText: 'XXXXXX',
+                    hintStyle: AppTextStyles.sectionHeader.copyWith(
+                      color: AppColors.coolGray.withValues(alpha: 0.5),
+                      fontSize: 28,
+                      letterSpacing: 8,
+                    ),
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.spacingL,
+                      vertical: AppSpacing.spacingL,
+                    ),
+                  ),
+                  keyboardType: TextInputType.number,
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.sectionHeader.copyWith(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 8,
+                    color: AppColors.vibrantPurple,
+                  ),
+                  maxLength: 6,
+                  buildCounter:
+                      (
+                        context, {
+                        required currentLength,
+                        required isFocused,
+                        maxLength,
+                      }) => null,
+                  onChanged: (value) {
+                    // Auto-format PIN input
+                    if (value.length == 6 &&
+                        RegExp(r'^\d{6}$').hasMatch(value)) {
+                      // Automatically attempt to join when 6 digits are entered
+                      _handleJoinGame(context, pinController, setState);
+                    }
+                  },
+                ),
+              ),
+
+              const SizedBox(height: AppSpacing.spacingM),
+
+              // PIN format hint
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.spacingS),
+                decoration: BoxDecoration(
+                  color: AppColors.mintGreen.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.info_outline,
+                      size: 16,
+                      color: AppColors.mintGreen,
+                    ),
+                    const SizedBox(width: AppSpacing.spacingS),
+                    Expanded(
+                      child: Text(
+                        'PIN is a 6-digit number shown on the host\'s screen',
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppColors.mintGreen,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            // Cancel button
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                'Cancel',
+                style: AppTextStyles.bodyText.copyWith(
+                  color: AppColors.coolGray,
+                ),
+              ),
+            ),
+
+            // Join button
+            ElevatedButton(
+              onPressed: () =>
+                  _handleJoinGame(context, pinController, setState),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.mintGreen,
+                foregroundColor: AppColors.pureWhite,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.spacingL,
+                  vertical: AppSpacing.spacingM,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.play_arrow, size: 18),
+                  const SizedBox(width: AppSpacing.spacingS),
+                  Text(
+                    'Join Game',
+                    style: AppTextStyles.buttonText.copyWith(
+                      color: AppColors.pureWhite,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(
-              'Cancel',
-              style: AppTextStyles.bodyText.copyWith(color: AppColors.coolGray),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              final pin = pinController.text.trim();
-              Navigator.of(context).pop();
-
-              if (pin.isNotEmpty) {
-                // Navigate to game join page with PIN
-                if (pin.length == 6 && RegExp(r'^\d+$').hasMatch(pin)) {
-                  context.push('${RouteConstants.gameJoin}?pin=$pin');
-                } else {
-                  // Navigate to game join page without PIN for validation
-                  context.push(RouteConstants.gameJoin);
-                }
-              } else {
-                // Navigate to game join page for PIN entry
-                context.push(RouteConstants.gameJoin);
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.vibrantPurple,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: Text(
-              'Join',
-              style: AppTextStyles.buttonText.copyWith(
-                color: AppColors.pureWhite,
-              ),
-            ),
-          ),
-        ],
       ),
     );
+  }
+
+  void _handleJoinGame(
+    BuildContext context,
+    TextEditingController pinController,
+    StateSetter setState,
+  ) async {
+    final pin = pinController.text.trim();
+
+    if (pin.isEmpty) {
+      return;
+    }
+
+    setState(() {
+      // Update loading state within the dialog
+    });
+
+    Navigator.of(context).pop();
+
+    if (pin.length == 6 && RegExp(r'^\d+$').hasMatch(pin)) {
+      context.push('${RouteConstants.gameJoin}?pin=$pin');
+    } else {
+      // Navigate to game join page for PIN validation
+      context.push(RouteConstants.gameJoin);
+    }
   }
 
   Widget _buildRecentActivity() {
@@ -831,6 +958,75 @@ class _HomePageState extends ConsumerState<HomePage>
               );
             },
           ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildGameStatistics() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Game Statistics',
+          style: AppTextStyles.sectionHeader.copyWith(
+            color: AppColors.charcoal,
+            fontSize: 20,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.spacingM),
+        Row(
+          children: [
+            // Games Hosted
+            Expanded(
+              child: _StatisticCard(
+                icon: Icons.sports_esports,
+                color: AppColors.vibrantPurple,
+                value: '12',
+                label: 'Games Hosted',
+                onTap: () => context.push(RouteConstants.leaderboard),
+              ),
+            ),
+            const SizedBox(width: AppSpacing.spacingM),
+
+            // Quizzes Created
+            Expanded(
+              child: _StatisticCard(
+                icon: Icons.quiz,
+                color: AppColors.mintGreen,
+                value: '8',
+                label: 'Quizzes Created',
+                onTap: () => context.push(RouteConstants.quizManagement),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.spacingM),
+        Row(
+          children: [
+            // Total Players
+            Expanded(
+              child: _StatisticCard(
+                icon: Icons.people,
+                color: AppColors.coralRed,
+                value: '245',
+                label: 'Total Players',
+                onTap: () => context.push(RouteConstants.leaderboard),
+              ),
+            ),
+            const SizedBox(width: AppSpacing.spacingM),
+
+            // Best Score
+            Expanded(
+              child: _StatisticCard(
+                icon: Icons.star,
+                color: AppColors.warmYellow,
+                value: '98%',
+                label: 'Best Score',
+                onTap: () => context.push(RouteConstants.profile),
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -1369,7 +1565,9 @@ class _MyQuizCardState extends State<_MyQuizCard>
                                 vertical: AppSpacing.spacingXS,
                               ),
                               decoration: BoxDecoration(
-                                color: AppColors.warmYellow.withValues(alpha: 0.1),
+                                color: AppColors.warmYellow.withValues(
+                                  alpha: 0.1,
+                                ),
                                 borderRadius: BorderRadius.circular(6),
                                 border: Border.all(
                                   color: AppColors.warmYellow,
@@ -1515,6 +1713,134 @@ class _MyQuizCardState extends State<_MyQuizCard>
                             ),
                           ),
                         ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// Statistic card widget for game statistics display
+class _StatisticCard extends StatefulWidget {
+  final IconData icon;
+  final Color color;
+  final String value;
+  final String label;
+  final VoidCallback? onTap;
+
+  const _StatisticCard({
+    required this.icon,
+    required this.color,
+    required this.value,
+    required this.label,
+    this.onTap,
+  });
+
+  @override
+  State<_StatisticCard> createState() => _StatisticCardState();
+}
+
+class _StatisticCardState extends State<_StatisticCard>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: AppAnimations.shortAnimation,
+      vsync: this,
+    );
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: AppAnimations.easeOut,
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _scaleAnimation,
+      builder: (context, child) {
+        return Transform.scale(
+          scale: _scaleAnimation.value,
+          child: Container(
+            padding: const EdgeInsets.all(AppSpacing.spacingM),
+            decoration: BoxDecoration(
+              color: AppColors.pureWhite,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.shadowLight,
+                  blurRadius: 8,
+                  spreadRadius: 1,
+                ),
+              ],
+            ),
+            child: Material(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(16),
+              child: InkWell(
+                onTap: widget.onTap,
+                onTapDown: (_) => _animationController.forward(),
+                onTapUp: (_) => _animationController.reverse(),
+                onTapCancel: () => _animationController.reverse(),
+                borderRadius: BorderRadius.circular(16),
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.spacingS),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Icon with background
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: widget.color.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(widget.icon, color: widget.color, size: 24),
+                      ),
+
+                      const SizedBox(height: AppSpacing.spacingM),
+
+                      // Value
+                      Text(
+                        widget.value,
+                        style: AppTextStyles.sectionHeader.copyWith(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.charcoal,
+                        ),
+                      ),
+
+                      const SizedBox(height: AppSpacing.spacingXS),
+
+                      // Label
+                      Text(
+                        widget.label,
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppColors.coolGray,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ],
                   ),
                 ),

@@ -181,12 +181,14 @@ class NavigationLoadingStates {
                               ? AppSpacing.spacingM
                               : 0,
                         ),
-                        child: Container(
-                          width: MediaQuery.of(context).size.width * width,
-                          height: 16,
-                          decoration: BoxDecoration(
-                            color: AppColors.lightGray,
-                            borderRadius: BorderRadius.circular(4),
+                        child: LayoutBuilder(
+                          builder: (context, constraints) => Container(
+                            width: constraints.maxWidth * width,
+                            height: 16,
+                            decoration: BoxDecoration(
+                              color: AppColors.lightGray,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
                           ),
                         ),
                       );

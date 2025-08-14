@@ -134,8 +134,9 @@ class SecureStorageUseCase {
       key,
     );
 
-    if (storedHashResult.isFailure)
+    if (storedHashResult.isFailure) {
       return Result.failure(storedHashResult.failureOrNull!);
+    }
     if (storedHashResult.data == null) return Result.success(false);
 
     return Result.success(storedHashResult.data == params.hashedPin);

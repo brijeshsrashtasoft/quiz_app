@@ -1,8 +1,6 @@
 import 'dart:async';
-import 'package:dartz/dartz.dart';
-import 'package:equatable/equatable.dart';
-import '../../../../core/errors/failures.dart';
 import '../../../../core/usecases/stream_usecase.dart';
+import '../../../../core/utils/result.dart';
 import '../entities/leaderboard.dart';
 import '../repositories/leaderboard_repository.dart';
 
@@ -13,16 +11,13 @@ class WatchLeaderboard
   const WatchLeaderboard(this.repository);
 
   @override
-  Stream<Either<Failure, Leaderboard>> call(WatchLeaderboardParams params) {
+  Stream<Result<Leaderboard>> call(WatchLeaderboardParams params) {
     return repository.watchLeaderboard(params.sessionId);
   }
 }
 
-class WatchLeaderboardParams extends Equatable {
+class WatchLeaderboardParams {
   final String sessionId;
 
   const WatchLeaderboardParams({required this.sessionId});
-
-  @override
-  List<Object> get props => [sessionId];
 }

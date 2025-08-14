@@ -9,6 +9,7 @@ import '../../data/services/game_session_realtime_service.dart';
 import '../../data/services/pin_lookup_service.dart';
 import '../../domain/usecases/create_game_session.dart';
 import '../../../authentication/presentation/providers/auth_providers.dart';
+import '../../../../core/utils/performance/connection_manager.dart' as conn;
 
 /// Game session data source provider
 final gameSessionDataSourceProvider = Provider<GameSessionFirestoreDataSource>((
@@ -51,7 +52,7 @@ final createGameSessionUseCaseProvider = Provider<CreateGameSession>((ref) {
 });
 
 /// Connection state stream provider
-final connectionStateProvider = StreamProvider<ConnectionState>((ref) {
+final connectionStateProvider = StreamProvider<conn.ConnectionState>((ref) {
   final realtimeService = ref.watch(gameSessionRealtimeServiceProvider);
   return realtimeService.connectionState;
 });

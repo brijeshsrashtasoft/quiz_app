@@ -5,6 +5,8 @@ import '../../../../core/utils/result.dart';
 import '../../../../core/utils/exception_mapper.dart';
 import '../../../../core/base/base_datasource.dart';
 import '../models/leaderboard_model.dart';
+import '../models/score_model.dart';
+import '../models/leaderboard_entry_model.dart';
 
 /// Leaderboard Firestore data source implementation
 /// Following CLAUDE.md patterns and Firestore integration with real-time support
@@ -143,31 +145,84 @@ class LeaderboardFirestoreDataSource extends BaseFirebaseDataSource {
 
         if (!doc.exists) {
           // Create new leaderboard if it doesn't exist
+          // Convert ScoreModel to LeaderboardEntryModel for proper structure
+          final entry = LeaderboardEntryModel(
+            playerId: score.playerId,
+            playerName: score.playerName,
+            rank: 1,
+            previousRank: 1,
+            totalScore: score.totalScore,
+            correctAnswers: score.isCorrect ? 1 : 0,
+            totalQuestions: 1,
+            averageResponseTime: score.responseTimeMs.toDouble(),
+            currentStreak: score.isCorrect ? 1 : 0,
+            maxStreak: score.isCorrect ? 1 : 0,
+            lastUpdated: DateTime.now(),
+          );
           leaderboard = LeaderboardModel(
             sessionId: sessionId,
-            scores: [score],
-            updatedAt: DateTime.now(),
+            quizId: '', // Will be set when quiz info is available
+            entries: [entry],
+            lastUpdated: DateTime.now(),
+            type: 'session',
+            totalPlayers: 1,
           );
         } else {
           // Update existing leaderboard
           final data = doc.data()!;
           leaderboard = LeaderboardModel.fromFirestore(data);
 
-          // Find and update existing score or add new one
-          final updatedScores = List<ScoreModel>.from(leaderboard.scores);
-          final existingIndex = updatedScores.indexWhere(
-            (s) => s.playerId == score.playerId,
+          // Find and update existing entry or add new one
+          final updatedEntries = List<LeaderboardEntryModel>.from(
+            leaderboard.entries,
+          );
+          final existingIndex = updatedEntries.indexWhere(
+            (e) => e.playerId == score.playerId,
           );
 
           if (existingIndex != -1) {
-            updatedScores[existingIndex] = score;
+            // Update existing entry with new score data
+            final existingEntry = updatedEntries[existingIndex];
+            updatedEntries[existingIndex] = existingEntry.copyWith(
+              totalScore: existingEntry.totalScore + score.totalScore,
+              correctAnswers:
+                  existingEntry.correctAnswers + (score.isCorrect ? 1 : 0),
+              totalQuestions: existingEntry.totalQuestions + 1,
+              averageResponseTime:
+                  (existingEntry.averageResponseTime + score.responseTimeMs) /
+                  2,
+              currentStreak: score.isCorrect
+                  ? existingEntry.currentStreak + 1
+                  : 0,
+              maxStreak: score.isCorrect
+                  ? (existingEntry.currentStreak + 1 > existingEntry.maxStreak
+                        ? existingEntry.currentStreak + 1
+                        : existingEntry.maxStreak)
+                  : existingEntry.maxStreak,
+              lastUpdated: DateTime.now(),
+            );
           } else {
-            updatedScores.add(score);
+            // Create new entry from score
+            final newEntry = LeaderboardEntryModel(
+              playerId: score.playerId,
+              playerName: score.playerName,
+              rank: updatedEntries.length + 1,
+              previousRank: updatedEntries.length + 1,
+              totalScore: score.totalScore,
+              correctAnswers: score.isCorrect ? 1 : 0,
+              totalQuestions: 1,
+              averageResponseTime: score.responseTimeMs.toDouble(),
+              currentStreak: score.isCorrect ? 1 : 0,
+              maxStreak: score.isCorrect ? 1 : 0,
+              lastUpdated: DateTime.now(),
+            );
+            updatedEntries.add(newEntry);
           }
 
           leaderboard = leaderboard.copyWith(
-            scores: updatedScores,
-            updatedAt: DateTime.now(),
+            entries: updatedEntries,
+            lastUpdated: DateTime.now(),
+            totalPlayers: updatedEntries.length,
           );
         }
 
@@ -200,8 +255,8 @@ class LeaderboardFirestoreDataSource extends BaseFirebaseDataSource {
     }
   }
 
-  /// Get top scores for a session
-  Future<Result<List<ScoreModel>>> getTopScores(
+  /// Get top entries for a session
+  Future<Result<List<LeaderboardEntryModel>>> getTopEntries(
     String sessionId, {
     int limit = 10,
   }) async {
@@ -210,49 +265,48 @@ class LeaderboardFirestoreDataSource extends BaseFirebaseDataSource {
 
       final leaderboardResult = await getLeaderboardBySessionId(sessionId);
 
-      if (leaderboardResult.isFailure) {
-        return Result.failure(leaderboardResult.failure!);
+      final failure = leaderboardResult.failureOrNull;
+      if (failure != null) {
+        return Result.failure(failure);
       }
 
-      final leaderboard = leaderboardResult.data!;
-      final sortedScores = List<ScoreModel>.from(leaderboard.scores);
+      final leaderboard = leaderboardResult.dataOrNull!;
+      final sortedEntries = List<LeaderboardEntryModel>.from(
+        leaderboard.entries,
+      );
 
-      // Sort by score (descending), then by accuracy, then by time taken
-      sortedScores.sort((a, b) {
-        // Primary sort: by score (descending)
-        final scoreComparison = b.score.compareTo(a.score);
+      // Sort by total score (descending), then by accuracy, then by average response time
+      sortedEntries.sort((a, b) {
+        // Primary sort: by total score (descending)
+        final scoreComparison = b.totalScore.compareTo(a.totalScore);
         if (scoreComparison != 0) return scoreComparison;
 
         // Secondary sort: by accuracy (descending)
-        final accuracyA = a.totalAnswers > 0
-            ? a.correctAnswers / a.totalAnswers
+        final accuracyA = a.totalQuestions > 0
+            ? a.correctAnswers / a.totalQuestions
             : 0.0;
-        final accuracyB = b.totalAnswers > 0
-            ? b.correctAnswers / b.totalAnswers
+        final accuracyB = b.totalQuestions > 0
+            ? b.correctAnswers / b.totalQuestions
             : 0.0;
         final accuracyComparison = accuracyB.compareTo(accuracyA);
         if (accuracyComparison != 0) return accuracyComparison;
 
-        // Tertiary sort: by time taken (ascending - faster is better)
-        if (a.timeTaken != null && b.timeTaken != null) {
-          return a.timeTaken!.compareTo(b.timeTaken!);
-        }
-
-        return 0;
+        // Tertiary sort: by average response time (ascending - faster is better)
+        return a.averageResponseTime.compareTo(b.averageResponseTime);
       });
 
-      final topScores = sortedScores.take(limit).toList();
+      final topEntries = sortedEntries.take(limit).toList();
 
       final duration = DateTime.now().difference(startTime);
-      AppLogger.performance('Get top scores', duration);
+      AppLogger.performance('Get top entries', duration);
 
-      return Result.success(topScores);
+      return Result.success(topEntries);
     } catch (e, stackTrace) {
-      AppLogger.error('Failed to get top scores: $sessionId', e, stackTrace);
+      AppLogger.error('Failed to get top entries: $sessionId', e, stackTrace);
       return Result.failure(
         FirestoreException(
-          message: 'Failed to get top scores: ${e.toString()}',
-          code: 'get_top_scores_error',
+          message: 'Failed to get top entries: ${e.toString()}',
+          code: 'get_top_entries_error',
         ).toFailure(),
       );
     }
@@ -265,36 +319,35 @@ class LeaderboardFirestoreDataSource extends BaseFirebaseDataSource {
 
       final leaderboardResult = await getLeaderboardBySessionId(sessionId);
 
-      if (leaderboardResult.isFailure) {
-        return Result.failure(leaderboardResult.failure!);
+      final failure = leaderboardResult.failureOrNull;
+      if (failure != null) {
+        return Result.failure(failure);
       }
 
-      final leaderboard = leaderboardResult.data!;
-      final sortedScores = List<ScoreModel>.from(leaderboard.scores);
+      final leaderboard = leaderboardResult.dataOrNull!;
+      final sortedEntries = List<LeaderboardEntryModel>.from(
+        leaderboard.entries,
+      );
 
-      // Sort by score (descending), then by accuracy, then by time taken
-      sortedScores.sort((a, b) {
-        final scoreComparison = b.score.compareTo(a.score);
+      // Sort by total score (descending), then by accuracy, then by average response time
+      sortedEntries.sort((a, b) {
+        final scoreComparison = b.totalScore.compareTo(a.totalScore);
         if (scoreComparison != 0) return scoreComparison;
 
-        final accuracyA = a.totalAnswers > 0
-            ? a.correctAnswers / a.totalAnswers
+        final accuracyA = a.totalQuestions > 0
+            ? a.correctAnswers / a.totalQuestions
             : 0.0;
-        final accuracyB = b.totalAnswers > 0
-            ? b.correctAnswers / b.totalAnswers
+        final accuracyB = b.totalQuestions > 0
+            ? b.correctAnswers / b.totalQuestions
             : 0.0;
         final accuracyComparison = accuracyB.compareTo(accuracyA);
         if (accuracyComparison != 0) return accuracyComparison;
 
-        if (a.timeTaken != null && b.timeTaken != null) {
-          return a.timeTaken!.compareTo(b.timeTaken!);
-        }
-
-        return 0;
+        return a.averageResponseTime.compareTo(b.averageResponseTime);
       });
 
-      final index = sortedScores.indexWhere(
-        (score) => score.playerId == playerId,
+      final index = sortedEntries.indexWhere(
+        (entry) => entry.playerId == playerId,
       );
       final rank = index == -1 ? null : index + 1;
 
@@ -328,8 +381,11 @@ class LeaderboardFirestoreDataSource extends BaseFirebaseDataSource {
               return Result.success(
                 LeaderboardModel(
                   sessionId: sessionId,
-                  scores: [],
-                  updatedAt: DateTime.now(),
+                  quizId: '',
+                  entries: [],
+                  lastUpdated: DateTime.now(),
+                  type: 'session',
+                  totalPlayers: 0,
                 ),
               );
             }
@@ -385,8 +441,8 @@ class LeaderboardFirestoreDataSource extends BaseFirebaseDataSource {
         final leaderboard = LeaderboardModel.fromFirestore(data);
 
         final finalizedLeaderboard = leaderboard.copyWith(
-          finalResults: true,
-          updatedAt: DateTime.now(),
+          type: 'finalResult',
+          lastUpdated: DateTime.now(),
         );
 
         final updateData = finalizedLeaderboard.toFirestore();
@@ -448,85 +504,6 @@ class LeaderboardFirestoreDataSource extends BaseFirebaseDataSource {
     }
   }
 
-  /// Batch update multiple player scores
-  Future<Result<LeaderboardModel>> batchUpdateScores(
-    String sessionId,
-    List<ScoreModel> scores,
-  ) async {
-    try {
-      final startTime = DateTime.now();
-
-      // Use transaction to ensure atomic update
-      final result = await FirestoreConfig.runTransaction<LeaderboardModel>((
-        transaction,
-      ) async {
-        final docRef = FirestoreConfig.getDocument(_collection, sessionId);
-        final doc = await transaction.get(docRef);
-
-        LeaderboardModel leaderboard;
-
-        if (!doc.exists) {
-          // Create new leaderboard if it doesn't exist
-          leaderboard = LeaderboardModel(
-            sessionId: sessionId,
-            scores: scores,
-            updatedAt: DateTime.now(),
-          );
-        } else {
-          // Update existing leaderboard
-          final data = doc.data()!;
-          leaderboard = LeaderboardModel.fromFirestore(data);
-
-          final updatedScores = List<ScoreModel>.from(leaderboard.scores);
-
-          // Update or add each score
-          for (final score in scores) {
-            final existingIndex = updatedScores.indexWhere(
-              (s) => s.playerId == score.playerId,
-            );
-
-            if (existingIndex != -1) {
-              updatedScores[existingIndex] = score;
-            } else {
-              updatedScores.add(score);
-            }
-          }
-
-          leaderboard = leaderboard.copyWith(
-            scores: updatedScores,
-            updatedAt: DateTime.now(),
-          );
-        }
-
-        final updateData = leaderboard.toFirestore();
-        transaction.set(docRef, updateData);
-
-        return leaderboard;
-      });
-
-      final duration = DateTime.now().difference(startTime);
-      AppLogger.performance('Batch update scores', duration);
-
-      AppLogger.firebase(
-        'LeaderboardDataSource',
-        'Batch updated ${scores.length} scores for session: $sessionId',
-      );
-      return Result.success(result);
-    } catch (e, stackTrace) {
-      AppLogger.error(
-        'Failed to batch update scores: $sessionId',
-        e,
-        stackTrace,
-      );
-      return Result.failure(
-        FirestoreException(
-          message: 'Failed to batch update scores: ${e.toString()}',
-          code: 'batch_update_scores_error',
-        ).toFailure(),
-      );
-    }
-  }
-
   /// Get leaderboard statistics
   Future<Result<Map<String, dynamic>>> getLeaderboardStats(
     String sessionId,
@@ -536,14 +513,15 @@ class LeaderboardFirestoreDataSource extends BaseFirebaseDataSource {
 
       final leaderboardResult = await getLeaderboardBySessionId(sessionId);
 
-      if (leaderboardResult.isFailure) {
-        return Result.failure(leaderboardResult.failure!);
+      final failure = leaderboardResult.failureOrNull;
+      if (failure != null) {
+        return Result.failure(failure);
       }
 
-      final leaderboard = leaderboardResult.data!;
-      final scores = leaderboard.scores;
+      final leaderboard = leaderboardResult.dataOrNull!;
+      final entries = leaderboard.entries;
 
-      if (scores.isEmpty) {
+      if (entries.isEmpty) {
         return Result.success(<String, dynamic>{
           'totalParticipants': 0,
           'averageScore': 0.0,
@@ -554,28 +532,28 @@ class LeaderboardFirestoreDataSource extends BaseFirebaseDataSource {
         });
       }
 
-      final totalScore = scores.fold(0, (sum, s) => sum + s.score);
-      final averageScore = totalScore / scores.length;
+      final totalScore = entries.fold(0, (sum, e) => sum + e.totalScore);
+      final averageScore = totalScore / entries.length;
 
-      final totalAccuracy = scores.fold(0.0, (sum, s) {
+      final totalAccuracy = entries.fold(0.0, (sum, e) {
         return sum +
-            (s.totalAnswers > 0 ? s.correctAnswers / s.totalAnswers : 0.0);
+            (e.totalQuestions > 0 ? e.correctAnswers / e.totalQuestions : 0.0);
       });
-      final averageAccuracy = (totalAccuracy / scores.length) * 100;
+      final averageAccuracy = (totalAccuracy / entries.length) * 100;
 
-      final highestScore = scores
-          .map((s) => s.score)
+      final highestScore = entries
+          .map((e) => e.totalScore)
           .reduce((a, b) => a > b ? a : b);
-      final lowestScore = scores
-          .map((s) => s.score)
+      final lowestScore = entries
+          .map((e) => e.totalScore)
           .reduce((a, b) => a < b ? a : b);
 
-      final perfectScores = scores.where((s) {
-        return s.totalAnswers > 0 && s.correctAnswers == s.totalAnswers;
+      final perfectScores = entries.where((e) {
+        return e.totalQuestions > 0 && e.correctAnswers == e.totalQuestions;
       }).length;
 
       final stats = <String, dynamic>{
-        'totalParticipants': scores.length,
+        'totalParticipants': entries.length,
         'averageScore': averageScore,
         'averageAccuracy': averageAccuracy,
         'highestScore': highestScore,
@@ -628,98 +606,6 @@ class LeaderboardFirestoreDataSource extends BaseFirebaseDataSource {
           code: 'check_leaderboard_error',
         ).toFailure(),
       );
-    }
-  }
-
-  /// Add score to leaderboard
-  Future<Result<LeaderboardModel>> addScore(
-    String sessionId,
-    ScoreModel score,
-  ) async {
-    try {
-      final leaderboardResult = await getLeaderboardBySessionId(sessionId);
-
-      return leaderboardResult.when(
-        success: (leaderboard) async {
-          final updatedScores = List<ScoreModel>.from(leaderboard.scores);
-          updatedScores.add(score);
-
-          final updatedLeaderboard = leaderboard.copyWith(
-            scores: updatedScores,
-            updatedAt: DateTime.now(),
-          );
-
-          final updateResult = await updateLeaderboard(updatedLeaderboard);
-          return updateResult;
-        },
-        failure: (error) => Result.failure(error),
-      );
-    } catch (e) {
-      return Result.failure(e.toFailure());
-    }
-  }
-
-  /// Update existing score
-  Future<Result<LeaderboardModel>> updateScore(
-    String sessionId,
-    ScoreModel score,
-  ) async {
-    try {
-      final leaderboardResult = await getLeaderboardBySessionId(sessionId);
-
-      return leaderboardResult.when(
-        success: (leaderboard) async {
-          final updatedScores = List<ScoreModel>.from(leaderboard.scores);
-          final existingIndex = updatedScores.indexWhere(
-            (s) => s.playerId == score.playerId,
-          );
-
-          if (existingIndex >= 0) {
-            updatedScores[existingIndex] = score;
-          } else {
-            updatedScores.add(score);
-          }
-
-          final updatedLeaderboard = leaderboard.copyWith(
-            scores: updatedScores,
-            updatedAt: DateTime.now(),
-          );
-
-          final updateResult = await updateLeaderboard(updatedLeaderboard);
-          return updateResult;
-        },
-        failure: (error) => Result.failure(error),
-      );
-    } catch (e) {
-      return Result.failure(e.toFailure());
-    }
-  }
-
-  /// Remove score from leaderboard
-  Future<Result<LeaderboardModel>> removeScore(
-    String sessionId,
-    String playerId,
-  ) async {
-    try {
-      final leaderboardResult = await getLeaderboardBySessionId(sessionId);
-
-      return leaderboardResult.when(
-        success: (leaderboard) async {
-          final updatedScores = List<ScoreModel>.from(leaderboard.scores);
-          updatedScores.removeWhere((s) => s.playerId == playerId);
-
-          final updatedLeaderboard = leaderboard.copyWith(
-            scores: updatedScores,
-            updatedAt: DateTime.now(),
-          );
-
-          final updateResult = await updateLeaderboard(updatedLeaderboard);
-          return updateResult;
-        },
-        failure: (error) => Result.failure(error),
-      );
-    } catch (e) {
-      return Result.failure(e.toFailure());
     }
   }
 }

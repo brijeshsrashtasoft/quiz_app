@@ -68,7 +68,6 @@ class _QuizMetadataFormState extends ConsumerState<QuizMetadataForm> {
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
-    final screenWidth = MediaQuery.of(context).size.width;
     final isSmallScreen = screenHeight < 700;
     final maxFormHeight = isSmallScreen
         ? screenHeight * 0.6

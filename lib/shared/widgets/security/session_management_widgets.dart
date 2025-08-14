@@ -4,6 +4,7 @@ import '../../constants/app_text_styles.dart';
 import '../../constants/app_spacing.dart';
 import '../../constants/app_dimensions.dart';
 import '../../constants/app_animations.dart';
+import 'device_management_widgets.dart';
 
 /// Session list tile showing active session details with device information
 /// Follows Kahoot-style design with security-focused UX patterns
@@ -157,7 +158,9 @@ class _SessionListTileState extends State<SessionListTile>
                               height: 48,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: AppColors.vibrantPurple.withValues(alpha: 0.1),
+                                color: AppColors.vibrantPurple.withValues(
+                                  alpha: 0.1,
+                                ),
                               ),
                               child: Icon(
                                 _getDeviceIcon(widget.sessionInfo.deviceType),
@@ -298,7 +301,7 @@ class _SessionListTileState extends State<SessionListTile>
 
                     // Expanded details
                     AnimatedCrossFade(
-                      firstChild: Container(),
+                      firstChild: const SizedBox.shrink(),
                       secondChild: _buildExpandedDetails(),
                       crossFadeState: _isExpanded
                           ? CrossFadeState.showSecond
@@ -617,6 +620,6 @@ class SessionInfo {
   });
 }
 
-enum DeviceType { mobile, tablet, desktop, web }
+// DeviceType enum moved to device_management_widgets.dart to avoid conflicts
 
 enum SessionStatus { active, idle, expired }

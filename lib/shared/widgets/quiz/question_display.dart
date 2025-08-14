@@ -197,7 +197,7 @@ class _QuestionDisplayState extends State<QuestionDisplay>
               ),
             ),
             child: Text(
-              '${widget.questionNumber}',
+              widget.questionNumber.toString(),
               style: AppTextStyles.buttonText.copyWith(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,

@@ -10,6 +10,18 @@ class AppDimensions {
   static const double borderRadiusXL = 24.0;
   static const double borderRadiusFull = 100.0; // Circular elements
 
+  // Theme compatibility aliases
+  static const double radiusLarge = borderRadiusL; // 16.0
+  static const double radiusMedium = borderRadiusM; // 12.0
+  static const double radiusSmall = borderRadiusS; // 8.0
+
+  // Padding constants for theme compatibility
+  static const double paddingXS = 4.0;
+  static const double paddingSmall = 8.0;
+  static const double paddingMedium = 16.0;
+  static const double paddingLarge = 24.0;
+  static const double paddingXL = 32.0;
+
   // Component-specific border radius
   static const double cardBorderRadius = borderRadiusL; // 16dp - Question cards
   static const double cardRadius = cardBorderRadius; // Alias for compatibility
@@ -22,6 +34,11 @@ class AppDimensions {
       inputBorderRadius; // Alias for compatibility
   static const double containerBorderRadius =
       borderRadiusM; // 12dp - General containers
+
+  // Additional aliases for theme compatibility
+  static const double elevationSmall = elevationLow; // 2.0
+  static const double elevationLarge = elevationHigh; // 8.0
+  static const double iconMedium = iconM; // 24.0
 
   // Button Dimensions
   static const double answerButtonHeight =

@@ -90,8 +90,9 @@ class _AnswerButtonState extends State<AnswerButton>
   Color get _backgroundColor {
     if (widget.showResult || widget.isCorrect || widget.isWrong) {
       if (widget.isCorrect) return AppColors.correctAnswer;
-      if (widget.isIncorrect || widget.isWrong)
+      if (widget.isIncorrect || widget.isWrong) {
         return AppColors.incorrectAnswer;
+      }
     }
 
     if (widget.isSelected && !widget.showResult) {
@@ -167,7 +168,7 @@ class _AnswerButtonState extends State<AnswerButton>
               child: Container(
                 width: double.infinity,
                 height: widget.height ?? AppDimensions.answerButtonHeight,
-                margin: EdgeInsets.symmetric(
+                margin: const EdgeInsets.symmetric(
                   vertical: AppSpacing.spacingXS,
                   horizontal: AppSpacing.spacingS,
                 ),
@@ -194,7 +195,7 @@ class _AnswerButtonState extends State<AnswerButton>
                     Center(
                       child: Row(
                         children: [
-                          SizedBox(width: AppSpacing.spacingM),
+                          const SizedBox(width: AppSpacing.spacingM),
                           // Shape icon
                           Container(
                             width: 32,
@@ -209,7 +210,7 @@ class _AnswerButtonState extends State<AnswerButton>
                               size: 20,
                             ),
                           ),
-                          SizedBox(width: AppSpacing.spacingM),
+                          const SizedBox(width: AppSpacing.spacingM),
                           // Answer text
                           Expanded(
                             child: Text(
@@ -222,7 +223,7 @@ class _AnswerButtonState extends State<AnswerButton>
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          SizedBox(width: AppSpacing.spacingM),
+                          const SizedBox(width: AppSpacing.spacingM),
                         ],
                       ),
                     ),

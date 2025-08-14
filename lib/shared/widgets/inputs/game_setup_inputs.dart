@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../../constants/app_colors.dart';
 import '../../constants/app_text_styles.dart';
 import '../../constants/app_spacing.dart';
@@ -240,13 +239,6 @@ class _NumberInputState extends State<NumberInput>
     _animationController.forward().then((_) {
       _animationController.reverse();
     });
-  }
-
-  void _onTextChanged(String value) {
-    final intValue = int.tryParse(value);
-    if (intValue != null && intValue >= widget.min && intValue <= widget.max) {
-      widget.onChanged(intValue);
-    }
   }
 
   @override

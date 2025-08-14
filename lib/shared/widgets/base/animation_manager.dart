@@ -250,8 +250,7 @@ final animationManagerProvider =
     });
 
 /// Mixin for widgets that use animation manager
-mixin AnimationManagerMixin<T extends StatefulWidget>
-    on State<T>, TickerProviderStateMixin {
+mixin AnimationManagerMixin on State, TickerProviderStateMixin {
   late final AnimationManager animationManager;
 
   @override

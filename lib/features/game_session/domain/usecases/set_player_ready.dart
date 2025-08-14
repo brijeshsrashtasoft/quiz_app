@@ -9,7 +9,7 @@ class SetPlayerReady
     implements UseCase<GameSessionEntity, SetPlayerReadyParams> {
   final GameSessionRepository repository;
 
-  const SetPlayerReady(this.repository);
+  SetPlayerReady(this.repository);
 
   @override
   Future<Result<GameSessionEntity>> call(SetPlayerReadyParams params) async {

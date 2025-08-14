@@ -37,6 +37,5 @@ class SendPasswordResetUseCase
 class SendPasswordResetParams extends BaseUseCaseParams {
   final String email;
   const SendPasswordResetParams({required this.email});
-  @override
   List<Object?> get props => [email];
 }

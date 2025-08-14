@@ -84,7 +84,7 @@ class WebFirebaseConfig {
         return;
       } catch (e) {
         if (attempt == maxRetries) {
-          throw e; // Rethrow on final attempt
+          rethrow; // Rethrow on final attempt
         }
 
         AppLogger.warning(

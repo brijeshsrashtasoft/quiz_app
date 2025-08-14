@@ -71,11 +71,11 @@ class AnimatedStateManager<T> extends ChangeNotifier {
 
 /// Provider for animated state managers
 final animatedStateManagerProvider =
-    Provider.family<AnimatedStateManager<T>, AnimatedStateConfig<T>, T>((
-      ref,
-      config,
-    ) {
-      final manager = AnimatedStateManager<T>(
+    Provider.family<
+      AnimatedStateManager<dynamic>,
+      AnimatedStateConfig<dynamic>
+    >((ref, config) {
+      final manager = AnimatedStateManager<dynamic>(
         initialState: config.initialState,
         defaultDuration: config.defaultDuration,
       );
@@ -252,7 +252,6 @@ class AnimatedValueNotifier<T> extends ValueNotifier<T> {
   final Curve curve;
   AnimationController? _controller;
   Animation<T>? _animation;
-  T? _targetValue;
 
   AnimatedValueNotifier(
     super.value, {
@@ -275,7 +274,6 @@ class AnimatedValueNotifier<T> extends ValueNotifier<T> {
       duration: customDuration ?? duration,
     );
 
-    _targetValue = newValue;
     _animation = Tween<T>(begin: value, end: newValue).animate(
       CurvedAnimation(parent: _controller!, curve: customCurve ?? curve),
     );

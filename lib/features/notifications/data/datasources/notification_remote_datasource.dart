@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math';
 import '../models/notification_model.dart';
-import '../../domain/failures/notification_failure.dart';
 
 /// Abstract remote data source for notifications
 /// Defines contract for remote notification operations (Firebase, API, etc.)
@@ -210,6 +209,7 @@ class NotificationRemoteDataSourceImpl implements NotificationRemoteDataSource {
     controller.add(_userNotifications[userId] ?? []);
 
     // Listen to updates and emit them
+    // ignore: unused_result
     _notificationsController.stream.listen((allNotifications) {
       controller.add(allNotifications[userId] ?? []);
     });
@@ -236,6 +236,7 @@ class NotificationRemoteDataSourceImpl implements NotificationRemoteDataSource {
     controller.add(currentNotifications.where((n) => !n.isRead).length);
 
     // Listen to updates and emit new counts
+    // ignore: unused_result
     _notificationsController.stream.listen((allNotifications) {
       final notifications = allNotifications[userId] ?? [];
       controller.add(notifications.where((n) => !n.isRead).length);

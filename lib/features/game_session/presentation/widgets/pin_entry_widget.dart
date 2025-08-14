@@ -25,7 +25,6 @@ class _PinEntryWidgetState extends State<PinEntryWidget> {
   late List<FocusNode> _focusNodes;
   late List<TextEditingController> _controllers;
   late List<AnimationController> _animationControllers;
-  late List<Animation<double>> _scaleAnimations;
 
   @override
   void initState() {
@@ -36,7 +35,6 @@ class _PinEntryWidgetState extends State<PinEntryWidget> {
       (_) => TextEditingController(),
     );
     _animationControllers = [];
-    _scaleAnimations = [];
 
     // Listen to main controller changes
     widget.controller.addListener(_updateIndividualControllers);
@@ -92,8 +90,8 @@ class _PinEntryWidgetState extends State<PinEntryWidget> {
     }
   }
 
-  void _handleKeyEvent(RawKeyEvent event, int index) {
-    if (event is RawKeyDownEvent) {
+  void _handleKeyEvent(KeyEvent event, int index) {
+    if (event is KeyDownEvent) {
       if (event.logicalKey == LogicalKeyboardKey.backspace) {
         if (_controllers[index].text.isEmpty && index > 0) {
           _focusNodes[index - 1].requestFocus();
@@ -131,7 +129,7 @@ class _PinDigitField extends StatefulWidget {
   final TextEditingController controller;
   final FocusNode focusNode;
   final ValueChanged<String> onChanged;
-  final Function(RawKeyEvent) onKeyEvent;
+  final Function(KeyEvent) onKeyEvent;
   final bool isActive;
 
   const _PinDigitField({
@@ -215,9 +213,9 @@ class _PinDigitFieldState extends State<_PinDigitField>
                     ]
                   : [],
             ),
-            child: RawKeyboardListener(
+            child: KeyboardListener(
               focusNode: FocusNode(),
-              onKey: widget.onKeyEvent,
+              onKeyEvent: widget.onKeyEvent,
               child: TextField(
                 controller: widget.controller,
                 focusNode: widget.focusNode,

@@ -5,6 +5,8 @@ import '../../constants/app_text_styles.dart';
 import '../../constants/app_spacing.dart';
 import '../../constants/app_dimensions.dart';
 import '../../../core/navigation/route_constants.dart';
+import '../base/responsive_builder.dart';
+import 'app_navigation_bar.dart';
 
 /// Responsive navigation that adapts to screen size
 /// Uses bottom navigation for mobile, drawer for larger screens
@@ -27,9 +29,17 @@ class ResponsiveNavigation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ResponsiveBuilder(
-      mobile: _buildMobileLayout(context),
-      tablet: _buildTabletLayout(context),
-      desktop: _buildDesktopLayout(context),
+      builder: (context, info) {
+        switch (info.screenSize) {
+          case ScreenSize.small:
+            return _buildMobileLayout(context);
+          case ScreenSize.medium:
+            return _buildTabletLayout(context);
+          case ScreenSize.large:
+          case ScreenSize.extraLarge:
+            return _buildDesktopLayout(context);
+        }
+      },
     );
   }
 

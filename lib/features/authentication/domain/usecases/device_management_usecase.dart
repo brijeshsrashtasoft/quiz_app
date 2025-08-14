@@ -158,8 +158,9 @@ class DeviceManagementUseCase {
     GetDeviceSecuritySummaryParams params,
   ) async {
     final devicesResult = await _deviceRepository.getUserDevices(params.userId);
-    if (devicesResult.isFailure)
+    if (devicesResult.isFailure) {
       return Result.failure(devicesResult.failureOrNull!);
+    }
 
     final devices = devicesResult.data!;
     final trustedDevices = devices.where((d) => d.isTrusted).toList();

@@ -8,8 +8,8 @@ import '../../../../shared/constants/app_text_styles.dart';
 import '../../../../shared/constants/app_spacing.dart';
 import '../../../../shared/constants/app_animations.dart';
 import '../../../../shared/widgets/buttons/primary_button.dart';
-import '../../../../shared/widgets/layout/page_layout.dart';
 import '../widgets/avatar_upload_widget.dart';
+import '../widgets/profile_field_widget.dart';
 import '../../../authentication/domain/entities/auth_state.dart';
 import '../../../authentication/presentation/providers/auth_providers.dart';
 
@@ -34,7 +34,6 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage>
   final _emailController = TextEditingController();
   final _bioController = TextEditingController();
 
-  File? _selectedAvatarImage;
   bool _isLoading = false;
   bool _hasUnsavedChanges = false;
 
@@ -211,7 +210,6 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage>
 
   void _onAvatarImageSelected(File image) {
     setState(() {
-      _selectedAvatarImage = image;
       _hasUnsavedChanges = true;
     });
   }
@@ -223,11 +221,12 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage>
 
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) async {
+      onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
+        final navigator = Navigator.of(context);
         final shouldPop = await _onWillPop();
         if (shouldPop && mounted) {
-          context.pop();
+          navigator.pop();
         }
       },
       child: Scaffold(
@@ -245,9 +244,10 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage>
           leading: IconButton(
             icon: const Icon(Icons.close),
             onPressed: () async {
+              final navigator = Navigator.of(context);
               final shouldPop = await _onWillPop();
               if (shouldPop && mounted) {
-                context.pop();
+                navigator.pop();
               }
             },
           ),

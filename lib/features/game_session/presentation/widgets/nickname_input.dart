@@ -105,7 +105,9 @@ class _NicknameInputState extends State<NicknameInput>
                     boxShadow: _isFocused
                         ? [
                             BoxShadow(
-                              color: AppColors.vibrantPurple.withValues(alpha: 0.2),
+                              color: AppColors.vibrantPurple.withValues(
+                                alpha: 0.2,
+                              ),
                               blurRadius: 15,
                               offset: const Offset(0, 5),
                             ),

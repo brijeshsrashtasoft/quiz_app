@@ -70,9 +70,10 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen>
             _buildHeader(context),
             Expanded(
               child: leaderboardAsync.when(
-                data: (leaderboard) => leaderboard.fold(
-                  (failure) => _buildErrorState(failure.toString()),
-                  (data) => _buildLeaderboardContent(data),
+                data: (result) => result.when(
+                  success: (leaderboard) =>
+                      _buildLeaderboardContent(leaderboard),
+                  failure: (failure) => _buildErrorState(failure.toString()),
                 ),
                 loading: () => const LeaderboardShimmer(),
                 error: (error, _) => _buildErrorState(error.toString()),
@@ -88,10 +89,10 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen>
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.primary,
+        color: AppColors.vibrantPurple,
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withOpacity(0.3),
+            color: AppColors.vibrantPurple.withValues(alpha: 0.3),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -231,15 +232,18 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen>
             ),
             const SizedBox(height: AppSpacing.xl),
             ElevatedButton.icon(
-              onPressed: () => ref.refresh(
-                widget.isFinal
-                    ? finalLeaderboardProvider(widget.sessionId)
-                    : liveLeaderboardStreamProvider(widget.sessionId),
-              ),
+              onPressed: () {
+                // ignore: unused_result
+                ref.refresh(
+                  widget.isFinal
+                      ? finalLeaderboardProvider(widget.sessionId)
+                      : liveLeaderboardStreamProvider(widget.sessionId),
+                );
+              },
               icon: const Icon(Icons.refresh),
               label: const Text('Try Again'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor: AppColors.vibrantPurple,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.lg,

@@ -44,8 +44,6 @@ class _AccountActionWidgetState extends State<AccountActionWidget>
   late Animation<double> _scaleAnimation;
   late Animation<double> _shakeAnimation;
 
-  bool _isPressed = false;
-
   @override
   void initState() {
     super.initState();
@@ -81,18 +79,11 @@ class _AccountActionWidgetState extends State<AccountActionWidget>
 
   Future<void> _handleAction() async {
     // Trigger press animation
-    setState(() {
-      _isPressed = true;
-    });
 
     await _animationController.forward();
     await _animationController.reverse();
 
-    if (mounted) {
-      setState(() {
-        _isPressed = false;
-      });
-    }
+    if (mounted) {}
 
     if (widget.requiresConfirmation) {
       final confirmed = await _showConfirmationDialog();

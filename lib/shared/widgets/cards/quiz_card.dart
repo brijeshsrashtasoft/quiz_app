@@ -265,8 +265,9 @@ class _QuizCardState extends State<QuizCard>
                                           vertical: 2,
                                         ),
                                         decoration: BoxDecoration(
-                                          color: AppColors.mintGreen
-                                              .withValues(alpha: 0.1),
+                                          color: AppColors.mintGreen.withValues(
+                                            alpha: 0.1,
+                                          ),
                                           borderRadius: BorderRadius.circular(
                                             8,
                                           ),
@@ -279,7 +280,7 @@ class _QuizCardState extends State<QuizCard>
                                               size: 10,
                                               color: AppColors.mintGreen,
                                             ),
-                                            SizedBox(width: 2),
+                                            const SizedBox(width: 2),
                                             Text(
                                               'PUBLIC',
                                               style: AppTextStyles.caption
@@ -299,8 +300,8 @@ class _QuizCardState extends State<QuizCard>
                                           vertical: 2,
                                         ),
                                         decoration: BoxDecoration(
-                                          color: AppColors.coolGray.withValues(alpha:
-                                            0.1,
+                                          color: AppColors.coolGray.withValues(
+                                            alpha: 0.1,
                                           ),
                                           borderRadius: BorderRadius.circular(
                                             8,
@@ -314,7 +315,7 @@ class _QuizCardState extends State<QuizCard>
                                               size: 10,
                                               color: AppColors.coolGray,
                                             ),
-                                            SizedBox(width: 2),
+                                            const SizedBox(width: 2),
                                             Text(
                                               'PRIVATE',
                                               style: AppTextStyles.caption
@@ -341,7 +342,9 @@ class _QuizCardState extends State<QuizCard>
                                     vertical: 2,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: AppColors.turquoise.withValues(alpha: 0.1),
+                                    color: AppColors.turquoise.withValues(
+                                      alpha: 0.1,
+                                    ),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Row(
@@ -352,9 +355,9 @@ class _QuizCardState extends State<QuizCard>
                                         size: 12,
                                         color: AppColors.turquoise,
                                       ),
-                                      SizedBox(width: 2),
+                                      const SizedBox(width: 2),
                                       Text(
-                                        '${widget.questionCount}',
+                                        widget.questionCount.toString(),
                                         style: AppTextStyles.caption.copyWith(
                                           color: AppColors.turquoise,
                                           fontWeight: FontWeight.w600,
@@ -375,8 +378,8 @@ class _QuizCardState extends State<QuizCard>
                                       vertical: 2,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: _getDifficultyColor().withValues(alpha:
-                                        0.1,
+                                      color: _getDifficultyColor().withValues(
+                                        alpha: 0.1,
                                       ),
                                       borderRadius: BorderRadius.circular(8),
                                     ),

@@ -141,7 +141,10 @@ class _LoadingAnimationsState extends State<LoadingAnimations>
             height: widget.size,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: _color.withValues(alpha: 0.2), width: 3),
+              border: Border.all(
+                color: _color.withValues(alpha: 0.2),
+                width: 3,
+              ),
             ),
             child: Stack(
               children: [

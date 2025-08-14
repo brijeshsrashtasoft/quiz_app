@@ -188,7 +188,6 @@ class _AnswerSubmissionPanelState extends ConsumerState<AnswerSubmissionPanel> {
   }
 
   Widget _buildTrueFalseOptions(bool correctAnswer) {
-    final options = ['True', 'False'];
     final correctIndex = correctAnswer ? 0 : 1;
 
     return Row(
